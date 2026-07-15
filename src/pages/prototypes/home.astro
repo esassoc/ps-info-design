@@ -1,0 +1,56 @@
+---
+// The unified FRONT DOOR. Today pugetsoundinfo.wa.gov is a landing page whose
+// only cross-app affordance is the "Explore" mega-menu; here the home surface
+// presents all five modules as peers and rolls up the recovery goals — inside
+// the persistent shell that carries you between them.
+import PsInfoAppShell from '../../layouts/PsInfoAppShell.astro';
+import EsaPageHeader from '@esa/ecology/esa-page-header.astro';
+import PsInfoStatBand from '../../components/psinfo/PsInfoStatBand.astro';
+import PsInfoSectionTitle from '../../components/psinfo/PsInfoSectionTitle.astro';
+import PsInfoModuleGrid from '../../components/psinfo/PsInfoModuleGrid.astro';
+import PsInfoGoalOverview from '../../components/psinfo/PsInfoGoalOverview.astro';
+import { TOTAL_VITAL_SIGNS, TOTAL_INDICATORS } from '../../data/psinfo-domain';
+
+const stats = [
+  { value: '6', label: 'Recovery goals', sub: 'Statutory targets for Puget Sound' },
+  { value: TOTAL_VITAL_SIGNS, label: 'Vital Signs', sub: 'Measures of ecosystem health', accent: true },
+  { value: TOTAL_INDICATORS, label: 'Indicators', sub: 'Tracked across the Vital Signs' },
+  { value: '$254M', label: 'Invested since 2007', sub: '600+ recovery projects' },
+];
+---
+<!-- manifest:
+  layout: PsInfoAppShell (active Overview/Home) > center+stack spine
+  sections:
+    - page header    -> esa-page-header
+    - headline stats -> psinfo-stat-band
+    - the 5 programs -> psinfo-section-title + psinfo-module-grid
+    - recovery goals -> psinfo-section-title + psinfo-goal-overview
+-->
+<PsInfoAppShell title="Puget Sound Info — Home" active={{ moduleId: 'overview', leafId: 'home' }}>
+  <div class="center stack" data-gap="xl">
+    <EsaPageHeader
+      eyebrow="Puget Sound Partnership"
+      title="Puget Sound Info"
+      lede="One workspace for the science, plans, and progress of Puget Sound recovery — the five programs that used to live on five separate sites, now under a single navigation."
+    />
+
+    <PsInfoStatBand stats={stats} />
+
+    <div class="stack" data-gap="md">
+      <PsInfoSectionTitle
+        title="The five programs"
+        note="Each is a full application in its own right. Move between them from the rail on the left — or search across all five from the bar above."
+      />
+      <PsInfoModuleGrid />
+    </div>
+
+    <div class="stack" data-gap="md">
+      <PsInfoSectionTitle
+        title="Recovery goals at a glance"
+        count="6 goals"
+        note="Six statutory goals organize the 22 Vital Signs. Bars roll up each goal's Vital Signs by their current status."
+      />
+      <PsInfoGoalOverview />
+    </div>
+  </div>
+</PsInfoAppShell>

@@ -1,0 +1,32 @@
+---
+// PsInfoSectionTitle — a readable section heading (NOT an ornamental micro-label:
+// normal case, 18px, primary color, semibold). Optional count + one-line note.
+interface Props {
+  title: string;
+  count?: string | number;
+  note?: string;
+}
+const { title, count, note } = Astro.props;
+---
+<div class="secttl">
+  <div class="secttl__row">
+    <h2 class="secttl__title">{title}</h2>
+    {count != null && <span class="secttl__count">{count}</span>}
+  </div>
+  {note && <p class="secttl__note">{note}</p>}
+</div>
+
+<style>
+  .secttl { display: flex; flex-direction: column; gap: var(--spacing-100); }
+  .secttl__row { display: flex; align-items: baseline; gap: var(--spacing-250); }
+  .secttl__title {
+    margin: 0; font-family: var(--font-display);
+    font-size: 1.25rem; font-weight: var(--font-weight-semibold);
+    color: var(--color-text-primary); letter-spacing: -0.01em;
+  }
+  .secttl__count {
+    font-size: var(--ps-info-text-meta-lg); font-weight: var(--font-weight-semibold);
+    color: var(--color-secondary); font-variant-numeric: tabular-nums;
+  }
+  .secttl__note { margin: 0; font-size: var(--ps-info-text-body); color: var(--color-text-secondary); line-height: 1.5; }
+</style>

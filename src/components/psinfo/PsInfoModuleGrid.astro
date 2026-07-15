@@ -1,0 +1,76 @@
+---
+// PsInfoModuleGrid — the five modules as first-class peer entry cards. This is
+// the unification made concrete: today these live on five separate subdomains
+// reachable only through a repeated mega-menu; here they are one grid, one system.
+import EsaIcon from '@esa/ecology/esa-icon.astro';
+import { MODULES } from '../../data/psinfo-nav';
+import { withBase } from '../../lib/base';
+
+// Modules whose landing page is a built prototype (others are model stubs).
+const BUILT: Record<string, string> = {
+  overview: '/prototypes/home',
+  'action-agenda': '/prototypes/action-agenda',
+  'vital-signs': '/prototypes/vital-signs',
+};
+---
+<ul class="mods">
+  {MODULES.map((m) => {
+    const route = BUILT[m.id];
+    const Tag = route ? 'a' : 'div';
+    return (
+      <li>
+        <Tag class:list={['mod', { 'mod--stub': !route }]} {...(route ? { href: withBase(route) } : {})}>
+          <span class="mod__icon" aria-hidden="true"><EsaIcon name={m.id} size="md" paths={m.icon} /></span>
+          <span class="mod__body">
+            <span class="mod__name">{m.label}</span>
+            <span class="mod__blurb">{m.blurb}</span>
+            <span class="mod__meta">
+              <span class="mod__domain">{m.domain}</span>
+              <span class="mod__dot" aria-hidden="true">·</span>
+              <span class="mod__pages">{m.pages.length} areas</span>
+            </span>
+          </span>
+          {route ? (
+            <EsaIcon name="arrow-right" size="sm" paths='<path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>' class="mod__go" />
+          ) : (
+            <span class="mod__soon">Model</span>
+          )}
+        </Tag>
+      </li>
+    );
+  })}
+</ul>
+
+<style>
+  .mods { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: var(--spacing-300); }
+  .mod {
+    display: flex; align-items: flex-start; gap: var(--spacing-300);
+    padding: var(--spacing-400);
+    background: var(--color-surface); border: 1px solid var(--color-border);
+    border-radius: var(--radius-300); text-decoration: none;
+    transition: border-color 150ms ease, box-shadow 150ms ease, transform 150ms ease;
+  }
+  a.mod:hover {
+    border-color: var(--color-primary-border);
+    box-shadow: 0 8px 24px color-mix(in srgb, var(--color-primary) 12%, transparent);
+    transform: translateY(-2px);
+  }
+  .mod--stub { background: var(--color-surface-sunken); }
+  .mod__icon {
+    flex: none; display: inline-flex; align-items: center; justify-content: center;
+    width: 40px; height: 40px; border-radius: var(--radius-200);
+    background: var(--color-primary-subtle); color: var(--color-primary);
+  }
+  .mod__body { display: flex; flex-direction: column; gap: var(--spacing-100); min-width: 0; flex: 1; }
+  .mod__name { font-size: 1.0625rem; font-weight: var(--font-weight-semibold); color: var(--color-text-primary); }
+  .mod__blurb { font-size: var(--ps-info-text-meta-lg); color: var(--color-text-secondary); line-height: 1.45; }
+  .mod__meta { display: flex; align-items: center; gap: var(--spacing-150); margin-top: var(--spacing-100); font-size: var(--ps-info-text-meta); color: var(--color-text-muted); }
+  .mod__domain { font-family: var(--font-mono); }
+  .mod__go { flex: none; color: var(--color-text-muted); margin-top: var(--spacing-100); }
+  a.mod:hover .mod__go { color: var(--color-primary); }
+  .mod__soon {
+    flex: none; align-self: center; padding: 2px var(--spacing-200);
+    border-radius: var(--radius-100); border: 1px solid var(--color-border);
+    font-size: var(--ps-info-text-meta); color: var(--color-text-muted);
+  }
+</style>

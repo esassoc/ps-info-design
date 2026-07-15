@@ -1,0 +1,48 @@
+---
+// PsInfoGoalPanel — one recovery goal with its Vital Signs listed (Vital Signs
+// page). The goal hue rides only on a small leading dot; each Vital Sign row
+// carries a quiet status badge (esa-badge via PsInfoStatusBadge) and its
+// indicator count. No colored left borders; the panel frame stays neutral.
+import PsInfoStatusBadge from './PsInfoStatusBadge.astro';
+import type { RecoveryGoal } from '../../data/psinfo-domain';
+
+interface Props {
+  goal: RecoveryGoal;
+}
+const { goal } = Astro.props;
+---
+<section class="panel">
+  <header class="panel__head">
+    <span class="panel__hue" style={`background:var(${goal.hueVar})`} aria-hidden="true"></span>
+    <div class="panel__titles">
+      <h3 class="panel__title">{goal.name}</h3>
+      <p class="panel__summary">{goal.summary}</p>
+    </div>
+    <span class="panel__count">{goal.vitalSigns.length} Vital Signs</span>
+  </header>
+  <ul class="vslist">
+    {goal.vitalSigns.map((vs) => (
+      <li class="vs">
+        <span class="vs__name">{vs.name}</span>
+        <span class="vs__indicators">{vs.indicators} indicators</span>
+        <PsInfoStatusBadge status={vs.status} />
+      </li>
+    ))}
+  </ul>
+</section>
+
+<style>
+  .panel { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-300); overflow: hidden; }
+  .panel__head { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: var(--spacing-300); padding: var(--spacing-400); border-bottom: 1px solid var(--color-border); }
+  .panel__hue { width: 14px; height: 14px; border-radius: 50%; }
+  .panel__titles { min-width: 0; }
+  .panel__title { margin: 0; font-family: var(--font-display); font-size: 1.125rem; font-weight: var(--font-weight-semibold); color: var(--color-text-primary); }
+  .panel__summary { margin: 2px 0 0; font-size: var(--ps-info-text-meta-lg); color: var(--color-text-secondary); }
+  .panel__count { font-size: var(--ps-info-text-meta-lg); font-weight: var(--font-weight-semibold); color: var(--color-secondary); white-space: nowrap; }
+
+  .vslist { list-style: none; margin: 0; padding: 0; }
+  .vs { display: grid; grid-template-columns: 1fr auto auto; align-items: center; gap: var(--spacing-300); padding: var(--spacing-300) var(--spacing-400); }
+  .vs + .vs { border-top: 1px solid var(--color-border-light); }
+  .vs__name { font-size: var(--ps-info-text-body); color: var(--color-text-primary); font-weight: var(--font-weight-medium); }
+  .vs__indicators { font-size: var(--ps-info-text-meta); color: var(--color-text-muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
+</style>

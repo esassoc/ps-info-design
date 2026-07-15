@@ -1,0 +1,23 @@
+---
+// PsInfoStatusBadge — maps an indicator/strategy status to the esa-badge lego.
+// bcn-lego-checked: composes esa-badge (the golden badge pattern); this only
+// resolves status → variant/label so pages don't repeat the map. Status is a
+// quiet inline badge — never a colored left border (Andy's hard ban).
+import EsaBadge from '@esa/ecology/esa-badge.astro';
+import { STATUS_META, type IndicatorStatus } from '../../data/psinfo-domain';
+
+interface Props {
+  status: IndicatorStatus;
+  size?: 'xs' | 'sm' | 'md';
+}
+const { status, size = 'sm' } = Astro.props;
+const meta = STATUS_META[status];
+const VARIANT: Record<string, 'success' | 'info' | 'secondary' | 'warning' | 'danger'> = {
+  success: 'success',
+  info: 'info',
+  neutral: 'secondary',
+  warning: 'warning',
+  danger: 'danger',
+};
+---
+<EsaBadge value={meta.label} variant={VARIANT[meta.tone]} size={size} />

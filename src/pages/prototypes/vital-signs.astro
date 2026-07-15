@@ -1,0 +1,60 @@
+---
+// Vital Signs — the ecosystem-health module, its 22 Vital Signs grouped by the
+// six recovery goals, each with a status. Same persistent shell as every other
+// module (rail shows Vital Signs expanded + active); the cross-links band at the
+// foot points into the OTHER modules — the wayfinding today's siloed apps lack.
+import PsInfoAppShell from '../../layouts/PsInfoAppShell.astro';
+import EsaPageHeader from '@esa/ecology/esa-page-header.astro';
+import PsInfoStatBand from '../../components/psinfo/PsInfoStatBand.astro';
+import PsInfoSectionTitle from '../../components/psinfo/PsInfoSectionTitle.astro';
+import PsInfoGoalPanel from '../../components/psinfo/PsInfoGoalPanel.astro';
+import PsInfoCrossLinks from '../../components/psinfo/PsInfoCrossLinks.astro';
+import { GOALS, TOTAL_VITAL_SIGNS, TOTAL_INDICATORS } from '../../data/psinfo-domain';
+
+const stats = [
+  { value: TOTAL_VITAL_SIGNS, label: 'Vital Signs', accent: true },
+  { value: '6', label: 'Recovery goals' },
+  { value: TOTAL_INDICATORS, label: 'Indicators tracked' },
+  { value: '3', label: 'Reporting cycles / year', sub: 'Draft → review → published' },
+];
+
+const crossLinks = [
+  { moduleId: 'action-agenda', label: 'Strategies that move these Vital Signs', detail: 'Habitat, Water Quality & Species strategies in the 2026–2030 Action Agenda', route: '/prototypes/action-agenda' },
+  { moduleId: 'progress-indicators', label: 'The pressure side', detail: 'Human-activity measures behind these ecosystem outcomes' },
+  { moduleId: 'nep-atlas', label: 'Funded activities on the ground', detail: 'NEP investments tied to these goals' },
+];
+---
+<!-- manifest:
+  layout: PsInfoAppShell (active Vital Signs) > center+stack spine
+  sections:
+    - page header      -> esa-page-header
+    - headline stats   -> psinfo-stat-band
+    - goals + signs    -> psinfo-section-title + psinfo-goal-panel (per goal)
+    - cross-module band-> psinfo-section-title + psinfo-cross-links
+-->
+<PsInfoAppShell title="Vital Signs — Puget Sound Info" active={{ moduleId: 'vital-signs', leafId: 'vs-all' }}>
+  <div class="center stack" data-gap="xl">
+    <EsaPageHeader
+      eyebrow="Vital Signs"
+      title="Ecosystem health, by recovery goal"
+      lede="The 22 Vital Signs are Puget Sound's core measures of ecosystem health. Each rolls up one or more indicators and reports a recovery status."
+    />
+
+    <PsInfoStatBand stats={stats} />
+
+    <div class="stack" data-gap="md">
+      <PsInfoSectionTitle title="Vital Signs by goal" count={`${TOTAL_VITAL_SIGNS} Vital Signs`} />
+      <div class="stack" data-gap="md">
+        {GOALS.map((goal) => <PsInfoGoalPanel goal={goal} />)}
+      </div>
+    </div>
+
+    <div class="stack" data-gap="md">
+      <PsInfoSectionTitle
+        title="Related across the platform"
+        note="From any Vital Sign, jump to the plans, pressures, and investments that connect to it — without leaving the workspace."
+      />
+      <PsInfoCrossLinks links={crossLinks} />
+    </div>
+  </div>
+</PsInfoAppShell>

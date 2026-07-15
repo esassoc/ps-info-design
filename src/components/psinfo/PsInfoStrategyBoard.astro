@@ -1,0 +1,69 @@
+---
+// PsInfoStrategyBoard — Action Agenda strategies grouped by topic (the
+// Topic → Strategy → Commitment hierarchy). Each strategy row: its code, name,
+// lead org, commitment count, and a quiet status badge. Rows are neutral cards;
+// status is a badge, never a colored edge.
+import PsInfoStatusBadge from './PsInfoStatusBadge.astro';
+import EsaIcon from '@esa/ecology/esa-icon.astro';
+import { STRATEGIES, AA_TOPICS } from '../../data/psinfo-domain';
+
+const byTopic = AA_TOPICS.map((topic) => ({
+  topic,
+  strategies: STRATEGIES.filter((s) => s.topic === topic),
+})).filter((t) => t.strategies.length > 0);
+---
+<div class="board">
+  {byTopic.map((group) => (
+    <section class="topic">
+      <div class="topic__head">
+        <h3 class="topic__name">{group.topic}</h3>
+        <span class="topic__count">{group.strategies.length} strategies</span>
+      </div>
+      <ul class="strats">
+        {group.strategies.map((s) => (
+          <li class="strat">
+            <span class="strat__code">{s.code}</span>
+            <span class="strat__main">
+              <span class="strat__name">{s.name}</span>
+              <span class="strat__lead">
+                <EsaIcon name="building" size="xs" paths='<rect width="16" height="20" x="4" y="2" rx="2"/><path d="M9 22v-4h6v4"/><path d="M8 6h.01"/><path d="M16 6h.01"/><path d="M12 6h.01"/><path d="M12 10h.01"/><path d="M8 10h.01"/><path d="M16 10h.01"/>' />
+                {s.lead}
+              </span>
+            </span>
+            <span class="strat__commit">{s.commitments} commitments</span>
+            <PsInfoStatusBadge status={s.status} />
+          </li>
+        ))}
+      </ul>
+    </section>
+  ))}
+</div>
+
+<style>
+  .board { display: flex; flex-direction: column; gap: var(--spacing-500); }
+  .topic__head { display: flex; align-items: baseline; gap: var(--spacing-250); margin-bottom: var(--spacing-250); }
+  .topic__name { margin: 0; font-family: var(--font-display); font-size: 1.0625rem; font-weight: var(--font-weight-semibold); color: var(--color-text-primary); }
+  .topic__count { font-size: var(--ps-info-text-meta); color: var(--color-text-muted); }
+
+  .strats { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--spacing-200); }
+  .strat {
+    display: grid; grid-template-columns: auto 1fr auto auto; align-items: center; gap: var(--spacing-300);
+    padding: var(--spacing-300) var(--spacing-400);
+    background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-200);
+  }
+  .strat__code {
+    flex: none; font-family: var(--font-mono); font-size: var(--ps-info-text-meta);
+    font-weight: var(--font-weight-semibold); color: var(--color-secondary);
+    padding: 2px var(--spacing-200); border-radius: var(--radius-100); background: var(--color-primary-subtle);
+  }
+  .strat__main { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+  .strat__name { font-size: var(--ps-info-text-body); font-weight: var(--font-weight-medium); color: var(--color-text-primary); }
+  .strat__lead { display: inline-flex; align-items: center; gap: var(--spacing-100); font-size: var(--ps-info-text-meta); color: var(--color-text-muted); }
+  .strat__lead :global(.esa-icon) { color: var(--color-text-muted); }
+  .strat__commit { font-size: var(--ps-info-text-meta); color: var(--color-text-tertiary); white-space: nowrap; font-variant-numeric: tabular-nums; }
+
+  @media (max-width: 640px) {
+    .strat { grid-template-columns: auto 1fr; }
+    .strat__commit { grid-column: 2; }
+  }
+</style>

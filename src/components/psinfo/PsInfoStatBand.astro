@@ -1,0 +1,29 @@
+---
+// PsInfoStatBand — a row of headline figures (composes the esa-stat lego).
+import EsaStat from '@esa/ecology/esa-stat.astro';
+
+export interface Stat {
+  value: string | number;
+  label: string;
+  sub?: string;
+  accent?: boolean;
+}
+interface Props {
+  stats: Stat[];
+}
+const { stats } = Astro.props;
+---
+<div class="band">
+  {stats.map((s) => (
+    <EsaStat value={s.value} label={s.label} sub={s.sub} accent={s.accent} />
+  ))}
+</div>
+
+<style>
+  .band {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: var(--spacing-300);
+    padding: var(--spacing-400);
+    background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-300);
+  }
+</style>

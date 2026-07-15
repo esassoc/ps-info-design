@@ -1,0 +1,59 @@
+---
+// PsInfoGoalOverview — the recovery goals at a glance (home page). Each goal:
+// its hue (data-encoding dot only), its Vital Sign count, and a compact stacked
+// status meter rolled up from its Vital Signs. The goal hue is NEVER a container
+// fill or left border — only the small dot and the meter segments encode it.
+import { GOALS, STATUS_META } from '../../data/psinfo-domain';
+import { withBase } from '../../lib/base';
+
+// Roll each goal's vital-sign statuses into a tone tally for the meter.
+const TONE_COLOR: Record<string, string> = {
+  success: 'var(--color-success)',
+  info: 'var(--color-secondary)',
+  neutral: 'var(--color-border-strong)',
+  warning: 'var(--color-warning)',
+  danger: 'var(--color-danger)',
+};
+const goals = GOALS.map((g) => {
+  const tally: Record<string, number> = {};
+  for (const vs of g.vitalSigns) {
+    const tone = STATUS_META[vs.status].tone;
+    tally[tone] = (tally[tone] ?? 0) + 1;
+  }
+  return { ...g, tally, total: g.vitalSigns.length };
+});
+---
+<ul class="goals">
+  {goals.map((g) => (
+    <li>
+      <a class="goal" href={withBase('/prototypes/vital-signs')}>
+        <span class="goal__hue" style={`background:var(${g.hueVar})`} aria-hidden="true"></span>
+        <span class="goal__name">{g.name}</span>
+        <span class="goal__count">{g.total} Vital Signs</span>
+        <span class="goal__meter" role="img" aria-label={`${g.total} Vital Signs by status`}>
+          {Object.entries(g.tally).map(([tone, n]) => (
+            <span class="goal__seg" style={`flex:${n};background:${TONE_COLOR[tone]}`}></span>
+          ))}
+        </span>
+      </a>
+    </li>
+  ))}
+</ul>
+
+<style>
+  .goals { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: var(--spacing-300); }
+  .goal {
+    display: grid; grid-template-columns: auto 1fr; grid-template-rows: auto auto auto;
+    column-gap: var(--spacing-250); row-gap: var(--spacing-150);
+    padding: var(--spacing-350) var(--spacing-400);
+    background: var(--color-surface); border: 1px solid var(--color-border);
+    border-radius: var(--radius-300); text-decoration: none;
+    transition: border-color 150ms ease, box-shadow 150ms ease;
+  }
+  .goal:hover { border-color: var(--color-primary-border); box-shadow: 0 6px 18px color-mix(in srgb, var(--color-primary) 10%, transparent); }
+  .goal__hue { width: 12px; height: 12px; border-radius: 50%; align-self: center; }
+  .goal__name { font-size: 1rem; font-weight: var(--font-weight-semibold); color: var(--color-text-primary); align-self: center; }
+  .goal__count { grid-column: 1 / -1; font-size: var(--ps-info-text-meta); color: var(--color-text-muted); }
+  .goal__meter { grid-column: 1 / -1; display: flex; gap: 2px; height: 8px; border-radius: var(--radius-full); overflow: hidden; }
+  .goal__seg { display: block; border-radius: var(--radius-full); }
+</style>

@@ -1,0 +1,59 @@
+---
+// Action Agenda — the regional recovery plan module: its Topic → Strategy →
+// Commitment hierarchy for 2026–2030. Same shell (rail shows Action Agenda
+// expanded + active); cross-links point to the Vital Signs the plan moves and
+// the NEP investments funding it.
+import PsInfoAppShell from '../../layouts/PsInfoAppShell.astro';
+import EsaPageHeader from '@esa/ecology/esa-page-header.astro';
+import PsInfoStatBand from '../../components/psinfo/PsInfoStatBand.astro';
+import PsInfoSectionTitle from '../../components/psinfo/PsInfoSectionTitle.astro';
+import PsInfoStrategyBoard from '../../components/psinfo/PsInfoStrategyBoard.astro';
+import PsInfoCrossLinks from '../../components/psinfo/PsInfoCrossLinks.astro';
+import { STRATEGIES, AA_TOPICS } from '../../data/psinfo-domain';
+
+const totalCommitments = STRATEGIES.reduce((n, s) => n + s.commitments, 0);
+const stats = [
+  { value: '2026–2030', label: 'Current edition', sub: 'Prior: 2022–2026' },
+  { value: AA_TOPICS.length, label: 'Topics', accent: true },
+  { value: STRATEGIES.length, label: 'Strategies' },
+  { value: totalCommitments, label: 'Partner commitments' },
+];
+
+const crossLinks = [
+  { moduleId: 'vital-signs', label: 'The Vital Signs these strategies move', detail: 'Ecosystem-health outcomes each strategy targets', route: '/prototypes/vital-signs' },
+  { moduleId: 'nep-atlas', label: 'NEP-funded activities', detail: 'On-the-ground work implementing these commitments' },
+  { moduleId: 'overview', label: 'Implementation & Funding', detail: 'How the plan is resourced across partners', route: '/prototypes/home' },
+];
+---
+<!-- manifest:
+  layout: PsInfoAppShell (active Action Agenda) > center+stack spine
+  sections:
+    - page header      -> esa-page-header
+    - headline stats   -> psinfo-stat-band
+    - strategy board   -> psinfo-section-title + psinfo-strategy-board
+    - cross-module band-> psinfo-section-title + psinfo-cross-links
+-->
+<PsInfoAppShell title="Action Agenda — Puget Sound Info" active={{ moduleId: 'action-agenda', leafId: 'aa-topics' }}>
+  <div class="center stack" data-gap="xl">
+    <EsaPageHeader
+      eyebrow="Action Agenda 2026–2030"
+      title="The regional recovery plan"
+      lede="The Action Agenda organizes recovery into topics and strategies, each carried by partner commitments across the region."
+    />
+
+    <PsInfoStatBand stats={stats} />
+
+    <div class="stack" data-gap="md">
+      <PsInfoSectionTitle title="Strategies by topic" count={`${STRATEGIES.length} strategies`} />
+      <PsInfoStrategyBoard />
+    </div>
+
+    <div class="stack" data-gap="md">
+      <PsInfoSectionTitle
+        title="Related across the platform"
+        note="A strategy connects to the outcomes it moves and the investments that fund it — one jump away, inside the same workspace."
+      />
+      <PsInfoCrossLinks links={crossLinks} />
+    </div>
+  </div>
+</PsInfoAppShell>

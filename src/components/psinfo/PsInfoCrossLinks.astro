@@ -1,0 +1,60 @@
+---
+// PsInfoCrossLinks — the wayfinding payoff, in-page. Today a Vital Sign page has
+// no idea the Action Agenda has strategies addressing the same goal; the apps
+// don't reference each other. In the unified model, every surface can point to
+// its siblings. This band shows "related across the platform" links, each tagged
+// with its module so the jump is legible.
+import EsaIcon from '@esa/ecology/esa-icon.astro';
+import { MODULES } from '../../data/psinfo-nav';
+import { withBase } from '../../lib/base';
+
+export interface CrossLink {
+  moduleId: string;
+  label: string;
+  detail: string;
+  route?: string;
+}
+interface Props {
+  links: CrossLink[];
+}
+const { links } = Astro.props;
+const iconFor = (id: string) => MODULES.find((m) => m.id === id)?.icon ?? '';
+const moduleLabel = (id: string) => MODULES.find((m) => m.id === id)?.label ?? id;
+---
+<ul class="xlinks">
+  {links.map((l) => {
+    const Tag = l.route ? 'a' : 'div';
+    return (
+      <li>
+        <Tag class:list={['xlink', { 'xlink--stub': !l.route }]} {...(l.route ? { href: withBase(l.route) } : {})}>
+          <span class="xlink__icon" aria-hidden="true"><EsaIcon name={l.moduleId} size="sm" paths={iconFor(l.moduleId)} /></span>
+          <span class="xlink__body">
+            <span class="xlink__module">{moduleLabel(l.moduleId)}</span>
+            <span class="xlink__label">{l.label}</span>
+            <span class="xlink__detail">{l.detail}</span>
+          </span>
+          {l.route && <EsaIcon name="arrow-up-right" size="sm" paths='<path d="M7 7h10v10"/><path d="M7 17 17 7"/>' class="xlink__go" />}
+        </Tag>
+      </li>
+    );
+  })}
+</ul>
+
+<style>
+  .xlinks { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: var(--spacing-300); }
+  .xlink {
+    display: flex; align-items: flex-start; gap: var(--spacing-250);
+    padding: var(--spacing-300) var(--spacing-350);
+    background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-200);
+    text-decoration: none; transition: border-color 150ms ease, background 150ms ease;
+  }
+  a.xlink:hover { border-color: var(--color-primary-border); background: var(--color-primary-subtle); }
+  .xlink--stub { background: var(--color-surface-sunken); }
+  .xlink__icon { flex: none; display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: var(--radius-100); background: var(--color-primary-subtle); color: var(--color-primary); }
+  .xlink__body { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1; }
+  .xlink__module { font-size: var(--ps-info-text-meta); color: var(--color-secondary); font-weight: var(--font-weight-semibold); }
+  .xlink__label { font-size: var(--ps-info-text-meta-lg); font-weight: var(--font-weight-medium); color: var(--color-text-primary); }
+  .xlink__detail { font-size: var(--ps-info-text-meta); color: var(--color-text-muted); line-height: 1.4; }
+  .xlink__go { flex: none; color: var(--color-text-muted); }
+  a.xlink:hover .xlink__go { color: var(--color-primary); }
+</style>
