@@ -1,56 +1,117 @@
 ---
-// The unified FRONT DOOR. Today pugetsoundinfo.wa.gov is a landing page whose
-// only cross-app affordance is the "Explore" mega-menu; here the home surface
-// presents all five modules as peers and rolls up the recovery goals — inside
-// the persistent shell that carries you between them.
+// The unified FRONT DOOR — the live pugetsoundinfo.wa.gov homepage, elevated.
+// Content is EXACT: every section, card title, caption, and link mirrors prod
+// (sourced 2026-07-16 from the homepage HTML and its PSInfo_homepage_data
+// FeatureServer; card photography and the bioregion map are the site's own
+// ArcGIS-hosted assets). What changes is the delivery: the prod page is five
+// ArcGIS Experience iframes stacked in HTML tables; here the same content is
+// native sections inside the persistent shell.
 import PsInfoAppShell from '../../layouts/PsInfoAppShell.astro';
-import EsaPageHeader from '@esa/ecology/esa-page-header.astro';
-import PsInfoStatBand from '../../components/psinfo/PsInfoStatBand.astro';
+import PsInfoPhotoHeader from '../../components/psinfo/PsInfoPhotoHeader.astro';
+import PsInfoAnchorNav from '../../components/psinfo/PsInfoAnchorNav.astro';
 import PsInfoSectionTitle from '../../components/psinfo/PsInfoSectionTitle.astro';
-import PsInfoModuleGrid from '../../components/psinfo/PsInfoModuleGrid.astro';
-import PsInfoGoalOverview from '../../components/psinfo/PsInfoGoalOverview.astro';
-import { TOTAL_VITAL_SIGNS, TOTAL_INDICATORS } from '../../data/psinfo-domain';
+import PsInfoGoalBand from '../../components/psinfo/PsInfoGoalBand.astro';
+import PsInfoHomeCards from '../../components/psinfo/PsInfoHomeCards.astro';
+import PsInfoToolLinks from '../../components/psinfo/PsInfoToolLinks.astro';
+import PsInfoRegionMap from '../../components/psinfo/PsInfoRegionMap.astro';
 
-const stats = [
-  { value: '6', label: 'Recovery goals', sub: 'Statutory targets for Puget Sound' },
-  { value: TOTAL_VITAL_SIGNS, label: 'Vital Signs', sub: 'Measures of ecosystem health', accent: true },
-  { value: TOTAL_INDICATORS, label: 'Indicators', sub: 'Tracked across the Vital Signs' },
-  { value: '$254M', label: 'Invested since 2007', sub: '600+ recovery projects' },
+const SECTIONS = [
+  { label: 'Goals', href: '#goals' },
+  { label: 'Plans', href: '#plans' },
+  { label: 'Implementation and Funding', href: '#implementationandfunding' },
+  { label: 'Progress', href: '#progress' },
+  { label: 'Data and Tools', href: '#dataandtools' },
+];
+
+const GOALS = [
+  { label: 'Healthy Human Population', hue: 'population', href: 'https://vitalsigns.pugetsoundinfo.wa.gov/VitalSignGoal/Detail/1' },
+  { label: 'Vibrant Human Quality of Life', hue: 'quality', href: 'https://vitalsigns.pugetsoundinfo.wa.gov/VitalSignGoal/Detail/2' },
+  { label: 'Thriving Species and Food Web', hue: 'species', href: 'https://vitalsigns.pugetsoundinfo.wa.gov/VitalSignGoal/Detail/3' },
+  { label: 'Functioning Habitat', hue: 'habitat', href: 'https://vitalsigns.pugetsoundinfo.wa.gov/VitalSignGoal/Detail/7' },
+  { label: 'Healthy Water Quality', hue: 'water', href: 'https://vitalsigns.pugetsoundinfo.wa.gov/VitalSignGoal/Detail/6' },
+] as const;
+
+const PLANS = [
+  { title: 'Action Agenda Explorer', blurb: 'Regional guidance that charts the course for Puget Sound recovery', image: '/photos/home/action-agenda-explorer.jpg', href: 'https://actionagenda.pugetsoundinfo.wa.gov/2026-2030' },
+  { title: 'Implementation Strategies', blurb: 'Strategies by topic to guide and accelerate recovery', image: '/photos/home/implementation-strategies.jpg', href: 'https://pugetsoundestuary.wa.gov/recovering-puget-sound/' },
+  { title: 'Local Ecosystem Recovery Plans', blurb: 'Local Integrating Organization (LIO) plans to implement the Action Agenda', image: '/photos/home/local-recovery-plans.jpg', href: 'https://www.pugetsoundinfo.wa.gov/LIOs' },
+  { title: 'Puget Sound Federal Task Force Action Plan', blurb: 'Federal plan to implement the Action Agenda (pdf)', image: '/photos/home/federal-task-force.jpg', href: 'https://www.epa.gov/system/files/documents/2022-06/puget-sound-federal-task-force-action-plan-2022-2026.pdf' },
+];
+
+const IMPLEMENTATION = [
+  { title: 'Recovery Acceleration Funding Tool', blurb: 'Opportunities for funding recovery projects', image: '/photos/home/funding-tool.jpg', href: 'https://experience.arcgis.com/experience/6f12941d99644b0e93deaed86f1674f0/' },
+  { title: 'NEP Atlas', blurb: 'EPA National Estuary Program (NEP) and Puget Sound Geographic Program investment activities', image: '/photos/home/nep-atlas.jpg', href: 'https://nepatlas.pugetsoundinfo.wa.gov/' },
+  { title: 'Ongoing Programs Portal', blurb: 'Key programs that provide the foundation for ongoing Puget Sound recovery efforts', image: '/photos/home/ongoing-programs.jpg', href: 'https://www.pugetsoundinfo.wa.gov/OngoingProgram/Index' },
+];
+
+const PROGRESS = [
+  { title: 'Puget Sound Indicators', blurb: 'Measures that track recovery progress and ecosystem health', image: '/photos/home/indicators.jpg', href: 'https://www.pugetsoundinfo.wa.gov/Indicator/Index' },
+  { title: 'State of the Sound', blurb: 'Biennial assessment of Puget Sound recovery efforts', image: '/photos/home/state-of-the-sound.jpg', href: 'https://stateofthesound.wa.gov' },
+];
+
+const TOOLS = [
+  {
+    title: 'PS Info Web Services',
+    blurb: 'Access and download Puget Sound Info data',
+    href: 'https://www.pugetsoundinfo.wa.gov/WebServices/Index',
+    icon: '<ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5V19A9 3 0 0 0 21 19V5"/><path d="M3 12A9 3 0 0 0 21 12"/>',
+  },
+  {
+    title: 'Spatial Data Hub',
+    blurb: 'Geospatial data and tools to inform Puget Sound recovery planning and decisions',
+    href: 'https://data-wa-psp.hub.arcgis.com/',
+    icon: '<path d="M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83z"/><path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65"/><path d="m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65"/>',
+  },
 ];
 ---
 <!-- manifest:
   layout: PsInfoAppShell (active Overview/Home) > center+stack spine
   sections:
-    - page header    -> esa-page-header
-    - headline stats -> psinfo-stat-band
-    - the 5 programs -> psinfo-section-title + psinfo-module-grid
-    - recovery goals -> psinfo-section-title + psinfo-goal-overview
+    - hero + section nav       -> psinfo-photo-header (band: psinfo-anchor-nav)
+    - goals                    -> psinfo-section-title + psinfo-goal-band
+    - plans                    -> psinfo-section-title + psinfo-home-cards
+    - implementation & funding -> psinfo-section-title + psinfo-home-cards
+    - progress                 -> psinfo-section-title + psinfo-home-cards
+    - data & tools             -> psinfo-section-title + psinfo-tool-links
+    - region map               -> psinfo-region-map
 -->
-<PsInfoAppShell title="Puget Sound Info — Home" active={{ moduleId: 'overview', leafId: 'home' }}>
-  <div class="center stack" data-gap="xl">
-    <EsaPageHeader
-      eyebrow="Puget Sound Partnership"
+<PsInfoAppShell title="Puget Sound Info — Home" active={{ moduleId: 'overview' }}>
+  <div class="center stack" data-gap="2xl">
+    <PsInfoPhotoHeader
+      size="hero"
+      image="/photos/sound-aerial.jpg"
+      focus="50% 40%"
       title="Puget Sound Info"
-      lede="One workspace for the science, plans, and progress of Puget Sound recovery — the five programs that used to live on five separate sites, now under a single navigation."
-    />
+      lede="Restoration, Protection and Recovery Information for the Puget Sound"
+    >
+      <PsInfoAnchorNav slot="band" items={SECTIONS} />
+    </PsInfoPhotoHeader>
 
-    <PsInfoStatBand stats={stats} />
-
-    <div class="stack" data-gap="md">
-      <PsInfoSectionTitle
-        title="The five programs"
-        note="Each is a full application in its own right. Move between them from the rail on the left — or search across all five from the bar above."
-      />
-      <PsInfoModuleGrid />
+    <div class="stack" data-gap="lg" id="goals">
+      <PsInfoSectionTitle size="lg" title="Goals" note="What are we trying to achieve?" />
+      <PsInfoGoalBand goals={GOALS} />
     </div>
 
-    <div class="stack" data-gap="md">
-      <PsInfoSectionTitle
-        title="Recovery goals at a glance"
-        count="6 goals"
-        note="Six statutory goals organize the 22 Vital Signs. Bars roll up each goal's Vital Signs by their current status."
-      />
-      <PsInfoGoalOverview />
+    <div class="stack" data-gap="lg" id="plans">
+      <PsInfoSectionTitle size="lg" title="Plans" note="What are we planning to do?" />
+      <PsInfoHomeCards items={PLANS} />
     </div>
+
+    <div class="stack" data-gap="lg" id="implementationandfunding">
+      <PsInfoSectionTitle size="lg" title="Implementation and Funding" />
+      <PsInfoHomeCards items={IMPLEMENTATION} min="260px" />
+    </div>
+
+    <div class="stack" data-gap="lg" id="progress">
+      <PsInfoSectionTitle size="lg" title="Progress" />
+      <PsInfoHomeCards items={PROGRESS} columns={2} />
+    </div>
+
+    <div class="stack" data-gap="lg" id="dataandtools">
+      <PsInfoSectionTitle size="lg" title="Data and Tools" />
+      <PsInfoToolLinks items={TOOLS} />
+    </div>
+
+    <PsInfoRegionMap image="/photos/map-puget-sound.png" alt="Map of Puget Sound" />
   </div>
 </PsInfoAppShell>

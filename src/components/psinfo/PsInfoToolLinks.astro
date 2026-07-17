@@ -1,0 +1,73 @@
+---
+// PsInfoToolLinks — the front door's Data & Tools row: wide link cards with a
+// glyph instead of a photograph (the live site's icon tiles, elevated). Each
+// card IS the esa-card lego wrapped in a block link; the glyph is esa-icon.
+import EsaCard from '@esa/ecology/esa-card.astro';
+import EsaIcon from '@esa/ecology/esa-icon.astro';
+
+export interface ToolLinkItem {
+  title: string;
+  blurb: string;
+  href: string;
+  /** Inner Lucide SVG markup for the glyph. */
+  icon: string;
+}
+interface Props {
+  items: ToolLinkItem[];
+}
+const { items } = Astro.props;
+
+const ARROW = '<path d="M7 7h10v10"/><path d="M7 17 17 7"/>';
+---
+<div class="toolrow">
+  {items.map((item) => (
+    <a class="tool" href={item.href} rel="noopener">
+      <EsaCard variant="outlined" padding="none">
+        <div class="tool__row">
+          <span class="tool__glyph" aria-hidden="true">
+            <EsaIcon name={item.title} size="lg" paths={item.icon} />
+          </span>
+          <span class="tool__body">
+            <span class="tool__title">
+              {item.title}
+              <EsaIcon name="arrow-up-right" size="xs" paths={ARROW} />
+            </span>
+            <span class="tool__blurb">{item.blurb}</span>
+          </span>
+        </div>
+      </EsaCard>
+    </a>
+  ))}
+</div>
+
+<style>
+  .toolrow {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: var(--spacing-400);
+  }
+  .tool {
+    display: block; text-decoration: none; border-radius: var(--radius-100);
+    transition: transform 150ms ease, box-shadow 150ms ease;
+  }
+  .tool:hover { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(16, 42, 67, 0.12); }
+  .tool:focus-visible { outline: 2px solid var(--focus-ring-color); outline-offset: 2px; }
+  .tool :global(.esa-card) { height: 100%; }
+
+  .tool__row {
+    display: flex; align-items: center; gap: var(--spacing-400);
+    padding: var(--spacing-400);
+  }
+  .tool__glyph {
+    flex: none; display: inline-flex; align-items: center; justify-content: center;
+    width: 52px; height: 52px; border-radius: var(--radius-full);
+    background: var(--color-primary-subtle); color: var(--color-primary);
+  }
+  .tool__body { display: flex; flex-direction: column; gap: var(--spacing-100); min-width: 0; }
+  .tool__title {
+    font-size: 1.0625rem; font-weight: var(--font-weight-semibold);
+    color: var(--color-text-primary);
+  }
+  .tool__title :global(.esa-icon) { color: var(--color-text-muted); margin-left: var(--spacing-100); }
+  .tool:hover .tool__title { color: var(--color-primary); }
+  .tool__blurb { font-size: var(--ps-info-text-meta-lg); color: var(--color-text-secondary); line-height: 1.5; }
+</style>

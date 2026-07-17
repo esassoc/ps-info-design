@@ -32,13 +32,13 @@ const { goal } = Astro.props;
 </section>
 
 <style>
-  .panel { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-300); overflow: hidden; }
+  .panel { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-100); overflow: hidden; }
   .panel__head { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: var(--spacing-300); padding: var(--spacing-400); border-bottom: 1px solid var(--color-border); }
   .panel__hue { width: 14px; height: 14px; border-radius: 50%; }
   .panel__titles { min-width: 0; }
   .panel__title { margin: 0; font-family: var(--font-display); font-size: 1.125rem; font-weight: var(--font-weight-semibold); color: var(--color-text-primary); }
   .panel__summary { margin: 2px 0 0; font-size: var(--ps-info-text-meta-lg); color: var(--color-text-secondary); }
-  .panel__count { font-size: var(--ps-info-text-meta-lg); font-weight: var(--font-weight-semibold); color: var(--color-secondary); white-space: nowrap; }
+  .panel__count { font-size: var(--ps-info-text-meta-lg); font-weight: var(--font-weight-semibold); color: var(--color-secondary-strong); white-space: nowrap; }
 
   .vslist { list-style: none; margin: 0; padding: 0; }
   .vs { display: grid; grid-template-columns: 1fr auto auto; align-items: center; gap: var(--spacing-300); padding: var(--spacing-300) var(--spacing-400); }

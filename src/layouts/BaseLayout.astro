@@ -15,19 +15,24 @@ interface Props {
   title?: string;
 }
 const { title = 'Puget Sound Info' } = Astro.props;
+
+// Source Sans 3 (UI voice) + Lora (display serif) — Andy's pick from the
+// font-switcher evaluation (2026-07-17).
+const GOOGLE_FONTS =
+  'https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400..700&family=Lora:wght@400..700&display=swap';
 ---
 <!doctype html>
 <html lang="en" data-theme="ps-info">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    {/* Anthropic faces are self-hosted (public/fonts/) and declared @font-face in
-        theme-ps-info.css — no external font <link> needed. */}
-    <link rel="preload" href="/fonts/AnthropicSans-Variable.woff2" as="font" type="font/woff2" crossorigin />
-    <link rel="preload" href="/fonts/AnthropicSerif-Variable.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href={GOOGLE_FONTS} />
     <title>{title}</title>
     <style is:global>
       *, *::before, *::after { box-sizing: border-box; }
+      html, body { scroll-behavior: smooth; }
       body {
         margin: 0;
         font-family: var(--font-sans, system-ui, sans-serif);
@@ -39,6 +44,15 @@ const { title = 'Puget Sound Info' } = Astro.props;
       a { color: var(--color-text-link, #43608a); text-decoration: none; }
       img { display: block; max-width: 100%; }
       button { font-family: inherit; cursor: pointer; background: none; border: 0; }
+      /* WCAG 2.3.3 / prefers-reduced-motion: motion is a preference, not a default. */
+      @media (prefers-reduced-motion: reduce) {
+        html, body { scroll-behavior: auto; }
+        *, *::before, *::after {
+          animation-duration: 0.01ms !important;
+          animation-iteration-count: 1 !important;
+          transition-duration: 0.01ms !important;
+        }
+      }
     </style>
   </head>
   <body>

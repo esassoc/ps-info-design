@@ -4,7 +4,7 @@
 // expanded + active); cross-links point to the Vital Signs the plan moves and
 // the NEP investments funding it.
 import PsInfoAppShell from '../../layouts/PsInfoAppShell.astro';
-import EsaPageHeader from '@esa/ecology/esa-page-header.astro';
+import PsInfoPhotoHeader from '../../components/psinfo/PsInfoPhotoHeader.astro';
 import PsInfoStatBand from '../../components/psinfo/PsInfoStatBand.astro';
 import PsInfoSectionTitle from '../../components/psinfo/PsInfoSectionTitle.astro';
 import PsInfoStrategyBoard from '../../components/psinfo/PsInfoStrategyBoard.astro';
@@ -20,22 +20,24 @@ const stats = [
 ];
 
 const crossLinks = [
-  { moduleId: 'vital-signs', label: 'The Vital Signs these strategies move', detail: 'Ecosystem-health outcomes each strategy targets', route: '/prototypes/vital-signs' },
-  { moduleId: 'nep-atlas', label: 'NEP-funded activities', detail: 'On-the-ground work implementing these commitments' },
-  { moduleId: 'overview', label: 'Implementation & Funding', detail: 'How the plan is resourced across partners', route: '/prototypes/home' },
+  { moduleId: 'goals', label: 'The Vital Signs these strategies move', detail: 'Ecosystem-health outcomes each strategy targets', route: '/prototypes/vital-signs' },
+  { moduleId: 'implementation', label: 'NEP-funded activities', detail: 'On-the-ground work implementing these commitments' },
+  { moduleId: 'progress', label: 'Progress on the plan', detail: 'Indicators and the State of the Sound track how recovery is going', route: '/prototypes/home#progress' },
 ];
 ---
 <!-- manifest:
   layout: PsInfoAppShell (active Action Agenda) > center+stack spine
   sections:
-    - page header      -> esa-page-header
+    - page header      -> psinfo-photo-header (photo band, composes esa-page-header)
     - headline stats   -> psinfo-stat-band
     - strategy board   -> psinfo-section-title + psinfo-strategy-board
     - cross-module band-> psinfo-section-title + psinfo-cross-links
 -->
-<PsInfoAppShell title="Action Agenda — Puget Sound Info" active={{ moduleId: 'action-agenda', leafId: 'aa-topics' }}>
+<PsInfoAppShell title="Action Agenda — Puget Sound Info" active={{ moduleId: 'plans', leafId: 'aa-explorer' }}>
   <div class="center stack" data-gap="xl">
-    <EsaPageHeader
+    <PsInfoPhotoHeader
+      image="/photos/sound-aerial.jpg"
+      focus="50% 70%"
       eyebrow="Action Agenda 2026–2030"
       title="The regional recovery plan"
       lede="The Action Agenda organizes recovery into topics and strategies, each carried by partner commitments across the region."

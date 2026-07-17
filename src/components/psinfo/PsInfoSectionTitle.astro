@@ -5,10 +5,12 @@ interface Props {
   title: string;
   count?: string | number;
   note?: string;
+  /** lg = landing-page section scale; md = in-page module scale. */
+  size?: 'md' | 'lg';
 }
-const { title, count, note } = Astro.props;
+const { title, count, note, size = 'md' } = Astro.props;
 ---
-<div class="secttl">
+<div class:list={['secttl', size === 'lg' && 'secttl--lg']}>
   <div class="secttl__row">
     <h2 class="secttl__title">{title}</h2>
     {count != null && <span class="secttl__count">{count}</span>}
@@ -24,9 +26,11 @@ const { title, count, note } = Astro.props;
     font-size: 1.25rem; font-weight: var(--font-weight-semibold);
     color: var(--color-text-primary); letter-spacing: -0.01em;
   }
+  .secttl--lg .secttl__title { font-size: 1.75rem; }
+  .secttl--lg .secttl__note { font-size: 1.0625rem; }
   .secttl__count {
     font-size: var(--ps-info-text-meta-lg); font-weight: var(--font-weight-semibold);
-    color: var(--color-secondary); font-variant-numeric: tabular-nums;
+    color: var(--color-secondary-strong); font-variant-numeric: tabular-nums;
   }
   .secttl__note { margin: 0; font-size: var(--ps-info-text-body); color: var(--color-text-secondary); line-height: 1.5; }
 </style>

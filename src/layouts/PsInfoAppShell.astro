@@ -3,11 +3,14 @@
 //
 // bcn-lego-checked: the interactive controls compose legos — esa-icon for every
 // glyph, esa-entity-search (the omnibox Lit component) for the cross-module
-// search. The topbar + collapsible grouped sidenav themselves are LAYOUT chrome,
-// ported from the Beacon AppShell pattern Andy named ("make something like
-// Beacon's sidebar/topbar"). esa-app-shell was checked first and can't pre-expand
-// the active module's children on load — a requirement for a buy-in walkthrough —
-// so this ports the richer Beacon frame instead. No UI primitive is hand-rolled.
+// search, esa-breadcrumbs for the in-content location trail. The topbar +
+// collapsible grouped sidenav themselves are LAYOUT chrome, ported from the
+// Beacon AppShell pattern Andy named ("make something like Beacon's
+// sidebar/topbar"); the collapsed-rail flyout is a faithful port of Beacon's
+// side-nav-modern flyout-menu. esa-app-shell was checked first and can't
+// pre-expand the active module's children on load — a requirement for a buy-in
+// walkthrough — so this ports the richer Beacon frame instead. No UI primitive
+// is hand-rolled.
 //
 // The design problem this solves: today the five apps live on five subdomains
 // with no shared nav; they connect only through a repeated "Explore" mega-menu.
@@ -15,6 +18,7 @@
 // its pages, and the topbar carries a search that spans all five at once.
 import BaseLayout from './BaseLayout.astro';
 import EsaIcon from '@esa/ecology/esa-icon.astro';
+import EsaBreadcrumbs from '@esa/ecology/esa-breadcrumbs.astro';
 import { navFor, MODULES, SEARCH_INDEX, ICONS, type ActiveNav } from '../data/psinfo-nav';
 import { withBase } from '../lib/base';
 
@@ -27,6 +31,17 @@ const { title = 'Puget Sound Info', active } = Astro.props;
 const sections = navFor(active);
 const activeModule = MODULES.find((m) => m.id === active.moduleId);
 const moduleLabel = activeModule?.label ?? 'Puget Sound Info';
+const activeLeaf = activeModule?.pages.find((p) => p.id === active.leafId);
+
+// Location trail — lives in the CONTENT, not the topbar. The front door (home,
+// the leafless overview surface) carries no trail; every other page reads
+// root / module / page.
+const isHome = active.moduleId === 'overview' && !active.leafId;
+const crumbs = [
+  { label: 'Puget Sound Info', href: withBase('/prototypes/home') },
+  { label: moduleLabel },
+  ...(activeLeaf ? [{ label: activeLeaf.label }] : []),
+];
 
 // esa-entity-search wants entities + scopes; adapt the flat cross-module index.
 const searchScopes = [...new Set(SEARCH_INDEX.map((e) => e.category))].map((c) => ({ id: c, label: c }));
@@ -41,6 +56,7 @@ const searchPayload = JSON.stringify({ entities: searchEntities, scopes: searchS
 ---
 
 <BaseLayout title={title}>
+  <a class="skip-link" href="#main-content">Skip to main content</a>
   <div class="shell">
     <!-- ═══ TOPBAR ═══ -->
     <header class="topbar">
@@ -48,11 +64,6 @@ const searchPayload = JSON.stringify({ entities: searchEntities, scopes: searchS
         <button type="button" class="icon-toggle" id="sidebar-toggle" aria-label="Collapse sidebar" aria-expanded="true">
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="icon-toggle__glyph"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M9 3v18"/></svg>
         </button>
-        <nav class="crumb" aria-label="Location">
-          <span class="crumb__root">Puget Sound Info</span>
-          <EsaIcon name="chevron-right" size="xs" paths='<path d="m9 18 6-6-6-6"/>' />
-          <span class="crumb__here">{moduleLabel}</span>
-        </nav>
       </div>
 
       <div class="topbar__center">
@@ -64,11 +75,6 @@ const searchPayload = JSON.stringify({ entities: searchEntities, scopes: searchS
       </div>
 
       <div class="topbar__right">
-        <span class="env-pill">Public view</span>
-        <a class="text-link" href="#request-support">
-          <EsaIcon name="life-buoy" size="sm" paths={ICONS['life-buoy']} />
-          <span>Request Support</span>
-        </a>
         <a class="account" href="#account" aria-label="Account">
           <EsaIcon name="circle-user" size="md" paths={ICONS['circle-user']} />
         </a>
@@ -80,17 +86,7 @@ const searchPayload = JSON.stringify({ entities: searchEntities, scopes: searchS
       <!-- ─── sidenav ─── -->
       <nav class="rail" id="rail" aria-label="Modules">
         <a class="brand" href={withBase('/prototypes/home')} aria-label="Puget Sound Info home">
-          <span class="brand__mark" aria-hidden="true">
-            <svg width="26" height="26" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <rect width="32" height="32" rx="7" fill="var(--ps-info-navy-800)"/>
-              <path d="M5 20c2.4 0 2.4-3 4.8-3s2.4 3 4.8 3 2.4-3 4.8-3 2.4 3 4.8 3M5 24c2.4 0 2.4-3 4.8-3s2.4 3 4.8 3 2.4-3 4.8-3 2.4 3 4.8 3" stroke="var(--ps-info-teal-400)" stroke-width="1.8" stroke-linecap="round"/>
-              <circle cx="16" cy="11" r="3.2" fill="#ffffff"/>
-            </svg>
-          </span>
-          <span class="brand__word">
-            <span class="brand__word-1">Puget Sound</span>
-            <span class="brand__word-2">Info</span>
-          </span>
+          <img class="brand__mark" src={withBase('/psp-mark.png')} alt="" width="40" height="40" />
         </a>
 
         <div class="rail__nav">
@@ -99,7 +95,7 @@ const searchPayload = JSON.stringify({ entities: searchEntities, scopes: searchS
               <button type="button" class="navsec__head" aria-expanded={section.active ? 'true' : 'false'}>
                 <EsaIcon name={section.id} size="sm" paths={section.icon} />
                 <span class="navsec__title">{section.label}</span>
-                <EsaIcon name="chevron-down" size="sm" paths={ICONS['chevron-down']} class="navsec__chev" />
+                <EsaIcon name="chevron-down" size="sm" paths={ICONS['chevron-down']} />
               </button>
               <ul class="navsec__items">
                 {section.children.map((leaf) => (
@@ -114,6 +110,23 @@ const searchPayload = JSON.stringify({ entities: searchEntities, scopes: searchS
                   </li>
                 ))}
               </ul>
+
+              <!-- Collapsed-rail flyout (Beacon side-nav-modern port): hover the
+                   module icon and its pages fly out beside the rail. -->
+              <div class="flyout" role="menu" aria-label={section.label}>
+                <div class="flyout__header">{section.label}</div>
+                <ul class="flyout__items">
+                  {section.children.map((leaf) => (
+                    <li>
+                      {leaf.href ? (
+                        <a href={leaf.href} class:list={['flyout__link', { 'flyout__link--active': leaf.active }]}>{leaf.label}</a>
+                      ) : (
+                        <span class="flyout__link flyout__link--stub" title="Not part of this prototype">{leaf.label}</span>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              </div>
             </div>
           ))}
         </div>
@@ -125,42 +138,75 @@ const searchPayload = JSON.stringify({ entities: searchEntities, scopes: searchS
       </nav>
 
       <!-- ─── content ─── -->
-      <main class="content">
+      <main class="content" id="main-content" tabindex="-1">
+        {!isHome && (
+          <div class="center content__crumbs">
+            <EsaBreadcrumbs items={crumbs} />
+          </div>
+        )}
         <slot />
       </main>
     </div>
   </div>
 
-  <esa-entity-search id="omnibox" placeholder="Search across Core, Action Agenda, Vital Signs, Progress Indicators & NEP Atlas" hotkey="slash"></esa-entity-search>
+  <esa-entity-search id="omnibox" placeholder="Search across Goals, Plans, Implementation & Funding, and Progress" hotkey="slash"></esa-entity-search>
   <script type="application/json" id="omnibox-data" set:html={searchPayload}></script>
 </BaseLayout>
 
 <script>
   import '@esa/ecology/esa-entity-search';
 
-  // Sidebar collapse
-  const toggle = document.getElementById('sidebar-toggle');
   const rail = document.getElementById('rail');
+  const isCollapsed = () => !!rail?.classList.contains('rail--collapsed');
+
+  // ── Collapsed-rail flyout (Beacon side-nav-modern behavior) ──────────────
+  let closeTimer: number | null = null;
+  const cancelClose = () => { if (closeTimer) { clearTimeout(closeTimer); closeTimer = null; } };
+  const closeFlyouts = () => document.querySelectorAll('.flyout--open').forEach((f) => f.classList.remove('flyout--open'));
+  const scheduleClose = () => { cancelClose(); closeTimer = window.setTimeout(closeFlyouts, 150); };
+
+  document.querySelectorAll<HTMLElement>('.navsec').forEach((sec) => {
+    const head = sec.querySelector<HTMLButtonElement>('.navsec__head');
+    const fly = sec.querySelector<HTMLElement>('.flyout');
+    if (!head || !fly) return;
+
+    const openFlyout = () => {
+      cancelClose();
+      closeFlyouts();
+      fly.classList.add('flyout--open');
+      // Anchor to the module row; clamp so it never runs off the viewport.
+      const top = head.getBoundingClientRect().top;
+      fly.style.top = `${Math.min(top, window.innerHeight - fly.offsetHeight - 8)}px`;
+    };
+
+    head.addEventListener('mouseenter', () => { if (isCollapsed()) openFlyout(); });
+    head.addEventListener('click', () => {
+      if (isCollapsed()) {
+        fly.classList.contains('flyout--open') ? closeFlyouts() : openFlyout();
+        return;
+      }
+      // Expanded rail: plain accordion toggle (any number open).
+      const nowCollapsed = sec.classList.toggle('navsec--collapsed');
+      head.setAttribute('aria-expanded', String(!nowCollapsed));
+    });
+    sec.addEventListener('mouseleave', () => { if (isCollapsed()) scheduleClose(); });
+    fly.addEventListener('mouseenter', cancelClose);
+  });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeFlyouts(); });
+
+  // ── Sidebar collapse ──────────────────────────────────────────────────────
+  const toggle = document.getElementById('sidebar-toggle');
   if (toggle && rail) {
     toggle.addEventListener('click', () => {
       const collapsed = rail.classList.toggle('rail--collapsed');
+      closeFlyouts();
       toggle.classList.toggle('icon-toggle--collapsed', collapsed);
       toggle.setAttribute('aria-expanded', String(!collapsed));
       toggle.setAttribute('aria-label', collapsed ? 'Expand sidebar' : 'Collapse sidebar');
     });
   }
 
-  // Per-module expand/collapse (accordion-free: any number open)
-  document.querySelectorAll<HTMLButtonElement>('.navsec__head').forEach((btn) => {
-    btn.addEventListener('click', () => {
-      const sec = btn.closest('.navsec');
-      if (!sec) return;
-      const nowCollapsed = sec.classList.toggle('navsec--collapsed');
-      btn.setAttribute('aria-expanded', String(!nowCollapsed));
-    });
-  });
-
-  // Cross-module omnibox
+  // ── Cross-module omnibox ──────────────────────────────────────────────────
   const panel = document.getElementById('omnibox') as (HTMLElement & Record<string, unknown>) | null;
   const dataEl = document.getElementById('omnibox-data');
   const trigger = document.getElementById('omnibox-trigger');
@@ -178,6 +224,20 @@ const searchPayload = JSON.stringify({ entities: searchEntities, scopes: searchS
 
 <style>
   .shell { display: flex; flex-direction: column; height: 100vh; }
+
+  /* Visible only on keyboard focus — first tab stop on every page. */
+  .skip-link {
+    position: fixed; top: var(--spacing-200); left: var(--spacing-200); z-index: 2000;
+    padding: var(--spacing-250) var(--spacing-400);
+    background: var(--color-primary); color: #ffffff;
+    border-radius: var(--radius-100);
+    font-weight: var(--font-weight-semibold);
+    transform: translateY(calc(-100% - var(--spacing-400)));
+  }
+  .skip-link:focus-visible {
+    transform: none;
+    outline: 2px solid var(--focus-ring-color); outline-offset: 2px;
+  }
 
   /* ═══ TOPBAR ═══ */
   .topbar {
@@ -202,15 +262,10 @@ const searchPayload = JSON.stringify({ entities: searchEntities, scopes: searchS
   .icon-toggle__glyph { transition: transform 150ms ease; }
   .icon-toggle--collapsed .icon-toggle__glyph { transform: scaleX(-1); }
 
-  .crumb { display: flex; align-items: center; gap: var(--spacing-150); white-space: nowrap; overflow: hidden; }
-  .crumb :global(.esa-icon) { color: var(--color-text-muted); }
-  .crumb__root { font-size: var(--ps-info-text-meta-lg); color: var(--color-text-tertiary); }
-  .crumb__here { font-size: 0.9375rem; font-weight: var(--font-weight-semibold); color: var(--color-text-primary); }
-
   .omnibox {
     display: inline-flex; align-items: center; gap: var(--spacing-200);
     width: clamp(240px, 42vw, 520px); height: 38px; padding: 0 var(--spacing-300);
-    border: 1px solid var(--color-border-strong); border-radius: var(--radius-200);
+    border: 1px solid var(--color-border-strong); border-radius: var(--radius-100);
     background: var(--color-surface); color: var(--color-text-muted);
     font-size: var(--ps-info-text-meta-lg); transition: border-color 150ms ease, box-shadow 150ms ease;
   }
@@ -226,20 +281,6 @@ const searchPayload = JSON.stringify({ entities: searchEntities, scopes: searchS
     color: var(--color-text-tertiary);
   }
 
-  .env-pill {
-    display: inline-flex; align-items: center; height: 24px; padding: 0 var(--spacing-250);
-    border-radius: var(--radius-full);
-    background: var(--color-secondary); color: #fff;
-    font-size: var(--ps-info-text-meta); font-weight: var(--font-weight-semibold); white-space: nowrap;
-  }
-  .text-link {
-    display: inline-flex; align-items: center; gap: var(--spacing-150);
-    padding: var(--spacing-150) var(--spacing-200); border-radius: var(--radius-100);
-    font-size: var(--ps-info-text-meta-lg); font-weight: var(--font-weight-medium);
-    color: var(--color-text-secondary); transition: background 150ms ease, color 150ms ease;
-  }
-  .text-link:hover { background: color-mix(in srgb, var(--color-primary) 8%, transparent); color: var(--color-primary); }
-  .text-link :global(.esa-icon) { color: var(--color-text-muted); }
   .account {
     display: inline-flex; align-items: center; justify-content: center;
     width: 36px; height: 36px; border-radius: var(--radius-full); color: var(--color-text-tertiary);
@@ -262,16 +303,17 @@ const searchPayload = JSON.stringify({ entities: searchEntities, scopes: searchS
   .rail--collapsed { width: 72px; }
 
   .brand {
-    display: flex; align-items: center; gap: var(--spacing-250);
-    padding: var(--spacing-350) var(--spacing-400);
+    display: flex; align-items: center;
+    margin: var(--spacing-300) var(--spacing-300) var(--spacing-200);
+    padding: var(--spacing-250) var(--spacing-250);
+    border-radius: var(--radius-100);
     text-decoration: none;
+    transition: background 150ms ease;
   }
-  .brand__mark { display: inline-flex; flex: none; }
-  .brand__word { display: flex; flex-direction: column; line-height: 1.05; overflow: hidden; }
-  .brand__word-1 { font-family: var(--font-display); font-size: 1.0625rem; font-weight: var(--font-weight-semibold); color: var(--color-text-primary); white-space: nowrap; }
-  .brand__word-2 { font-family: var(--font-display); font-size: 1.0625rem; font-weight: var(--font-weight-semibold); color: var(--color-secondary); white-space: nowrap; }
-  .rail--collapsed .brand { justify-content: center; padding-inline: 0; }
-  .rail--collapsed .brand__word { display: none; }
+  .brand:hover { background: color-mix(in srgb, var(--color-primary) 6%, transparent); }
+  .brand__mark { display: block; width: 40px; height: 40px; flex: none; transition: width 200ms ease-in-out, height 200ms ease-in-out; }
+  .rail--collapsed .brand { justify-content: center; margin-inline: var(--spacing-200); padding: var(--spacing-200) 0; }
+  .rail--collapsed .brand__mark { width: 28px; height: 28px; }
 
   .rail__nav {
     flex: 1; overflow-y: auto; overflow-x: hidden;
@@ -281,11 +323,15 @@ const searchPayload = JSON.stringify({ entities: searchEntities, scopes: searchS
   }
 
   .navsec { display: flex; flex-direction: column; }
+  /* Each of the five modules is its own program — a hairline keeps them from
+     collapsing into one undifferentiated list. */
+  .navsec + .navsec { margin-top: var(--spacing-200); padding-top: var(--spacing-200); border-top: 1px solid var(--color-border); }
+
   .navsec__head {
     display: flex; align-items: center; gap: var(--spacing-300);
     width: 100%; text-align: left;
     padding: var(--spacing-250) var(--spacing-250);
-    border-radius: var(--radius-200);
+    border-radius: var(--radius-100);
     font-size: 0.9375rem; font-weight: var(--font-weight-semibold);
     color: var(--color-text-primary);
     transition: background 150ms ease, color 150ms ease;
@@ -294,10 +340,13 @@ const searchPayload = JSON.stringify({ entities: searchEntities, scopes: searchS
   .navsec__head:focus-visible { outline: 2px solid var(--focus-ring-color); outline-offset: 2px; }
   .navsec__head > :global(.esa-icon:first-child) { flex: none; color: var(--color-text-tertiary); }
   .navsec__title { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .navsec__head > :global(.navsec__chev) { flex: none; color: var(--color-text-muted); transition: transform 150ms ease; }
-  .navsec--collapsed .navsec__head > :global(.navsec__chev) { transform: rotate(-90deg); }
-  /* Active module: navy title + a teal keyline on the section head */
-  .navsec--active > .navsec__head { color: var(--color-primary); background: var(--color-primary-subtle); }
+  /* The chevron is the head's LAST esa-icon (esa-icon drops a class prop, so
+     it must be selected structurally). */
+  .navsec__head > :global(.esa-icon:last-child) { flex: none; color: var(--color-text-muted); transition: transform 150ms ease; }
+  .navsec--collapsed .navsec__head > :global(.esa-icon:last-child) { transform: rotate(-90deg); }
+  /* Active module: brand-blue title on a blue wash; the accent-orange icon is
+     the one identity moment in the rail. */
+  .navsec--active > .navsec__head { color: var(--color-primary); }
   .navsec--active > .navsec__head > :global(.esa-icon:first-child) { color: var(--color-secondary); }
 
   .navsec__items {
@@ -309,7 +358,7 @@ const searchPayload = JSON.stringify({ entities: searchEntities, scopes: searchS
   .navsec--collapsed .navsec__items { max-height: 0; opacity: 0; padding: 0; }
   .rail--collapsed .navsec__items { display: none; }
   .rail--collapsed .navsec__title,
-  .rail--collapsed .navsec__head > :global(.navsec__chev) { display: none; }
+  .rail--collapsed .navsec__head > :global(.esa-icon:last-child) { display: none; }
   .rail--collapsed .navsec__head { justify-content: center; }
 
   .leaf {
@@ -324,11 +373,42 @@ const searchPayload = JSON.stringify({ entities: searchEntities, scopes: searchS
   .leaf--stub { color: var(--color-text-muted); cursor: default; }
   .leaf--stub:hover { background: transparent; color: var(--color-text-muted); }
 
+  /* ── Collapsed-rail flyout ── */
+  .flyout {
+    display: none;
+    position: fixed; left: 76px; min-width: 220px; z-index: 1200;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border); border-radius: var(--radius-100);
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.12);
+  }
+  .flyout--open { display: block; animation: flyout-in 150ms ease-out; }
+  @keyframes flyout-in {
+    from { opacity: 0; transform: translateX(-8px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+  .flyout__header {
+    padding: var(--spacing-300) var(--spacing-400);
+    font-size: var(--ps-info-text-meta-lg); font-weight: var(--font-weight-semibold);
+    color: var(--color-text-primary);
+    border-bottom: 1px solid var(--color-border);
+  }
+  .flyout__items { list-style: none; margin: 0; padding: var(--spacing-200) 0; }
+  .flyout__link {
+    display: block; padding: var(--spacing-200) var(--spacing-400);
+    font-size: var(--ps-info-text-meta-lg); color: var(--color-text-secondary);
+    text-decoration: none; white-space: nowrap;
+    transition: background 150ms ease, color 150ms ease;
+  }
+  .flyout__link:hover { background: color-mix(in srgb, var(--color-primary) 7%, transparent); color: var(--color-primary); }
+  .flyout__link--active { color: var(--color-primary); font-weight: var(--font-weight-semibold); background: var(--color-primary-subtle); }
+  .flyout__link--stub { color: var(--color-text-muted); cursor: default; }
+  .flyout__link--stub:hover { background: transparent; color: var(--color-text-muted); }
+
   .rail__support {
     flex: none; display: flex; align-items: center; gap: var(--spacing-250);
     margin: var(--spacing-200) var(--spacing-300) var(--spacing-300);
     padding: var(--spacing-250) var(--spacing-300);
-    border-radius: var(--radius-200); border: 1px solid var(--color-border);
+    border-radius: var(--radius-100); border: 1px solid var(--color-border);
     background: var(--color-surface);
     font-size: var(--ps-info-text-meta-lg); font-weight: var(--font-weight-medium); color: var(--color-text-secondary);
     transition: border-color 150ms ease, color 150ms ease;
@@ -339,11 +419,14 @@ const searchPayload = JSON.stringify({ entities: searchEntities, scopes: searchS
   .rail--collapsed .rail__support span { display: none; }
 
   /* ═══ CONTENT ═══ */
-  .content { flex: 1; overflow-y: auto; min-width: 0; background: var(--color-background); padding: var(--spacing-600) var(--spacing-600) var(--spacing-800); }
-  @media (max-width: 720px) { .content { padding: var(--spacing-500) var(--spacing-400) var(--spacing-700); } }
+  .content { flex: 1; overflow-y: auto; min-width: 0; background: var(--color-background); padding: var(--spacing-500) var(--spacing-600) var(--spacing-800); scroll-behavior: smooth; }
+  .content:focus-visible { outline: none; }
+  @media (prefers-reduced-motion: reduce) { .content { scroll-behavior: auto; } }
+  .content__crumbs { margin-bottom: var(--spacing-400); }
+  @media (max-width: 720px) { .content { padding: var(--spacing-400) var(--spacing-400) var(--spacing-700); } }
 
   @media (max-width: 720px) {
-    .crumb__root, .omnibox__label, .omnibox__kbd, .text-link span { display: none; }
+    .omnibox__label, .omnibox__kbd { display: none; }
     .omnibox { width: 44px; padding: 0; justify-content: center; }
     .rail { position: fixed; z-index: 1050; box-shadow: 0 8px 32px rgba(0,0,0,0.16); }
   }

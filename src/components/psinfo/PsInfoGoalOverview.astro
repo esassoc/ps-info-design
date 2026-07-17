@@ -9,7 +9,7 @@ import { withBase } from '../../lib/base';
 // Roll each goal's vital-sign statuses into a tone tally for the meter.
 const TONE_COLOR: Record<string, string> = {
   success: 'var(--color-success)',
-  info: 'var(--color-secondary)',
+  info: 'var(--color-info)',
   neutral: 'var(--color-border-strong)',
   warning: 'var(--color-warning)',
   danger: 'var(--color-danger)',
@@ -45,9 +45,9 @@ const goals = GOALS.map((g) => {
   .goal {
     display: grid; grid-template-columns: auto 1fr; grid-template-rows: auto auto auto;
     column-gap: var(--spacing-250); row-gap: var(--spacing-150);
-    padding: var(--spacing-350) var(--spacing-400);
+    padding: var(--spacing-300) var(--spacing-400);
     background: var(--color-surface); border: 1px solid var(--color-border);
-    border-radius: var(--radius-300); text-decoration: none;
+    border-radius: var(--radius-100); text-decoration: none;
     transition: border-color 150ms ease, box-shadow 150ms ease;
   }
   .goal:hover { border-color: var(--color-primary-border); box-shadow: 0 6px 18px color-mix(in srgb, var(--color-primary) 10%, transparent); }

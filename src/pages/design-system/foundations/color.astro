@@ -4,10 +4,46 @@ import ColorFoundation from '@esa/docs/ColorFoundation.astro';
 
 // The semantic roles + their live values come from @esa/docs and read from the
 // active theme at runtime. The only spoke-specific part is this spoke's own
-// primitive ramp(s) — pass them via the `ramps` prop.
+// primitive ramps — the raw PSP brand material defined in theme-ps-info.css.
+const ramps = [
+  {
+    name: 'Blue — the PSP key color (800 = brand #0a3b5c, 600 = prod link blue)',
+    steps: ['50', '100', '200', '300', '400', '500', '600', '700', '800', '900', '950'].map(
+      (step) => ({ step, token: `ps-info-blue-${step}` }),
+    ),
+  },
+  {
+    name: 'Orange — the PSP accent (500 = brand #ef892e; 700 = text-safe)',
+    steps: ['50', '100', '200', '300', '400', '500', '600', '700', '800'].map(
+      (step) => ({ step, token: `ps-info-orange-${step}` }),
+    ),
+  },
+  {
+    name: 'Neutrals — a very subtle blue cast',
+    steps: ['0', '50', '100', '200', '300', '400', '500', '600', '700', '800', '900', '950', '1000'].map(
+      (step) => ({ step, token: `ps-info-gray-${step}` }),
+    ),
+  },
+  {
+    name: 'App chrome — value-layered, main < rail < bar',
+    steps: [
+      { step: 'surface', token: 'ps-info-app-surface' },
+      { step: 'rail', token: 'ps-info-rail-bg' },
+      { step: 'bar', token: 'ps-info-bar-bg' },
+    ],
+  },
+  {
+    name: 'Vital-Sign goal hues — exact prod values, data-encoding only',
+    steps: [
+      { step: 'population', token: 'ps-info-goal-population' },
+      { step: 'quality', token: 'ps-info-goal-quality' },
+      { step: 'species', token: 'ps-info-goal-species' },
+      { step: 'habitat', token: 'ps-info-goal-habitat' },
+      { step: 'water', token: 'ps-info-goal-water' },
+    ],
+  },
+];
 ---
 <DocsLayout title="Color — Puget Sound Info" activeHref="/design-system/foundations/color">
-  {/* TODO(spoke-init): pass this spoke's primitive ramp(s), e.g.
-      ramps={[{ name: 'Warm gray — neutrals', steps: [{ step: '0', token: 'ps-info-gray-0' }, ...] }]} */}
-  <ColorFoundation brand="Puget Sound Info" />
+  <ColorFoundation brand="Puget Sound Info" ramps={ramps} />
 </DocsLayout>

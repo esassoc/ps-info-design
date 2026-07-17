@@ -63,6 +63,14 @@ update the plugin: `claude plugin marketplace update ecology`.
   **/design-qa** (on-demand quality pass), **/ship** (sync → build → deploy →
   public URL), **/request-lego** (file a hub gap)
 
+## Accessibility — WCAG 2.2 AA is a hard requirement
+
+This is WA State agency work (Policy #188). Load the **`wcag22-a11y` skill**
+before building or reviewing ANY page/component in this repo — it carries the
+token contrast facts, semantic/keyboard/SR rules, and the six new 2.2 criteria.
+A PostToolUse hook (`.claude/hooks/check-a11y.mjs`) flags mechanical misses on
+every src write; treat its warnings as defects.
+
 ## Confidentiality
 
 This repo and its deployed site are PUBLIC. Client-sensitive material lives

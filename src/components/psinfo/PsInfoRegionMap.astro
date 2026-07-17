@@ -1,0 +1,25 @@
+---
+// PsInfoRegionMap — the Puget Sound / Salish Sea bioregion map that closes the
+// live homepage (PSP cartography; credits are part of the artwork). Framed by
+// the esa-card lego, centered at a readable measure.
+import EsaCard from '@esa/ecology/esa-card.astro';
+import { withBase } from '../../lib/base';
+
+interface Props {
+  /** public/ path of the map image */
+  image: string;
+  alt: string;
+}
+const { image, alt } = Astro.props;
+---
+<div class="regionmap">
+  <EsaCard variant="outlined" padding="none">
+    <img class="regionmap__img" src={withBase(image)} alt={alt} loading="lazy" decoding="async" />
+  </EsaCard>
+</div>
+
+<style>
+  .regionmap { width: 100%; }
+  .regionmap :global(.esa-card) { overflow: hidden; }
+  .regionmap__img { display: block; width: 100%; height: auto; }
+</style>

@@ -1,0 +1,96 @@
+---
+// PsInfoPhotoHeader — a page header set on Puget Sound photography. The five
+// programs publish genuinely beautiful imagery of the Sound; this puts it to
+// work on the front door and each module's landing header.
+//
+// bcn-lego-checked: the text block IS the esa-page-header lego — this component
+// only adds the photographic band under it, re-pointing the lego's public
+// --page-header-*-color hooks for legibility on the photo (color is the
+// consumer's job per the lego's own contract). No esa- lego renders a photo
+// band (esa-page-header is a transparent text container; esa-card is a content
+// card); checked Beacon (no photo-header pattern). psinfo-photo-header is the
+// reusable home.
+import EsaPageHeader from '@esa/ecology/esa-page-header.astro';
+import { withBase } from '../../lib/base';
+
+interface Props {
+  title: string;
+  eyebrow?: string;
+  lede?: string;
+  /** public/ path of the photograph, e.g. '/photos/sound-aerial.jpg' */
+  image: string;
+  /** object-position focal point of the crop, e.g. '50% 30%' */
+  focus?: string;
+  /** hero = the homepage front door (taller, display title); band = module pages */
+  size?: 'hero' | 'band';
+}
+const { title, eyebrow, lede, image, focus = '50% 45%', size = 'band' } = Astro.props;
+---
+<header class:list={['photohead', `photohead--${size}`]}>
+  <img class="photohead__img" src={withBase(image)} alt="" decoding="async" style={`object-position: ${focus}`} />
+  <div class="photohead__text">
+    <EsaPageHeader {title} {eyebrow} {lede} as="div" prominence={size === 'hero' ? 'display' : 'page-title'} />
+  </div>
+  {Astro.slots.has('band') && (
+    <div class="photohead__band">
+      <slot name="band" />
+    </div>
+  )}
+</header>
+
+<style>
+  .photohead {
+    position: relative; overflow: hidden;
+    display: flex; flex-direction: column; justify-content: flex-end;
+    min-height: 250px;
+    border-radius: var(--radius-100);
+    background: var(--ps-info-blue-950);
+  }
+  .photohead--hero { min-height: 400px; }
+
+  .photohead__img {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%; object-fit: cover;
+  }
+  /* Scrim: deep brand blue rising from the text edge so the type always clears
+     the photo; the upper half stays clean water. */
+  .photohead::after {
+    content: '';
+    position: absolute; inset: 0;
+    background: linear-gradient(
+      to top,
+      color-mix(in srgb, var(--ps-info-blue-950) 88%, transparent) 0%,
+      color-mix(in srgb, var(--ps-info-blue-950) 56%, transparent) 46%,
+      color-mix(in srgb, var(--ps-info-blue-950) 12%, transparent) 82%,
+      transparent 100%
+    );
+  }
+
+  .photohead__text {
+    position: relative; z-index: 1;
+    width: 100%;
+    padding: var(--spacing-600);
+    /* Re-point the lego's public color hooks for photo legibility; the orange
+       eyebrow is the logo's blue/orange pairing doing the identity work. */
+    --page-header-title-color: #ffffff;
+    --page-header-lede-color: rgba(255, 255, 255, 0.9);
+    --page-header-eyebrow-color: var(--ps-info-orange-300);
+  }
+  .photohead__text :global(.esa-page-header__lede) { max-width: 62ch; }
+
+  /* Optional band across the hero foot (e.g. the front door's section nav) —
+     the original site's band-under-photo, elevated to a translucent layer. */
+  .photohead__band {
+    position: relative; z-index: 1;
+    background: color-mix(in srgb, var(--ps-info-blue-950) 62%, transparent);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-top: 1px solid rgba(255, 255, 255, 0.16);
+  }
+
+  @media (max-width: 720px) {
+    .photohead { min-height: 210px; }
+    .photohead--hero { min-height: 280px; }
+    .photohead__text { padding: var(--spacing-400); }
+  }
+</style>

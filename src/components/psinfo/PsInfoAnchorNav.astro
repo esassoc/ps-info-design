@@ -1,0 +1,35 @@
+---
+// PsInfoAnchorNav — the front door's in-page section nav, designed to live in
+// the photo header's `band` slot (white-on-dark). Mirrors the live homepage's
+// band-under-photo: five evenly-spread links to the page's anchor sections.
+//
+// bcn-lego-checked: checked esa-header-nav / esa-nav-dropdown (site-level nav
+// with dropdowns, not an in-page anchor row) and esa-button-group (form
+// control grouping); nothing fits an on-photo anchor band. Composes tokens
+// only; psinfo-anchor-nav is the reusable home.
+interface Props {
+  items: { label: string; href: string }[];
+}
+const { items } = Astro.props;
+---
+<nav class="anchornav" aria-label="Page sections">
+  {items.map((item) => (
+    <a class="anchornav__link" href={item.href}>{item.label}</a>
+  ))}
+</nav>
+
+<style>
+  .anchornav {
+    display: flex; flex-wrap: wrap;
+  }
+  .anchornav__link {
+    flex: 1 1 auto;
+    text-align: center;
+    padding: var(--spacing-300) var(--spacing-400);
+    font-size: 0.9375rem; font-weight: var(--font-weight-medium);
+    color: #ffffff; text-decoration: none; white-space: nowrap;
+    transition: background 150ms ease;
+  }
+  .anchornav__link:hover { background: rgba(255, 255, 255, 0.12); }
+  .anchornav__link:focus-visible { outline: 2px solid var(--focus-ring-color); outline-offset: -2px; }
+</style>

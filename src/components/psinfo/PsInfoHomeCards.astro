@@ -1,0 +1,81 @@
+---
+// PsInfoHomeCards — the front door's photo resource cards (Plans /
+// Implementation & Funding / Progress). Each card IS the esa-card lego
+// (outlined, zero padding) carrying a photo band + title + caption, wrapped in
+// a block link. Titles get an external-link mark because these cards point at
+// the live tools they represent.
+import EsaCard from '@esa/ecology/esa-card.astro';
+import EsaIcon from '@esa/ecology/esa-icon.astro';
+import { withBase } from '../../lib/base';
+
+export interface HomeCardItem {
+  title: string;
+  blurb: string;
+  /** public/ path of the card photograph */
+  image: string;
+  href: string;
+}
+interface Props {
+  items: HomeCardItem[];
+  /** Minimum card width the grid packs to (auto-fit mode). */
+  min?: string;
+  /** Fixed column count filling the full row width (collapses on narrow screens). */
+  columns?: number;
+}
+const { items, min = '230px', columns } = Astro.props;
+
+const ARROW = '<path d="M7 7h10v10"/><path d="M7 17 17 7"/>';
+---
+<div class:list={['homecards', { 'homecards--fixed': !!columns }]} style={`--card-min: ${min}; --cols: ${columns ?? 1}`}>
+  {items.map((item) => (
+    <a class="homecard" href={item.href} rel="noopener">
+      <EsaCard variant="outlined" padding="none">
+        <img class="homecard__img" src={withBase(item.image)} alt="" loading="lazy" decoding="async" />
+        <div class="homecard__body">
+          <span class="homecard__title">
+            {item.title}
+            <EsaIcon name="arrow-up-right" size="xs" paths={ARROW} />
+          </span>
+          <span class="homecard__blurb">{item.blurb}</span>
+        </div>
+      </EsaCard>
+    </a>
+  ))}
+</div>
+
+<style>
+  .homecards {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(var(--card-min), 1fr));
+    gap: var(--spacing-400);
+  }
+  .homecards--fixed { grid-template-columns: repeat(var(--cols), 1fr); }
+  @media (max-width: 720px) { .homecards--fixed { grid-template-columns: 1fr; } }
+  .homecard {
+    display: block; text-decoration: none; border-radius: var(--radius-100);
+    transition: transform 150ms ease, box-shadow 150ms ease;
+  }
+  .homecard:hover { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(16, 42, 67, 0.12); }
+  .homecard:focus-visible { outline: 2px solid var(--focus-ring-color); outline-offset: 2px; }
+  .homecard :global(.esa-card) { height: 100%; overflow: hidden; }
+
+  .homecard__img {
+    display: block; width: 100%; aspect-ratio: 16 / 10; object-fit: cover;
+    border-bottom: 1px solid var(--color-border-light);
+  }
+  /* Fixed-column rows (e.g. Progress's 2-up) get wide cards — flatten the
+     crop at desktop so the photos don't tower. */
+  @media (min-width: 900px) {
+    .homecards--fixed .homecard__img { aspect-ratio: 21 / 9; }
+  }
+  .homecard__body {
+    display: flex; flex-direction: column; gap: var(--spacing-150);
+    padding: var(--spacing-400);
+  }
+  .homecard__title {
+    font-size: 1.0625rem; font-weight: var(--font-weight-semibold);
+    color: var(--color-text-primary); line-height: 1.35;
+  }
+  .homecard__title :global(.esa-icon) { color: var(--color-text-muted); margin-left: var(--spacing-100); vertical-align: baseline; }
+  .homecard:hover .homecard__title { color: var(--color-primary); }
+  .homecard__blurb { font-size: var(--ps-info-text-meta-lg); color: var(--color-text-secondary); line-height: 1.5; }
+</style>

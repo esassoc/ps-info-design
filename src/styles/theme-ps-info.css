@@ -7,56 +7,71 @@
  * Because every esa-* component reads only the semantic layer, re-pointing it
  * re-skins the whole kit with no forks.
  *
- * BRAND VALUES ARE RESEARCHED, NOT INVENTED (mirrors the attempt-1 brand layer):
- *   header navy #133244 and the five Vital-Sign goal hues are the exact prod
- *   inline-style values from vitalsigns.pugetsoundinfo.wa.gov. PSP teal #018470
- *   is the accent. The five apps ship no shared design language today; this
- *   theme is the unified one.
+ * BRAND VALUES ARE RESEARCHED, NOT INVENTED — pulled from psp.wa.gov/css/custom.css
+ * (2026-07-16): brand blue #0a3b5c (.blue-fill/.blue, 19 uses), link blue #00549a
+ * (a/), accent orange #ef892e (.orange-fill/.border-top-orange, 7 uses), light
+ * washes #fdf3ea (.light-orange-fill) and #e6ebee (.faint-blue-fill). The PS Info
+ * lockup (public/psi-logo.png) carries the same pair: orange mark, navy wordmark.
+ * The five Vital-Sign goal hues are the exact prod inline-style values from
+ * vitalsigns.pugetsoundinfo.wa.gov.
+ *
+ * COLOR ROLES: blue is the KEY color (primary actions, links, active nav);
+ * orange is the ACCENT (focus, counts, small identity moments — never chrome).
+ * App chrome is neutral with a VERY subtle blue cast (~2–4%), value-layered
+ * main < rail < bar per the house-chrome rule.
  *
  * TOKEN TIERS:
  *   - ecology tokens (--color-*, --font-*, --form-*): the durable hub vocabulary.
  *     Reassigned here; components read only these.
- *   - --ps-info-* tokens: the spoke tier. Raw brand material (navy/teal/neutral
+ *   - --ps-info-* tokens: the spoke tier. Raw brand material (blue/orange/neutral
  *     ramps, goal hues, sanctioned type floors). Feeds the re-points; hub
  *     components never read them directly.
  */
 
-/* ===== Fonts — Anthropic (the Ecology docs-site editorial voice), self-hosted ===== */
-@font-face{font-family:'Anthropic Sans';src:url('/fonts/AnthropicSans-Variable.woff2') format('woff2-variations');font-weight:300 800;font-style:normal;font-display:swap}
-@font-face{font-family:'Anthropic Sans';src:url('/fonts/AnthropicSans-Italic-Variable.woff2') format('woff2-variations');font-weight:300 800;font-style:italic;font-display:swap}
-@font-face{font-family:'Anthropic Serif';src:url('/fonts/AnthropicSerif-Variable.woff2') format('woff2-variations');font-weight:300 800;font-style:normal;font-display:swap}
-@font-face{font-family:'Anthropic Mono';src:url('/fonts/AnthropicMono-Variable.woff2') format('woff2-variations');font-weight:300 800;font-style:normal;font-display:swap}
-
 [data-theme="ps-info"] {
   /* ===== (7) RAW PRIMITIVE RAMPS — the spoke tier (--ps-info-*) ===== */
 
-  /* Navy ramp — PSP's signature (feeds --color-primary*). */
-  --ps-info-navy-50:  #eef3f5;   /* light wash behind selected/hover */
-  --ps-info-navy-100: #dbe7eb;
-  --ps-info-navy-200: #b6ccd4;   /* hairline on brand surfaces */
-  --ps-info-navy-500: #2c5c72;
-  --ps-info-navy-700: #1d4a60;
-  --ps-info-navy-800: #133244;   /* PSP header navy — the primary */
-  --ps-info-navy-900: #0e2735;   /* deepest — hover / active */
+  /* Blue ramp — the PSP key color. 800 is the brand blue (#0a3b5c), 600 is the
+     prod link blue (#00549a — deliberately more saturated: the interactive step). */
+  --ps-info-blue-50:  #eef4f8;   /* light wash behind selected/hover */
+  --ps-info-blue-100: #dce9f1;
+  --ps-info-blue-200: #b9d1e2;   /* hairline on brand surfaces */
+  --ps-info-blue-300: #8bb2cd;
+  --ps-info-blue-400: #5989ad;
+  --ps-info-blue-500: #2f6d96;
+  --ps-info-blue-600: #00549a;   /* PSP link blue — links, focusable, info */
+  --ps-info-blue-700: #0d4675;
+  --ps-info-blue-800: #0a3b5c;   /* PSP brand blue — the primary */
+  --ps-info-blue-900: #072c46;   /* deepest — hover / active */
+  --ps-info-blue-950: #051f33;   /* inverse surface */
 
-  /* Teal ramp — PSP accent (feeds --color-secondary*, focus ring). */
-  --ps-info-teal-400: #12a394;
-  --ps-info-teal-500: #018470;   /* PSP teal */
-  --ps-info-teal-600: #01685a;
+  /* Orange ramp — the PSP accent. 500 is the brand orange (#ef892e; 2.5:1 on
+     white — fills/icons only). 700 is the TEXT-SAFE accent (≥4.5:1) that small
+     accent text (counts, labels) must read instead of 500. */
+  --ps-info-orange-50:  #fdf3ea;  /* prod .light-orange-fill wash */
+  --ps-info-orange-100: #fbe5cf;
+  --ps-info-orange-200: #f8d0a8;
+  --ps-info-orange-300: #f5b878;
+  --ps-info-orange-400: #f2a050;
+  --ps-info-orange-500: #ef892e;  /* PSP orange */
+  --ps-info-orange-600: #d97316;  /* hover; 3.2:1 — border/ring-safe */
+  --ps-info-orange-700: #b25a10;  /* text-safe accent */
+  --ps-info-orange-800: #8a4409;
 
-  /* Cool-neutral gray ramp — the authoritative neutrals (a faint water-cool cast). */
+  /* Neutral ramp — the authoritative grays. A VERY subtle blue cast (hue ~210,
+     2–6% saturation) replacing the old teal-green cast; reads neutral at a glance. */
   --ps-info-gray-0:    #ffffff;
-  --ps-info-gray-50:   #f7fafa;
-  --ps-info-gray-100:  #eef3f3;
-  --ps-info-gray-200:  #dbe3e4;
-  --ps-info-gray-300:  #c1cbcd;
-  --ps-info-gray-400:  #97a4a8;
-  --ps-info-gray-500:  #6f7d81;
-  --ps-info-gray-600:  #576368;
-  --ps-info-gray-700:  #45514f;
-  --ps-info-gray-800:  #333d40;
-  --ps-info-gray-900:  #1f2b30;
-  --ps-info-gray-950:  #131c20;
+  --ps-info-gray-50:   #f8fafb;
+  --ps-info-gray-100:  #eff2f5;
+  --ps-info-gray-200:  #dfe4e9;
+  --ps-info-gray-300:  #c4ccd4;
+  --ps-info-gray-400:  #99a3ae;
+  --ps-info-gray-500:  #626e7a;  /* muted-text floor: ≥4.5:1 on white AND the tinted chrome (axe-verified) */
+  --ps-info-gray-600:  #59646f;
+  --ps-info-gray-700:  #46515b;
+  --ps-info-gray-800:  #343d47;
+  --ps-info-gray-900:  #202932;
+  --ps-info-gray-950:  #141b23;
   --ps-info-gray-1000: #000000;
 
   /* Five Vital-Sign goal hues — EXACT prod inline-style values.
@@ -69,28 +84,29 @@
   --ps-info-goal-water:      #018470;  /* Healthy Water Quality */
 
   /* Neutral value-layered app chrome (design-principles house-chrome rule):
-     main < rail < bar by LIGHTNESS — a teal whisper (~3%), never a saturated fill. */
-  --ps-info-app-surface: #f8fbfb;  /* main canvas — lightest */
-  --ps-info-rail-bg:     #f1f6f5;  /* sidenav */
-  --ps-info-bar-bg:      #eaf1f0;  /* topbar — the darkest chrome step */
+     main < rail < bar by LIGHTNESS — a blue whisper (~2–4%), never a saturated fill. */
+  --ps-info-app-surface: #f8fafc;  /* main canvas — lightest */
+  --ps-info-rail-bg:     #f1f4f7;  /* sidenav */
+  --ps-info-bar-bg:      #eaeef3;  /* topbar — the darkest chrome step */
 
   /* Sanctioned type floors (Anthropic reading + meta). */
   --ps-info-text-body:    1rem;        /* 16px reading text */
   --ps-info-text-meta:    0.8125rem;   /* 13px — genuine meta floor */
   --ps-info-text-meta-lg: 0.875rem;    /* 14px — labels, secondary meta */
 
-  /* ===== (1) BRAND — navy primary, teal secondary ===== */
-  --color-primary:         var(--ps-info-navy-800);
-  --color-primary-hover:   var(--ps-info-navy-900);
-  --color-primary-active:  var(--ps-info-navy-900);
-  --color-primary-strong:  var(--ps-info-navy-800);
-  --color-primary-subtle:  var(--ps-info-navy-50);
-  --color-primary-border:  var(--ps-info-navy-200);
-  --color-secondary:       var(--ps-info-teal-500);
-  --color-secondary-hover: var(--ps-info-teal-600);
-  --color-text-link:       var(--ps-info-navy-800);
-  --color-text-link-hover: var(--ps-info-navy-900);
-  --color-surface-inverse: var(--ps-info-navy-900);
+  /* ===== (1) BRAND — blue primary, orange accent ===== */
+  --color-primary:         var(--ps-info-blue-800);
+  --color-primary-hover:   var(--ps-info-blue-900);
+  --color-primary-active:  var(--ps-info-blue-900);
+  --color-primary-strong:  var(--ps-info-blue-800);
+  --color-primary-subtle:  var(--ps-info-blue-50);
+  --color-primary-border:  var(--ps-info-blue-200);
+  --color-secondary:        var(--ps-info-orange-500);
+  --color-secondary-hover:  var(--ps-info-orange-600);
+  --color-secondary-strong: var(--ps-info-orange-700);  /* text-safe accent (stat values, counts) */
+  --color-text-link:       var(--ps-info-blue-600);
+  --color-text-link-hover: var(--ps-info-blue-800);
+  --color-surface-inverse: var(--ps-info-blue-950);
 
   /* ===== (2) NEUTRAL CHAIN ===== */
   --color-text-primary:   var(--ps-info-gray-900);
@@ -104,13 +120,15 @@
   --color-surface:        var(--ps-info-gray-0);
   --color-surface-sunken: var(--ps-info-gray-100);
 
-  --focus-ring-color:  var(--ps-info-teal-500);
-  --color-border-focus: var(--ps-info-teal-500);
+  /* Focus is the accent's interactive job — ring-safe orange (3.2:1). */
+  --focus-ring-color:   var(--ps-info-orange-600);
+  --color-border-focus: var(--ps-info-orange-600);
 
-  /* ===== (3) FONTS — Anthropic replaces DM Sans ===== */
-  --font-sans:    'Anthropic Sans', system-ui, -apple-system, sans-serif;
-  --font-display: 'Anthropic Serif', Georgia, serif;   /* headline voice */
-  --font-mono:    'Anthropic Mono', ui-monospace, monospace;
+  /* ===== (3) FONTS — Google faces, loaded in BaseLayout. Source Sans 3 +
+     Lora: Andy's pick (2026-07-17) from the font-switcher evaluation. ===== */
+  --font-sans:    'Source Sans 3', system-ui, -apple-system, sans-serif;
+  --font-display: 'Lora', Georgia, serif;   /* headline voice */
+  --font-mono:    ui-monospace, 'SF Mono', Menlo, monospace;
   --font-weight-regular:  400;
   --font-weight-medium:   500;
   --font-weight-semibold: 600;
@@ -118,18 +136,21 @@
 
   /* ===== (4) FEEDBACK — conventional green/amber/red, a distinct axis from goal hues.
      Always paired with a text label, so never confused with a goal color. ===== */
-  --color-success:        #2f8f5b;   --color-status-success:        #2f8f5b;
+  /* success fill carries WHITE badge text — #257a4c holds ≥4.5:1 (axe-verified) */
+  --color-success:        #257a4c;   --color-status-success:        #257a4c;
   --color-success-subtle: #eaf5ef;   --color-status-success-subtle: #eaf5ef;
-  --color-success-strong: #1f7048;   --color-status-success-strong: #1f7048;
+  --color-success-strong: #175a3c;   --color-status-success-strong: #175a3c;
+  --color-success-on-fill: #ffffff;
   --color-warning:        #c07d18;   --color-status-warning:        #c07d18;
   --color-warning-subtle: #fbf1e0;   --color-status-warning-subtle: #fbf1e0;
   --color-warning-strong: #8a5a10;   --color-status-warning-strong: #8a5a10;
   --color-danger:         #c4362f;
   --color-danger-subtle:  #fbeceb;
   --color-danger-strong:  #a02a24;
-  --color-info:           var(--ps-info-teal-500);
+  --color-info:           var(--ps-info-blue-600);
 
-  /* ===== (5) FORM SIZING + RADIUS — quiet, flat (4px) ===== */
+  /* ===== (5) SIZING + RADIUS — quiet, flat. 4px (radius-100) is the house
+     standard for cards, photos, and controls. ===== */
   --form-height-xs: 26px;
   --form-height-sm: 30px;
   --form-height-md: 36px;
@@ -138,6 +159,7 @@
   --form-radius-sm: var(--radius-100);
   --form-radius-md: var(--radius-100);
   --form-radius-lg: var(--radius-100);
+  --card-radius:    var(--radius-100);
 
   /* ===== (6) --button-on-warning ===== */
   --button-on-warning: #ffffff;

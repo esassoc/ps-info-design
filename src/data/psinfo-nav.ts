@@ -1,15 +1,15 @@
 // psinfo-nav.ts — the UNIFIED information architecture for Puget Sound Info.
 //
-// This is the redesign's core artifact: the five apps that today live on five
-// separate subdomains (Core, Action Agenda, Vital Signs, Progress Indicators,
-// NEP Atlas) — connected only by a repeated "Explore" mega-menu — modeled here
-// as ONE navigable structure. Each module is a first-class peer in a single
-// persistent sidenav; the topbar carries the one thing no app offers today: a
-// search that reaches across all five.
+// The rail MIRRORS the live pugetsoundinfo.wa.gov "Explore" menu (scraped
+// 2026-07-17): Puget Sound Info (the program front door + data tools), then
+// Goals / Plans / Implementation & Funding / Progress with prod's own
+// sub-links. What the prototype adds is the delivery: today those links
+// scatter across five subdomains connected only by a repeated mega-menu; here
+// they live in ONE persistent rail with a cross-module search above.
 //
-// Structure is REAL (mapped from the live sites, 2026-07-15). Only three pages
-// are built as working screens (home, vital-signs, action-agenda); the rest are
-// href-less nav stubs so the model reads coherently without every leaf existing.
+// Built pages: home, vital-signs (all five goal links resolve to its by-goal
+// listing), action-agenda (Plans > Action Agenda Explorer). Every other leaf
+// is an href-less stub so the IA reads complete without every page existing.
 
 import { withBase } from '../lib/base';
 
@@ -25,9 +25,9 @@ export interface NavLeaf {
 export interface NavModule {
   id: string;
   label: string;
-  /** One-line description of what the module is (used on the overview page). */
+  /** One-line description of what the module is (used on overview surfaces). */
   blurb: string;
-  /** The live subdomain this module runs on today. */
+  /** The live destination this module fronts today. */
   domain: string;
   /** Inner Lucide SVG markup (paths/rects) for the module glyph. */
   icon: string;
@@ -36,18 +36,16 @@ export interface NavModule {
 
 // ── Lucide glyphs (inner markup only) ──────────────────────────────────────
 export const ICONS: Record<string, string> = {
-  compass:
-    '<circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/>',
+  info:
+    '<circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/>',
+  target:
+    '<circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>',
   'list-checks':
     '<path d="m3 17 2 2 4-4"/><path d="m3 7 2 2 4-4"/><path d="M13 6h8"/><path d="M13 12h8"/><path d="M13 18h8"/>',
-  activity:
-    '<path d="M22 12h-2.48a2 2 0 0 0-1.93 1.46l-2.35 8.36a.25.25 0 0 1-.48 0L9.24 2.18a.25.25 0 0 0-.48 0l-2.35 8.36A2 2 0 0 1 4.49 12H2"/>',
+  banknote:
+    '<rect width="20" height="12" x="2" y="6" rx="2"/><circle cx="12" cy="12" r="2"/><path d="M6 12h.01M18 12h.01"/>',
   'trending-up':
     '<polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/>',
-  'map-pinned':
-    '<path d="M18 8c0 3.613-3.869 7.429-5.393 8.795a1 1 0 0 1-1.214 0C9.87 15.429 6 11.613 6 8a6 6 0 0 1 12 0"/><circle cx="12" cy="8" r="2"/><path d="M8.714 14h-3.71a1 1 0 0 0-.948.683l-2.004 6A1 1 0 0 0 3 22h18a1 1 0 0 0 .948-1.316l-2-6a1 1 0 0 0-.949-.684h-3.712"/>',
-  home:
-    '<path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>',
   search:
     '<circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>',
   'circle-user':
@@ -57,74 +55,69 @@ export const ICONS: Record<string, string> = {
     '<circle cx="12" cy="12" r="10"/><path d="m4.93 4.93 4.24 4.24"/><path d="m14.83 9.17 4.24-4.24"/><path d="m14.83 14.83 4.24 4.24"/><path d="m9.17 14.83-4.24 4.24"/><circle cx="12" cy="12" r="4"/>',
 };
 
-// ── The five modules, in Puget Sound recovery reading order ────────────────
+// ── The five areas, in prod's reading order ─────────────────────────────────
 export const MODULES: NavModule[] = [
   {
     id: 'overview',
-    label: 'Overview',
-    blurb: 'The front door — recovery goals, plans, funding, and the data center in one place.',
+    label: 'Puget Sound Info',
+    blurb: 'The program front door — about, web services, spatial data, and the data center.',
     domain: 'pugetsoundinfo.wa.gov',
-    icon: ICONS.compass,
+    icon: ICONS.info,
     pages: [
-      { id: 'home', label: 'Home', route: '/prototypes/home' },
-      { id: 'about', label: 'About Puget Sound Info' },
-      { id: 'goals', label: 'Recovery Goals' },
-      { id: 'plans', label: 'Plans' },
-      { id: 'funding', label: 'Implementation & Funding' },
-      { id: 'data-tools', label: 'Data & Tools' },
+      { id: 'about', label: 'About' },
+      { id: 'web-services', label: 'Web Services' },
+      { id: 'spatial-data-hub', label: 'Spatial Data Hub' },
       { id: 'data-center', label: 'Data Center' },
     ],
   },
   {
-    id: 'action-agenda',
-    label: 'Action Agenda',
-    blurb: 'The regional recovery plan — topics, strategies, and partner commitments (2026–2030).',
+    id: 'goals',
+    label: 'Goals',
+    blurb: 'What are we trying to achieve? The statutory recovery goals and their Vital Signs.',
+    domain: 'vitalsigns.pugetsoundinfo.wa.gov',
+    icon: ICONS.target,
+    pages: [
+      { id: 'goal-population', label: 'Healthy Human Population', route: '/prototypes/vital-signs' },
+      { id: 'goal-quality', label: 'Vibrant Human Quality of Life', route: '/prototypes/vital-signs' },
+      { id: 'goal-species', label: 'Thriving Species and Food Web', route: '/prototypes/vital-signs' },
+      { id: 'goal-habitat', label: 'Functioning Habitat', route: '/prototypes/vital-signs' },
+      { id: 'goal-water', label: 'Healthy Water Quality', route: '/prototypes/vital-signs' },
+    ],
+  },
+  {
+    id: 'plans',
+    label: 'Plans',
+    blurb: 'What are we planning to do? Regional guidance and the plans implementing it.',
     domain: 'actionagenda.pugetsoundinfo.wa.gov',
     icon: ICONS['list-checks'],
     pages: [
-      { id: 'aa-topics', label: 'Topics', route: '/prototypes/action-agenda' },
-      { id: 'aa-strategies', label: 'Strategies' },
-      { id: 'aa-commitments', label: 'Commitments' },
-      { id: 'aa-local-plans', label: 'Local Recovery Plans' },
-      { id: 'aa-federal', label: 'Federal Task Force' },
+      { id: 'aa-explorer', label: 'Action Agenda Explorer', route: '/prototypes/action-agenda' },
+      { id: 'impl-strategies', label: 'Implementation Strategies' },
+      { id: 'local-recovery-plans', label: 'Local Ecosystem Recovery Plans' },
+      { id: 'federal-task-force', label: 'Puget Sound Federal Task Force Action Plan' },
     ],
   },
   {
-    id: 'vital-signs',
-    label: 'Vital Signs',
-    blurb: 'Measures of ecosystem health — 22 Vital Signs and their indicators, by recovery goal.',
-    domain: 'vitalsigns.pugetsoundinfo.wa.gov',
-    icon: ICONS.activity,
+    id: 'implementation',
+    label: 'Implementation & Funding',
+    blurb: 'Funding opportunities and the investments implementing recovery on the ground.',
+    domain: 'nepatlas.pugetsoundinfo.wa.gov',
+    icon: ICONS.banknote,
     pages: [
-      { id: 'vs-all', label: 'All Vital Signs', route: '/prototypes/vital-signs' },
-      { id: 'vs-indicators', label: 'Indicators' },
-      { id: 'vs-targets', label: 'Recovery Targets' },
-      { id: 'vs-methods', label: 'Background & Methods' },
+      { id: 'funding-tool', label: 'Recovery Acceleration Funding Tool' },
+      { id: 'nep-atlas', label: 'NEP Atlas' },
+      { id: 'ongoing-programs', label: 'Ongoing Programs Portal' },
     ],
   },
   {
-    id: 'progress-indicators',
-    label: 'Progress Indicators',
-    blurb: 'Measures of the human activities that shape ecosystem health — the pressure side.',
-    domain: 'progressindicators.pugetsoundinfo.wa.gov',
+    id: 'progress',
+    label: 'Progress',
+    blurb: 'Measures that track recovery progress and the biennial State of the Sound.',
+    domain: 'stateofthesound.wa.gov',
     icon: ICONS['trending-up'],
     pages: [
-      { id: 'pi-overview', label: 'Overview' },
-      { id: 'pi-indicators', label: 'Indicators' },
-      { id: 'pi-data', label: 'Data Tables' },
-    ],
-  },
-  {
-    id: 'nep-atlas',
-    label: 'NEP Atlas',
-    blurb: 'National Estuary Program-funded activities and investments across the Sound.',
-    domain: 'nepatlas.pugetsoundinfo.wa.gov',
-    icon: ICONS['map-pinned'],
-    pages: [
-      { id: 'nep-map', label: 'Activities Map' },
-      { id: 'nep-list', label: 'Activities List' },
-      { id: 'nep-awards', label: 'NEP Awards' },
-      { id: 'nep-summary', label: 'Investment Summary' },
+      { id: 'indicators', label: 'Indicators' },
+      { id: 'state-of-the-sound', label: 'State of the Sound' },
     ],
   },
 ];
@@ -157,8 +150,8 @@ export function navFor(active: ActiveNav) {
 }
 
 // ── Cross-module search index — the unification payoff ─────────────────────
-// One flat index that spans all five apps. Today this search is impossible:
-// each subdomain searches only itself. `category` is the module label.
+// One flat index that spans all five areas. Today this search is impossible:
+// each subdomain searches only itself. `category` is the area label.
 export interface SearchEntry {
   title: string;
   subtitle: string;
@@ -167,18 +160,18 @@ export interface SearchEntry {
 }
 
 export const SEARCH_INDEX: SearchEntry[] = [
-  { title: 'Chinook Salmon', subtitle: 'Vital Sign · Thriving Species & Food Web', category: 'Vital Signs', route: '/prototypes/vital-signs' },
-  { title: 'Marine Water Quality', subtitle: 'Vital Sign · Healthy Water Quality', category: 'Vital Signs', route: '/prototypes/vital-signs' },
-  { title: 'Estuaries', subtitle: 'Vital Sign · Functioning Habitat', category: 'Vital Signs', route: '/prototypes/vital-signs' },
-  { title: 'Orcas', subtitle: 'Vital Sign · Thriving Species & Food Web', category: 'Vital Signs', route: '/prototypes/vital-signs' },
-  { title: 'Shellfish Beds', subtitle: 'Vital Sign · Healthy Human Population', category: 'Vital Signs', route: '/prototypes/vital-signs' },
-  { title: 'Habitat Protection & Restoration', subtitle: 'Strategy · Foundations of Recovery', category: 'Action Agenda', route: '/prototypes/action-agenda' },
-  { title: 'Shellfish Bed Reopening', subtitle: 'Commitment · 3 partners', category: 'Action Agenda', route: '/prototypes/action-agenda' },
-  { title: 'Stormwater Management', subtitle: 'Strategy · Foundations of Recovery', category: 'Action Agenda', route: '/prototypes/action-agenda' },
-  { title: 'Floodplains & Estuaries', subtitle: 'Topic · pressure indicators', category: 'Progress Indicators' },
-  { title: 'On-site Sewage Systems', subtitle: 'Topic · pressure indicators', category: 'Progress Indicators' },
-  { title: 'Nearshore Restoration — Skagit Delta', subtitle: 'Activity · NEP-funded', category: 'NEP Atlas' },
-  { title: 'Investment Summary 2007–2025', subtitle: '$254M across 600+ projects', category: 'NEP Atlas' },
-  { title: 'Recovery Goals', subtitle: 'Six statutory goals for Puget Sound', category: 'Overview', route: '/prototypes/home' },
-  { title: 'Data Center', subtitle: 'Downloads, APIs, spatial data hub', category: 'Overview' },
+  { title: 'Chinook Salmon', subtitle: 'Vital Sign · Thriving Species & Food Web', category: 'Goals', route: '/prototypes/vital-signs' },
+  { title: 'Marine Water Quality', subtitle: 'Vital Sign · Healthy Water Quality', category: 'Goals', route: '/prototypes/vital-signs' },
+  { title: 'Estuaries', subtitle: 'Vital Sign · Functioning Habitat', category: 'Goals', route: '/prototypes/vital-signs' },
+  { title: 'Orcas', subtitle: 'Vital Sign · Thriving Species & Food Web', category: 'Goals', route: '/prototypes/vital-signs' },
+  { title: 'Shellfish Beds', subtitle: 'Vital Sign · Healthy Human Population', category: 'Goals', route: '/prototypes/vital-signs' },
+  { title: 'Habitat Protection & Restoration', subtitle: 'Strategy · Foundations of Recovery', category: 'Plans', route: '/prototypes/action-agenda' },
+  { title: 'Shellfish Bed Reopening', subtitle: 'Commitment · 3 partners', category: 'Plans', route: '/prototypes/action-agenda' },
+  { title: 'Stormwater Management', subtitle: 'Strategy · Foundations of Recovery', category: 'Plans', route: '/prototypes/action-agenda' },
+  { title: 'Floodplains & Estuaries', subtitle: 'Topic · pressure indicators', category: 'Progress' },
+  { title: 'On-site Sewage Systems', subtitle: 'Topic · pressure indicators', category: 'Progress' },
+  { title: 'Nearshore Restoration — Skagit Delta', subtitle: 'Activity · NEP-funded', category: 'Implementation & Funding' },
+  { title: 'Investment Summary 2007–2025', subtitle: '$254M across 600+ projects', category: 'Implementation & Funding' },
+  { title: 'Recovery Goals', subtitle: 'Six statutory goals for Puget Sound', category: 'Puget Sound Info', route: '/prototypes/home' },
+  { title: 'Data Center', subtitle: 'Downloads, APIs, spatial data hub', category: 'Puget Sound Info' },
 ];
