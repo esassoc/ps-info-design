@@ -1,0 +1,101 @@
+---
+// Goals — the five statutory recovery goals, one dynamic template. Content is
+// verbatim from vitalsigns.pugetsoundinfo.wa.gov/VitalSignGoal/Detail/{1,2,3,7,6}
+// (see src/data/pages/goals.ts for full sourcing notes): each goal's "Our goal
+// is…" statement, its one narrative paragraph and inline photo, and its full
+// Vital Sign -> Indicator tree with real Indicator Progress / Target Status
+// labels (pulled from the page's embedded treeSources data, never rendered as
+// a visible table on the source itself).
+import PsInfoAppShell from '../../../layouts/PsInfoAppShell.astro';
+import PsInfoPhotoHeader from '../../../components/psinfo/PsInfoPhotoHeader.astro';
+import PsInfoGoalsNarrative from '../../../components/psinfo/PsInfoGoalsNarrative.astro';
+import PsInfoStatBand from '../../../components/psinfo/PsInfoStatBand.astro';
+import PsInfoSectionTitle from '../../../components/psinfo/PsInfoSectionTitle.astro';
+import PsInfoGoalsVitalSignList from '../../../components/psinfo/PsInfoGoalsVitalSignList.astro';
+import PsInfoGoalsCrossLinks from '../../../components/psinfo/PsInfoGoalsCrossLinks.astro';
+import {
+  GOALS,
+  vitalSignCount,
+  indicatorCount,
+  indicatorsByProgress,
+  ABOUT_VITAL_SIGNS_URL,
+  ALL_INDICATORS_URL,
+  type GoalSlug,
+  type GoalDetail,
+} from '../../../data/pages/goals';
+
+export function getStaticPaths() {
+  return GOALS.map((goal) => ({ params: { slug: goal.slug }, props: { goal } }));
+}
+
+interface Props {
+  goal: GoalDetail;
+}
+const { goal } = Astro.props;
+
+// Shared sound-aerial.jpg crop focus per goal — a presentational choice (not
+// content), matching the precedent in indicators/[slug].astro and vital-signs.astro.
+const FOCUS: Record<GoalSlug, string> = {
+  'healthy-human-population': '50% 35%',
+  'vibrant-human-quality-of-life': '50% 45%',
+  'thriving-species-and-food-web': '50% 25%',
+  'functioning-habitat': '50% 55%',
+  'healthy-water-quality': '50% 30%',
+};
+
+const progress = indicatorsByProgress(goal);
+const stats = [
+  { value: vitalSignCount(goal), label: 'Vital Signs', accent: true },
+  { value: indicatorCount(goal), label: 'Indicators tracked' },
+  { value: progress['Getting Better'] ?? 0, label: 'Getting Better' },
+  { value: progress['Getting Worse'] ?? 0, label: 'Getting Worse' },
+];
+
+const crossLinks = [
+  { moduleId: 'goals', label: 'All Vital Signs', detail: 'Every Vital Sign, grouped by all five recovery goals', route: '/prototypes/vital-signs' },
+  { moduleId: 'goals', label: 'About Vital Signs', detail: 'What Vital Signs and Indicators are, on vitalsigns.pugetsoundinfo.wa.gov', externalHref: ABOUT_VITAL_SIGNS_URL },
+  { moduleId: 'goals', label: 'All Indicators', detail: 'The full Vital Sign and Progress Indicator list on vitalsigns.pugetsoundinfo.wa.gov', externalHref: ALL_INDICATORS_URL },
+];
+---
+<!-- manifest:
+  layout: PsInfoAppShell (active Goals > this goal) > center+stack spine
+  sections:
+    - page header               -> psinfo-photo-header (band, composes esa-page-header)
+    - goal narrative + photo    -> psinfogoals-narrative
+    - quick stats               -> psinfo-stat-band
+    - vital signs & indicators  -> psinfo-section-title + psinfogoals-vital-sign-list
+    - related across platform   -> psinfo-section-title + psinfogoals-cross-links
+-->
+<PsInfoAppShell title={`${goal.name} — Puget Sound Info`} active={{ moduleId: 'goals', leafId: goal.navLeafId }}>
+  <div class="center stack" data-gap="xl">
+    <PsInfoPhotoHeader
+      size="band"
+      image="/photos/sound-aerial.jpg"
+      focus={FOCUS[goal.slug]}
+      eyebrow="Goals"
+      title={goal.name}
+      lede={goal.statement}
+    />
+
+    <PsInfoGoalsNarrative narrative={goal.narrative} image={goal.image} imageAlt={goal.imageAlt} />
+
+    <PsInfoStatBand stats={stats} />
+
+    <div class="stack" data-gap="md">
+      <PsInfoSectionTitle
+        title="Vital Signs & Indicators"
+        count={`${vitalSignCount(goal)} Vital Signs`}
+        note="Indicator Progress is the trend since the last reporting cycle; Target Status appears only where the source ties an indicator to a numeric target."
+      />
+      <PsInfoGoalsVitalSignList vitalSigns={goal.vitalSigns} hueVar={goal.hueVar} />
+    </div>
+
+    <div class="stack" data-gap="md">
+      <PsInfoSectionTitle
+        title="Related across the platform"
+        note="From this goal, jump to every Vital Sign across the recovery system or back to the source reporting on vitalsigns.pugetsoundinfo.wa.gov."
+      />
+      <PsInfoGoalsCrossLinks links={crossLinks} />
+    </div>
+  </div>
+</PsInfoAppShell>

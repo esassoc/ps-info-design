@@ -1,0 +1,96 @@
+---
+// PsInfoLiosPlanTypes — "Each LIO develops:" — a lead sentence, then each
+// plan type (a bold label, optionally itself linked — the Ecosystem Recovery
+// Plan's shared Box folder — plus body text and, for Topical LIO Action
+// Plans, two named PowerBI-dashboard sub-links), then a closing paragraph.
+//
+// bcn-lego-checked: no esa- lego renders a bold linked lead-in mixed with a
+// nested link sub-list inside prose; checked Beacon (no matching pattern).
+// Modeled on PsInfoAboutNarrative's inline-link-segment approach and its
+// esa-card (outlined) surface — same card treatment as this page's other
+// prose sections.
+import EsaCard from '@esa/ecology/esa-card.astro';
+import EsaIcon from '@esa/ecology/esa-icon.astro';
+
+export interface LiosPlanLink {
+  label: string;
+  href: string;
+}
+export interface LiosPlanType {
+  label: string;
+  href?: string;
+  body: string;
+  links?: LiosPlanLink[];
+}
+interface Props {
+  lead: string;
+  planTypes: LiosPlanType[];
+  closing: string;
+}
+const { lead, planTypes, closing } = Astro.props;
+
+const ARROW = '<path d="M7 7h10v10"/><path d="M7 17 17 7"/>';
+---
+<EsaCard variant="outlined">
+  <div class="plantypes">
+    <p class="plantypes__lead">{lead}</p>
+    <ul class="plantypes__list" role="list">
+      {planTypes.map((pt) => (
+        <li class="plantypes__item">
+          <p class="plantypes__row">
+            {pt.href ? (
+              <a href={pt.href} target="_blank" rel="noopener" class="plantypes__link">
+                <strong>{pt.label}</strong>
+                <EsaIcon name="arrow-up-right" size="xs" paths={ARROW} />
+              </a>
+            ) : (
+              <strong>{pt.label}</strong>
+            )}
+            {' – '}{pt.body}
+          </p>
+          {pt.links && pt.links.length > 0 && (
+            <ul class="plantypes__sublinks" role="list">
+              {pt.links.map((l) => (
+                <li>
+                  <a href={l.href} target="_blank" rel="noopener" class="plantypes__link">
+                    {l.label}
+                    <EsaIcon name="arrow-up-right" size="xs" paths={ARROW} />
+                  </a>
+                </li>
+              ))}
+            </ul>
+          )}
+        </li>
+      ))}
+    </ul>
+    <p class="plantypes__closing">{closing}</p>
+  </div>
+</EsaCard>
+
+<style>
+  .plantypes { display: flex; flex-direction: column; gap: var(--spacing-400); }
+  .plantypes__lead,
+  .plantypes__closing {
+    margin: 0; font-size: var(--ps-info-text-body); line-height: 1.65;
+    color: var(--color-text-primary); max-width: 74ch;
+  }
+  .plantypes__list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--spacing-300); }
+  .plantypes__item { display: flex; flex-direction: column; gap: var(--spacing-200); }
+  .plantypes__row {
+    margin: 0; font-size: var(--ps-info-text-body); line-height: 1.65;
+    color: var(--color-text-primary); max-width: 74ch;
+  }
+  .plantypes__link {
+    color: var(--color-text-link); text-decoration: underline;
+    text-decoration-color: color-mix(in srgb, currentColor 35%, transparent);
+  }
+  .plantypes__link:hover { text-decoration-color: currentColor; }
+  .plantypes__link:focus-visible { outline: 2px solid var(--focus-ring-color); outline-offset: 2px; }
+  .plantypes__link :global(.esa-icon) { color: var(--color-text-muted); margin-left: 2px; vertical-align: -2px; }
+
+  .plantypes__sublinks {
+    list-style: none; margin: 0; padding: 0;
+    display: flex; flex-direction: column; gap: var(--spacing-150);
+    padding-left: var(--spacing-500);
+  }
+</style>

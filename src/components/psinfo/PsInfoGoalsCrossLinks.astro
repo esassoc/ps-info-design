@@ -1,0 +1,71 @@
+---
+// PsInfoGoalsCrossLinks — "related across the platform" for a goal page: one
+// internal jump (All Vital Signs) plus this goal's two REAL breadcrumb
+// destinations on the source site (About Vital Signs, All Indicators).
+//
+// bcn-lego-checked: the shared PsInfoCrossLinks is out of this unit's write
+// scope (not one of this build's own files) AND its `route`-only contract
+// always runs the href through withBase() — passing it the two absolute
+// vitalsigns.pugetsoundinfo.wa.gov URLs this page actually needs would mangle
+// them into a broken relative path. This mirrors PsInfoCrossLinks' exact card
+// treatment (same module-icon lookup, same layout) for this page's own link
+// set, adding a genuine external-href case alongside the internal route case.
+import EsaIcon from '@esa/ecology/esa-icon.astro';
+import { MODULES } from '../../data/psinfo-nav';
+import { withBase } from '../../lib/base';
+
+export interface GoalsCrossLink {
+  moduleId: string;
+  label: string;
+  detail: string;
+  /** Root-relative internal route (withBase'd). Mutually exclusive with externalHref. */
+  route?: string;
+  /** Absolute URL — opens in a new tab with the external mark. */
+  externalHref?: string;
+}
+interface Props {
+  links: GoalsCrossLink[];
+}
+const { links } = Astro.props;
+const iconFor = (id: string) => MODULES.find((m) => m.id === id)?.icon ?? '';
+const moduleLabel = (id: string) => MODULES.find((m) => m.id === id)?.label ?? id;
+const ARROW = '<path d="M7 7h10v10"/><path d="M7 17 17 7"/>';
+---
+<ul class="gxlinks" role="list">
+  {links.map((l) => {
+    const external = !!l.externalHref;
+    const href = l.route ? withBase(l.route) : l.externalHref;
+    return (
+      <li>
+        <a class="gxlink" href={href} {...(external ? { target: '_blank', rel: 'noopener' } : {})}>
+          <span class="gxlink__icon" aria-hidden="true"><EsaIcon name={l.moduleId} size="sm" paths={iconFor(l.moduleId)} /></span>
+          <span class="gxlink__body">
+            <span class="gxlink__module">{moduleLabel(l.moduleId)}</span>
+            <span class="gxlink__label">{l.label}</span>
+            <span class="gxlink__detail">{l.detail}</span>
+          </span>
+          <EsaIcon name="arrow-up-right" size="sm" paths={ARROW} class="gxlink__go" />
+        </a>
+      </li>
+    );
+  })}
+</ul>
+
+<style>
+  .gxlinks { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: var(--spacing-300); }
+  .gxlink {
+    display: flex; align-items: flex-start; gap: var(--spacing-250);
+    padding: var(--spacing-300) var(--spacing-400);
+    background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-100);
+    text-decoration: none; transition: border-color 150ms ease, background 150ms ease;
+  }
+  .gxlink:hover { border-color: var(--color-primary-border); background: var(--color-primary-subtle); }
+  .gxlink:focus-visible { outline: 2px solid var(--focus-ring-color); outline-offset: 2px; }
+  .gxlink__icon { flex: none; display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: var(--radius-100); background: var(--color-primary-subtle); color: var(--color-primary); }
+  .gxlink__body { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1; }
+  .gxlink__module { font-size: var(--ps-info-text-meta); color: var(--color-secondary-strong); font-weight: var(--font-weight-semibold); }
+  .gxlink__label { font-size: var(--ps-info-text-meta-lg); font-weight: var(--font-weight-medium); color: var(--color-text-primary); }
+  .gxlink__detail { font-size: var(--ps-info-text-meta); color: var(--color-text-muted); line-height: 1.4; }
+  .gxlink__go { flex: none; color: var(--color-text-muted); }
+  .gxlink:hover .gxlink__go { color: var(--color-primary); }
+</style>

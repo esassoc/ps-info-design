@@ -1,0 +1,60 @@
+---
+// PsInfoIndicatorsMapCard — the Detail page's critical-habitat map: the
+// downloaded photo (real alt text), its verbatim caption, and the overview-PDF
+// link. Presented image-left/caption-right on wide screens (the source map is
+// a portrait crop), stacked on narrow ones.
+//
+// bcn-lego-checked: extends psinfo-region-map's single-image-in-a-card
+// treatment (esa-card, outlined, zero padding) with a caption + link column
+// alongside; no esa- lego renders an image+caption+link composite. Checked
+// Beacon: no matching map-card pattern. psinfo-indicators-map-card is the
+// reusable home.
+import EsaCard from '@esa/ecology/esa-card.astro';
+import EsaIcon from '@esa/ecology/esa-icon.astro';
+import { withBase } from '../../lib/base';
+import type { ExemplarMap } from '../../data/pages/indicators';
+
+interface Props {
+  map: ExemplarMap;
+}
+const { map } = Astro.props;
+
+const ARROW = '<path d="M7 7h10v10"/><path d="M7 17 17 7"/>';
+---
+<EsaCard variant="outlined" padding="none">
+  <div class="mapcard">
+    <div class="mapcard__frame">
+      <img class="mapcard__img" src={withBase(map.imagePath)} alt={map.imageAlt} loading="lazy" decoding="async" />
+    </div>
+    <div class="mapcard__body">
+      <p class="mapcard__caption">{map.caption}</p>
+      <a class="mapcard__link" href={map.overviewLink.href} target="_blank" rel="noopener">
+        {map.overviewLink.text}
+        <EsaIcon name="arrow-up-right" size="xs" paths={ARROW} />
+      </a>
+    </div>
+  </div>
+</EsaCard>
+
+<style>
+  .mapcard { display: grid; grid-template-columns: minmax(220px, 320px) 1fr; }
+  .mapcard__frame {
+    display: flex; align-items: center; justify-content: center;
+    background: var(--color-surface-sunken); border-right: 1px solid var(--color-border-light);
+    padding: var(--spacing-300);
+  }
+  .mapcard__img { display: block; width: 100%; max-height: 420px; object-fit: contain; }
+  .mapcard__body { display: flex; flex-direction: column; gap: var(--spacing-300); padding: var(--spacing-400); }
+  .mapcard__caption { margin: 0; font-size: var(--ps-info-text-body); color: var(--color-text-secondary); line-height: 1.6; }
+  .mapcard__link {
+    display: inline-flex; align-items: center; gap: var(--spacing-100); align-self: flex-start;
+    font-size: var(--ps-info-text-meta-lg); color: var(--color-text-link); text-decoration: none;
+  }
+  .mapcard__link:hover { text-decoration: underline; }
+  .mapcard__link:focus-visible { outline: 2px solid var(--focus-ring-color); outline-offset: 2px; }
+
+  @media (max-width: 640px) {
+    .mapcard { grid-template-columns: 1fr; }
+    .mapcard__frame { border-right: none; border-bottom: 1px solid var(--color-border-light); }
+  }
+</style>

@@ -1,0 +1,80 @@
+---
+// PsInfoDataCenterGrid — the Data Center hub's icon-tile grid (active grid of
+// 9, and the single archived tile below the "Archived" heading). The source
+// page (pugetsoundinfo.wa.gov/DataCenter) renders each resource as a Font
+// Awesome glyph over a title with NO body copy — every `<span
+// class="sectionDetails">` is empty in source — so each tile here is icon +
+// title only, no blurb slot.
+//
+// bcn-lego-checked: composes esa-card (outlined, no padding) + esa-icon, the
+// same glyph-tile pattern as psinfo-tool-links / psinfo-home-cards, but
+// centered/icon-on-top since there is no blurb or photo to anchor a
+// left-aligned row. Checked Beacon (no icon-tile-grid pattern); this
+// component is the reusable home for that shape.
+import EsaCard from '@esa/ecology/esa-card.astro';
+import EsaIcon from '@esa/ecology/esa-icon.astro';
+import { withBase } from '../../lib/base';
+import type { DataCenterResource } from '../../data/pages/data-center';
+
+interface Props {
+  items: DataCenterResource[];
+}
+const { items } = Astro.props;
+
+const ARROW = '<path d="M7 7h10v10"/><path d="M7 17 17 7"/>';
+---
+<ul class="dctiles" role="list">
+  {items.map((item) => {
+    const internal = item.href.startsWith('/');
+    return (
+      <li>
+        <a
+          class="dctile"
+          href={internal ? withBase(item.href) : item.href}
+          {...(internal ? {} : { target: '_blank', rel: 'noopener' })}
+        >
+          <EsaCard variant="outlined" padding="none">
+            <span class="dctile__glyph" aria-hidden="true">
+              <EsaIcon name={item.id} size="lg" paths={item.icon} />
+            </span>
+            <span class="dctile__title">
+              {item.title}
+              {!internal && <EsaIcon name="arrow-up-right" size="xs" paths={ARROW} />}
+            </span>
+          </EsaCard>
+        </a>
+      </li>
+    );
+  })}
+</ul>
+
+<style>
+  .dctiles {
+    list-style: none; margin: 0; padding: 0;
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: var(--spacing-400);
+  }
+  .dctile {
+    display: block; height: 100%; text-decoration: none; border-radius: var(--radius-100);
+    transition: transform 150ms ease, box-shadow 150ms ease;
+  }
+  .dctile:hover { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(16, 42, 67, 0.12); }
+  .dctile:focus-visible { outline: 2px solid var(--focus-ring-color); outline-offset: 2px; }
+  .dctile :global(.esa-card) { height: 100%; }
+  .dctile :global(.esa-card__body) {
+    height: 100%; display: flex; flex-direction: column; align-items: center;
+    gap: var(--spacing-300); padding: var(--spacing-500) var(--spacing-400);
+    text-align: center;
+  }
+  .dctile__glyph {
+    flex: none; display: inline-flex; align-items: center; justify-content: center;
+    width: 52px; height: 52px; border-radius: var(--radius-full);
+    background: var(--color-primary-subtle); color: var(--color-primary);
+  }
+  .dctile__title {
+    font-size: 1.0625rem; font-weight: var(--font-weight-semibold);
+    color: var(--color-text-primary); line-height: 1.35;
+  }
+  .dctile__title :global(.esa-icon) { color: var(--color-text-muted); margin-left: var(--spacing-100); vertical-align: baseline; }
+  .dctile:hover .dctile__title { color: var(--color-primary); }
+</style>

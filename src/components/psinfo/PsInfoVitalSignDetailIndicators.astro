@@ -1,0 +1,70 @@
+---
+// PsInfoVitalSignDetailIndicators — the Vital Sign Detail page's indicator
+// listing (source: an embedded Fancytree table of Indicator Progress / Target
+// Status icons, one row per tracked indicator). Same neutral row-card shape as
+// PsInfoIndicatorsBoard; status renders as esa-badge using this unit's own
+// verbatim progress/target-status vocabulary (PROGRESS_BADGE_VARIANT /
+// TARGET_STATUS_BADGE_VARIANT in the data file), not the invented
+// IndicatorStatus enum — same call PsInfoIndicatorsBasics already made for
+// this exact source vocabulary mismatch.
+//
+// bcn-lego-checked: rows compose esa-badge for status and esa-icon for the
+// external-link mark; no esa- lego renders a repeating indicator-row listing
+// (esa-card's body is one block, not a row list) — the row/list frame is
+// bespoke structure, the same shape already established by
+// PsInfoIndicatorsBoard. Checked Beacon: no matching grouped-listing pattern.
+// psinfo-vital-sign-detail-indicators is the reusable home.
+import EsaBadge from '@esa/ecology/esa-badge.astro';
+import EsaIcon from '@esa/ecology/esa-icon.astro';
+import { withBase } from '../../lib/base';
+import {
+  PROGRESS_BADGE_VARIANT,
+  TARGET_STATUS_BADGE_VARIANT,
+  type VitalSignIndicatorRow,
+} from '../../data/pages/vital-sign-details';
+
+interface Props {
+  indicators: VitalSignIndicatorRow[];
+}
+const { indicators } = Astro.props;
+
+const ARROW = '<path d="M7 7h10v10"/><path d="M7 17 17 7"/>';
+---
+<ul class="rows" role="list">
+  {indicators.map((row) => (
+    <li class="row">
+      {row.internalRoute ? (
+        <a class="row__name" href={withBase(row.internalRoute)}>{row.name}</a>
+      ) : (
+        <a class="row__name" href={row.detailUrl} target="_blank" rel="noopener">
+          {row.name}
+          <EsaIcon name="arrow-up-right" size="xs" paths={ARROW} />
+        </a>
+      )}
+      <div class="row__badges">
+        <EsaBadge value={row.progress} variant={PROGRESS_BADGE_VARIANT[row.progress] ?? 'secondary'} size="sm" />
+        {row.targetStatus && (
+          <EsaBadge value={row.targetStatus} variant={TARGET_STATUS_BADGE_VARIANT[row.targetStatus] ?? 'secondary'} size="sm" />
+        )}
+      </div>
+    </li>
+  ))}
+</ul>
+
+<style>
+  .rows { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--spacing-200); }
+  .row {
+    display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--spacing-300);
+    padding: var(--spacing-300) var(--spacing-400);
+    background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-100);
+  }
+  .row__name {
+    font-size: var(--ps-info-text-body); font-weight: var(--font-weight-medium);
+    color: var(--color-text-primary); text-decoration: none;
+  }
+  .row__name:hover { color: var(--color-primary); text-decoration: underline; }
+  .row__name:focus-visible { outline: 2px solid var(--focus-ring-color); outline-offset: 2px; }
+  .row__name :global(.esa-icon) { color: var(--color-text-muted); margin-left: 2px; vertical-align: -1px; }
+
+  .row__badges { display: flex; flex-wrap: wrap; align-items: center; gap: var(--spacing-200); }
+</style>

@@ -1,0 +1,84 @@
+---
+// LIOs — Local Integrating Organizations (pugetsoundinfo.wa.gov/LIOs). The
+// live page's own server-rendered HTML is an intro, a "What makes an LIO?"
+// callout, an "Each LIO develops" plan-types section, and a calendar CTA; its
+// one interactive piece — the per-LIO list — lives inside an ArcGIS
+// Experience Builder map widget with no static HTML fallback. That list is
+// recovered from the widget's own backing feature service (see
+// src/data/pages/lios.ts header for full sourcing) and rendered here as a
+// card directory in place of the un-embeddable map+list iframe.
+import PsInfoAppShell from '../../layouts/PsInfoAppShell.astro';
+import PsInfoPhotoHeader from '../../components/psinfo/PsInfoPhotoHeader.astro';
+import PsInfoSectionTitle from '../../components/psinfo/PsInfoSectionTitle.astro';
+import PsInfoActionAgendaRefreshProse from '../../components/psinfo/PsInfoActionAgendaRefreshProse.astro';
+import PsInfoLiosCallout from '../../components/psinfo/PsInfoLiosCallout.astro';
+import PsInfoLiosDirectory from '../../components/psinfo/PsInfoLiosDirectory.astro';
+import PsInfoLiosPlanTypes from '../../components/psinfo/PsInfoLiosPlanTypes.astro';
+import EsaButton from '@esa/ecology/esa-button.astro';
+import EsaIcon from '@esa/ecology/esa-icon.astro';
+import {
+  PAGE_TITLE, PAGE_LEDE,
+  INTRO_PARAGRAPHS,
+  PARTICIPANTS,
+  LIO_AREAS, TOTAL_ACTIVE_LIOS,
+  PLANS_SECTION,
+  CALENDAR_CTA,
+} from '../../data/pages/lios';
+
+const ARROW = '<path d="M7 7h10v10"/><path d="M7 17 17 7"/>';
+---
+<!-- manifest:
+  layout: PsInfoAppShell (active Plans > Local Ecosystem Recovery Plans) > center+stack spine
+  sections:
+    - page header            -> psinfo-photo-header (photo band, composes esa-page-header)
+    - overview                -> psinfo-action-agenda-refresh-prose (reused as-is)
+    - what makes an lio?      -> psinfo-section-title + psinfo-lios-callout (wraps esa-alert-box)
+    - local areas & lios      -> psinfo-section-title + psinfo-lios-directory
+    - each lio develops       -> psinfo-section-title + psinfo-lios-plan-types
+    - public meeting calendar -> psinfo-section-title + esa-button (external CTA)
+-->
+<PsInfoAppShell title="LIOs — Puget Sound Info" active={{ moduleId: 'plans', leafId: 'local-recovery-plans' }}>
+  <div class="center stack" data-gap="xl">
+    <PsInfoPhotoHeader
+      size="band"
+      image="/photos/sound-aerial.jpg"
+      focus="50% 50%"
+      title={PAGE_TITLE}
+      lede={PAGE_LEDE}
+    />
+
+    <div class="stack" data-gap="md" id="overview">
+      <PsInfoActionAgendaRefreshProse paragraphs={INTRO_PARAGRAPHS} />
+    </div>
+
+    <div class="stack" data-gap="md" id="what-makes-an-lio">
+      <PsInfoLiosCallout
+        title={PARTICIPANTS.title}
+        lead={PARTICIPANTS.lead}
+        items={PARTICIPANTS.items}
+        closing={PARTICIPANTS.closing}
+      />
+    </div>
+
+    <div class="stack" data-gap="md" id="local-areas">
+      <PsInfoSectionTitle title="Local Areas &amp; LIOs" count={TOTAL_ACTIVE_LIOS} />
+      <PsInfoLiosDirectory areas={LIO_AREAS} />
+    </div>
+
+    <div class="stack" data-gap="md" id="each-lio-develops">
+      <PsInfoLiosPlanTypes
+        lead={PLANS_SECTION.lead}
+        planTypes={PLANS_SECTION.planTypes}
+        closing={PLANS_SECTION.closing}
+      />
+    </div>
+
+    <div class="stack" data-gap="md" id="calendar">
+      <PsInfoSectionTitle title={CALENDAR_CTA.heading} />
+      <EsaButton href={CALENDAR_CTA.href} target="_blank" rel="noopener">
+        {CALENDAR_CTA.linkLabel}
+        <EsaIcon name="arrow-up-right" size="xs" paths={ARROW} />
+      </EsaButton>
+    </div>
+  </div>
+</PsInfoAppShell>

@@ -1,61 +1,120 @@
 ---
-// Action Agenda — the regional recovery plan module: its Topic → Strategy →
-// Commitment hierarchy for 2026–2030. Same shell (rail shows Action Agenda
-// expanded + active); cross-links point to the Vital Signs the plan moves and
-// the NEP investments funding it.
+// Action Agenda — the real 2026–2030 Action Agenda Explorer
+// (actionagenda.pugetsoundinfo.wa.gov/2026-2030): its 26 Topics, grouped into
+// 5 categories, each carrying real Strategies, Actions, Commitments, and
+// linked Vital Signs (see src/data/pages/action-agenda-refresh.ts for full
+// sourcing notes). Same persistent shell as every other module (rail shows
+// Plans expanded + Action Agenda Explorer active); cross-links point to the
+// Vital Signs these strategies move.
 import PsInfoAppShell from '../../layouts/PsInfoAppShell.astro';
 import PsInfoPhotoHeader from '../../components/psinfo/PsInfoPhotoHeader.astro';
 import PsInfoStatBand from '../../components/psinfo/PsInfoStatBand.astro';
 import PsInfoSectionTitle from '../../components/psinfo/PsInfoSectionTitle.astro';
-import PsInfoStrategyBoard from '../../components/psinfo/PsInfoStrategyBoard.astro';
-import PsInfoCrossLinks from '../../components/psinfo/PsInfoCrossLinks.astro';
-import { STRATEGIES, AA_TOPICS } from '../../data/psinfo-domain';
+import PsInfoHomeCards from '../../components/psinfo/PsInfoHomeCards.astro';
+import PsInfoActionAgendaRefreshProse from '../../components/psinfo/PsInfoActionAgendaRefreshProse.astro';
+import PsInfoActionAgendaRefreshStrategies from '../../components/psinfo/PsInfoActionAgendaRefreshStrategies.astro';
+import PsInfoActionAgendaRefreshMeasures from '../../components/psinfo/PsInfoActionAgendaRefreshMeasures.astro';
+import EsaButton from '@esa/ecology/esa-button.astro';
+import EsaIcon from '@esa/ecology/esa-icon.astro';
+import {
+  PAGE_EYEBROW, PAGE_TITLE, PAGE_LEDE,
+  INTRO_PARAGRAPHS,
+  ORGANIZATION_INTRO, FOUNDATIONS_OF_RECOVERY, RECOVERY_PLAN,
+  PROGRESS_MEASURES_INTRO, PROGRESS_MEASURES,
+  EXPLORER_DESCRIPTION, EXPLORER_CTA,
+  TOPICS, CATEGORIES,
+  TOTAL_TOPICS, TOTAL_STRATEGIES, TOTAL_ACTIONS, TOTAL_COMMITMENTS,
+} from '../../data/pages/action-agenda-refresh';
 
-const totalCommitments = STRATEGIES.reduce((n, s) => n + s.commitments, 0);
 const stats = [
-  { value: '2026–2030', label: 'Current edition', sub: 'Prior: 2022–2026' },
-  { value: AA_TOPICS.length, label: 'Topics', accent: true },
-  { value: STRATEGIES.length, label: 'Strategies' },
-  { value: totalCommitments, label: 'Partner commitments' },
+  { value: TOTAL_TOPICS, label: 'Topics', accent: true },
+  { value: TOTAL_STRATEGIES, label: 'Strategies' },
+  { value: TOTAL_ACTIONS, label: 'Actions' },
+  { value: TOTAL_COMMITMENTS, label: 'Partner commitments' },
 ];
 
-const crossLinks = [
-  { moduleId: 'goals', label: 'The Vital Signs these strategies move', detail: 'Ecosystem-health outcomes each strategy targets', route: '/prototypes/vital-signs' },
-  { moduleId: 'implementation', label: 'NEP-funded activities', detail: 'On-the-ground work implementing these commitments' },
-  { moduleId: 'progress', label: 'Progress on the plan', detail: 'Indicators and the State of the Sound track how recovery is going', route: '/prototypes/home#progress' },
-];
+const slug = (name: string) => name.toLowerCase().replace(/[^a-z0-9]+/g, '');
+
+const categoryGroups = CATEGORIES.map((category) => ({
+  category,
+  topics: category.topicIds
+    .map((id) => TOPICS.find((t) => t.id === id))
+    .filter((t): t is (typeof TOPICS)[number] => !!t),
+}));
+
+const ARROW = '<path d="M7 7h10v10"/><path d="M7 17 17 7"/>';
 ---
 <!-- manifest:
-  layout: PsInfoAppShell (active Action Agenda) > center+stack spine
+  layout: PsInfoAppShell (active Plans > Action Agenda Explorer) > center+stack spine
   sections:
-    - page header      -> psinfo-photo-header (photo band, composes esa-page-header)
-    - headline stats   -> psinfo-stat-band
-    - strategy board   -> psinfo-section-title + psinfo-strategy-board
-    - cross-module band-> psinfo-section-title + psinfo-cross-links
+    - page header               -> psinfo-photo-header (photo band, composes esa-page-header)
+    - headline stats             -> psinfo-stat-band
+    - overview                   -> psinfo-section-title + psinfo-action-agenda-refresh-prose
+    - how it's organized         -> psinfo-section-title + psinfo-action-agenda-refresh-prose
+    - topics by category (x5)    -> psinfo-section-title + psinfo-home-cards, looped per category
+    - strategies by topic        -> psinfo-section-title + psinfo-action-agenda-refresh-strategies (esa-collapsible per topic)
+    - how progress is measured   -> psinfo-section-title + psinfo-action-agenda-refresh-measures
+    - the explorer                -> psinfo-section-title + psinfo-action-agenda-refresh-prose + esa-button (external CTA)
 -->
 <PsInfoAppShell title="Action Agenda — Puget Sound Info" active={{ moduleId: 'plans', leafId: 'aa-explorer' }}>
   <div class="center stack" data-gap="xl">
     <PsInfoPhotoHeader
+      size="band"
       image="/photos/sound-aerial.jpg"
-      focus="50% 70%"
-      eyebrow="Action Agenda 2026–2030"
-      title="The regional recovery plan"
-      lede="The Action Agenda organizes recovery into topics and strategies, each carried by partner commitments across the region."
+      focus="50% 65%"
+      eyebrow={PAGE_EYEBROW}
+      title={PAGE_TITLE}
+      lede={PAGE_LEDE}
     />
 
     <PsInfoStatBand stats={stats} />
 
-    <div class="stack" data-gap="md">
-      <PsInfoSectionTitle title="Strategies by topic" count={`${STRATEGIES.length} strategies`} />
-      <PsInfoStrategyBoard />
+    <div class="stack" data-gap="md" id="overview">
+      <PsInfoSectionTitle title="Overview" />
+      <PsInfoActionAgendaRefreshProse paragraphs={INTRO_PARAGRAPHS} />
     </div>
 
-    <div class="stack" data-gap="md">
-      <PsInfoSectionTitle
-        title="Related across the platform"
-        note="A strategy connects to the outcomes it moves and the investments that fund it — one jump away, inside the same workspace."
+    <div class="stack" data-gap="md" id="organized">
+      <PsInfoSectionTitle title="How the Action Agenda is organized" note={ORGANIZATION_INTRO} />
+      <PsInfoActionAgendaRefreshProse
+        subsections={[
+          { label: FOUNDATIONS_OF_RECOVERY.label, body: FOUNDATIONS_OF_RECOVERY.body },
+          { label: RECOVERY_PLAN.label, body: RECOVERY_PLAN.body, items: RECOVERY_PLAN.themes },
+        ]}
       />
-      <PsInfoCrossLinks links={crossLinks} />
+    </div>
+
+    {categoryGroups.map(({ category, topics }) => (
+      <div class="stack" data-gap="md" id={slug(category.name)}>
+        <PsInfoSectionTitle title={category.name} count={`${topics.length} topics`} />
+        <PsInfoHomeCards
+          items={topics.map((t) => ({
+            title: `${t.number}: ${t.title}`,
+            blurb: t.blurb,
+            image: t.image,
+            href: t.href,
+          }))}
+        />
+      </div>
+    ))}
+
+    <div class="stack" data-gap="md" id="strategies">
+      <PsInfoSectionTitle title="Strategies by topic" count={`${TOTAL_STRATEGIES} strategies`} />
+      <PsInfoActionAgendaRefreshStrategies topics={TOPICS} />
+    </div>
+
+    <div class="stack" data-gap="md" id="progressmeasured">
+      <PsInfoSectionTitle title="How progress is measured" note={PROGRESS_MEASURES_INTRO} />
+      <PsInfoActionAgendaRefreshMeasures measures={PROGRESS_MEASURES} />
+    </div>
+
+    <div class="stack" data-gap="md" id="explorer">
+      <PsInfoSectionTitle title="The Action Agenda Explorer" />
+      <PsInfoActionAgendaRefreshProse paragraphs={[EXPLORER_DESCRIPTION]} />
+      <EsaButton href={EXPLORER_CTA.href} target="_blank" rel="noopener">
+        {EXPLORER_CTA.label}
+        <EsaIcon name="arrow-up-right" size="xs" paths={ARROW} />
+      </EsaButton>
     </div>
   </div>
 </PsInfoAppShell>

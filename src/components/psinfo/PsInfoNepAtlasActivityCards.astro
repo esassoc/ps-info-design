@@ -1,0 +1,99 @@
+---
+// PsInfoNepAtlasActivityCards — the NEP Atlas's featured activities, drawn
+// from the live Activity/IndexGridJsonData feed (see src/data/pages/nep-atlas
+// for sourcing). Each card is a real, on-the-ground project: its NEP
+// investment amount, funding owner, stage, and Vital Sign, plus the source's
+// own description. Every card links out to the live Activity/Detail page —
+// there's no in-app detail page in this prototype.
+//
+// bcn-lego-checked: no esa- lego renders this project-card shape (name+badge+
+// dollar figure+owner+description+meta row); checked Beacon (no matching
+// activity/grant-card pattern). esa-card (outlined) is the reused surface,
+// esa-badge/esa-icon are the reused primitives — same composition as
+// PsInfoStrategyBoard's strategy rows, restyled as cards for the richer
+// per-record content (description + dollar figure) this data carries.
+import EsaCard from '@esa/ecology/esa-card.astro';
+import EsaBadge from '@esa/ecology/esa-badge.astro';
+import EsaIcon from '@esa/ecology/esa-icon.astro';
+import type { AtlasActivity } from '../../data/pages/nep-atlas';
+
+interface Props {
+  activities: AtlasActivity[];
+}
+const { activities } = Astro.props;
+
+const ARROW = '<path d="M7 7h10v10"/><path d="M7 17 17 7"/>';
+const BUILDING = '<rect width="16" height="20" x="4" y="2" rx="2"/><path d="M9 22v-4h6v4"/><path d="M8 6h.01"/><path d="M16 6h.01"/><path d="M12 6h.01"/><path d="M12 10h.01"/><path d="M8 10h.01"/><path d="M16 10h.01"/>';
+
+const money = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
+---
+<div class="activities">
+  {activities.map((activity) => (
+    <EsaCard variant="outlined">
+      <div class="activity">
+        <div class="activity__head">
+          <a href={activity.href} target="_blank" rel="noopener" class="activity__name">
+            {activity.name}
+            <EsaIcon name="arrow-up-right" size="xs" paths={ARROW} />
+          </a>
+          <EsaBadge value={activity.stage} variant={activity.stage === 'Completed' ? 'success' : 'info'} size="sm" />
+        </div>
+
+        <div class="activity__amount">{money.format(activity.nepInvestmentAmount)}</div>
+
+        <a href={activity.ownerHref} target="_blank" rel="noopener" class="activity__owner">
+          <EsaIcon name="building" size="xs" paths={BUILDING} />
+          {activity.owner}
+        </a>
+
+        <p class="activity__desc">{activity.description}</p>
+
+        <div class="activity__meta">
+          <span>{activity.vitalSign}</span>
+          <span>{activity.county} County &middot; {activity.geographicScope}</span>
+          <span>{activity.contractStartYear}&ndash;{activity.completionYear}</span>
+        </div>
+      </div>
+    </EsaCard>
+  ))}
+</div>
+
+<style>
+  .activities {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: var(--spacing-400);
+  }
+  .activity { display: flex; flex-direction: column; gap: var(--spacing-250); }
+
+  .activity__head { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--spacing-250); }
+  .activity__name {
+    flex: 1 1 auto; min-width: 0;
+    font-size: 1.0625rem; font-weight: var(--font-weight-semibold);
+    color: var(--color-text-primary); text-decoration: none; line-height: 1.35;
+  }
+  .activity__name:hover { color: var(--color-primary); }
+  .activity__name:focus-visible { outline: 2px solid var(--focus-ring-color); outline-offset: 2px; }
+  .activity__name :global(.esa-icon) { color: var(--color-text-muted); margin-left: 2px; vertical-align: baseline; }
+  .activity__head :global(.esa-badge) { flex: none; }
+
+  .activity__amount {
+    font-family: var(--font-display); font-size: 1.375rem; font-weight: var(--font-weight-semibold);
+    color: var(--color-secondary-strong); font-variant-numeric: tabular-nums;
+  }
+
+  .activity__owner {
+    display: inline-flex; align-items: center; gap: var(--spacing-150); align-self: flex-start;
+    font-size: var(--ps-info-text-meta-lg); color: var(--color-text-secondary); text-decoration: none;
+  }
+  .activity__owner:hover { color: var(--color-primary); }
+  .activity__owner:focus-visible { outline: 2px solid var(--focus-ring-color); outline-offset: 2px; }
+  .activity__owner :global(.esa-icon) { color: var(--color-text-muted); }
+
+  .activity__desc { margin: 0; font-size: var(--ps-info-text-body); line-height: 1.6; color: var(--color-text-primary); }
+
+  .activity__meta {
+    display: flex; flex-direction: column; gap: 2px; padding-top: var(--spacing-250);
+    border-top: 1px solid var(--color-border-light);
+    font-size: var(--ps-info-text-meta); color: var(--color-text-muted);
+  }
+</style>

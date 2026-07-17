@@ -1,0 +1,36 @@
+---
+// Web Services — the Overview module's data-endpoint reference. Content is
+// EXACT: sourced 2026-07-17 from https://www.pugetsoundinfo.wa.gov/WebServices/Index,
+// a flat, alphabetically-ordered list of 28 real download endpoints (Action
+// Agenda outcomes/strategies, Funds, NEP activity/expenditure/funding/award
+// records, Ongoing Programs, Progress Indicators, Puget Sound Indicators,
+// Vital Signs). No imagery on the source page beyond site chrome, so the
+// header uses the shared Sound photograph like every other module band.
+import PsInfoAppShell from '../../layouts/PsInfoAppShell.astro';
+import PsInfoPhotoHeader from '../../components/psinfo/PsInfoPhotoHeader.astro';
+import PsInfoSectionTitle from '../../components/psinfo/PsInfoSectionTitle.astro';
+import PsInfoWebServicesCatalog from '../../components/psinfo/PsInfoWebServicesCatalog.astro';
+import { PAGE_TITLE, INTRO_PARAGRAPH, WEB_SERVICES, TOTAL_SERVICES } from '../../data/pages/web-services';
+---
+<!-- manifest:
+  layout: PsInfoAppShell (active Overview > Web Services) > center+stack spine
+  sections:
+    - page header       -> psinfo-photo-header (photo band, composes esa-page-header)
+    - available services -> psinfo-section-title + psinfo-web-services-catalog (28 endpoints, one esa-collapsible each)
+-->
+<PsInfoAppShell title={`${PAGE_TITLE} — Puget Sound Info`} active={{ moduleId: 'overview', leafId: 'web-services' }}>
+  <div class="center stack" data-gap="xl">
+    <PsInfoPhotoHeader
+      size="band"
+      image="/photos/sound-aerial.jpg"
+      focus="50% 30%"
+      title={PAGE_TITLE}
+      lede={INTRO_PARAGRAPH}
+    />
+
+    <div class="stack" data-gap="md">
+      <PsInfoSectionTitle title="Available services" count={`${TOTAL_SERVICES} services`} />
+      <PsInfoWebServicesCatalog services={WEB_SERVICES} />
+    </div>
+  </div>
+</PsInfoAppShell>

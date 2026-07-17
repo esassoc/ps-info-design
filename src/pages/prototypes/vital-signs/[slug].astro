@@ -1,0 +1,130 @@
+---
+// Vital Sign Detail — the two Vital Signs built out in full under the
+// Thriving Species and Food Web goal: Salmon (task/nav shorthand "Chinook
+// Salmon" — the source's own title is "Salmon"; its lede photo and most key
+// messages are Chinook-specific, though the tracked indicators also cover
+// coho, steelhead, and chum) and Orcas. Content is verbatim from
+// vitalsigns.pugetsoundinfo.wa.gov/VitalSign/Detail/{32,19}; per-indicator
+// progress/target-status labels came from each source page's embedded
+// Fancytree JSON (the visible table itself renders client-side from that
+// same JSON — there are no static table rows to scrape). Nested beside the
+// sibling "vital-signs" overview's own route, mirroring how the built
+// indicators unit nests its exemplar detail page under
+// /prototypes/indicators/[slug].
+import PsInfoAppShell from '../../../layouts/PsInfoAppShell.astro';
+import PsInfoPhotoHeader from '../../../components/psinfo/PsInfoPhotoHeader.astro';
+import PsInfoStatBand from '../../../components/psinfo/PsInfoStatBand.astro';
+import PsInfoSectionTitle from '../../../components/psinfo/PsInfoSectionTitle.astro';
+import PsInfoVitalSignDetailIntro from '../../../components/psinfo/PsInfoVitalSignDetailIntro.astro';
+import PsInfoVitalSignDetailIndicators from '../../../components/psinfo/PsInfoVitalSignDetailIndicators.astro';
+import PsInfoVitalSignDetailMessages from '../../../components/psinfo/PsInfoVitalSignDetailMessages.astro';
+import PsInfoVitalSignDetailResources from '../../../components/psinfo/PsInfoVitalSignDetailResources.astro';
+import PsInfoIndicatorsContentCard from '../../../components/psinfo/PsInfoIndicatorsContentCard.astro';
+import PsInfoVitalSignDetailFooter from '../../../components/psinfo/PsInfoVitalSignDetailFooter.astro';
+import PsInfoCrossLinks from '../../../components/psinfo/PsInfoCrossLinks.astro';
+import { VITAL_SIGN_DETAILS, type VitalSignDetail } from '../../../data/pages/vital-sign-details';
+
+export function getStaticPaths() {
+  return VITAL_SIGN_DETAILS.map((detail) => ({ params: { slug: detail.slug }, props: { detail } }));
+}
+
+interface Props {
+  detail: VitalSignDetail;
+}
+const { detail } = Astro.props;
+
+// Per-page photo focus (both photos are wide underwater/surface shots — a
+// slightly different vertical crop per subject).
+const FOCUS: Record<string, string> = {
+  'chinook-salmon': '50% 55%',
+  orcas: '50% 35%',
+};
+
+const stats = [
+  { value: detail.indicators.length, label: 'Indicators tracked', accent: true },
+  { value: detail.reporterOrg, label: 'Vital Sign Reporter' },
+  { value: detail.lastUpdated, label: 'Last updated' },
+];
+
+const crossLinks = [
+  { moduleId: 'progress', label: 'All Puget Sound Indicators', detail: '86 Vital Sign and Progress Indicators tracked across the recovery system', route: '/prototypes/indicators' },
+  { moduleId: 'goals', label: `${detail.goalName} goal`, detail: 'How this Vital Sign rolls up into ecosystem-health reporting', route: '/prototypes/goals/thriving-species-and-food-web' },
+  { moduleId: 'goals', label: 'All Vital Signs', detail: 'Ecosystem health tracked across all six recovery goals', route: '/prototypes/vital-signs' },
+];
+---
+<!-- manifest:
+  layout: PsInfoAppShell (active Goals, no leaf — Vital Sign detail pages aren't
+    in the 5-goal-overview leaf list) > center+stack spine
+  sections:
+    - page header              -> psinfo-photo-header (photo band)
+    - quick facts               -> psinfo-stat-band
+    - intro + photo             -> psinfo-vital-sign-detail-intro
+    - indicators                -> psinfo-section-title + psinfo-vital-sign-detail-indicators
+    - key vital sign messages   -> psinfo-section-title + psinfo-vital-sign-detail-messages
+    - background documents      -> psinfo-section-title + psinfo-vital-sign-detail-resources
+    - other resources           -> psinfo-section-title + psinfo-vital-sign-detail-resources
+    - related strategies        -> psinfo-section-title + psinfo-indicators-content-card
+    - partners / reporter / print -> psinfo-section-title + psinfo-vital-sign-detail-footer
+    - cross-module band         -> psinfo-section-title + psinfo-cross-links
+-->
+<PsInfoAppShell title={`${detail.name} — Puget Sound Info`} active={{ moduleId: 'goals' }}>
+  <div class="center stack" data-gap="xl">
+    <PsInfoPhotoHeader
+      size="band"
+      image="/photos/sound-aerial.jpg"
+      focus={FOCUS[detail.slug] ?? '50% 45%'}
+      eyebrow={detail.goalName}
+      title={detail.name}
+      lede={`${detail.intro.split('. ')[0]}.`}
+    />
+
+    <PsInfoStatBand stats={stats} />
+
+    <PsInfoVitalSignDetailIntro intro={detail.intro} photo={detail.photo} />
+
+    <div class="stack" data-gap="md">
+      <PsInfoSectionTitle title="Indicators" count={`${detail.indicators.length} indicator${detail.indicators.length === 1 ? '' : 's'}`} />
+      <PsInfoVitalSignDetailIndicators indicators={detail.indicators} />
+    </div>
+
+    <div class="stack" data-gap="md">
+      <PsInfoSectionTitle title="Key Vital Sign Messages" />
+      <PsInfoVitalSignDetailMessages messages={detail.keyMessages} links={detail.keyMessageLinks} />
+    </div>
+
+    <div class="stack" data-gap="md">
+      <PsInfoSectionTitle title="Background Documents" />
+      <PsInfoVitalSignDetailResources sections={detail.backgroundDocuments} />
+    </div>
+
+    <div class="stack" data-gap="md">
+      <PsInfoSectionTitle title="Other Resources" />
+      <PsInfoVitalSignDetailResources sections={detail.otherResources} />
+    </div>
+
+    <div class="stack" data-gap="md">
+      <PsInfoSectionTitle title="Related Strategies" note="Legacy 2022 Action Agenda strategies addressing this Vital Sign." />
+      <PsInfoIndicatorsContentCard links={detail.relatedStrategies} />
+    </div>
+
+    <div class="stack" data-gap="md">
+      <PsInfoSectionTitle title="Partners &amp; Reporting" />
+      <PsInfoVitalSignDetailFooter
+        contributingPartnersIntro={detail.contributingPartnersIntro}
+        contributingPartners={detail.contributingPartners}
+        reporterOrg={detail.reporterOrg}
+        reporterEmail={detail.reporterEmail}
+        lastUpdated={detail.lastUpdated}
+        printUrl={detail.printUrl}
+      />
+    </div>
+
+    <div class="stack" data-gap="md">
+      <PsInfoSectionTitle
+        title="Related across the platform"
+        note="This Vital Sign connects to the indicators that measure it and the recovery goal it reports into — one jump away, inside the same workspace."
+      />
+      <PsInfoCrossLinks links={crossLinks} />
+    </div>
+  </div>
+</PsInfoAppShell>

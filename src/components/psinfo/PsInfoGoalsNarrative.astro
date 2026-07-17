@@ -1,0 +1,43 @@
+---
+// PsInfoGoalsNarrative — a recovery goal's own narrative paragraph paired with
+// its inline photograph (VitalSignGoal/Detail/{id}'s one page-body paragraph +
+// one inline photo). Layout is the `.sidebar` + `.frame` LAYOUT PRIMITIVES from
+// @esa/tokens (photo as the fixed-ish aside, prose as the fluid main, dropping
+// to one column under the wrap threshold) — not hand-rolled flex/grid CSS.
+//
+// bcn-lego-checked: no esa- lego pairs a photo with a prose block (esa-card
+// has no media slot; esa-page-header is text-only, already spent on the page
+// header above this section). Checked Beacon (no matching media+prose
+// pattern). The photo frame reuses PsInfoAboutPhotoTrio's exact treatment
+// (EsaCard outlined, zero padding, object-fit cover) — only the prose
+// typography and the sidebar/frame composition are this component's own.
+import EsaCard from '@esa/ecology/esa-card.astro';
+import { withBase } from '../../lib/base';
+
+interface Props {
+  /** The goal's one narrative paragraph (VitalSignGoal/Detail/{id} body copy). */
+  narrative: string;
+  /** public/ path of the goal's inline photograph. */
+  image: string;
+  /** Authored alt text — source ships alt=""; see src/data/pages/goals.ts header. */
+  imageAlt: string;
+}
+const { narrative, image, imageAlt } = Astro.props;
+---
+<div class="sidebar" style="--sidebar-width: 21rem;" data-gap="lg">
+  <EsaCard variant="outlined" padding="none">
+    <div class="frame" style="--frame-ratio: 4 / 3;">
+      <img src={withBase(image)} alt={imageAlt} loading="lazy" decoding="async" />
+    </div>
+  </EsaCard>
+  <p class="goalnarr__text">{narrative}</p>
+</div>
+
+<style>
+  .sidebar :global(.esa-card) { overflow: hidden; }
+  .goalnarr__text {
+    margin: 0; align-self: center;
+    font-size: var(--ps-info-text-body); line-height: 1.65;
+    color: var(--color-text-primary); max-width: 62ch;
+  }
+</style>

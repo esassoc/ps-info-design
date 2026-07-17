@@ -1,0 +1,100 @@
+---
+// Ongoing Programs Portal — the state/federal ongoing-program inventory
+// (Implementation & Funding module). Content is exact: the Index page's own
+// intro, the Program List tab's own intro + "Ongoing Programs by Activity
+// Type" breakdown (its donut-chart image decoded to the same 48/34/18
+// percentages, rendered natively instead of re-embedded), and all 270
+// programs from the live IndexGridJsonData endpoint, grouped by primary
+// Activity Type the way the source page frames the count. Two programs carry
+// no Activity Type in the source grid and group under "Unspecified" rather
+// than a guessed category. Per-program and per-organization Detail pages
+// aren't rebuilt in this prototype — every program/org/website link opens
+// the live pugetsoundinfo.wa.gov site in a new tab.
+import PsInfoAppShell from '../../layouts/PsInfoAppShell.astro';
+import PsInfoPhotoHeader from '../../components/psinfo/PsInfoPhotoHeader.astro';
+import PsInfoOngoingProgramsIntro from '../../components/psinfo/PsInfoOngoingProgramsIntro.astro';
+import PsInfoStatBand from '../../components/psinfo/PsInfoStatBand.astro';
+import PsInfoOngoingProgramsActivityBreakdown from '../../components/psinfo/PsInfoOngoingProgramsActivityBreakdown.astro';
+import PsInfoSectionTitle from '../../components/psinfo/PsInfoSectionTitle.astro';
+import PsInfoOngoingProgramsBoard from '../../components/psinfo/PsInfoOngoingProgramsBoard.astro';
+import PsInfoCrossLinks from '../../components/psinfo/PsInfoCrossLinks.astro';
+import {
+  PAGE_TITLE,
+  HERO_LEDE,
+  INTRO_PARAGRAPHS,
+  PROGRAM_LIST_INTRO,
+  ACTIVITY_TYPE_HEADING,
+  ACTIVITY_TYPE_INTRO,
+  ACTIVITY_TYPE_STATS,
+  ACTIVITY_TYPE_BREAKDOWN,
+  PROGRAMS,
+  TOTAL_PROGRAMS,
+  ACTIVE_PROGRAMS,
+  GEOGRAPHIC_SCOPE_COUNTS,
+  groupByActivityType,
+} from '../../data/pages/ongoing-programs';
+
+const headlineStats = [
+  { value: TOTAL_PROGRAMS, label: 'Total programs', accent: true },
+  { value: ACTIVE_PROGRAMS, label: 'Active' },
+  { value: GEOGRAPHIC_SCOPE_COUNTS['Statewide'] ?? 0, label: 'Statewide' },
+  { value: GEOGRAPHIC_SCOPE_COUNTS['Puget Sound Region'] ?? 0, label: 'Puget Sound Region' },
+];
+
+const programSections = groupByActivityType(PROGRAMS);
+
+const crossLinks = [
+  { moduleId: 'implementation', label: 'NEP Atlas', detail: 'EPA National Estuary Program and Puget Sound Geographic Program investment activities', route: '/prototypes/nep-atlas' },
+  { moduleId: 'progress', label: 'State of the Sound', detail: 'Biennial assessment of Puget Sound recovery efforts' },
+];
+---
+<!-- manifest:
+  layout: PsInfoAppShell (active Implementation and Funding > Ongoing Programs Portal) > center+stack spine
+  sections:
+    - page header -> psinfo-photo-header (photo band, composes esa-page-header)
+    - intro -> psinfo-ongoing-programs-intro (composes esa-card)
+    - headline stats -> psinfo-stat-band
+    - Program List intro and Activity Type breakdown -> psinfo-ongoing-programs-activity-breakdown (composes psinfo-stat-band)
+    - All Programs (270 rows) -> psinfo-section-title + psinfo-ongoing-programs-board (grouped by Activity Type)
+    - cross-module band -> psinfo-section-title + psinfo-cross-links
+-->
+<PsInfoAppShell title={`${PAGE_TITLE} — Puget Sound Info`} active={{ moduleId: 'implementation', leafId: 'ongoing-programs' }}>
+  <div class="center stack" data-gap="xl">
+    <PsInfoPhotoHeader
+      size="band"
+      image="/photos/sound-aerial.jpg"
+      focus="50% 35%"
+      title={PAGE_TITLE}
+      lede={HERO_LEDE}
+    />
+
+    <PsInfoOngoingProgramsIntro paragraphs={INTRO_PARAGRAPHS} />
+
+    <PsInfoStatBand stats={headlineStats} />
+
+    <PsInfoOngoingProgramsActivityBreakdown
+      listIntro={PROGRAM_LIST_INTRO}
+      heading={ACTIVITY_TYPE_HEADING}
+      intro={ACTIVITY_TYPE_INTRO}
+      stats={ACTIVITY_TYPE_STATS}
+      breakdown={ACTIVITY_TYPE_BREAKDOWN}
+    />
+
+    <div class="stack" data-gap="md">
+      <PsInfoSectionTitle
+        title="All Programs"
+        count={`${TOTAL_PROGRAMS} programs`}
+        note="Grouped by each program's primary Activity Type, largest group first."
+      />
+      <PsInfoOngoingProgramsBoard sections={programSections} />
+    </div>
+
+    <div class="stack" data-gap="md">
+      <PsInfoSectionTitle
+        title="Related across the platform"
+        note="Ongoing programs fund and carry out the work these sibling pages track."
+      />
+      <PsInfoCrossLinks links={crossLinks} />
+    </div>
+  </div>
+</PsInfoAppShell>

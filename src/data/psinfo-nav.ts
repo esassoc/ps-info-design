@@ -18,6 +18,9 @@ export interface NavLeaf {
   label: string;
   /** Root-relative route for a BUILT page; omit for a stub (renders inert). */
   route?: string;
+  /** Absolute URL for a destination that stays OUTSIDE the prototype (opens
+      in a new tab with an external mark). Mutually exclusive with `route`. */
+  externalHref?: string;
   /** Sets this leaf apart with a hairline above it. */
   divider?: boolean;
 }
@@ -64,10 +67,10 @@ export const MODULES: NavModule[] = [
     domain: 'pugetsoundinfo.wa.gov',
     icon: ICONS.info,
     pages: [
-      { id: 'about', label: 'About' },
-      { id: 'web-services', label: 'Web Services' },
-      { id: 'spatial-data-hub', label: 'Spatial Data Hub' },
-      { id: 'data-center', label: 'Data Center' },
+      { id: 'about', label: 'About', route: '/prototypes/about' },
+      { id: 'web-services', label: 'Web Services', route: '/prototypes/web-services' },
+      { id: 'spatial-data-hub', label: 'Spatial Data Hub', externalHref: 'https://data-wa-psp.hub.arcgis.com/' },
+      { id: 'data-center', label: 'Data Center', route: '/prototypes/data-center' },
     ],
   },
   {
@@ -77,11 +80,11 @@ export const MODULES: NavModule[] = [
     domain: 'vitalsigns.pugetsoundinfo.wa.gov',
     icon: ICONS.target,
     pages: [
-      { id: 'goal-population', label: 'Healthy Human Population', route: '/prototypes/vital-signs' },
-      { id: 'goal-quality', label: 'Vibrant Human Quality of Life', route: '/prototypes/vital-signs' },
-      { id: 'goal-species', label: 'Thriving Species and Food Web', route: '/prototypes/vital-signs' },
-      { id: 'goal-habitat', label: 'Functioning Habitat', route: '/prototypes/vital-signs' },
-      { id: 'goal-water', label: 'Healthy Water Quality', route: '/prototypes/vital-signs' },
+      { id: 'goal-population', label: 'Healthy Human Population', route: '/prototypes/goals/healthy-human-population' },
+      { id: 'goal-quality', label: 'Vibrant Human Quality of Life', route: '/prototypes/goals/vibrant-human-quality-of-life' },
+      { id: 'goal-species', label: 'Thriving Species and Food Web', route: '/prototypes/goals/thriving-species-and-food-web' },
+      { id: 'goal-habitat', label: 'Functioning Habitat', route: '/prototypes/goals/functioning-habitat' },
+      { id: 'goal-water', label: 'Healthy Water Quality', route: '/prototypes/goals/healthy-water-quality' },
     ],
   },
   {
@@ -92,9 +95,9 @@ export const MODULES: NavModule[] = [
     icon: ICONS['list-checks'],
     pages: [
       { id: 'aa-explorer', label: 'Action Agenda Explorer', route: '/prototypes/action-agenda' },
-      { id: 'impl-strategies', label: 'Implementation Strategies' },
-      { id: 'local-recovery-plans', label: 'Local Ecosystem Recovery Plans' },
-      { id: 'federal-task-force', label: 'Puget Sound Federal Task Force Action Plan' },
+      { id: 'impl-strategies', label: 'Implementation Strategies', externalHref: 'https://pugetsoundestuary.wa.gov/recovering-puget-sound/' },
+      { id: 'local-recovery-plans', label: 'Local Ecosystem Recovery Plans', route: '/prototypes/lios' },
+      { id: 'federal-task-force', label: 'Puget Sound Federal Task Force Action Plan', externalHref: 'https://www.epa.gov/system/files/documents/2022-06/puget-sound-federal-task-force-action-plan-2022-2026.pdf' },
     ],
   },
   {
@@ -104,9 +107,9 @@ export const MODULES: NavModule[] = [
     domain: 'nepatlas.pugetsoundinfo.wa.gov',
     icon: ICONS.banknote,
     pages: [
-      { id: 'funding-tool', label: 'Recovery Acceleration Funding Tool' },
-      { id: 'nep-atlas', label: 'NEP Atlas' },
-      { id: 'ongoing-programs', label: 'Ongoing Programs Portal' },
+      { id: 'funding-tool', label: 'Recovery Acceleration Funding Tool', externalHref: 'https://experience.arcgis.com/experience/6f12941d99644b0e93deaed86f1674f0/' },
+      { id: 'nep-atlas', label: 'NEP Atlas', route: '/prototypes/nep-atlas' },
+      { id: 'ongoing-programs', label: 'Ongoing Programs Portal', route: '/prototypes/ongoing-programs' },
     ],
   },
   {
@@ -116,8 +119,8 @@ export const MODULES: NavModule[] = [
     domain: 'stateofthesound.wa.gov',
     icon: ICONS['trending-up'],
     pages: [
-      { id: 'indicators', label: 'Indicators' },
-      { id: 'state-of-the-sound', label: 'State of the Sound' },
+      { id: 'indicators', label: 'Indicators', route: '/prototypes/indicators' },
+      { id: 'state-of-the-sound', label: 'State of the Sound', externalHref: 'https://stateofthesound.wa.gov/' },
     ],
   },
 ];
@@ -142,7 +145,8 @@ export function navFor(active: ActiveNav) {
     children: m.pages.map((p) => ({
       id: p.id,
       label: p.label,
-      href: p.route ? withBase(p.route) : undefined,
+      href: p.route ? withBase(p.route) : p.externalHref,
+      external: !!p.externalHref,
       active: p.id === active.leafId,
       divider: p.divider,
     })),

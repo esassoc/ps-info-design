@@ -1,0 +1,90 @@
+---
+// PsInfoActionAgendaRefreshStrategies — the real Topic → Strategy hierarchy,
+// one esa-collapsible per Topic (collapsed by default — 26 Topics / 110
+// Strategies would otherwise dump the whole tree on the page at once). Each
+// Strategy row shows only its real code + title: the real site carries no
+// per-Strategy owner or status (only Commitments carry an organization, and
+// only two statuses — "Not reported" / "Data Pending" — exist across all 455
+// Commitment rows), so this deliberately does NOT reuse the sibling
+// PsInfoStrategyBoard, which renders an owner + status badge per row that
+// this data doesn't have. Expanding a Topic also surfaces its full real
+// Overview paragraph and the Vital Signs it links to (both scraped alongside
+// strategiesCount/actionsCount/commitmentsCount but previously unused on this
+// page) — the disclosure is the natural home for that per-topic detail short
+// of a future dedicated Topic page.
+//
+// bcn-lego-checked: esa-collapsible (native <details>) IS the disclosure
+// primitive — no bespoke accordion built. The strategy-code chip + row layout
+// is plain content composition, same treatment as PsInfoStrategyBoard's
+// .strat__code, not a reinvented control. Vital Sign tags reuse esa-pill
+// (removable={false}), same static-tag convention as PsInfoIndicatorsBoard /
+// PsInfoIndicatorsChartCard — no bespoke chip markup.
+import EsaCollapsible from '@esa/ecology/esa-collapsible.astro';
+import EsaPill from '@esa/ecology/esa-pill.astro';
+import { withBase } from '../../lib/base';
+import type { ActionAgendaTopic } from '../../data/pages/action-agenda-refresh';
+
+interface Props {
+  topics: ActionAgendaTopic[];
+}
+const { topics } = Astro.props;
+---
+<div class="strategies">
+  {topics.map((topic) => (
+    <EsaCollapsible title={`${topic.number}: ${topic.title}`}>
+      <p class="strategies__overview">{topic.overview}</p>
+      <p class="strategies__meta">
+        {topic.strategiesCount} strategies · {topic.actionsCount} actions · {topic.commitmentsCount} commitments
+      </p>
+      <ul class="strategies__list" role="list">
+        {topic.strategies.map((s) => (
+          <li class="strategies__row">
+            <span class="strategies__code">{s.code}</span>
+            <span class="strategies__name">{s.name}</span>
+          </li>
+        ))}
+      </ul>
+      {topic.vitalSigns.length > 0 && (
+        <div class="strategies__vs">
+          <a class="strategies__vs-label" href={withBase('/prototypes/vital-signs')}>Vital Signs this Topic moves</a>
+          <div class="strategies__vs-pills">
+            {topic.vitalSigns.map((vs) => (
+              <EsaPill label={vs.name} size="xs" removable={false} />
+            ))}
+          </div>
+        </div>
+      )}
+    </EsaCollapsible>
+  ))}
+</div>
+
+<style>
+  .strategies { display: flex; flex-direction: column; gap: var(--spacing-200); }
+  .strategies__overview {
+    margin: 0 0 var(--spacing-300); font-size: var(--ps-info-text-body);
+    color: var(--color-text-primary); line-height: 1.65; max-width: 74ch;
+  }
+  .strategies__meta {
+    margin: 0 0 var(--spacing-300); font-size: var(--ps-info-text-meta-lg);
+    color: var(--color-text-muted); font-variant-numeric: tabular-nums;
+  }
+  .strategies__list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--spacing-200); }
+  .strategies__row {
+    display: flex; align-items: baseline; gap: var(--spacing-300);
+    padding: var(--spacing-250) var(--spacing-300);
+    background: var(--color-surface-sunken); border-radius: var(--radius-100);
+  }
+  .strategies__code {
+    flex: none; font-family: var(--font-mono); font-size: var(--ps-info-text-meta);
+    font-weight: var(--font-weight-semibold); color: var(--color-primary);
+    padding: 2px var(--spacing-200); border-radius: var(--radius-100); background: var(--color-primary-subtle);
+  }
+  .strategies__name { font-size: var(--ps-info-text-meta-lg); color: var(--color-text-primary); line-height: 1.5; }
+  .strategies__vs { margin-top: var(--spacing-400); display: flex; flex-direction: column; gap: var(--spacing-200); }
+  .strategies__vs-label {
+    font-size: var(--ps-info-text-meta-lg); font-weight: var(--font-weight-semibold);
+    color: var(--color-text-primary); text-decoration: none;
+  }
+  .strategies__vs-label:hover { color: var(--color-primary); text-decoration: underline; }
+  .strategies__vs-pills { display: flex; flex-wrap: wrap; gap: var(--spacing-150); }
+</style>

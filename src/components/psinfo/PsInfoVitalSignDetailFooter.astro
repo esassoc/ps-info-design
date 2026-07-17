@@ -1,0 +1,106 @@
+---
+// PsInfoVitalSignDetailFooter — the source's own right-column footer group,
+// rendered together: Contributing Partners (optional intro sentence + a
+// list of partner orgs, linked when the source itself links them — e.g.
+// Salmon's single WDFW credit has no href because source's own logo image
+// isn't wrapped in a link), Vital Sign Reporter (org, plus its email row
+// only when the source's mailto actually has an address — both this unit's
+// pages have a genuinely empty mailto in source, so that row is omitted
+// rather than rendering a dead link), Last Updated, and the external
+// Print-to-PDF link.
+//
+// bcn-lego-checked: esa-card is the surface; esa-icon marks the external
+// links. No esa- lego renders this partners/reporter/print fact group.
+// Checked Beacon: no matching pattern; same bespoke-facts-panel shape as
+// PsInfoIndicatorsBasics. psinfo-vital-sign-detail-footer is the reusable
+// home.
+import EsaCard from '@esa/ecology/esa-card.astro';
+import EsaIcon from '@esa/ecology/esa-icon.astro';
+import type { VitalSignPartner } from '../../data/pages/vital-sign-details';
+
+interface Props {
+  contributingPartnersIntro?: string;
+  contributingPartners: VitalSignPartner[];
+  reporterOrg: string;
+  reporterEmail: string | null;
+  lastUpdated: string;
+  printUrl: string;
+}
+const { contributingPartnersIntro, contributingPartners, reporterOrg, reporterEmail, lastUpdated, printUrl } = Astro.props;
+
+const ARROW = '<path d="M7 7h10v10"/><path d="M7 17 17 7"/>';
+---
+<EsaCard variant="outlined">
+  <div class="footer">
+    <div class="footer__section">
+      <h3 class="footer__heading">Contributing Partners</h3>
+      {contributingPartnersIntro && <p class="footer__p">{contributingPartnersIntro}</p>}
+      <ul class="footer__partners" role="list">
+        {contributingPartners.map((p) => (
+          <li>
+            {p.href ? (
+              <a class="footer__orglink" href={p.href} target="_blank" rel="noopener">
+                {p.name}
+                <EsaIcon name="arrow-up-right" size="xs" paths={ARROW} />
+              </a>
+            ) : (
+              <span class="footer__orglink footer__orglink--plain">{p.name}</span>
+            )}
+          </li>
+        ))}
+      </ul>
+    </div>
+
+    <div class="footer__section">
+      <h3 class="footer__heading">Vital Sign Reporter</h3>
+      {reporterEmail ? (
+        <p class="footer__p">
+          {reporterOrg} — <a href={`mailto:${reporterEmail}`}>{reporterEmail}</a>
+        </p>
+      ) : (
+        <p class="footer__p">{reporterOrg}</p>
+      )}
+    </div>
+
+    <div class="footer__meta">
+      <p class="footer__updated">Last updated {lastUpdated}</p>
+      <a class="footer__print" href={printUrl} target="_blank" rel="noopener">
+        Print this Vital Sign (PDF)
+        <EsaIcon name="arrow-up-right" size="xs" paths={ARROW} />
+      </a>
+    </div>
+  </div>
+</EsaCard>
+
+<style>
+  .footer { display: flex; flex-direction: column; gap: var(--spacing-500); }
+
+  .footer__section { display: flex; flex-direction: column; gap: var(--spacing-200); }
+  .footer__heading { margin: 0; font-family: var(--font-display); font-size: 1rem; font-weight: var(--font-weight-semibold); color: var(--color-text-primary); }
+  .footer__p { margin: 0; font-size: var(--ps-info-text-body); color: var(--color-text-secondary); line-height: 1.6; }
+  .footer__p a { color: var(--color-text-link); text-decoration: none; }
+  .footer__p a:hover { text-decoration: underline; }
+  .footer__p a:focus-visible { outline: 2px solid var(--focus-ring-color); outline-offset: 2px; }
+
+  .footer__partners { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: var(--spacing-300); }
+  .footer__orglink {
+    display: inline-flex; align-items: center; gap: var(--spacing-100);
+    font-size: var(--ps-info-text-body); color: var(--color-text-primary); text-decoration: none;
+  }
+  a.footer__orglink:hover { color: var(--color-primary); }
+  a.footer__orglink:focus-visible { outline: 2px solid var(--focus-ring-color); outline-offset: 2px; }
+  .footer__orglink :global(.esa-icon) { color: var(--color-text-muted); }
+  .footer__orglink--plain { color: var(--color-text-secondary); }
+
+  .footer__meta {
+    display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: var(--spacing-300);
+    padding-top: var(--spacing-400); border-top: 1px solid var(--color-border-light);
+  }
+  .footer__updated { margin: 0; font-size: var(--ps-info-text-meta); color: var(--color-text-muted); }
+  .footer__print {
+    display: inline-flex; align-items: center; gap: var(--spacing-100);
+    font-size: var(--ps-info-text-meta-lg); color: var(--color-text-link); text-decoration: none;
+  }
+  .footer__print:hover { text-decoration: underline; }
+  .footer__print:focus-visible { outline: 2px solid var(--focus-ring-color); outline-offset: 2px; }
+</style>

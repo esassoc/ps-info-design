@@ -1,0 +1,72 @@
+---
+// PsInfoVitalSignDetailMessages — the source's "Key Vital Sign Messages"
+// block: an ordered mix of paragraphs and bullet lists (order preserved, not
+// regrouped into paragraphs-then-bullets). Deliberately does NOT reuse
+// PsInfoIndicatorsContentCard, which always renders in a fixed
+// paragraphs -> bulletGroups order regardless of prop order — that would
+// reorder this section's real paragraph/bullets/paragraph/paragraph sequence.
+// Inline links captured separately in the source (mid-sentence hrefs, kept
+// out of the verbatim text to avoid corrupting it) render as their own row
+// below the prose, same convention as PsInfoIndicatorsContentCard's `links`.
+//
+// bcn-lego-checked: esa-card is the surface; no esa- lego renders an
+// order-preserving mix of paragraph/bullet blocks. Checked Beacon: no
+// matching flexible narrative-card pattern. psinfo-vital-sign-detail-messages
+// is the reusable home.
+import EsaCard from '@esa/ecology/esa-card.astro';
+import EsaIcon from '@esa/ecology/esa-icon.astro';
+import { withBase } from '../../lib/base';
+import type { VitalSignMessageBlock, VitalSignResourceLink } from '../../data/pages/vital-sign-details';
+
+interface Props {
+  messages: VitalSignMessageBlock[];
+  links?: VitalSignResourceLink[];
+}
+const { messages, links } = Astro.props;
+
+const ARROW = '<path d="M7 7h10v10"/><path d="M7 17 17 7"/>';
+const isInternal = (href: string) => href.startsWith('/');
+---
+<EsaCard variant="outlined">
+  <div class="msgs">
+    {messages.map((block) =>
+      block.kind === 'paragraph' ? (
+        <p class="msgs__p">{block.text}</p>
+      ) : (
+        <ul class="msgs__bullets" role="list">
+          {block.items.map((item) => <li>{item}</li>)}
+        </ul>
+      )
+    )}
+
+    {links && links.length > 0 && (
+      <div class="msgs__links">
+        {links.map((l) =>
+          isInternal(l.href) ? (
+            <a href={withBase(l.href)}>{l.text}</a>
+          ) : (
+            <a href={l.href} target="_blank" rel="noopener">
+              {l.text}
+              <EsaIcon name="arrow-up-right" size="xs" paths={ARROW} />
+            </a>
+          )
+        )}
+      </div>
+    )}
+  </div>
+</EsaCard>
+
+<style>
+  .msgs { display: flex; flex-direction: column; gap: var(--spacing-400); }
+  .msgs__p { margin: 0; font-size: var(--ps-info-text-body); color: var(--color-text-primary); line-height: 1.65; }
+  .msgs__bullets { margin: 0; padding-left: 1.25em; display: flex; flex-direction: column; gap: var(--spacing-200); }
+  .msgs__bullets li { font-size: var(--ps-info-text-body); color: var(--color-text-primary); line-height: 1.6; }
+
+  .msgs__links { display: flex; flex-wrap: wrap; gap: var(--spacing-300); padding-top: var(--spacing-200); border-top: 1px solid var(--color-border-light); }
+  .msgs__links a {
+    display: inline-flex; align-items: center; gap: var(--spacing-100);
+    font-size: var(--ps-info-text-meta-lg); color: var(--color-text-link); text-decoration: none;
+  }
+  .msgs__links a:hover { text-decoration: underline; }
+  .msgs__links a:focus-visible { outline: 2px solid var(--focus-ring-color); outline-offset: 2px; }
+</style>

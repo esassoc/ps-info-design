@@ -144,6 +144,8 @@
   --color-warning:        #c07d18;   --color-status-warning:        #c07d18;
   --color-warning-subtle: #fbf1e0;   --color-status-warning-subtle: #fbf1e0;
   --color-warning-strong: #8a5a10;   --color-status-warning-strong: #8a5a10;
+  /* amber fill carries near-black badge text — ≥4.5:1 (axe-verified) */
+  --color-warning-on-fill: #261807;
   --color-danger:         #c4362f;
   --color-danger-subtle:  #fbeceb;
   --color-danger-strong:  #a02a24;

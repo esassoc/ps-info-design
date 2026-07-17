@@ -1,0 +1,44 @@
+---
+// PsInfoAboutPhotoTrio — the About page's own inline photography (orca,
+// farmland/mountains, shoreline — the three images that ran down the source
+// article) shown as a responsive 3-up row instead of a stacked column.
+//
+// bcn-lego-checked: no esa- lego renders a multi-photo row; this extends
+// psinfo-region-map's single-image-in-a-card treatment to three frames.
+// esa-card (outlined, zero padding) is the reused surface for each photo.
+import EsaCard from '@esa/ecology/esa-card.astro';
+import { withBase } from '../../lib/base';
+
+export interface AboutPhotoItem {
+  /** public/ path of the photograph. */
+  image: string;
+  alt: string;
+}
+interface Props {
+  photos: AboutPhotoItem[];
+}
+const { photos } = Astro.props;
+---
+<div class="phototrio">
+  {photos.map((photo) => (
+    <EsaCard variant="outlined" padding="none">
+      <img class="phototrio__img" src={withBase(photo.image)} alt={photo.alt} loading="lazy" decoding="async" />
+    </EsaCard>
+  ))}
+</div>
+
+<style>
+  .phototrio {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--spacing-300);
+  }
+  .phototrio :global(.esa-card) { overflow: hidden; }
+  .phototrio__img {
+    display: block; width: 100%; aspect-ratio: 4 / 3; object-fit: cover;
+  }
+
+  @media (max-width: 640px) {
+    .phototrio { grid-template-columns: 1fr; }
+  }
+</style>

@@ -1,0 +1,69 @@
+---
+// PsInfoActionAgendaRefreshMeasures — the 3 real ways Action Agenda progress
+// is measured (Vital Signs, Progress Indicators, Commitments). Each entry can
+// be: an internal jump (Vital Signs already lives inside this workspace, so
+// it links in-app with no new tab), a genuine external tool (Progress
+// Indicators, arrow-up-right + new tab), or plain text with no link at all
+// (Commitments — the real /About page names it but links nowhere).
+//
+// bcn-lego-checked: no esa- lego renders a 3-item list whose members are each
+// independently internal-link / external-link / plain-text; checked Beacon
+// (no matching mixed-link-type list). Same card-row surface as
+// PsInfoCrossLinks, which this deliberately does not reuse — CrossLinks
+// requires a MODULES moduleId per entry and has no external-link mode, and
+// forcing "Progress Indicators" (a real external tool with no moduleId)
+// through it would silently drop its link.
+import EsaIcon from '@esa/ecology/esa-icon.astro';
+import { withBase } from '../../lib/base';
+import type { ProgressMeasure } from '../../data/pages/action-agenda-refresh';
+
+interface Props {
+  measures: ProgressMeasure[];
+}
+const { measures } = Astro.props;
+const ARROW = '<path d="M7 7h10v10"/><path d="M7 17 17 7"/>';
+---
+<ul class="measures" role="list">
+  {measures.map((m) => {
+    const isInternal = !!m.internalRoute;
+    const isExternal = !isInternal && !!m.href;
+    const Tag = isInternal || isExternal ? 'a' : 'div';
+    const linkAttrs = isInternal
+      ? { href: withBase(m.internalRoute!) }
+      : isExternal
+        ? { href: m.href, target: '_blank', rel: 'noopener' }
+        : {};
+    return (
+      <li>
+        <Tag class:list={['measure', { 'measure--stub': !isInternal && !isExternal }]} {...linkAttrs}>
+          <span class="measure__label">
+            {m.label}
+            {isExternal && <EsaIcon name="arrow-up-right" size="xs" paths={ARROW} />}
+          </span>
+          <p class="measure__detail">{m.detail}</p>
+        </Tag>
+      </li>
+    );
+  })}
+</ul>
+
+<style>
+  .measures { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--spacing-300); }
+  .measure {
+    display: block; padding: var(--spacing-300) var(--spacing-400);
+    background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-100);
+    text-decoration: none; transition: border-color 150ms ease, background 150ms ease;
+  }
+  a.measure:hover { border-color: var(--color-primary-border); background: var(--color-primary-subtle); }
+  .measure--stub { background: var(--color-surface-sunken); }
+  .measure__label {
+    display: inline-flex; align-items: center; gap: var(--spacing-100);
+    font-size: 1.0625rem; font-weight: var(--font-weight-semibold); color: var(--color-text-primary);
+  }
+  a.measure:hover .measure__label { color: var(--color-primary); }
+  .measure__label :global(.esa-icon) { color: var(--color-text-muted); }
+  .measure__detail {
+    margin: var(--spacing-100) 0 0; font-size: var(--ps-info-text-meta-lg);
+    color: var(--color-text-secondary); line-height: 1.5; max-width: 68ch;
+  }
+</style>

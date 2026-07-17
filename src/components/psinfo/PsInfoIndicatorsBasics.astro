@@ -1,0 +1,144 @@
+---
+// PsInfoIndicatorsBasics — the Detail page's key-fact panel: recovery goal,
+// Vital Sign, type, unit, the two status badges (Indicator Progress / Target
+// Status), the 2030/2050 target text + fact sheets, reporter contact,
+// contributing partners, and the last-updated stamp.
+//
+// bcn-lego-checked: composes esa-badge for the two status chips and esa-icon
+// for the org glyph + external-link mark; no esa- lego renders a mixed
+// fact-panel (badges + dt/dd facts + prose + contact block) as one unit, so
+// the panel frame is bespoke structure, in the same vein as PsInfoGoalPanel.
+// Checked Beacon: no matching indicator/detail fact-panel. The source's own
+// status vocabulary ("Getting Worse" / "Below Target") doesn't match this
+// repo's IndicatorStatus enum (psinfo-domain.ts: on-track / progress /
+// no-trend / not-improving / declining), so this renders esa-badge directly
+// with the verbatim labels rather than forcing it through PsInfoStatusBadge.
+// psinfo-indicators-basics is the reusable home.
+import EsaCard from '@esa/ecology/esa-card.astro';
+import EsaBadge from '@esa/ecology/esa-badge.astro';
+import EsaIcon from '@esa/ecology/esa-icon.astro';
+import type { ExemplarBasics } from '../../data/pages/indicators';
+
+interface Props {
+  basics: ExemplarBasics;
+}
+const { basics } = Astro.props;
+
+const ARROW = '<path d="M7 7h10v10"/><path d="M7 17 17 7"/>';
+---
+<EsaCard variant="outlined">
+  <div class="basics">
+    <div class="basics__badges">
+      <EsaBadge value={basics.indicatorProgress} variant="danger" size="md" />
+      <EsaBadge value={basics.targetStatus} variant="warning" size="md" />
+    </div>
+
+    <dl class="basics__facts">
+      <div class="basics__fact">
+        <dt>Ecosystem Recovery Goal</dt>
+        <dd>{basics.ecosystemRecoveryGoal}</dd>
+      </div>
+      <div class="basics__fact">
+        <dt>Vital Sign</dt>
+        <dd>
+          <a href={basics.vitalSignHref} target="_blank" rel="noopener">
+            {basics.vitalSign}
+            <EsaIcon name="arrow-up-right" size="xs" paths={ARROW} />
+          </a>
+        </dd>
+      </div>
+      <div class="basics__fact">
+        <dt>Indicator Type</dt>
+        <dd>{basics.indicatorType}</dd>
+      </div>
+      <div class="basics__fact">
+        <dt>Measurement Unit</dt>
+        <dd>{basics.measurementUnit}</dd>
+      </div>
+    </dl>
+
+    <div class="basics__section">
+      <h3 class="basics__subhead">Target</h3>
+      {basics.targetParagraphs.map((p) => <p class="basics__p">{p}</p>)}
+      <div class="basics__links">
+        {basics.targetLinks.map((l) => (
+          <a href={l.href} target="_blank" rel="noopener">
+            {l.text}
+            <EsaIcon name="arrow-up-right" size="xs" paths={ARROW} />
+          </a>
+        ))}
+      </div>
+    </div>
+
+    <div class="basics__row">
+      <div class="basics__section">
+        <h3 class="basics__subhead">Reporter</h3>
+        <p class="basics__p">
+          {basics.reporter.name} — <a href={`mailto:${basics.reporter.email}`}>{basics.reporter.email}</a>
+        </p>
+        <a class="basics__orglink" href={basics.reporter.orgHref} target="_blank" rel="noopener">
+          {basics.reporter.org}
+          <EsaIcon name="arrow-up-right" size="xs" paths={ARROW} />
+        </a>
+      </div>
+
+      <div class="basics__section">
+        <h3 class="basics__subhead">Contributing Partners</h3>
+        <ul class="basics__partners" role="list">
+          {basics.contributingPartners.map((p) => (
+            <li>
+              <a class="basics__orglink" href={p.href} target="_blank" rel="noopener">
+                {p.name}
+                <EsaIcon name="arrow-up-right" size="xs" paths={ARROW} />
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
+
+    <p class="basics__updated">Last updated {basics.lastUpdated}</p>
+  </div>
+</EsaCard>
+
+<style>
+  .basics { display: flex; flex-direction: column; gap: var(--spacing-500); }
+
+  .basics__badges { display: flex; flex-wrap: wrap; gap: var(--spacing-200); }
+
+  .basics__facts { margin: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: var(--spacing-300) var(--spacing-400); }
+  .basics__fact { display: flex; flex-direction: column; gap: 2px; }
+  .basics__fact dt { font-size: var(--ps-info-text-meta); color: var(--color-text-muted); }
+  .basics__fact dd { margin: 0; font-size: var(--ps-info-text-body); font-weight: var(--font-weight-medium); color: var(--color-text-primary); }
+  .basics__fact dd a { color: var(--color-text-link); text-decoration: none; }
+  .basics__fact dd a:hover { text-decoration: underline; }
+  .basics__fact dd a:focus-visible { outline: 2px solid var(--focus-ring-color); outline-offset: 2px; }
+  .basics__fact dd :global(.esa-icon) { color: var(--color-text-muted); margin-left: 2px; vertical-align: -1px; }
+
+  .basics__row { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: var(--spacing-400); }
+
+  .basics__section { display: flex; flex-direction: column; gap: var(--spacing-200); }
+  .basics__subhead { margin: 0; font-family: var(--font-display); font-size: 1rem; font-weight: var(--font-weight-semibold); color: var(--color-text-primary); }
+  .basics__p { margin: 0; font-size: var(--ps-info-text-body); color: var(--color-text-secondary); line-height: 1.6; }
+  .basics__p a { color: var(--color-text-link); }
+
+  .basics__links { display: flex; flex-wrap: wrap; gap: var(--spacing-300); }
+  .basics__links a {
+    display: inline-flex; align-items: center; gap: var(--spacing-100);
+    font-size: var(--ps-info-text-meta-lg); color: var(--color-text-link);
+  }
+  .basics__links a:hover { text-decoration: underline; }
+  .basics__links a:focus-visible { outline: 2px solid var(--focus-ring-color); outline-offset: 2px; }
+
+  .basics__partners { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--spacing-150); }
+
+  .basics__orglink {
+    display: inline-flex; align-items: center; gap: var(--spacing-100);
+    font-size: var(--ps-info-text-body); color: var(--color-text-primary); text-decoration: none;
+  }
+  .basics__orglink:hover { color: var(--color-primary); }
+  .basics__orglink:focus-visible { outline: 2px solid var(--focus-ring-color); outline-offset: 2px; }
+  .basics__orglink :global(.esa-icon) { color: var(--color-text-muted); }
+
+  .basics__updated { margin: 0; font-size: var(--ps-info-text-meta); color: var(--color-text-muted); }
+</style>

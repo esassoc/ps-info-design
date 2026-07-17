@@ -1,0 +1,138 @@
+---
+// Indicator Detail — the exemplar built out in full: "Number of Southern
+// Resident killer whales" (Vital Sign Indicator 32, Orcas / Thriving Species
+// and Food Web). Content is verbatim from Indicator/Detail/32. The source
+// chart's full 1973-2025 by-pod time series lives in an embedded Google
+// Charts JSON blob and wasn't extractable — its legend/axis/pod-breakdown and
+// descriptive caption are represented as text (PsInfoIndicatorsChartCard)
+// rather than a fabricated graph.
+import PsInfoAppShell from '../../../layouts/PsInfoAppShell.astro';
+import PsInfoPhotoHeader from '../../../components/psinfo/PsInfoPhotoHeader.astro';
+import PsInfoSectionTitle from '../../../components/psinfo/PsInfoSectionTitle.astro';
+import PsInfoIndicatorsBasics from '../../../components/psinfo/PsInfoIndicatorsBasics.astro';
+import PsInfoIndicatorsMapCard from '../../../components/psinfo/PsInfoIndicatorsMapCard.astro';
+import PsInfoIndicatorsContentCard from '../../../components/psinfo/PsInfoIndicatorsContentCard.astro';
+import PsInfoIndicatorsChartCard from '../../../components/psinfo/PsInfoIndicatorsChartCard.astro';
+import PsInfoCrossLinks from '../../../components/psinfo/PsInfoCrossLinks.astro';
+import {
+  EXEMPLAR_SLUG,
+  EXEMPLAR_BASICS,
+  EXEMPLAR_MAP,
+  EXEMPLAR_DESCRIPTION,
+  EXEMPLAR_CHART,
+  EXEMPLAR_IMPORTANCE,
+  EXEMPLAR_KEY_RESULTS,
+  EXEMPLAR_METHODS,
+  EXEMPLAR_INTERPRETATION,
+  EXEMPLAR_ADDITIONAL_INFORMATION,
+} from '../../../data/pages/indicators';
+
+export function getStaticPaths() {
+  return [{ params: { slug: EXEMPLAR_SLUG } }];
+}
+
+const crossLinks = [
+  { moduleId: 'progress', label: 'All Puget Sound Indicators', detail: '86 Vital Sign and Progress Indicators tracked across the recovery system', route: '/prototypes/indicators' },
+  { moduleId: 'goals', label: 'Orcas Vital Sign', detail: 'How this indicator rolls up into ecosystem-health reporting', route: '/prototypes/vital-signs' },
+  { moduleId: 'plans', label: 'Action Agenda topics', detail: 'Abundant and Harvestable Salmon & Vessel Impacts strategies this indicator connects to' },
+];
+---
+<!-- manifest:
+  layout: PsInfoAppShell (active Progress > Indicators) > center+stack spine
+  sections:
+    - page header                    -> psinfo-photo-header (photo band, composes esa-page-header)
+    - basics                         -> psinfo-section-title + psinfo-indicators-basics
+    - critical-habitat map           -> psinfo-section-title + psinfo-indicators-map-card
+    - description                    -> psinfo-section-title + psinfo-indicators-content-card
+    - vital sign indicator chart     -> psinfo-section-title + psinfo-indicators-chart-card
+    - importance                     -> psinfo-section-title + psinfo-indicators-content-card
+    - key vital sign indicator results -> psinfo-section-title + psinfo-indicators-content-card
+    - methods                        -> psinfo-section-title + psinfo-indicators-content-card
+    - interpretation of results      -> psinfo-section-title + psinfo-indicators-content-card
+    - additional information         -> psinfo-section-title + psinfo-indicators-content-card
+    - cross-module band              -> psinfo-section-title + psinfo-cross-links
+-->
+<PsInfoAppShell title={`${EXEMPLAR_BASICS.indicatorName} — Puget Sound Info`} active={{ moduleId: 'progress', leafId: 'indicators' }}>
+  <div class="center stack" data-gap="xl">
+    <PsInfoPhotoHeader
+      size="band"
+      image="/photos/sound-aerial.jpg"
+      focus="50% 30%"
+      eyebrow={`${EXEMPLAR_BASICS.indicatorType} · ${EXEMPLAR_BASICS.vitalSign}`}
+      title={EXEMPLAR_BASICS.indicatorName}
+      lede={EXEMPLAR_DESCRIPTION}
+    />
+
+    <div class="stack" data-gap="md">
+      <PsInfoSectionTitle title="Basics" />
+      <PsInfoIndicatorsBasics basics={EXEMPLAR_BASICS} />
+    </div>
+
+    <div class="stack" data-gap="md">
+      <PsInfoSectionTitle title="Critical Habitat" />
+      <PsInfoIndicatorsMapCard map={EXEMPLAR_MAP} />
+    </div>
+
+    <div class="stack" data-gap="md">
+      <PsInfoSectionTitle title="Description" />
+      <PsInfoIndicatorsContentCard paragraphs={[EXEMPLAR_DESCRIPTION]} />
+    </div>
+
+    <div class="stack" data-gap="md">
+      <PsInfoSectionTitle title={EXEMPLAR_CHART.heading} />
+      <PsInfoIndicatorsChartCard chart={EXEMPLAR_CHART} />
+    </div>
+
+    <div class="stack" data-gap="md">
+      <PsInfoSectionTitle title="Importance" />
+      <PsInfoIndicatorsContentCard paragraphs={EXEMPLAR_IMPORTANCE} />
+    </div>
+
+    <div class="stack" data-gap="md">
+      <PsInfoSectionTitle title="Key Vital Sign Indicator Results" />
+      <PsInfoIndicatorsContentCard
+        paragraphs={[EXEMPLAR_KEY_RESULTS.intro]}
+        bulletGroups={[EXEMPLAR_KEY_RESULTS.provisionalUpdate, EXEMPLAR_KEY_RESULTS.pastResults]}
+        links={EXEMPLAR_KEY_RESULTS.links}
+      />
+    </div>
+
+    <div class="stack" data-gap="md">
+      <PsInfoSectionTitle title="Methods" />
+      <PsInfoIndicatorsContentCard
+        fields={[
+          { label: 'Monitoring Program', text: EXEMPLAR_METHODS.monitoringProgram.text, linkText: EXEMPLAR_METHODS.monitoringProgram.linkText, href: EXEMPLAR_METHODS.monitoringProgram.href },
+          { label: 'Data Source', text: EXEMPLAR_METHODS.dataSource.text, linkText: EXEMPLAR_METHODS.dataSource.linkText, href: EXEMPLAR_METHODS.dataSource.href },
+        ]}
+        paragraphs={EXEMPLAR_METHODS.paragraphs}
+        links={EXEMPLAR_METHODS.links}
+      />
+    </div>
+
+    <div class="stack" data-gap="md">
+      <PsInfoSectionTitle title="Interpretation of Results" />
+      <PsInfoIndicatorsContentCard
+        paragraphs={EXEMPLAR_INTERPRETATION.paragraphs}
+        quote={EXEMPLAR_INTERPRETATION.quote}
+        links={EXEMPLAR_INTERPRETATION.links}
+        subsections={EXEMPLAR_INTERPRETATION.subsections}
+      />
+    </div>
+
+    <div class="stack" data-gap="md">
+      <PsInfoSectionTitle title="Additional Information" />
+      <PsInfoIndicatorsContentCard
+        links={EXEMPLAR_ADDITIONAL_INFORMATION.externalLinks}
+        references={EXEMPLAR_ADDITIONAL_INFORMATION.references}
+      />
+    </div>
+
+    <div class="stack" data-gap="md">
+      <PsInfoSectionTitle
+        title="Related across the platform"
+        note="This indicator connects to the Vital Sign it rolls up into and the strategies working to move it — one jump away, inside the same workspace."
+      />
+      <PsInfoCrossLinks links={crossLinks} />
+    </div>
+  </div>
+</PsInfoAppShell>

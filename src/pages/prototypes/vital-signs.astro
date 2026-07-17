@@ -1,35 +1,42 @@
 ---
-// Vital Signs — the ecosystem-health module, its 22 Vital Signs grouped by the
-// six recovery goals, each with a status. Same persistent shell as every other
-// module (rail shows Vital Signs expanded + active); the cross-links band at the
-// foot points into the OTHER modules — the wayfinding today's siloed apps lack.
+// Vital Signs — the ecosystem-health index: every Vital Sign and indicator
+// from the live vitalsigns.pugetsoundinfo.wa.gov goal pages (scraped verbatim
+// into src/data/pages/goals.ts by the Goals unit), grouped by the five
+// recovery goals. Counts are computed from that real data, never hardcoded.
+// Same persistent shell as every other module (rail shows Goals expanded);
+// the cross-links band at the foot points into the OTHER modules.
 import PsInfoAppShell from '../../layouts/PsInfoAppShell.astro';
 import PsInfoPhotoHeader from '../../components/psinfo/PsInfoPhotoHeader.astro';
 import PsInfoStatBand from '../../components/psinfo/PsInfoStatBand.astro';
 import PsInfoSectionTitle from '../../components/psinfo/PsInfoSectionTitle.astro';
-import PsInfoGoalPanel from '../../components/psinfo/PsInfoGoalPanel.astro';
+import PsInfoGoalsVitalSignList from '../../components/psinfo/PsInfoGoalsVitalSignList.astro';
 import PsInfoCrossLinks from '../../components/psinfo/PsInfoCrossLinks.astro';
-import { GOALS, TOTAL_VITAL_SIGNS, TOTAL_INDICATORS } from '../../data/psinfo-domain';
+import { GOALS } from '../../data/pages/goals';
+
+const totalVitalSigns = GOALS.reduce((n, g) => n + g.vitalSigns.length, 0);
+const totalIndicators = GOALS.reduce(
+  (n, g) => n + g.vitalSigns.reduce((m, vs) => m + vs.indicators.length, 0),
+  0,
+);
 
 const stats = [
-  { value: TOTAL_VITAL_SIGNS, label: 'Vital Signs', accent: true },
-  { value: '6', label: 'Recovery goals' },
-  { value: TOTAL_INDICATORS, label: 'Indicators tracked' },
-  { value: '3', label: 'Reporting cycles / year', sub: 'Draft → review → published' },
+  { value: totalVitalSigns, label: 'Vital Signs', accent: true },
+  { value: GOALS.length, label: 'Recovery goals' },
+  { value: totalIndicators, label: 'Indicators tracked' },
 ];
 
 const crossLinks = [
-  { moduleId: 'plans', label: 'Strategies that move these Vital Signs', detail: 'Habitat, Water Quality & Species strategies in the 2026–2030 Action Agenda', route: '/prototypes/action-agenda' },
-  { moduleId: 'progress', label: 'The pressure side', detail: 'Human-activity measures behind these ecosystem outcomes' },
-  { moduleId: 'implementation', label: 'Funded activities on the ground', detail: 'NEP investments tied to these goals' },
+  { moduleId: 'plans', label: 'Strategies that move these Vital Signs', detail: 'Topics and strategies in the 2026–2030 Action Agenda', route: '/prototypes/action-agenda' },
+  { moduleId: 'progress', label: 'Puget Sound Indicators', detail: 'Measures that track recovery progress and ecosystem health', route: '/prototypes/indicators' },
+  { moduleId: 'implementation', label: 'Funded activities on the ground', detail: 'NEP investments tied to these goals', route: '/prototypes/nep-atlas' },
 ];
 ---
 <!-- manifest:
-  layout: PsInfoAppShell (active Vital Signs) > center+stack spine
+  layout: PsInfoAppShell (active Goals) > center+stack spine
   sections:
     - page header      -> psinfo-photo-header (photo band, composes esa-page-header)
     - headline stats   -> psinfo-stat-band
-    - goals + signs    -> psinfo-section-title + psinfo-goal-panel (per goal)
+    - per-goal listing -> psinfo-section-title + psinfo-goals-vital-sign-list (x5)
     - cross-module band-> psinfo-section-title + psinfo-cross-links
 -->
 <PsInfoAppShell title="Vital Signs — Puget Sound Info" active={{ moduleId: 'goals' }}>
@@ -39,17 +46,21 @@ const crossLinks = [
       focus="50% 20%"
       eyebrow="Vital Signs"
       title="Ecosystem health, by recovery goal"
-      lede="The 22 Vital Signs are Puget Sound's core measures of ecosystem health. Each rolls up one or more indicators and reports a recovery status."
+      lede={`${totalVitalSigns} Vital Signs and ${totalIndicators} indicators measure the health of Puget Sound, organized by the recovery goals they serve.`}
     />
 
     <PsInfoStatBand stats={stats} />
 
-    <div class="stack" data-gap="md">
-      <PsInfoSectionTitle title="Vital Signs by goal" count={`${TOTAL_VITAL_SIGNS} Vital Signs`} />
-      <div class="stack" data-gap="md">
-        {GOALS.map((goal) => <PsInfoGoalPanel goal={goal} />)}
+    {GOALS.map((goal) => (
+      <div class="stack" data-gap="md" id={goal.slug}>
+        <PsInfoSectionTitle
+          title={goal.name}
+          count={`${goal.vitalSigns.length} Vital Signs`}
+          note={goal.statement}
+        />
+        <PsInfoGoalsVitalSignList vitalSigns={goal.vitalSigns} hueVar={goal.hueVar} />
       </div>
-    </div>
+    ))}
 
     <div class="stack" data-gap="md">
       <PsInfoSectionTitle

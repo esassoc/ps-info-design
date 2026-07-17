@@ -1,0 +1,34 @@
+---
+// PsInfoOngoingProgramsIntro — the Ongoing Programs Portal's own intro copy:
+// 2 verbatim paragraphs from OngoingProgram/Index. Modeled directly on
+// PsInfoAboutNarrative's plain-paragraph case, but with local Props only —
+// About's component is typed to about.ts's AboutBlock (inline text/link
+// segments), which this page has no reason to reuse across the write-scope
+// boundary; this page's intro is plain prose with no inline links.
+//
+// bcn-lego-checked: no esa- lego renders bare prose paragraphs as a section
+// (esa-card's body is a slot, not a paragraph renderer); esa-card (outlined)
+// is the reused surface — same card treatment as every other prose block
+// already established (PsInfoAboutNarrative, PsInfoIndicatorsDefinitions).
+// Checked Beacon: no matching plain-narrative pattern either.
+// psinfo-ongoing-programs-intro is the reusable home for this page.
+import EsaCard from '@esa/ecology/esa-card.astro';
+
+interface Props {
+  paragraphs: string[];
+}
+const { paragraphs } = Astro.props;
+---
+<EsaCard variant="outlined">
+  <div class="intro">
+    {paragraphs.map((p) => <p class="intro__p">{p}</p>)}
+  </div>
+</EsaCard>
+
+<style>
+  .intro { display: flex; flex-direction: column; gap: var(--spacing-400); }
+  .intro__p {
+    margin: 0; font-size: var(--ps-info-text-body); line-height: 1.65;
+    color: var(--color-text-primary); max-width: 74ch;
+  }
+</style>

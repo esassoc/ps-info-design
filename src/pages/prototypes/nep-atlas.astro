@@ -1,0 +1,107 @@
+---
+// NEP Atlas — the real nepatlas.pugetsoundinfo.wa.gov mini-site (part of the
+// Implementation & Funding module): welcome copy, the fuller About narrative
+// and funding-recipients roster, a curated set of featured NEP-funded
+// activities, the complete 14-award NEP Awards roster, and the Investment
+// Summary's own intro copy. Every figure and record here is sourced from the
+// site's own server-rendered HTML or its own live JSON feeds (Activity/
+// IndexGridJsonData, Award/IndexGridJsonData) — see
+// src/data/pages/nep-atlas.ts for full sourcing notes and the documented
+// gaps (the Activities Map and the two Investment Summary charts are
+// genuinely client-side-only and are represented here by their real intro
+// copy plus an outbound link, not reproduced).
+import PsInfoAppShell from '../../layouts/PsInfoAppShell.astro';
+import PsInfoPhotoHeader from '../../components/psinfo/PsInfoPhotoHeader.astro';
+import PsInfoSectionTitle from '../../components/psinfo/PsInfoSectionTitle.astro';
+import PsInfoStatBand from '../../components/psinfo/PsInfoStatBand.astro';
+import PsInfoNepAtlasNarrative from '../../components/psinfo/PsInfoNepAtlasNarrative.astro';
+import PsInfoAboutPhotoTrio from '../../components/psinfo/PsInfoAboutPhotoTrio.astro';
+import PsInfoActionAgendaRefreshProse from '../../components/psinfo/PsInfoActionAgendaRefreshProse.astro';
+import PsInfoNepAtlasActivityCards from '../../components/psinfo/PsInfoNepAtlasActivityCards.astro';
+import PsInfoNepAtlasAwardCards from '../../components/psinfo/PsInfoNepAtlasAwardCards.astro';
+import PsInfoToolLinks from '../../components/psinfo/PsInfoToolLinks.astro';
+import {
+  PAGE_EYEBROW, PAGE_TITLE, PAGE_LEDE,
+  WELCOME_PARAGRAPH, WELCOME_PHOTO,
+  ABOUT_PARAGRAPHS, FUNDING_RECIPIENTS, ABOUT_PHOTOS,
+  ATLAS_STATS, ACTIVITY_TYPE_COUNTS,
+  ACTIVITIES_INTRO_PARAGRAPH, ACTIVITIES_SORT_NOTE, FEATURED_ACTIVITIES,
+  AWARDS_INTRO_PARAGRAPH, AWARDS,
+  INVESTMENT_SUMMARY_PARAGRAPHS,
+  ATLAS_TOOLS,
+} from '../../data/pages/nep-atlas';
+
+// Lucide glyphs for the live-tool row (not in the shared icon registry; same
+// inline-paths pattern home.astro uses for its own Data & Tools row).
+const TOOL_ICONS: Record<string, string> = {
+  'Activities Map': '<path d="M14.106 5.553a2 2 0 0 0 1.788 0l3.659-1.83A1 1 0 0 1 21 4.618v12.764a1 1 0 0 1-.553.894l-4.553 2.277a2 2 0 0 1-1.788 0l-4.212-2.106a2 2 0 0 0-1.788 0l-3.659 1.83A1 1 0 0 1 3 17.382V4.618a1 1 0 0 1 .553-.894l4.553-2.277a2 2 0 0 1 1.788 0z"/><path d="M15 5.764v15"/><path d="M9 3.236v15"/>',
+  'Activities List': '<path d="M3 12h.01"/><path d="M3 18h.01"/><path d="M3 6h.01"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M8 6h13"/>',
+  'NEP Awards': '<path d="m15.477 12.89 1.515 8.526a.5.5 0 0 1-.81.47l-3.58-2.687a1 1 0 0 0-1.197 0l-3.586 2.686a.5.5 0 0 1-.81-.469l1.514-8.526"/><circle cx="12" cy="8" r="6"/>',
+  'Investment Summary': '<path d="M3 3v16a2 2 0 0 0 2 2h16"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/>',
+  'Download Full NEP Activity Database': '<path d="M12 15V3"/><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/>',
+};
+const tools = ATLAS_TOOLS.map((t) => ({ ...t, icon: TOOL_ICONS[t.title] ?? '' }));
+
+const typeBreakdown = ACTIVITY_TYPE_COUNTS.map((t) => `${t.type} — ${t.count.toLocaleString()}`);
+---
+<!-- manifest:
+  layout: PsInfoAppShell (active Implementation and Funding > NEP Atlas) > center+stack spine
+  sections:
+    - page header        -> psinfo-photo-header (photo band, composes esa-page-header)
+    - welcome             -> psinfo-nep-atlas-narrative (paragraph + side photo)
+    - headline stats      -> psinfo-stat-band
+    - about the NEP Atlas -> psinfo-section-title + psinfo-nep-atlas-narrative (narrative + funding recipients) + psinfo-about-photo-trio
+    - activities          -> psinfo-section-title + psinfo-action-agenda-refresh-prose (intro + investment-type breakdown) + psinfo-nep-atlas-activity-cards
+    - NEP awards          -> psinfo-section-title + psinfo-action-agenda-refresh-prose (intro) + psinfo-nep-atlas-award-cards
+    - investment summary  -> psinfo-section-title + psinfo-action-agenda-refresh-prose (intro copy only; charts are a JS-only gap, see data file)
+    - explore the atlas   -> psinfo-section-title + psinfo-tool-links (5 live sub-tools, external)
+-->
+<PsInfoAppShell title="NEP Atlas — Puget Sound Info" active={{ moduleId: 'implementation', leafId: 'nep-atlas' }}>
+  <div class="center stack" data-gap="xl">
+    <PsInfoPhotoHeader
+      size="band"
+      image="/photos/sound-aerial.jpg"
+      focus="55% 45%"
+      eyebrow={PAGE_EYEBROW}
+      title={PAGE_TITLE}
+      lede={PAGE_LEDE}
+    />
+
+    <div class="stack" data-gap="md" id="welcome">
+      <PsInfoNepAtlasNarrative paragraphs={[WELCOME_PARAGRAPH]} photo={WELCOME_PHOTO} />
+    </div>
+
+    <PsInfoStatBand stats={ATLAS_STATS} />
+
+    <div class="stack" data-gap="md" id="about">
+      <PsInfoSectionTitle title="About the NEP Atlas" />
+      <PsInfoNepAtlasNarrative paragraphs={ABOUT_PARAGRAPHS} recipients={FUNDING_RECIPIENTS} />
+      <PsInfoAboutPhotoTrio photos={ABOUT_PHOTOS} />
+    </div>
+
+    <div class="stack" data-gap="md" id="activities">
+      <PsInfoSectionTitle title="Activities" count={`${FEATURED_ACTIVITIES.length} featured`} />
+      <PsInfoActionAgendaRefreshProse
+        paragraphs={[ACTIVITIES_INTRO_PARAGRAPH]}
+        subsections={[{ label: 'Investment types', body: ACTIVITIES_SORT_NOTE, items: typeBreakdown }]}
+      />
+      <PsInfoNepAtlasActivityCards activities={FEATURED_ACTIVITIES} />
+    </div>
+
+    <div class="stack" data-gap="md" id="awards">
+      <PsInfoSectionTitle title="NEP Awards" count={`${AWARDS.length} awards`} />
+      <PsInfoActionAgendaRefreshProse paragraphs={[AWARDS_INTRO_PARAGRAPH]} />
+      <PsInfoNepAtlasAwardCards awards={AWARDS} />
+    </div>
+
+    <div class="stack" data-gap="md" id="investmentsummary">
+      <PsInfoSectionTitle title="Investment Summary" />
+      <PsInfoActionAgendaRefreshProse paragraphs={INVESTMENT_SUMMARY_PARAGRAPHS} />
+    </div>
+
+    <div class="stack" data-gap="md" id="tools">
+      <PsInfoSectionTitle title="Explore the NEP Atlas" />
+      <PsInfoToolLinks items={tools} />
+    </div>
+  </div>
+</PsInfoAppShell>

@@ -1,0 +1,42 @@
+---
+// About — the program front door's own about page: what Puget Sound Info is,
+// who develops/maintains it, and how it's funded. Content is verbatim from
+// pugetsoundinfo.wa.gov/About (see src/data/pages/about.ts for sourcing
+// notes); the source's three ALL-CAPS <p> "headings" render here as real,
+// sentence-case <h2>s.
+import PsInfoAppShell from '../../layouts/PsInfoAppShell.astro';
+import PsInfoPhotoHeader from '../../components/psinfo/PsInfoPhotoHeader.astro';
+import PsInfoSectionTitle from '../../components/psinfo/PsInfoSectionTitle.astro';
+import PsInfoAboutPhotoTrio from '../../components/psinfo/PsInfoAboutPhotoTrio.astro';
+import PsInfoAboutNarrative from '../../components/psinfo/PsInfoAboutNarrative.astro';
+import { ABOUT_HERO, ABOUT_PHOTOS, ABOUT_SECTIONS } from '../../data/pages/about';
+---
+<!-- manifest:
+  layout: PsInfoAppShell (active Overview > About) > center+stack spine
+  sections:
+    - page header       -> psinfo-photo-header (band, composes esa-page-header)
+    - page photography  -> psinfo-about-photo-trio (3-up, esa-card frames)
+    - what is it         -> psinfo-section-title + psinfo-about-narrative
+    - who is involved    -> psinfo-section-title + psinfo-about-narrative (+ partner list)
+    - how is it funded    -> psinfo-section-title + psinfo-about-narrative (+ EPA disclaimer)
+-->
+<PsInfoAppShell title="About — Puget Sound Info" active={{ moduleId: 'overview', leafId: 'about' }}>
+  <div class="center stack" data-gap="xl">
+    <PsInfoPhotoHeader
+      size="band"
+      image="/photos/sound-aerial.jpg"
+      focus="50% 55%"
+      title={ABOUT_HERO.title}
+      lede={ABOUT_HERO.lede}
+    />
+
+    <PsInfoAboutPhotoTrio photos={ABOUT_PHOTOS} />
+
+    {ABOUT_SECTIONS.map((section) => (
+      <div class="stack" data-gap="md" id={section.id}>
+        <PsInfoSectionTitle size="lg" title={section.heading} />
+        <PsInfoAboutNarrative blocks={section.blocks} />
+      </div>
+    ))}
+  </div>
+</PsInfoAppShell>

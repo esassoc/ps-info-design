@@ -39,7 +39,8 @@ const activeLeaf = activeModule?.pages.find((p) => p.id === active.leafId);
 const isHome = active.moduleId === 'overview' && !active.leafId;
 const crumbs = [
   { label: 'Puget Sound Info', href: withBase('/prototypes/home') },
-  { label: moduleLabel },
+  // The overview module shares the root's name — don't repeat it in the trail.
+  ...(moduleLabel !== 'Puget Sound Info' ? [{ label: moduleLabel }] : []),
   ...(activeLeaf ? [{ label: activeLeaf.label }] : []),
 ];
 
@@ -53,6 +54,8 @@ const searchEntities = SEARCH_INDEX.map((e, i) => ({
   url: e.route ? withBase(e.route) : '#',
 }));
 const searchPayload = JSON.stringify({ entities: searchEntities, scopes: searchScopes });
+
+const ARROW = '<path d="M7 7h10v10"/><path d="M7 17 17 7"/>';
 ---
 
 <BaseLayout title={title}>
@@ -100,7 +103,12 @@ const searchPayload = JSON.stringify({ entities: searchEntities, scopes: searchS
               <ul class="navsec__items">
                 {section.children.map((leaf) => (
                   <li>
-                    {leaf.href ? (
+                    {leaf.href && leaf.external ? (
+                      <a href={leaf.href} class="leaf leaf--external" target="_blank" rel="noopener">
+                        <span>{leaf.label}</span>
+                        <EsaIcon name="arrow-up-right" size="xs" paths={ARROW} />
+                      </a>
+                    ) : leaf.href ? (
                       <a href={leaf.href} class:list={['leaf', { 'leaf--active': leaf.active }]} aria-current={leaf.active ? 'page' : undefined}>
                         {leaf.label}
                       </a>
@@ -118,7 +126,12 @@ const searchPayload = JSON.stringify({ entities: searchEntities, scopes: searchS
                 <ul class="flyout__items">
                   {section.children.map((leaf) => (
                     <li>
-                      {leaf.href ? (
+                      {leaf.href && leaf.external ? (
+                        <a href={leaf.href} class="flyout__link flyout__link--external" target="_blank" rel="noopener">
+                          <span>{leaf.label}</span>
+                          <EsaIcon name="arrow-up-right" size="xs" paths={ARROW} />
+                        </a>
+                      ) : leaf.href ? (
                         <a href={leaf.href} class:list={['flyout__link', { 'flyout__link--active': leaf.active }]}>{leaf.label}</a>
                       ) : (
                         <span class="flyout__link flyout__link--stub" title="Not part of this prototype">{leaf.label}</span>
@@ -372,6 +385,10 @@ const searchPayload = JSON.stringify({ entities: searchEntities, scopes: searchS
   .leaf--active { background: var(--color-surface); color: var(--color-primary); font-weight: var(--font-weight-semibold); box-shadow: inset 0 0 0 1px var(--color-primary-border); }
   .leaf--stub { color: var(--color-text-muted); cursor: default; }
   .leaf--stub:hover { background: transparent; color: var(--color-text-muted); }
+  .leaf--external { display: flex; align-items: center; gap: var(--spacing-100); }
+  .leaf--external :global(.esa-icon) { color: var(--color-text-muted); flex: none; }
+  .flyout__link--external { display: flex; align-items: center; gap: var(--spacing-100); }
+  .flyout__link--external :global(.esa-icon) { color: var(--color-text-muted); flex: none; }
 
   /* ── Collapsed-rail flyout ── */
   .flyout {

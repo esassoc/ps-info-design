@@ -27,20 +27,27 @@ const { items, min = '230px', columns } = Astro.props;
 const ARROW = '<path d="M7 7h10v10"/><path d="M7 17 17 7"/>';
 ---
 <div class:list={['homecards', { 'homecards--fixed': !!columns }]} style={`--card-min: ${min}; --cols: ${columns ?? 1}`}>
-  {items.map((item) => (
-    <a class="homecard" href={item.href} rel="noopener">
-      <EsaCard variant="outlined" padding="none">
-        <img class="homecard__img" src={withBase(item.image)} alt="" loading="lazy" decoding="async" />
-        <div class="homecard__body">
-          <span class="homecard__title">
-            {item.title}
-            <EsaIcon name="arrow-up-right" size="xs" paths={ARROW} />
-          </span>
-          <span class="homecard__blurb">{item.blurb}</span>
-        </div>
-      </EsaCard>
-    </a>
-  ))}
+  {items.map((item) => {
+    const internal = item.href.startsWith('/');
+    return (
+      <a
+        class="homecard"
+        href={internal ? withBase(item.href) : item.href}
+        {...(internal ? {} : { target: '_blank', rel: 'noopener' })}
+      >
+        <EsaCard variant="outlined" padding="none">
+          <img class="homecard__img" src={withBase(item.image)} alt="" loading="lazy" decoding="async" />
+          <div class="homecard__body">
+            <span class="homecard__title">
+              {item.title}
+              {!internal && <EsaIcon name="arrow-up-right" size="xs" paths={ARROW} />}
+            </span>
+            <span class="homecard__blurb">{item.blurb}</span>
+          </div>
+        </EsaCard>
+      </a>
+    );
+  })}
 </div>
 
 <style>

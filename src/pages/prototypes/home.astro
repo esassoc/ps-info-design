@@ -14,6 +14,7 @@ import PsInfoGoalBand from '../../components/psinfo/PsInfoGoalBand.astro';
 import PsInfoHomeCards from '../../components/psinfo/PsInfoHomeCards.astro';
 import PsInfoToolLinks from '../../components/psinfo/PsInfoToolLinks.astro';
 import PsInfoRegionMap from '../../components/psinfo/PsInfoRegionMap.astro';
+import { withBase } from '../../lib/base';
 
 const SECTIONS = [
   { label: 'Goals', href: '#goals' },
@@ -24,28 +25,28 @@ const SECTIONS = [
 ];
 
 const GOALS = [
-  { label: 'Healthy Human Population', hue: 'population', href: 'https://vitalsigns.pugetsoundinfo.wa.gov/VitalSignGoal/Detail/1' },
-  { label: 'Vibrant Human Quality of Life', hue: 'quality', href: 'https://vitalsigns.pugetsoundinfo.wa.gov/VitalSignGoal/Detail/2' },
-  { label: 'Thriving Species and Food Web', hue: 'species', href: 'https://vitalsigns.pugetsoundinfo.wa.gov/VitalSignGoal/Detail/3' },
-  { label: 'Functioning Habitat', hue: 'habitat', href: 'https://vitalsigns.pugetsoundinfo.wa.gov/VitalSignGoal/Detail/7' },
-  { label: 'Healthy Water Quality', hue: 'water', href: 'https://vitalsigns.pugetsoundinfo.wa.gov/VitalSignGoal/Detail/6' },
+  { label: 'Healthy Human Population', hue: 'population', href: withBase('/prototypes/goals/healthy-human-population') },
+  { label: 'Vibrant Human Quality of Life', hue: 'quality', href: withBase('/prototypes/goals/vibrant-human-quality-of-life') },
+  { label: 'Thriving Species and Food Web', hue: 'species', href: withBase('/prototypes/goals/thriving-species-and-food-web') },
+  { label: 'Functioning Habitat', hue: 'habitat', href: withBase('/prototypes/goals/functioning-habitat') },
+  { label: 'Healthy Water Quality', hue: 'water', href: withBase('/prototypes/goals/healthy-water-quality') },
 ] as const;
 
 const PLANS = [
-  { title: 'Action Agenda Explorer', blurb: 'Regional guidance that charts the course for Puget Sound recovery', image: '/photos/home/action-agenda-explorer.jpg', href: 'https://actionagenda.pugetsoundinfo.wa.gov/2026-2030' },
+  { title: 'Action Agenda Explorer', blurb: 'Regional guidance that charts the course for Puget Sound recovery', image: '/photos/home/action-agenda-explorer.jpg', href: '/prototypes/action-agenda' },
   { title: 'Implementation Strategies', blurb: 'Strategies by topic to guide and accelerate recovery', image: '/photos/home/implementation-strategies.jpg', href: 'https://pugetsoundestuary.wa.gov/recovering-puget-sound/' },
-  { title: 'Local Ecosystem Recovery Plans', blurb: 'Local Integrating Organization (LIO) plans to implement the Action Agenda', image: '/photos/home/local-recovery-plans.jpg', href: 'https://www.pugetsoundinfo.wa.gov/LIOs' },
+  { title: 'Local Ecosystem Recovery Plans', blurb: 'Local Integrating Organization (LIO) plans to implement the Action Agenda', image: '/photos/home/local-recovery-plans.jpg', href: '/prototypes/lios' },
   { title: 'Puget Sound Federal Task Force Action Plan', blurb: 'Federal plan to implement the Action Agenda (pdf)', image: '/photos/home/federal-task-force.jpg', href: 'https://www.epa.gov/system/files/documents/2022-06/puget-sound-federal-task-force-action-plan-2022-2026.pdf' },
 ];
 
 const IMPLEMENTATION = [
   { title: 'Recovery Acceleration Funding Tool', blurb: 'Opportunities for funding recovery projects', image: '/photos/home/funding-tool.jpg', href: 'https://experience.arcgis.com/experience/6f12941d99644b0e93deaed86f1674f0/' },
-  { title: 'NEP Atlas', blurb: 'EPA National Estuary Program (NEP) and Puget Sound Geographic Program investment activities', image: '/photos/home/nep-atlas.jpg', href: 'https://nepatlas.pugetsoundinfo.wa.gov/' },
-  { title: 'Ongoing Programs Portal', blurb: 'Key programs that provide the foundation for ongoing Puget Sound recovery efforts', image: '/photos/home/ongoing-programs.jpg', href: 'https://www.pugetsoundinfo.wa.gov/OngoingProgram/Index' },
+  { title: 'NEP Atlas', blurb: 'EPA National Estuary Program (NEP) and Puget Sound Geographic Program investment activities', image: '/photos/home/nep-atlas.jpg', href: '/prototypes/nep-atlas' },
+  { title: 'Ongoing Programs Portal', blurb: 'Key programs that provide the foundation for ongoing Puget Sound recovery efforts', image: '/photos/home/ongoing-programs.jpg', href: '/prototypes/ongoing-programs' },
 ];
 
 const PROGRESS = [
-  { title: 'Puget Sound Indicators', blurb: 'Measures that track recovery progress and ecosystem health', image: '/photos/home/indicators.jpg', href: 'https://www.pugetsoundinfo.wa.gov/Indicator/Index' },
+  { title: 'Puget Sound Indicators', blurb: 'Measures that track recovery progress and ecosystem health', image: '/photos/home/indicators.jpg', href: '/prototypes/indicators' },
   { title: 'State of the Sound', blurb: 'Biennial assessment of Puget Sound recovery efforts', image: '/photos/home/state-of-the-sound.jpg', href: 'https://stateofthesound.wa.gov' },
 ];
 
@@ -53,7 +54,7 @@ const TOOLS = [
   {
     title: 'PS Info Web Services',
     blurb: 'Access and download Puget Sound Info data',
-    href: 'https://www.pugetsoundinfo.wa.gov/WebServices/Index',
+    href: '/prototypes/web-services',
     icon: '<ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5V19A9 3 0 0 0 21 19V5"/><path d="M3 12A9 3 0 0 0 21 12"/>',
   },
   {

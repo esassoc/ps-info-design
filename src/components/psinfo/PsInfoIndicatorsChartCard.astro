@@ -1,0 +1,49 @@
+---
+// PsInfoIndicatorsChartCard — represents the source's "Vital Sign Indicator
+// Chart" as text: its legend/axis titles, pod-breakdown tags, and the verbatim
+// descriptive caption. The real 1973-2025 numeric series lives in a large
+// embedded Google Charts JSON blob on the source page and was not extracted
+// (see the page's return-value gaps) — this deliberately does NOT fabricate a
+// numeric chart in its place.
+//
+// bcn-lego-checked: composes esa-pill for the pod/subcategory tags; no esa-
+// lego renders a chart-as-structured-text card (esa-stat is a single value,
+// not a legend/axis/caption composite). Checked Beacon: no matching pattern.
+// psinfo-indicators-chart-card is the reusable home.
+import EsaCard from '@esa/ecology/esa-card.astro';
+import EsaPill from '@esa/ecology/esa-pill.astro';
+import type { ExemplarChart } from '../../data/pages/indicators';
+
+interface Props {
+  chart: ExemplarChart;
+}
+const { chart } = Astro.props;
+---
+<EsaCard variant="outlined">
+  <div class="chartcard">
+    <dl class="chartcard__meta">
+      <div class="chartcard__field">
+        <dt>Legend</dt>
+        <dd>{chart.legendTitle}</dd>
+      </div>
+      <div class="chartcard__field">
+        <dt>X-axis</dt>
+        <dd>{chart.xAxisTitle}</dd>
+      </div>
+    </dl>
+    <div class="chartcard__tags">
+      {chart.subcategoryOptions.map((s) => <EsaPill label={s} size="sm" removable={false} />)}
+    </div>
+    <p class="chartcard__caption">{chart.caption}</p>
+  </div>
+</EsaCard>
+
+<style>
+  .chartcard { display: flex; flex-direction: column; gap: var(--spacing-400); }
+  .chartcard__meta { margin: 0; display: flex; flex-wrap: wrap; gap: var(--spacing-500); }
+  .chartcard__field { display: flex; flex-direction: column; gap: 2px; }
+  .chartcard__field dt { font-size: var(--ps-info-text-meta); color: var(--color-text-muted); }
+  .chartcard__field dd { margin: 0; font-size: var(--ps-info-text-body); font-weight: var(--font-weight-medium); color: var(--color-text-primary); }
+  .chartcard__tags { display: flex; flex-wrap: wrap; gap: var(--spacing-150); }
+  .chartcard__caption { margin: 0; font-size: var(--ps-info-text-body); color: var(--color-text-secondary); line-height: 1.6; }
+</style>

@@ -1,0 +1,115 @@
+---
+// PsInfoNepAtlasNarrative — renders NEP Atlas prose blocks built from
+// AtlasParagraph[] (text/link segments kept in their original sentence
+// position, same shape as the sitewide About page's segments) with two
+// optional additions the NEP Atlas source pages carry that About's narrative
+// doesn't: a single photo floated beside the opening paragraph (the live
+// homepage's welcome copy), and a funding-recipients list where each entry
+// can carry a parenthetical department/agency detail line.
+//
+// bcn-lego-checked: no esa- lego renders ordered prose with inline
+// internal/external links plus an optional side photo and an optional
+// detailed link list; checked Beacon (no matching narrative-body pattern).
+// esa-card (outlined) is the reused surface — same card treatment as every
+// other prose section on this prototype (PsInfoAboutNarrative,
+// PsInfoActionAgendaRefreshProse). Kept as its own sibling rather than
+// reusing PsInfoAboutNarrative because that component's Props type imports
+// AboutBlock/AboutLink from data/pages/about specifically.
+import EsaCard from '@esa/ecology/esa-card.astro';
+import EsaIcon from '@esa/ecology/esa-icon.astro';
+import { withBase } from '../../lib/base';
+import type { AtlasParagraph, AtlasLink, AtlasPhoto, AtlasFundingRecipient } from '../../data/pages/nep-atlas';
+
+interface Props {
+  paragraphs: AtlasParagraph[];
+  /** Photo shown beside the first paragraph, mirroring the source's own float. */
+  photo?: AtlasPhoto;
+  recipients?: AtlasFundingRecipient[];
+}
+const { paragraphs, photo, recipients } = Astro.props;
+
+const ARROW = '<path d="M7 7h10v10"/><path d="M7 17 17 7"/>';
+
+const linkAttrs = (link: AtlasLink) =>
+  link.kind === 'internal' ? { href: withBase(link.route) } : { href: link.href, target: '_blank', rel: 'noopener' };
+---
+<EsaCard variant="outlined">
+  <div class:list={['narrative', photo && 'narrative--photo']}>
+    {photo && (
+      <img class="narrative__photo" src={withBase(photo.image)} alt={photo.alt} loading="lazy" decoding="async" />
+    )}
+    <div class="narrative__body">
+      {paragraphs.map((paragraph) => (
+        <p class="narrative__p">
+          {paragraph.segments.map((seg) =>
+            seg.type === 'text' ? (
+              seg.text
+            ) : (
+              <a {...linkAttrs(seg.link)} class="narrative__link">
+                {seg.link.text}
+                {seg.link.kind === 'external' && <EsaIcon name="arrow-up-right" size="xs" paths={ARROW} />}
+              </a>
+            )
+          )}
+        </p>
+      ))}
+
+      {recipients && recipients.length > 0 && (
+        <ul class="narrative__recipients" role="list">
+          {recipients.map((org) => (
+            <li class="recipient">
+              <a href={org.href} target="_blank" rel="noopener" class="recipient__link">
+                {org.name}
+                <EsaIcon name="arrow-up-right" size="xs" paths={ARROW} />
+              </a>
+              {org.detail && <span class="recipient__detail">{org.detail}</span>}
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  </div>
+</EsaCard>
+
+<style>
+  .narrative--photo { display: grid; grid-template-columns: 240px 1fr; gap: var(--spacing-400); align-items: start; }
+  .narrative__photo {
+    width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: var(--radius-100);
+  }
+  .narrative__body { display: flex; flex-direction: column; gap: var(--spacing-400); min-width: 0; }
+  .narrative__p {
+    margin: 0; font-size: var(--ps-info-text-body); line-height: 1.65;
+    color: var(--color-text-primary); max-width: 74ch;
+  }
+  .narrative__link {
+    color: var(--color-text-link); text-decoration: underline;
+    text-decoration-color: color-mix(in srgb, currentColor 35%, transparent);
+  }
+  .narrative__link:hover { text-decoration-color: currentColor; }
+  .narrative__link:focus-visible { outline: 2px solid var(--focus-ring-color); outline-offset: 2px; }
+  .narrative__link :global(.esa-icon) { color: var(--color-text-muted); margin-left: 2px; vertical-align: -2px; }
+
+  .narrative__recipients {
+    list-style: none; margin: 0; padding: 0;
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: var(--spacing-200);
+  }
+  .recipient {
+    display: flex; flex-direction: column; gap: 2px;
+    padding: var(--spacing-250) var(--spacing-300);
+    background: var(--color-surface-sunken); border-radius: var(--radius-100);
+  }
+  .recipient__link {
+    display: flex; align-items: center; gap: var(--spacing-150);
+    color: var(--color-text-primary); text-decoration: none;
+    font-size: var(--ps-info-text-meta-lg); font-weight: var(--font-weight-medium); line-height: 1.4;
+  }
+  .recipient__link:hover { color: var(--color-primary); }
+  .recipient__link:focus-visible { outline: 2px solid var(--focus-ring-color); outline-offset: 2px; }
+  .recipient__link :global(.esa-icon) { flex: none; margin-left: auto; color: var(--color-text-muted); }
+  .recipient__detail { font-size: var(--ps-info-text-meta); color: var(--color-text-muted); line-height: 1.4; }
+
+  @media (max-width: 640px) {
+    .narrative--photo { grid-template-columns: 1fr; }
+  }
+</style>

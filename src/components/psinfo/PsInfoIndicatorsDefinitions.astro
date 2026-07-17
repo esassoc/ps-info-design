@@ -1,0 +1,44 @@
+---
+// PsInfoIndicatorsDefinitions — the two Indicator Type definitions (Vital Sign
+// Indicators / Progress Indicators) as a two-up card pair, with the closing
+// paragraph beneath. Verbatim from the Indicator/Index page body.
+//
+// bcn-lego-checked: no esa- lego renders a bold-term + definition pair (esa-card
+// has title/subtitle slots but no "term: definition" prose body); esa-card
+// (outlined) is still the reused surface for each definition, same treatment
+// as every other card on this page. Checked Beacon: no matching definition-list
+// pattern. psinfo-indicators-definitions is the reusable home.
+import EsaCard from '@esa/ecology/esa-card.astro';
+import type { IndicatorTypeDefinition } from '../../data/pages/indicators';
+
+interface Props {
+  definitions: IndicatorTypeDefinition[];
+  closing?: string;
+}
+const { definitions, closing } = Astro.props;
+---
+<div class="stack" data-gap="md">
+  <div class="defs">
+    {definitions.map((d) => (
+      <EsaCard variant="outlined">
+        <p class="defs__term">{d.term}</p>
+        <p class="defs__def">{d.definition}</p>
+      </EsaCard>
+    ))}
+  </div>
+  {closing && <p class="defs__closing">{closing}</p>}
+</div>
+
+<style>
+  .defs {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: var(--spacing-400);
+  }
+  .defs__term {
+    margin: 0 0 var(--spacing-150);
+    font-size: 1.0625rem; font-weight: var(--font-weight-semibold);
+    color: var(--color-text-primary);
+  }
+  .defs__def { margin: 0; font-size: var(--ps-info-text-body); color: var(--color-text-secondary); line-height: 1.6; }
+  .defs__closing { margin: 0; font-size: var(--ps-info-text-body); color: var(--color-text-secondary); line-height: 1.65; max-width: 74ch; }
+</style>

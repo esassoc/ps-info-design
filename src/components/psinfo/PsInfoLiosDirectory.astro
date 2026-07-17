@@ -1,0 +1,91 @@
+---
+// PsInfoLiosDirectory — the 10 active Local Areas & LIOs as a card grid.
+// Stands in for the live page's un-embeddable ArcGIS Experience Builder
+// map+list widget (a JS-rendered iframe with no static thumbnail available).
+// Each card: local area (title), action area (meta), the LIO's own
+// organization name (body), and its website when the source data has a real
+// URL — San Juan's "LinktoWebsite" attribute is the literal non-URL string
+// "Coming....." in the feature service, so that one card renders a plain
+// caption instead of a fabricated link.
+//
+// bcn-lego-checked: no esa- lego renders an area/org/conditional-external-
+// link card triple; checked Beacon (no matching directory-card pattern).
+// Card anatomy (bordered surface, icon-free, whole-card link) follows
+// PsInfoCrossLinks.astro / PsInfoModuleGrid.astro already in this folder —
+// reused rather than inventing new card CSS.
+import EsaIcon from '@esa/ecology/esa-icon.astro';
+
+export interface LioAreaCard {
+  localArea: string;
+  actionArea: string;
+  organization: string;
+  website: string | null;
+}
+interface Props {
+  areas: LioAreaCard[];
+}
+const { areas } = Astro.props;
+
+const ARROW = '<path d="M7 7h10v10"/><path d="M7 17 17 7"/>';
+---
+<ul class="liosdir">
+  {areas.map((a) => {
+    const Tag = a.website ? 'a' : 'div';
+    return (
+      <li>
+        <Tag
+          class:list={['liosdir__card', { 'liosdir__card--link': !!a.website }]}
+          {...(a.website ? { href: a.website, target: '_blank', rel: 'noopener' } : {})}
+        >
+          <span class="liosdir__area">{a.localArea}</span>
+          <span class="liosdir__region">{a.actionArea}</span>
+          <span class="liosdir__org">{a.organization}</span>
+          {a.website ? (
+            <span class="liosdir__link">
+              Visit website
+              <EsaIcon name="arrow-up-right" size="xs" paths={ARROW} />
+            </span>
+          ) : (
+            <span class="liosdir__pending">Website coming soon</span>
+          )}
+        </Tag>
+      </li>
+    );
+  })}
+</ul>
+
+<style>
+  .liosdir {
+    list-style: none; margin: 0; padding: 0;
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: var(--spacing-300);
+  }
+  .liosdir__card {
+    display: flex; flex-direction: column; gap: var(--spacing-100);
+    padding: var(--spacing-300) var(--spacing-400);
+    background: var(--color-surface); border: 1px solid var(--color-border);
+    border-radius: var(--radius-100); text-decoration: none;
+    transition: border-color 150ms ease, background 150ms ease;
+  }
+  a.liosdir__card:hover { border-color: var(--color-primary-border); background: var(--color-primary-subtle); }
+  a.liosdir__card:focus-visible { outline: 2px solid var(--focus-ring-color); outline-offset: 2px; }
+  .liosdir__area {
+    font-size: 1.0625rem; font-weight: var(--font-weight-semibold);
+    color: var(--color-text-primary);
+  }
+  .liosdir__region { font-size: var(--ps-info-text-meta); color: var(--color-text-muted); }
+  .liosdir__org { font-size: var(--ps-info-text-body); color: var(--color-text-secondary); line-height: 1.4; }
+  .liosdir__link {
+    display: inline-flex; align-items: center; gap: var(--spacing-100);
+    margin-top: var(--spacing-100);
+    font-size: var(--ps-info-text-meta-lg); font-weight: var(--font-weight-medium);
+    color: var(--color-text-link);
+  }
+  a.liosdir__card:hover .liosdir__link { color: var(--color-primary); }
+  .liosdir__link :global(.esa-icon) { color: var(--color-text-muted); }
+  a.liosdir__card:hover .liosdir__link :global(.esa-icon) { color: var(--color-primary); }
+  .liosdir__pending {
+    margin-top: var(--spacing-100);
+    font-size: var(--ps-info-text-meta-lg); font-style: italic; color: var(--color-text-muted);
+  }
+</style>

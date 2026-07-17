@@ -1,0 +1,102 @@
+---
+// PsInfoAboutNarrative — renders one About section's content blocks: ordered
+// paragraphs with inline text/link segments in their original sentence
+// position (internal links resolve via withBase(), external links open in a
+// new tab with the arrow-up-right mark, mailto links stay plain), plus an
+// optional partner-organization list. Shared by all three About Q&A sections
+// (source: pugetsoundinfo.wa.gov/About).
+//
+// bcn-lego-checked: no esa- lego renders ordered prose with inline
+// internal/external/mailto links mixed in sentence position; checked Beacon
+// (no matching narrative-body pattern). esa-card (outlined) is the reused
+// surface — same card treatment as every other section on this page.
+import EsaCard from '@esa/ecology/esa-card.astro';
+import EsaIcon from '@esa/ecology/esa-icon.astro';
+import { withBase } from '../../lib/base';
+import type { AboutBlock, AboutLink } from '../../data/pages/about';
+
+interface Props {
+  blocks: AboutBlock[];
+}
+const { blocks } = Astro.props;
+
+const ARROW = '<path d="M7 7h10v10"/><path d="M7 17 17 7"/>';
+
+const mailtoHref = (email: string, subject?: string) =>
+  `mailto:${email}${subject ? `?subject=${encodeURIComponent(subject)}` : ''}`;
+
+const linkAttrs = (link: AboutLink) => {
+  if (link.kind === 'internal') return { href: withBase(link.route) };
+  if (link.kind === 'external') return { href: link.href, target: '_blank', rel: 'noopener' };
+  return { href: mailtoHref(link.email, link.subject) };
+};
+---
+<EsaCard variant="outlined">
+  <div class="narrative">
+    {blocks.map((block) => {
+      if (block.type === 'partners') {
+        return (
+          <ul class="narrative__partners" role="list">
+            {block.partners.map((org) => (
+              <li>
+                <a href={org.href} target="_blank" rel="noopener" class="narrative__partner">
+                  {org.name}
+                  <EsaIcon name="arrow-up-right" size="xs" paths={ARROW} />
+                </a>
+              </li>
+            ))}
+          </ul>
+        );
+      }
+      const { paragraph } = block;
+      const content = paragraph.segments.map((seg) => {
+        if (seg.type === 'text') return seg.text;
+        const { link } = seg;
+        return (
+          <a {...linkAttrs(link)} class="narrative__link">
+            {link.text}
+            {link.kind === 'external' && <EsaIcon name="arrow-up-right" size="xs" paths={ARROW} />}
+          </a>
+        );
+      });
+      return (
+        <p class="narrative__p">
+          {paragraph.emphasis ? <em>{content}</em> : content}
+        </p>
+      );
+    })}
+  </div>
+</EsaCard>
+
+<style>
+  .narrative { display: flex; flex-direction: column; gap: var(--spacing-400); }
+  .narrative__p {
+    margin: 0; font-size: var(--ps-info-text-body); line-height: 1.65;
+    color: var(--color-text-primary); max-width: 74ch;
+  }
+  .narrative__p em { font-style: italic; color: var(--color-text-secondary); }
+  .narrative__link {
+    color: var(--color-text-link); text-decoration: underline;
+    text-decoration-color: color-mix(in srgb, currentColor 35%, transparent);
+  }
+  .narrative__link:hover { text-decoration-color: currentColor; }
+  .narrative__link:focus-visible { outline: 2px solid var(--focus-ring-color); outline-offset: 2px; }
+  .narrative__link :global(.esa-icon) { color: var(--color-text-muted); margin-left: 2px; vertical-align: -2px; }
+
+  .narrative__partners {
+    list-style: none; margin: 0; padding: 0;
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: var(--spacing-200);
+  }
+  .narrative__partner {
+    display: flex; align-items: center; gap: var(--spacing-150);
+    padding: var(--spacing-250) var(--spacing-300);
+    background: var(--color-surface-sunken); border-radius: var(--radius-100);
+    color: var(--color-text-primary); text-decoration: none;
+    font-size: var(--ps-info-text-meta-lg); line-height: 1.4;
+    transition: background 150ms ease;
+  }
+  .narrative__partner:hover { background: var(--color-primary-subtle); color: var(--color-primary); }
+  .narrative__partner:focus-visible { outline: 2px solid var(--focus-ring-color); outline-offset: 2px; }
+  .narrative__partner :global(.esa-icon) { flex: none; margin-left: auto; color: var(--color-text-muted); }
+</style>

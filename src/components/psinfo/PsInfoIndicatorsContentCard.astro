@@ -1,0 +1,206 @@
+---
+// PsInfoIndicatorsContentCard — a generic content card reused across the
+// Detail page's narrative sections (Description, Importance, Key Vital Sign
+// Indicator Results, Methods, Interpretation of Results, Additional
+// Information). Each section supplies only the prop groups it has; the card
+// renders whichever are present, in a fixed order: paragraphs -> fields (dt/dd,
+// for Methods' Monitoring Program / Data Source) -> bulletGroups (for Key
+// Results' Provisional Update / Past Indicator Results) -> quote (for
+// Interpretation's Task Force excerpt) -> subsections (the 2019/2018 report
+// write-ups) -> links -> references (Additional Information's citations).
+//
+// Source paragraphs are stored as flat strings (not pre-segmented with inline
+// link boundaries), so rather than risk corrupting verbatim text by
+// string-splitting it to re-insert links, each section's referenced links
+// render as their own row below the prose — same verbatim text, same real
+// hrefs, no invented markup.
+//
+// bcn-lego-checked: no esa- lego renders this mix of prose/fields/bullets/
+// quote/subsections — it's the same "esa-card as reused surface, bespoke
+// prose body" shape as PsInfoAboutNarrative. Checked Beacon: no matching
+// flexible content-card pattern. psinfo-indicators-content-card is the
+// reusable home.
+import EsaCard from '@esa/ecology/esa-card.astro';
+import EsaIcon from '@esa/ecology/esa-icon.astro';
+
+export interface ContentCardField {
+  label: string;
+  text: string;
+  linkText: string;
+  href: string;
+}
+export interface ContentCardBulletGroup {
+  label: string;
+  bullets: string[];
+}
+export interface ContentCardQuote {
+  leadIn: string;
+  leadInHref?: string;
+  text: string;
+}
+export interface ContentCardLink {
+  text: string;
+  href: string;
+}
+export interface ContentCardSubsection {
+  heading: string;
+  paragraph: string;
+  links?: ContentCardLink[];
+}
+export interface ContentCardReference {
+  citation: string;
+  linkText: string;
+  href: string;
+}
+
+interface Props {
+  paragraphs?: string[];
+  fields?: ContentCardField[];
+  bulletGroups?: ContentCardBulletGroup[];
+  quote?: ContentCardQuote;
+  subsections?: ContentCardSubsection[];
+  links?: ContentCardLink[];
+  references?: ContentCardReference[];
+}
+const { paragraphs, fields, bulletGroups, quote, subsections, links, references } = Astro.props;
+
+const ARROW = '<path d="M7 7h10v10"/><path d="M7 17 17 7"/>';
+---
+<EsaCard variant="outlined">
+  <div class="cc">
+    {paragraphs && paragraphs.map((p) => <p class="cc__p">{p}</p>)}
+
+    {fields && fields.length > 0 && (
+      <dl class="cc__fields">
+        {fields.map((f) => (
+          <div class="cc__field">
+            <dt>{f.label}</dt>
+            <dd>
+              {f.text}{' '}
+              <a href={f.href} target="_blank" rel="noopener">
+                {f.linkText}
+                <EsaIcon name="arrow-up-right" size="xs" paths={ARROW} />
+              </a>
+            </dd>
+          </div>
+        ))}
+      </dl>
+    )}
+
+    {bulletGroups && bulletGroups.map((g) => (
+      <div class="cc__group">
+        <p class="cc__grouplabel">{g.label}</p>
+        <ul class="cc__bullets" role="list">
+          {g.bullets.map((b) => <li>{b}</li>)}
+        </ul>
+      </div>
+    ))}
+
+    {quote && (
+      <figure class="cc__quote">
+        <blockquote class="cc__quotetext">{quote.text}</blockquote>
+        <figcaption class="cc__quotecite">
+          {quote.leadInHref ? (
+            <a href={quote.leadInHref} target="_blank" rel="noopener">
+              {quote.leadIn}
+              <EsaIcon name="arrow-up-right" size="xs" paths={ARROW} />
+            </a>
+          ) : quote.leadIn}
+        </figcaption>
+      </figure>
+    )}
+
+    {subsections && subsections.map((s) => (
+      <div class="cc__sub">
+        <h3 class="cc__subhead">{s.heading}</h3>
+        <p class="cc__p">{s.paragraph}</p>
+        {s.links && s.links.length > 0 && (
+          <div class="cc__links">
+            {s.links.map((l) => (
+              <a href={l.href} target="_blank" rel="noopener">
+                {l.text}
+                <EsaIcon name="arrow-up-right" size="xs" paths={ARROW} />
+              </a>
+            ))}
+          </div>
+        )}
+      </div>
+    ))}
+
+    {links && links.length > 0 && (
+      <div class="cc__links">
+        {links.map((l) => (
+          <a href={l.href} target="_blank" rel="noopener">
+            {l.text}
+            <EsaIcon name="arrow-up-right" size="xs" paths={ARROW} />
+          </a>
+        ))}
+      </div>
+    )}
+
+    {references && references.length > 0 && (
+      <ol class="cc__refs">
+        {references.map((r) => (
+          <li class="cc__ref">
+            <p class="cc__refcite">{r.citation}</p>
+            <a href={r.href} target="_blank" rel="noopener">
+              {r.linkText}
+              <EsaIcon name="arrow-up-right" size="xs" paths={ARROW} />
+            </a>
+          </li>
+        ))}
+      </ol>
+    )}
+  </div>
+</EsaCard>
+
+<style>
+  .cc { display: flex; flex-direction: column; gap: var(--spacing-400); }
+  .cc__p { margin: 0; font-size: var(--ps-info-text-body); color: var(--color-text-primary); line-height: 1.65; max-width: 74ch; }
+
+  .cc__fields { margin: 0; display: flex; flex-direction: column; gap: var(--spacing-300); }
+  .cc__field dt { font-size: var(--ps-info-text-meta); color: var(--color-text-muted); }
+  .cc__field dd { margin: 2px 0 0; font-size: var(--ps-info-text-body); color: var(--color-text-primary); line-height: 1.6; max-width: 74ch; }
+  .cc__field dd a { color: var(--color-text-link); text-decoration: none; }
+  .cc__field dd a:hover { text-decoration: underline; }
+  .cc__field dd a:focus-visible { outline: 2px solid var(--focus-ring-color); outline-offset: 2px; }
+  .cc__field dd :global(.esa-icon) { color: var(--color-text-muted); margin-left: 2px; vertical-align: -1px; }
+
+  .cc__group { display: flex; flex-direction: column; gap: var(--spacing-200); }
+  .cc__grouplabel { margin: 0; font-size: 1rem; font-weight: var(--font-weight-semibold); color: var(--color-text-primary); }
+  .cc__bullets { margin: 0; padding-left: 1.25em; display: flex; flex-direction: column; gap: var(--spacing-200); }
+  .cc__bullets li { font-size: var(--ps-info-text-body); color: var(--color-text-primary); line-height: 1.6; max-width: 74ch; }
+
+  .cc__quote {
+    margin: 0; display: flex; flex-direction: column; gap: var(--spacing-200);
+    padding: var(--spacing-400); background: var(--color-surface-sunken); border-radius: var(--radius-100);
+  }
+  .cc__quotetext { margin: 0; font-size: var(--ps-info-text-body); font-style: italic; color: var(--color-text-primary); line-height: 1.65; max-width: 72ch; }
+  .cc__quotecite { font-size: var(--ps-info-text-meta-lg); color: var(--color-text-muted); }
+  .cc__quotecite a { color: var(--color-text-muted); text-decoration: none; }
+  .cc__quotecite a:hover { color: var(--color-primary); }
+  .cc__quotecite a:focus-visible { outline: 2px solid var(--focus-ring-color); outline-offset: 2px; }
+  .cc__quotecite :global(.esa-icon) { margin-left: 2px; vertical-align: -1px; }
+
+  .cc__sub { display: flex; flex-direction: column; gap: var(--spacing-200); }
+  .cc__subhead { margin: 0; font-family: var(--font-display); font-size: 1.0625rem; font-weight: var(--font-weight-semibold); color: var(--color-text-primary); }
+
+  .cc__links { display: flex; flex-wrap: wrap; gap: var(--spacing-300); }
+  .cc__links a {
+    display: inline-flex; align-items: center; gap: var(--spacing-100);
+    font-size: var(--ps-info-text-meta-lg); color: var(--color-text-link); text-decoration: none;
+  }
+  .cc__links a:hover { text-decoration: underline; }
+  .cc__links a:focus-visible { outline: 2px solid var(--focus-ring-color); outline-offset: 2px; }
+
+  .cc__refs { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: var(--spacing-300); }
+  .cc__ref { display: flex; flex-direction: column; gap: var(--spacing-100); padding-top: var(--spacing-300); border-top: 1px solid var(--color-border-light); }
+  .cc__refs .cc__ref:first-child { padding-top: 0; border-top: none; }
+  .cc__refcite { margin: 0; font-size: var(--ps-info-text-meta-lg); color: var(--color-text-secondary); line-height: 1.55; }
+  .cc__ref > a {
+    display: inline-flex; align-items: center; gap: var(--spacing-100); align-self: flex-start;
+    font-size: var(--ps-info-text-meta-lg); color: var(--color-text-link); text-decoration: none;
+  }
+  .cc__ref > a:hover { text-decoration: underline; }
+  .cc__ref > a:focus-visible { outline: 2px solid var(--focus-ring-color); outline-offset: 2px; }
+</style>

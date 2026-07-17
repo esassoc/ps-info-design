@@ -1,0 +1,150 @@
+---
+// PsInfoOngoingProgramsBoard — the 270-row Ongoing Programs inventory,
+// grouped by primary Activity Type (12 real categories + "Unspecified" for
+// the 2 programs the source grid leaves uncategorized). Modeled directly on
+// PsInfoIndicatorsBoard's grouped-row shape: neutral card rows, no colored
+// left borders, an external-link mark on the program name and the owner
+// organization (both route to the live site — their Detail pages aren't
+// rebuilt in this prototype). At 270 rows the per-item esa-collapsible
+// pattern (PsInfoWebServicesCatalog) would dump 270 accordions — unusable;
+// grouped rows read far better at this scale, the same reasoning
+// PsInfoIndicatorsBoard already established over PsInfoStrategyBoard's shape.
+//
+// Status uses a LOCAL Active/Inactive/Retired -> esa-badge map, not
+// PsInfoStatusBadge — that component is typed to psinfo-domain's unrelated
+// IndicatorStatus, which this page's OngoingProgramStatus doesn't share.
+//
+// bcn-lego-checked: rows compose esa-pill (activity type + geographic scope
+// tags), esa-badge (status), and esa-icon (org glyph + external-link marks);
+// no esa- lego renders a grouped, repeating program listing itself (esa-card's
+// header/body doesn't fit a repeating row list), so the row/group frame is
+// bespoke structure — the same shape already established by
+// PsInfoIndicatorsBoard and PsInfoStrategyBoard. Checked Beacon: no matching
+// grouped-listing pattern either. psinfo-ongoing-programs-board is the
+// reusable home for this page's listing.
+import EsaIcon from '@esa/ecology/esa-icon.astro';
+import EsaPill from '@esa/ecology/esa-pill.astro';
+import EsaBadge from '@esa/ecology/esa-badge.astro';
+import type { ActivityTypeGroup, OngoingProgramStatus } from '../../data/pages/ongoing-programs';
+
+interface Props {
+  sections: ActivityTypeGroup[];
+}
+const { sections } = Astro.props;
+
+const ARROW = '<path d="M7 7h10v10"/><path d="M7 17 17 7"/>';
+const BUILDING = '<rect width="16" height="20" x="4" y="2" rx="2"/><path d="M9 22v-4h6v4"/><path d="M8 6h.01"/><path d="M16 6h.01"/><path d="M12 6h.01"/><path d="M12 10h.01"/><path d="M8 10h.01"/><path d="M16 10h.01"/>';
+
+const STATUS_VARIANT: Record<OngoingProgramStatus, 'success' | 'info' | 'secondary'> = {
+  Active: 'success',
+  Inactive: 'info',
+  Retired: 'secondary',
+};
+---
+<div class="board">
+  {sections.map((group) => (
+    <div class="group">
+      <div class="group__head">
+        <h3 class="group__name">{group.activityType}</h3>
+        <span class="group__count">{group.programs.length} program{group.programs.length === 1 ? '' : 's'}</span>
+      </div>
+      <ul class="rows" role="list">
+        {group.programs.map((p) => (
+          <li class="row">
+            <div class="row__head">
+              <a class="row__name" href={p.detailUrl} target="_blank" rel="noopener">
+                {p.name}
+                <EsaIcon name="arrow-up-right" size="xs" paths={ARROW} />
+              </a>
+              <EsaBadge value={p.status} variant={STATUS_VARIANT[p.status]} size="sm" />
+            </div>
+
+            <a class="row__org" href={p.ownerOrganization.href} target="_blank" rel="noopener">
+              <EsaIcon name="building" size="xs" paths={BUILDING} />
+              {p.ownerOrganization.name}
+              <EsaIcon name="arrow-up-right" size="xs" paths={ARROW} />
+            </a>
+
+            <p class="row__desc">{p.description}</p>
+
+            <div class="row__tags">
+              {p.activityTypes.map((t) => (
+                <EsaPill label={t} size="xs" variant={t === p.primaryActivityType ? 'primary' : 'default'} removable={false} />
+              ))}
+              <EsaPill label={p.geographicScope} size="xs" variant="info" removable={false} />
+            </div>
+
+            {(p.startYear || p.website || p.includedInActionAgenda.length > 0) && (
+              <div class="row__meta">
+                {p.startYear && <span class="row__meta-item">Since {p.startYear}</span>}
+                {p.includedInActionAgenda.length > 0 && (
+                  <span class="row__meta-item">{p.includedInActionAgenda.join(', ')}</span>
+                )}
+                {p.website && (
+                  <a class="row__meta-item row__meta-link" href={p.website.url} target="_blank" rel="noopener">
+                    Program website
+                    <EsaIcon name="external-link" size="xs" />
+                  </a>
+                )}
+              </div>
+            )}
+          </li>
+        ))}
+      </ul>
+    </div>
+  ))}
+</div>
+
+<style>
+  .board { display: flex; flex-direction: column; gap: var(--spacing-500); }
+
+  .group__head { display: flex; align-items: baseline; gap: var(--spacing-250); margin-bottom: var(--spacing-250); }
+  .group__name { margin: 0; font-family: var(--font-display); font-size: 1.0625rem; font-weight: var(--font-weight-semibold); color: var(--color-text-primary); }
+  .group__count { font-size: var(--ps-info-text-meta); color: var(--color-text-muted); white-space: nowrap; }
+
+  .rows { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--spacing-200); }
+  .row {
+    display: flex; flex-direction: column; gap: var(--spacing-200);
+    padding: var(--spacing-300) var(--spacing-400);
+    background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-100);
+  }
+
+  .row__head { display: flex; align-items: baseline; flex-wrap: wrap; gap: var(--spacing-250); justify-content: space-between; }
+  .row__name {
+    font-size: var(--ps-info-text-body); font-weight: var(--font-weight-medium);
+    color: var(--color-text-primary); text-decoration: none;
+  }
+  .row__name:hover { color: var(--color-primary); text-decoration: underline; }
+  .row__name:focus-visible { outline: 2px solid var(--focus-ring-color); outline-offset: 2px; }
+  .row__name :global(.esa-icon) { color: var(--color-text-muted); margin-left: 2px; vertical-align: -1px; }
+
+  .row__org {
+    display: inline-flex; align-items: center; gap: var(--spacing-100);
+    font-size: var(--ps-info-text-meta-lg); color: var(--color-text-muted); text-decoration: none;
+  }
+  .row__org:hover { color: var(--color-primary); }
+  .row__org:focus-visible { outline: 2px solid var(--focus-ring-color); outline-offset: 2px; }
+  .row__org :global(.esa-icon) { color: var(--color-text-muted); }
+
+  .row__desc {
+    margin: 0; font-size: var(--ps-info-text-meta-lg); line-height: 1.55;
+    color: var(--color-text-secondary); max-width: 74ch;
+  }
+
+  .row__tags { display: flex; flex-wrap: wrap; align-items: center; gap: var(--spacing-150); }
+
+  .row__meta { display: flex; flex-wrap: wrap; align-items: center; gap: var(--spacing-150) var(--spacing-300); }
+  .row__meta-item {
+    display: inline-flex; align-items: center; gap: var(--spacing-100);
+    font-size: var(--ps-info-text-meta); color: var(--color-text-muted); text-decoration: none;
+  }
+  .row__meta-item:not(:first-child)::before { content: '·'; margin-right: var(--spacing-150); color: var(--color-border); }
+  a.row__meta-link { color: var(--color-text-link); }
+  a.row__meta-link:hover { text-decoration: underline; }
+  a.row__meta-link:focus-visible { outline: 2px solid var(--focus-ring-color); outline-offset: 2px; }
+  .row__meta-item :global(.esa-icon) { color: currentColor; }
+
+  @media (max-width: 640px) {
+    .row__head { flex-direction: column; align-items: flex-start; gap: var(--spacing-150); }
+  }
+</style>

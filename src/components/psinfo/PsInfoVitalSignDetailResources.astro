@@ -1,0 +1,103 @@
+---
+// PsInfoVitalSignDetailResources — the source's "Background Documents" and
+// "Other Resources" outlines: an optional heading, entries that are either a
+// link, a plain label (a group heading with its own children — e.g. Salmon's
+// "2020 Ecosystem Recovery Target", Orcas' "Recently Published Reports"), or
+// a sentence with links embedded mid-sentence (`inlineLinks`, kept out of the
+// verbatim text and rendered as their own row, same convention as
+// PsInfoVitalSignDetailMessages). Real 2-level nesting in source (Orcas'
+// "Encyclopedia Of Puget Sound" and "Southern Resident Orca Task Force
+// website" are themselves sub-lists inside Other Resources) — rendered via
+// Astro.self so depth isn't hardcoded to 2.
+//
+// Shared by both Background Documents and Other Resources (same shape).
+//
+// bcn-lego-checked: esa-card is the surface (top-level call only — recursive
+// calls render just the nested <ul>, no re-wrapping); esa-icon marks every
+// external link. No esa- lego renders a nested document outline. Checked
+// Beacon: no matching pattern. psinfo-vital-sign-detail-resources is the
+// reusable home.
+import EsaCard from '@esa/ecology/esa-card.astro';
+import EsaIcon from '@esa/ecology/esa-icon.astro';
+import type { VitalSignResourceSection, VitalSignResourceEntry } from '../../data/pages/vital-sign-details';
+
+interface Props {
+  /** Top-level call: one or more headed/unheaded groups, wrapped in a card. */
+  sections?: VitalSignResourceSection[];
+  /** Recursive call: a bare nested entry list, no card. */
+  entries?: VitalSignResourceEntry[];
+}
+const { sections, entries } = Astro.props;
+
+const ARROW = '<path d="M7 7h10v10"/><path d="M7 17 17 7"/>';
+---
+{sections ? (
+  <EsaCard variant="outlined">
+    <div class="resources">
+      {sections.map((section) => (
+        <div class="resources__section">
+          {section.heading && <h3 class="resources__heading">{section.heading}</h3>}
+          <Astro.self entries={section.entries} />
+        </div>
+      ))}
+    </div>
+  </EsaCard>
+) : (
+  entries && (
+    <ul class="resources__list" role="list">
+      {entries.map((entry) => (
+        <li class="resources__entry">
+          {entry.href ? (
+            <a href={entry.href} target="_blank" rel="noopener">
+              {entry.text}
+              <EsaIcon name="arrow-up-right" size="xs" paths={ARROW} />
+            </a>
+          ) : (
+            <span class="resources__label">{entry.text}</span>
+          )}
+          {entry.inlineLinks && entry.inlineLinks.length > 0 && (
+            <div class="resources__inline-links">
+              {entry.inlineLinks.map((l) => (
+                <a href={l.href} target="_blank" rel="noopener">
+                  {l.text}
+                  <EsaIcon name="arrow-up-right" size="xs" paths={ARROW} />
+                </a>
+              ))}
+            </div>
+          )}
+          {entry.children && entry.children.length > 0 && <Astro.self entries={entry.children} />}
+        </li>
+      ))}
+    </ul>
+  )
+)}
+
+<style>
+  .resources { display: flex; flex-direction: column; gap: var(--spacing-500); }
+  .resources__section:not(:first-child) { padding-top: var(--spacing-400); border-top: 1px solid var(--color-border-light); }
+  .resources__heading { margin: 0 0 var(--spacing-200); font-family: var(--font-display); font-size: 1.0625rem; font-weight: var(--font-weight-semibold); color: var(--color-text-primary); }
+
+  .resources__list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--spacing-250); }
+  .resources__entry { display: flex; flex-direction: column; gap: var(--spacing-150); }
+  .resources__entry > a {
+    display: inline-flex; align-items: flex-start; gap: var(--spacing-100); align-self: flex-start;
+    font-size: var(--ps-info-text-body); color: var(--color-text-link); text-decoration: none; line-height: 1.5;
+  }
+  .resources__entry > a:hover { text-decoration: underline; }
+  .resources__entry > a:focus-visible { outline: 2px solid var(--focus-ring-color); outline-offset: 2px; }
+  .resources__entry > a :global(.esa-icon) { flex: none; margin-top: 3px; }
+  .resources__label { font-size: var(--ps-info-text-body); font-weight: var(--font-weight-medium); color: var(--color-text-primary); line-height: 1.5; }
+
+  .resources__inline-links { display: flex; flex-wrap: wrap; gap: var(--spacing-300); }
+  .resources__inline-links a {
+    display: inline-flex; align-items: center; gap: var(--spacing-100);
+    font-size: var(--ps-info-text-meta-lg); color: var(--color-text-link); text-decoration: none;
+  }
+  .resources__inline-links a:hover { text-decoration: underline; }
+  .resources__inline-links a:focus-visible { outline: 2px solid var(--focus-ring-color); outline-offset: 2px; }
+
+  .resources__entry > .resources__list {
+    margin-top: var(--spacing-150);
+    padding-left: var(--spacing-500);
+  }
+</style>

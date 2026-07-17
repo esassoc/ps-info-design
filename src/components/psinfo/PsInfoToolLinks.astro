@@ -4,6 +4,7 @@
 // card IS the esa-card lego wrapped in a block link; the glyph is esa-icon.
 import EsaCard from '@esa/ecology/esa-card.astro';
 import EsaIcon from '@esa/ecology/esa-icon.astro';
+import { withBase } from '../../lib/base';
 
 export interface ToolLinkItem {
   title: string;
@@ -20,24 +21,31 @@ const { items } = Astro.props;
 const ARROW = '<path d="M7 7h10v10"/><path d="M7 17 17 7"/>';
 ---
 <div class="toolrow">
-  {items.map((item) => (
-    <a class="tool" href={item.href} rel="noopener">
-      <EsaCard variant="outlined" padding="none">
-        <div class="tool__row">
-          <span class="tool__glyph" aria-hidden="true">
-            <EsaIcon name={item.title} size="lg" paths={item.icon} />
-          </span>
-          <span class="tool__body">
-            <span class="tool__title">
-              {item.title}
-              <EsaIcon name="arrow-up-right" size="xs" paths={ARROW} />
+  {items.map((item) => {
+    const internal = item.href.startsWith('/');
+    return (
+      <a
+        class="tool"
+        href={internal ? withBase(item.href) : item.href}
+        {...(internal ? {} : { target: '_blank', rel: 'noopener' })}
+      >
+        <EsaCard variant="outlined" padding="none">
+          <div class="tool__row">
+            <span class="tool__glyph" aria-hidden="true">
+              <EsaIcon name={item.title} size="lg" paths={item.icon} />
             </span>
-            <span class="tool__blurb">{item.blurb}</span>
-          </span>
-        </div>
-      </EsaCard>
-    </a>
-  ))}
+            <span class="tool__body">
+              <span class="tool__title">
+                {item.title}
+                {!internal && <EsaIcon name="arrow-up-right" size="xs" paths={ARROW} />}
+              </span>
+              <span class="tool__blurb">{item.blurb}</span>
+            </span>
+          </div>
+        </EsaCard>
+      </a>
+    );
+  })}
 </div>
 
 <style>
