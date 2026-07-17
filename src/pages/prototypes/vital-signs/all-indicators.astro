@@ -1,0 +1,26 @@
+---
+// All Indicators — vitalsigns.pugetsoundinfo.wa.gov/VitalSignIndicator/ViewAll
+// reproduced: the Vital Signs module sub-nav, then the full color-coded
+// Fancytree of every goal, Vital Sign, and indicator (goal and Vital Sign
+// links render in their goal's ThemeColor, exactly as the source's
+// treeSources data styles them), with the source's own progress/target-status
+// icons. Data is the same verbatim scrape the goal pages use
+// (src/data/pages/goals.ts).
+import PsInfoAppShell from '../../../layouts/PsInfoAppShell.astro';
+import PsInfoVsSubnav from '../../../components/psinfo/PsInfoVsSubnav.astro';
+import PsInfoVsFancyTree from '../../../components/psinfo/PsInfoVsFancyTree.astro';
+import { GOALS } from '../../../data/pages/goals';
+---
+<!-- manifest:
+  layout: PsInfoAppShell (active Goals) > center+stack spine
+  sections:
+    - vital signs module nav -> psinfo-vs-subnav (banner + goal dropdowns + trail)
+    - all indicators tree    -> psinfo-vs-fancy-tree (color-coded, all five goals)
+-->
+<PsInfoAppShell title="All Indicators — Puget Sound Info" active={{ moduleId: 'goals' }}>
+  <div class="center stack" data-gap="xl">
+    <PsInfoVsSubnav activeAllIndicators={true} />
+
+    <PsInfoVsFancyTree goals={GOALS} colorCoded={true} expandedLevels={2} treeId="tree-all" />
+  </div>
+</PsInfoAppShell>

@@ -1,0 +1,318 @@
+---
+// PsInfoVsFancyTree — the Vital Signs sites' Fancytree convention, reproduced:
+// an expandable/collapsible GOAL > VITAL SIGN > INDICATOR tree in a table-like
+// frame, with Expand Level / Collapse Level buttons, a search filter, and the
+// source's OWN circular progress/target-status icons
+// (/photos/vital-signs/icons/*, downloaded from
+// vitalsigns.pugetsoundinfo.wa.gov/Content/img/VitalSignIndicatorIcons/).
+//
+// bcn-lego-checked: checked esa-collapsible (single disclosure block, no
+// tree/level semantics, no column layout) and esa-tab-layout /
+// esa-filter-container (unrelated shapes); the Fancytree table convention is
+// the source site's own UI and is reproduced here. Toggles are real buttons
+// with aria-expanded/aria-controls; the status icons carry the source's full
+// alt text; search input is labeled.
+import EsaIcon from '@esa/ecology/esa-icon.astro';
+import { withBase } from '../../lib/base';
+import type { GoalDetail, ProgressLabel, TargetStatusLabel } from '../../data/pages/goals';
+
+interface Props {
+  goals: GoalDetail[];
+  /** Frame color token, e.g. '--ps-info-goal-population'; defaults to brand navy. */
+  frameHueVar?: string;
+  /** ViewAll mode: goal + vital sign links render in their goal's ThemeColor. */
+  colorCoded?: boolean;
+  /** Which levels start expanded: 1 = goals only, 2 = goals + vital signs. */
+  expandedLevels?: 1 | 2;
+  /** Unique id when multiple trees share a page. */
+  treeId?: string;
+}
+const { goals, frameHueVar, colorCoded = false, expandedLevels = 1, treeId = 'vstree' } = Astro.props;
+
+const PROGRESS_ICON: Record<ProgressLabel, string> = {
+  'Getting Better': 'progress-gettingbetter.png',
+  'Mixed Results': 'progress-mixedresults.png',
+  'No Trend': 'progress-notrend.png',
+  'Getting Worse': 'progress-gettingworse.png',
+  'Limited Data': 'progress-limiteddata.png',
+  'Indicator To Be Developed': 'progress-status-tobedeveloped.png',
+};
+const TARGET_ICON: Record<TargetStatusLabel, string> = {
+  'Near Or At Target': 'status-neartarget.png',
+  'Below Target': 'status-belowtarget.png',
+};
+const progressAlt = (p: ProgressLabel) =>
+  `An image representing the progress of a Vital Sign. Display name of the progress: ${p}`;
+const targetAlt = (t: TargetStatusLabel) =>
+  `An image representing the status of a Vital Sign. Display name of the status: ${t}`;
+
+// Salmon and Orcas have in-prototype detail pages (same mapping the goal pages use).
+const INTERNAL_VS: Record<string, string> = {
+  Salmon: '/prototypes/vital-signs/chinook-salmon',
+  Orcas: '/prototypes/vital-signs/orcas',
+};
+
+const PLUS = '<path d="M5 12h14"/><path d="M12 5v14"/>';
+const MINUS = '<path d="M5 12h14"/>';
+const uid = (...parts: (string | number)[]) =>
+  [treeId, ...parts].join('-').toLowerCase().replace(/[^a-z0-9-]+/g, '');
+---
+<div class="vstree" id={treeId} style={`--frame: var(${frameHueVar ?? '--ps-info-blue-800'})`}>
+  <div class="vstree__toolbar">
+    <button type="button" class="vstree__lvlbtn" data-tree-expand>Expand Level</button>
+    <button type="button" class="vstree__lvlbtn" data-tree-collapse>Collapse Level</button>
+    <label class="vstree__searchwrap">
+      <span class="sr-only">Search the indicator tree</span>
+      <input class="vstree__search" type="search" placeholder="Search..." data-tree-search />
+    </label>
+    <button type="button" class="vstree__clear" data-tree-clear aria-label="Clear search">×</button>
+  </div>
+
+  <div class="vstree__head" aria-hidden="true">
+    <span class="vstree__head-path">Goal <EsaIcon name="chevron-right" size="xs" paths='<path d="m9 18 6-6-6-6"/>' /> Vital Sign <EsaIcon name="chevron-right" size="xs" paths='<path d="m9 18 6-6-6-6"/>' /> Indicator</span>
+    <span class="vstree__head-col">Indicator Progress</span>
+    <span class="vstree__head-col">Target Status</span>
+  </div>
+
+  <ul class="vstree__l0" role="list">
+    {goals.map((goal) => (
+      <li class="vstree__goal" data-tree-row data-level="0" data-text={goal.name.toLowerCase()}>
+        <div class="vstree__row">
+          <button
+            type="button"
+            class="vstree__toggle"
+            data-tree-toggle
+            aria-expanded={expandedLevels >= 1 ? 'true' : 'false'}
+            aria-controls={uid(goal.slug)}
+            aria-label={`Toggle ${goal.name}`}
+          >
+            <EsaIcon name="tree-toggle" size="sm" paths={expandedLevels >= 1 ? MINUS : PLUS} />
+          </button>
+          <a
+            class="vstree__link vstree__link--goal"
+            style={colorCoded ? `color: color-mix(in srgb, var(${goal.hueVar}) 80%, #000000)` : undefined}
+            href={withBase(`/prototypes/goals/${goal.slug}`)}
+          >{goal.name}</a>
+        </div>
+        <ul class="vstree__l1" role="list" id={uid(goal.slug)} hidden={expandedLevels < 1}>
+          {goal.vitalSigns.map((vsign) => (
+            <li data-tree-row data-level="1" data-text={vsign.name.toLowerCase()}>
+              <div class="vstree__row vstree__row--vs">
+                <button
+                  type="button"
+                  class="vstree__toggle"
+                  data-tree-toggle
+                  aria-expanded={expandedLevels >= 2 ? 'true' : 'false'}
+                  aria-controls={uid(goal.slug, vsign.name)}
+                  aria-label={`Toggle ${vsign.name}`}
+                >
+                  <EsaIcon name="tree-toggle" size="sm" paths={expandedLevels >= 2 ? MINUS : PLUS} />
+                </button>
+                {INTERNAL_VS[vsign.name] ? (
+                  <a
+                    class="vstree__link"
+                    style={colorCoded ? `color: color-mix(in srgb, var(${goal.hueVar}) 80%, #000000)` : undefined}
+                    href={withBase(INTERNAL_VS[vsign.name])}
+                  >{vsign.name}</a>
+                ) : (
+                  <a
+                    class="vstree__link"
+                    style={colorCoded ? `color: color-mix(in srgb, var(${goal.hueVar}) 80%, #000000)` : undefined}
+                    href={vsign.href}
+                    target="_blank" rel="noopener"
+                  >{vsign.name}</a>
+                )}
+              </div>
+              <ul class="vstree__l2" role="list" id={uid(goal.slug, vsign.name)} hidden={expandedLevels < 2}>
+                {vsign.indicators.map((ind) => (
+                  <li data-tree-row data-level="2" data-text={ind.name.toLowerCase()}>
+                    <div class="vstree__row vstree__row--ind">
+                      <a class="vstree__link vstree__link--ind" href={ind.href} target="_blank" rel="noopener">{ind.name}</a>
+                      <span class="vstree__cell">
+                        <img src={withBase(`/photos/vital-signs/icons/${PROGRESS_ICON[ind.progress]}`)} alt={progressAlt(ind.progress)} width="64" height="64" loading="lazy" />
+                      </span>
+                      <span class="vstree__cell">
+                        {ind.targetStatus && (
+                          <img src={withBase(`/photos/vital-signs/icons/${TARGET_ICON[ind.targetStatus]}`)} alt={targetAlt(ind.targetStatus)} width="64" height="64" loading="lazy" />
+                        )}
+                      </span>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </li>
+          ))}
+        </ul>
+      </li>
+    ))}
+  </ul>
+</div>
+
+<script>
+  const MINUS_D = 'M5 12h14';
+  const PLUS_D2 = 'M12 5v14';
+
+  document.querySelectorAll<HTMLElement>('.vstree').forEach((tree) => {
+    const toggles = [...tree.querySelectorAll<HTMLButtonElement>('[data-tree-toggle]')];
+
+    const setToggle = (btn: HTMLButtonElement, open: boolean) => {
+      btn.setAttribute('aria-expanded', String(open));
+      const target = document.getElementById(btn.getAttribute('aria-controls') || '');
+      if (target) target.hidden = !open;
+      const svg = btn.querySelector('svg');
+      if (svg) {
+        svg.innerHTML = open ? `<path d="${MINUS_D}"/>` : `<path d="${MINUS_D}"/><path d="${PLUS_D2}"/>`;
+      }
+    };
+
+    toggles.forEach((btn) => {
+      btn.addEventListener('click', () => setToggle(btn, btn.getAttribute('aria-expanded') !== 'true'));
+    });
+
+    const levelOf = (btn: HTMLButtonElement) =>
+      Number(btn.closest<HTMLElement>('[data-tree-row]')?.dataset.level ?? 0);
+
+    tree.querySelector('[data-tree-expand]')?.addEventListener('click', () => {
+      const closed = toggles.filter((b) => b.getAttribute('aria-expanded') !== 'true');
+      if (!closed.length) return;
+      const min = Math.min(...closed.map(levelOf));
+      closed.filter((b) => levelOf(b) === min).forEach((b) => setToggle(b, true));
+    });
+
+    tree.querySelector('[data-tree-collapse]')?.addEventListener('click', () => {
+      const open = toggles.filter((b) => b.getAttribute('aria-expanded') === 'true');
+      if (!open.length) return;
+      const max = Math.max(...open.map(levelOf));
+      open.filter((b) => levelOf(b) === max).forEach((b) => setToggle(b, false));
+    });
+
+    const rows = [...tree.querySelectorAll<HTMLElement>('[data-tree-row]')];
+    const search = tree.querySelector<HTMLInputElement>('[data-tree-search]');
+    const applyFilter = (q: string) => {
+      const query = q.trim().toLowerCase();
+      if (!query) {
+        rows.forEach((r) => { r.style.display = ''; });
+        return;
+      }
+      rows.forEach((r) => { r.style.display = 'none'; });
+      rows.forEach((r) => {
+        if (!(r.dataset.text || '').includes(query)) return;
+        let node: HTMLElement | null = r;
+        while (node && node !== tree) {
+          if (node.matches('[data-tree-row]')) node.style.display = '';
+          const list = node.parentElement?.closest<HTMLElement>('ul[hidden]');
+          node = node.parentElement?.closest<HTMLElement>('[data-tree-row]') ?? null;
+          if (list) list.hidden = false;
+        }
+        r.querySelectorAll<HTMLElement>('[data-tree-row]').forEach((child) => { child.style.display = ''; });
+        r.querySelectorAll<HTMLElement>('ul[hidden]').forEach((ul) => { ul.hidden = false; });
+        r.querySelectorAll<HTMLButtonElement>('[data-tree-toggle]').forEach((b) => b.setAttribute('aria-expanded', 'true'));
+      });
+      // sync toggle glyphs after force-expanding
+      tree.querySelectorAll<HTMLButtonElement>('[data-tree-toggle]').forEach((b) => {
+        const target = document.getElementById(b.getAttribute('aria-controls') || '');
+        if (target && !target.hidden) {
+          b.setAttribute('aria-expanded', 'true');
+          const svg = b.querySelector('svg');
+          if (svg) svg.innerHTML = `<path d="${MINUS_D}"/>`;
+        }
+      });
+    };
+    search?.addEventListener('input', () => applyFilter(search.value));
+    tree.querySelector('[data-tree-clear]')?.addEventListener('click', () => {
+      if (search) { search.value = ''; applyFilter(''); search.focus(); }
+    });
+  });
+</script>
+
+<style>
+  .vstree { display: flex; flex-direction: column; gap: var(--spacing-200); }
+  .sr-only {
+    position: absolute; width: 1px; height: 1px; margin: -1px;
+    overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap;
+  }
+
+  .vstree__toolbar { display: flex; align-items: center; gap: var(--spacing-200); flex-wrap: wrap; }
+  .vstree__lvlbtn {
+    padding: var(--spacing-200) var(--spacing-300);
+    background: var(--ps-info-blue-800); color: #ffffff;
+    border-radius: var(--radius-100);
+    font-size: var(--ps-info-text-meta-lg); font-weight: var(--font-weight-semibold);
+  }
+  .vstree__lvlbtn:hover { background: var(--ps-info-blue-900); }
+  .vstree__lvlbtn:focus-visible { outline: 2px solid var(--focus-ring-color); outline-offset: 2px; }
+  .vstree__searchwrap { display: inline-flex; }
+  .vstree__search {
+    height: 36px; width: 220px; padding: 0 var(--spacing-300);
+    border: 1px solid var(--color-border-strong); border-radius: var(--radius-100);
+    background: var(--color-surface); color: var(--color-text-primary);
+    font-size: var(--ps-info-text-meta-lg); font-family: inherit;
+  }
+  .vstree__search:focus-visible { outline: 2px solid var(--focus-ring-color); outline-offset: 1px; }
+  .vstree__clear {
+    width: 28px; height: 28px; border-radius: var(--radius-100);
+    background: var(--color-surface-sunken); color: var(--color-text-secondary);
+    font-size: 1rem; line-height: 1;
+  }
+  .vstree__clear:hover { background: var(--color-border); }
+  .vstree__clear:focus-visible { outline: 2px solid var(--focus-ring-color); outline-offset: 2px; }
+
+  .vstree__head {
+    display: grid; grid-template-columns: 1fr 110px 110px; gap: var(--spacing-300);
+    align-items: end;
+    padding: var(--spacing-300) var(--spacing-400);
+    background: var(--color-surface-sunken);
+    border-radius: var(--radius-100) var(--radius-100) 0 0;
+    font-size: var(--ps-info-text-meta-lg); font-weight: var(--font-weight-semibold);
+    color: var(--color-text-secondary); text-transform: uppercase; letter-spacing: 0.03em;
+  }
+  .vstree__head-path { display: inline-flex; align-items: center; gap: var(--spacing-100); }
+  .vstree__head-path :global(.esa-icon) { color: var(--color-text-muted); }
+  .vstree__head-col { text-align: center; }
+
+  .vstree__l0 {
+    list-style: none; margin: 0; padding: 0;
+    border: 2px solid var(--frame); border-radius: 0 0 var(--radius-100) var(--radius-100);
+    background: var(--color-surface);
+  }
+  .vstree__l1, .vstree__l2 { list-style: none; margin: 0; padding: 0; }
+
+  .vstree__row {
+    display: flex; align-items: center; gap: var(--spacing-250);
+    padding: var(--spacing-250) var(--spacing-400);
+    background: #eef4fa;
+    border-top: 1px solid var(--color-border-light);
+  }
+  .vstree__goal:first-child > .vstree__row { border-top: 0; }
+  .vstree__row--vs { padding-left: calc(var(--spacing-400) + 2.25rem); background: #f5f9fd; }
+  .vstree__row--ind {
+    display: grid; grid-template-columns: 1fr 110px 110px; gap: var(--spacing-300);
+    align-items: center;
+    padding-left: calc(var(--spacing-400) + 4.5rem);
+    background: var(--color-surface);
+  }
+
+  .vstree__toggle {
+    flex: none; display: inline-flex; align-items: center; justify-content: center;
+    width: 28px; height: 28px; border-radius: var(--radius-100);
+    color: var(--color-text-primary); background: transparent;
+  }
+  .vstree__toggle:hover { background: rgba(16, 42, 67, 0.08); }
+  .vstree__toggle:focus-visible { outline: 2px solid var(--focus-ring-color); outline-offset: 1px; }
+
+  .vstree__link {
+    font-size: var(--ps-info-text-body); color: var(--color-text-link);
+    text-decoration: underline; text-underline-offset: 3px;
+  }
+  .vstree__link:hover { color: var(--color-text-link-hover); }
+  .vstree__link:focus-visible { outline: 2px solid var(--focus-ring-color); outline-offset: 2px; }
+  .vstree__link--goal { font-weight: var(--font-weight-semibold); }
+  .vstree__cell { display: flex; justify-content: center; }
+  .vstree__cell img { width: 64px; height: 64px; }
+
+  @media (max-width: 720px) {
+    .vstree__head { grid-template-columns: 1fr 72px 72px; }
+    .vstree__row--ind { grid-template-columns: 1fr 72px 72px; padding-left: var(--spacing-500); }
+    .vstree__cell img { width: 48px; height: 48px; }
+  }
+</style>

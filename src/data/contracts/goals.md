@@ -64,3 +64,16 @@ Every Detail/N page has exactly three content sections below the title+statement
 - No goal's Detail/N page states a numeric target value — "Target Status" surfaces only as the Near Or At Target / Below Target tag; the underlying target numbers (if any exist) live elsewhere, out of scope for this page.
 - No Vital Sign carries its own description/blurb on this page — that content, if it exists, lives one level down on `/VitalSign/Detail/{id}`, out of scope for this unit.
 - No other gaps. Every string in the tables above was fetched and checked against the live site on 2026-07-17.
+
+## Amendments (2026-07-17, Andy — Vital Signs module fidelity)
+- ADD the Vital Signs module sub-nav at the top of every goal page (PsInfoVsSubnav):
+  navy banner + the source header's five ThemeColor goal columns with per-goal
+  Vital Sign dropdowns + the About / All Indicators / Goal trail. This is the
+  source site's own chrome, now sanctioned as page content in the prototype.
+- Title block renders in the SOURCE's hierarchy (PsInfoVsGoalIntro): uppercase
+  goal name in the goal's ThemeColor, bold navy statement, narrative, photo —
+  no esa-page-header, no two-column layouts.
+- The Vital Sign/indicator listing uses the source's Fancytree convention
+  (PsInfoVsFancyTree): Expand/Collapse Level, search, GOAL > VITAL SIGN >
+  INDICATOR header, goal-ThemeColor frame, and the source's OWN circular
+  progress/target icons (/photos/vital-signs/icons/*) — never esa-badge pills.

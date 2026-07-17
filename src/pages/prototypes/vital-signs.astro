@@ -1,32 +1,28 @@
 ---
 // Vital Signs — the flagship front door of the Vital Signs sub-site
-// (vitalsigns.pugetsoundinfo.wa.gov). The live home page has no visible
-// on-page heading (only <title>Vital Signs </title>) and exactly three
-// sections: an interactive wheel grouping all 23 Vital Signs into the 5
-// recovery goals (reproduced here as a readable list, real data from the
-// Goals unit's own src/data/pages/goals.ts — verbatim-usable, unchanged),
-// an un-headed three-paragraph intro block, and the "Contributing Partners"
-// grid of 33 organizations. No stats, no per-goal counts, no indicator
-// lists, no cross-link band — none of that appears on the source home page.
+// (vitalsigns.pugetsoundinfo.wa.gov). The live home page is exactly three
+// sections: the Vital Signs wheel (a flat PNG + image map on the source,
+// rebuilt natively here — every tile a live link), an un-headed
+// three-paragraph intro block, and the Contributing Partners logo wall
+// (the source's own logo files, standardized sizing). Content is verbatim
+// (src/data/pages/vital-signs.ts, src/data/pages/vital-signs-module.ts).
 import PsInfoAppShell from '../../layouts/PsInfoAppShell.astro';
 import PsInfoPhotoHeader from '../../components/psinfo/PsInfoPhotoHeader.astro';
-import PsInfoVitalSignsGoalGroups from '../../components/psinfo/PsInfoVitalSignsGoalGroups.astro';
+import PsInfoVsWheel from '../../components/psinfo/PsInfoVsWheel.astro';
 import PsInfoVitalSignsIntro from '../../components/psinfo/PsInfoVitalSignsIntro.astro';
-import PsInfoSectionTitle from '../../components/psinfo/PsInfoSectionTitle.astro';
-import PsInfoAboutNarrative from '../../components/psinfo/PsInfoAboutNarrative.astro';
-import { GOALS } from '../../data/pages/goals';
-import { PAGE_TITLE, HERO, ESPANOL_LINK, INTRO_PARAGRAPHS, CONTRIBUTING_PARTNERS } from '../../data/pages/vital-signs';
+import PsInfoVsPartners from '../../components/psinfo/PsInfoVsPartners.astro';
+import { PAGE_TITLE, HERO, ESPANOL_LINK, INTRO_PARAGRAPHS } from '../../data/pages/vital-signs';
 ---
 <!-- manifest:
   layout: PsInfoAppShell (active Goals) > center+stack spine
   sections:
     - page header            -> psinfo-photo-header (photo band)
-    - vital signs wheel      -> psinfo-vital-signs-goal-groups
+    - vital signs wheel      -> psinfo-vs-wheel (native rebuild of the source graphic)
     - intro text (un-headed) -> psinfo-vital-signs-intro
-    - contributing partners  -> psinfo-section-title + psinfo-about-narrative
+    - contributing partners  -> psinfo-vs-partners (real logo files)
 -->
 <PsInfoAppShell title={`${PAGE_TITLE} — Puget Sound Info`} active={{ moduleId: 'goals' }}>
-  <div class="center stack" data-gap="xl">
+  <div class="center stack" data-gap="2xl">
     <PsInfoPhotoHeader
       size="band"
       image={HERO.image}
@@ -34,13 +30,10 @@ import { PAGE_TITLE, HERO, ESPANOL_LINK, INTRO_PARAGRAPHS, CONTRIBUTING_PARTNERS
       title={PAGE_TITLE}
     />
 
-    <PsInfoVitalSignsGoalGroups goals={GOALS} />
+    <PsInfoVsWheel />
 
     <PsInfoVitalSignsIntro espanolLink={ESPANOL_LINK} paragraphs={INTRO_PARAGRAPHS} />
 
-    <div class="stack" data-gap="md">
-      <PsInfoSectionTitle title="Contributing Partners" />
-      <PsInfoAboutNarrative blocks={[{ type: 'partners', partners: CONTRIBUTING_PARTNERS }]} />
-    </div>
+    <PsInfoVsPartners />
   </div>
 </PsInfoAppShell>

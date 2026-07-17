@@ -1,0 +1,158 @@
+---
+// PsInfoVsWheel — the Puget Sound Vital Signs wheel, rebuilt natively.
+// The source home page ships this as a flat PNG (vitalsigns_wheel.png) with
+// an <area> image map; this reproduces the same graphic in real HTML/CSS —
+// a 7×7 tile ring (each tile a live Vital Sign link, positioned exactly per
+// the source image map), goal-name bands on the four edges, and a center
+// medallion (five-arc donut + two-tone disc wordmark). Colors sampled from
+// the source PNG (see src/data/pages/vital-signs-module.ts).
+//
+// bcn-lego-checked: no esa-* lego renders a tiled infographic (checked
+// esa-card / esa-stat / layout primitives — a grid primitive can't carry the
+// banded ring or donut); this is a faithful one-off reproduction of the
+// site's own graphic, kept reusable behind the WHEEL_TILES data. Tile fills
+// use the goals' theme tokens (the quality orange darkened 12% so white
+// labels hold ≥4.5:1); band/donut hues are the source PNG's own values,
+// decorative only.
+import { WHEEL_TILES, WHEEL_COLORS } from '../../data/pages/vital-signs-module';
+import { withBase } from '../../lib/base';
+
+const TILE_FILL: Record<string, string> = {
+  population: 'var(--ps-info-goal-population)',
+  quality: 'color-mix(in srgb, var(--ps-info-goal-quality) 88%, #000000)',
+  species: 'var(--ps-info-goal-species)',
+  habitat: 'var(--ps-info-goal-habitat)',
+  water: 'var(--ps-info-goal-water)',
+};
+---
+<div class="wheel" role="group" aria-label="Puget Sound Vital Signs by recovery goal">
+  <span class="wheel__band wheel__band--top" style={`background:${WHEEL_COLORS.band.population}`}>Healthy Human Population</span>
+  <span class="wheel__band wheel__band--right" style={`background:${WHEEL_COLORS.band.quality}`}>Vibrant Human Quality of Life</span>
+  <span class="wheel__band wheel__band--bottom" style={`background:${WHEEL_COLORS.band.species}`}>Thriving Species &amp; Food Web</span>
+  <span class="wheel__band wheel__band--left-top" style={`background:${WHEEL_COLORS.band.water}`}>Healthy Water Quality</span>
+  <span class="wheel__band wheel__band--left-bottom" style={`background:${WHEEL_COLORS.band.habitat}`}>Functioning Habitat</span>
+  <span class="wheel__cornerband" style={`background:${WHEEL_COLORS.corner}`} aria-hidden="true"></span>
+  <span class="wheel__corner" aria-hidden="true">
+    <img src={withBase('/psp-mark.png')} alt="" width="44" height="44" />
+  </span>
+
+  {WHEEL_TILES.map((t) => {
+    const style = `grid-row:${t.row + 1};grid-column:${t.col + 1};background:${TILE_FILL[t.goal]}`;
+    return t.link.route ? (
+      <a class="wheel__tile" style={style} href={withBase(t.link.route)}>{t.link.label}</a>
+    ) : (
+      <a class="wheel__tile" style={style} href={t.link.externalHref} target="_blank" rel="noopener">{t.link.label}</a>
+    );
+  })}
+
+  <div class="wheel__center">
+    <div class="wheel__donut" aria-hidden="true"></div>
+    <div class="wheel__disc">
+      <span class="wheel__word wheel__word--1">Puget Sound</span>
+      <span class="wheel__divider" aria-hidden="true">
+        <svg class="wheel__pulse" viewBox="0 0 90 40"><polyline points="0,24 18,24 24,10 32,34 38,4 46,30 50,24 90,24" fill="none" stroke="#ffffff" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/></svg>
+        <span class="wheel__rule"></span>
+      </span>
+      <span class="wheel__word wheel__word--2">Vital Signs</span>
+      <span class="wheel__tag">Reporting Ecosystem Health <i>v.3</i></span>
+    </div>
+  </div>
+</div>
+
+<style>
+  .wheel {
+    --gap: 4px;
+    display: grid;
+    grid-template-columns: 52px repeat(7, 1fr) 52px;
+    grid-template-rows: 52px repeat(7, 1fr) 52px;
+    gap: var(--gap);
+    aspect-ratio: 1 / 1;
+    max-width: 820px;
+    margin-inline: auto;
+    width: 100%;
+  }
+
+  .wheel__band {
+    display: flex; align-items: center; justify-content: center;
+    color: #ffffff; font-weight: var(--font-weight-bold);
+    font-size: clamp(0.8125rem, 1.6vw, 1.0625rem);
+    text-transform: uppercase; letter-spacing: 0.14em; text-align: center;
+  }
+  .wheel__band--top { grid-row: 1; grid-column: 2 / 8; }
+  .wheel__band--bottom { grid-row: 9; grid-column: 2 / 10; }
+  .wheel__band--right { grid-row: 3 / 9; grid-column: 9; writing-mode: vertical-rl; }
+  .wheel__band--left-top { grid-row: 1 / 5; grid-column: 1; writing-mode: vertical-rl; transform: rotate(180deg); }
+  .wheel__band--left-bottom { grid-row: 5 / 10; grid-column: 1; writing-mode: vertical-rl; transform: rotate(180deg); }
+
+  .wheel__cornerband { grid-row: 1 / 3; grid-column: 8 / 10; margin: 0 0 calc(var(--gap) * -1) calc(var(--gap) * -1); }
+  .wheel__corner {
+    grid-row: 2; grid-column: 8;
+    background: #77787b;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .wheel__corner img { width: 42%; height: auto; filter: grayscale(1) brightness(1.9) opacity(0.55); }
+
+  .wheel__tile {
+    display: flex; align-items: center; justify-content: center;
+    padding: var(--spacing-150);
+    color: #ffffff; text-align: center; text-decoration: none;
+    font-size: clamp(0.8125rem, 1.5vw, 1rem);
+    font-weight: var(--font-weight-bold); line-height: 1.2;
+    overflow-wrap: break-word;
+  }
+  .wheel__tile:hover { filter: brightness(1.12); }
+  .wheel__tile:focus-visible { outline: 3px solid var(--focus-ring-color); outline-offset: -3px; z-index: 1; }
+
+  .wheel__center {
+    grid-row: 3 / 8; grid-column: 3 / 8;
+    position: relative;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .wheel__donut {
+    position: absolute; inset: 5%;
+    border-radius: 50%;
+    background: conic-gradient(
+      #ffffff 0deg 10deg,
+      #71b749 10deg 96deg,
+      #ffffff 96deg 104deg,
+      #e96f31 104deg 168deg,
+      #ffffff 168deg 176deg,
+      #ea237c 176deg 258deg,
+      #ffffff 258deg 266deg,
+      #854d9f 266deg 312deg,
+      #ffffff 312deg 320deg,
+      #00b7ab 320deg 352deg,
+      #ffffff 352deg 360deg
+    );
+  }
+  .wheel__disc {
+    position: relative;
+    width: 76%; aspect-ratio: 1 / 1;
+    border-radius: 50%;
+    background: linear-gradient(180deg, #0f5da5 0 52%, #253774 52% 100%);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 2px;
+    padding: 10%;
+    text-align: center;
+  }
+  .wheel__divider { display: flex; align-items: center; gap: 4px; width: 74%; margin: 3% 0; }
+  .wheel__pulse { width: 38%; flex: none; }
+  .wheel__divider .wheel__rule { flex: 1; margin: 0; width: auto; }
+  .wheel__word {
+    color: #ffffff; font-weight: var(--font-weight-bold); font-style: italic;
+    text-transform: uppercase; letter-spacing: 0.03em; line-height: 1.05;
+    font-size: clamp(1.125rem, 3.4vw, 2rem);
+  }
+  .wheel__rule { width: 62%; height: 2px; background: #ffffff; margin: 3% 0; }
+  .wheel__tag {
+    color: rgba(255, 255, 255, 0.92);
+    font-size: clamp(0.8125rem, 1.3vw, 0.9375rem);
+    text-transform: uppercase; letter-spacing: 0.08em;
+  }
+  .wheel__tag i { font-style: italic; text-transform: none; }
+
+  @media (max-width: 640px) {
+    .wheel { grid-template-columns: 36px repeat(7, 1fr) 36px; grid-template-rows: 36px repeat(7, 1fr) 36px; --gap: 3px; }
+    .wheel__band { letter-spacing: 0.06em; }
+  }
+</style>

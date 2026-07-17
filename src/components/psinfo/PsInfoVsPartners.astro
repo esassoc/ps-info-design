@@ -1,0 +1,54 @@
+---
+// PsInfoVsPartners — the Contributing Partners logo wall, with the source
+// site's real logo files (downloaded to /photos/vital-signs/partners/, DOM
+// order) rendered at a standardized cell size instead of the source's
+// mixed-dimension originals. Each logo links to its organization page.
+//
+// bcn-lego-checked: checked esa-card / esa-avatar (content card / person
+// avatar — not a logo wall); a normalized logo grid is this component's own
+// single job. Logos carry their organization name as alt text.
+import { PARTNER_LOGOS } from '../../data/pages/vital-signs-module';
+import { withBase } from '../../lib/base';
+
+interface Props {
+  heading?: string;
+}
+const { heading = 'Contributing Partners' } = Astro.props;
+---
+<section class="partners" aria-label={heading}>
+  <h2 class="partners__heading">{heading}</h2>
+  <ul class="partners__grid" role="list">
+    {PARTNER_LOGOS.map((p) => (
+      <li>
+        <a class="partners__cell" href={p.href} target="_blank" rel="noopener">
+          <img src={withBase(p.image)} alt={p.name} loading="lazy" />
+        </a>
+      </li>
+    ))}
+  </ul>
+</section>
+
+<style>
+  .partners { display: flex; flex-direction: column; gap: var(--spacing-500); }
+  .partners__heading {
+    margin: 0; text-align: center;
+    font-family: var(--font-display);
+    font-size: 1.5rem; font-weight: var(--font-weight-semibold);
+    color: var(--color-text-primary);
+  }
+  .partners__grid {
+    list-style: none; margin: 0; padding: 0;
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+    gap: var(--spacing-400);
+  }
+  .partners__cell {
+    display: flex; align-items: center; justify-content: center;
+    height: 120px; padding: var(--spacing-300);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border-light); border-radius: var(--radius-100);
+    transition: border-color 150ms ease, box-shadow 150ms ease;
+  }
+  .partners__cell:hover { border-color: var(--color-border-strong); box-shadow: 0 2px 10px rgba(16, 42, 67, 0.08); }
+  .partners__cell:focus-visible { outline: 2px solid var(--focus-ring-color); outline-offset: 2px; }
+  .partners__cell img { max-width: 100%; max-height: 100%; width: auto; height: auto; object-fit: contain; }
+</style>

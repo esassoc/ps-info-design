@@ -1,16 +1,16 @@
 ---
-// Goals — the five statutory recovery goals, one dynamic template. Content is
-// verbatim from vitalsigns.pugetsoundinfo.wa.gov/VitalSignGoal/Detail/{1,2,3,7,6}
-// (see src/data/pages/goals.ts for full sourcing notes): each goal's "Our goal
-// is…" statement (the header's lede), its one narrative paragraph and inline
-// photo, and its full Vital Sign -> Indicator tree with real Indicator
-// Progress / Target Status labels (pulled from the page's embedded
-// treeSources data, never rendered as a visible table on the source itself).
+// Goals — the five statutory recovery goals, one dynamic template mirroring
+// vitalsigns.pugetsoundinfo.wa.gov/VitalSignGoal/Detail/{1,2,3,7,6}: the
+// Vital Signs module sub-nav (color-coded goal columns with Vital Sign
+// dropdowns), then the goal's title block in source order (colored uppercase
+// name, bold statement, narrative, inline photo), then the Fancytree of the
+// goal's Vital Signs and indicators framed in the goal's ThemeColor, with the
+// source's own progress/target-status icons. All content is verbatim from the
+// source (src/data/pages/goals.ts).
 import PsInfoAppShell from '../../../layouts/PsInfoAppShell.astro';
-import EsaPageHeader from '@esa/ecology/esa-page-header.astro';
-import PsInfoGoalsNarrative from '../../../components/psinfo/PsInfoGoalsNarrative.astro';
-import PsInfoSectionTitle from '../../../components/psinfo/PsInfoSectionTitle.astro';
-import PsInfoGoalsVitalSignList from '../../../components/psinfo/PsInfoGoalsVitalSignList.astro';
+import PsInfoVsSubnav from '../../../components/psinfo/PsInfoVsSubnav.astro';
+import PsInfoVsGoalIntro from '../../../components/psinfo/PsInfoVsGoalIntro.astro';
+import PsInfoVsFancyTree from '../../../components/psinfo/PsInfoVsFancyTree.astro';
 import { GOALS, type GoalDetail } from '../../../data/pages/goals';
 
 export function getStaticPaths() {
@@ -25,19 +25,23 @@ const { goal } = Astro.props;
 <!-- manifest:
   layout: PsInfoAppShell (active Goals > this goal) > center+stack spine
   sections:
-    - page header (title + statement) -> esa-page-header
-    - goal narrative + photo          -> psinfogoals-narrative
-    - vital signs & indicators        -> psinfo-section-title + psinfogoals-vital-sign-list
+    - vital signs module nav -> psinfo-vs-subnav (banner + goal dropdowns + trail)
+    - goal title block       -> psinfo-vs-goal-intro (name/statement/narrative/photo)
+    - vital signs & indicators tree -> psinfo-vs-fancy-tree (goal-framed, prod icons)
 -->
 <PsInfoAppShell title={`${goal.name} — Puget Sound Info`} active={{ moduleId: 'goals', leafId: goal.navLeafId }}>
   <div class="center stack" data-gap="xl">
-    <EsaPageHeader title={goal.name} lede={goal.statement} />
+    <PsInfoVsSubnav activeGoal={goal.slug} />
 
-    <PsInfoGoalsNarrative narrative={goal.narrative} image={goal.image} imageAlt={goal.imageAlt} />
+    <PsInfoVsGoalIntro
+      name={goal.name}
+      statement={goal.statement}
+      narrative={goal.narrative}
+      image={goal.image}
+      imageAlt={goal.imageAlt}
+      hueVar={goal.hueVar}
+    />
 
-    <div class="stack" data-gap="md">
-      <PsInfoSectionTitle title="Vital Signs & Indicators" />
-      <PsInfoGoalsVitalSignList vitalSigns={goal.vitalSigns} hueVar={goal.hueVar} />
-    </div>
+    <PsInfoVsFancyTree goals={[goal]} frameHueVar={goal.hueVar} expandedLevels={1} treeId={`tree-${goal.slug}`} />
   </div>
 </PsInfoAppShell>

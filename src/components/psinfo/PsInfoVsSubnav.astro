@@ -1,0 +1,180 @@
+---
+// PsInfoVsSubnav — the Vital Signs module's own chrome, reproduced from the
+// vitalsigns.pugetsoundinfo.wa.gov site header: a navy banner (title +
+// mission line, linking to the module home), the five goal columns colored
+// with the goals' real ThemeColors, each opening a dropdown of that goal's
+// Vital Signs, and the About / All Indicators / Goal link row beneath.
+//
+// bcn-lego-checked: checked esa-header-nav + esa-nav-dropdown (site-level
+// horizontal nav with dropdowns — styled for neutral app chrome, no
+// per-item brand-color columns or grouped goal semantics) and
+// esa-app-bar (app chrome, not an in-content module banner); the source's
+// color-coded five-column goal bar is this module's own identity and gets a
+// faithful reproduction. Dropdowns are CSS :hover/:focus-within (keyboard
+// reachable, no JS); goal-bar labels render ≥19px bold so white-on-goal-color
+// meets WCAG large-text contrast; dropdown panels darken the goal color 22%
+// so 16px items meet 4.5:1.
+import { SUBNAV_GOALS, SUBNAV_BANNER, SUBNAV_LINKS, type SubnavGoal } from '../../data/pages/vital-signs-module';
+import EsaIcon from '@esa/ecology/esa-icon.astro';
+import { withBase } from '../../lib/base';
+
+interface Props {
+  /** Slug of the goal page being viewed (marks that column current). */
+  activeGoal?: string;
+  /** Marks the All Indicators trail link current. */
+  activeAllIndicators?: boolean;
+  /** Trail crumb for the goal a DETAIL page belongs to (rendered as a link). */
+  goalCrumb?: { label: string; route: string };
+  /** Trailing current-page crumb on detail pages (e.g. the Vital Sign name). */
+  currentLabel?: string;
+}
+const { activeGoal, activeAllIndicators = false, goalCrumb, currentLabel } = Astro.props;
+
+const ARROW = '<path d="M7 7h10v10"/><path d="M7 17 17 7"/>';
+const goalHref = (g: SubnavGoal) => withBase(g.route);
+const currentGoal = SUBNAV_GOALS.find((g) => g.slug === activeGoal);
+---
+<div class="vsnav">
+  <a class="vsnav__banner" href={withBase(SUBNAV_BANNER.homeRoute)}>
+    <span class="vsnav__title">{SUBNAV_BANNER.title}</span>
+    <span class="vsnav__subtitle">{SUBNAV_BANNER.subtitle}</span>
+  </a>
+
+  <nav class="vsnav__goals" aria-label="Vital Signs goals">
+    <ul class="vsnav__row" role="list">
+      {SUBNAV_GOALS.map((g) => (
+        <li class="vsnav__cell" style={`--goal: var(${g.hueVar})`}>
+          <a
+            class:list={['vsnav__goal', { 'vsnav__goal--current': g.slug === activeGoal }]}
+            href={goalHref(g)}
+            aria-current={g.slug === activeGoal ? 'page' : undefined}
+          >
+            {g.label}
+          </a>
+          <ul class="vsnav__menu" role="list">
+            {g.vitalSigns.map((v) => (
+              <li>
+                {v.route ? (
+                  <a class="vsnav__item" href={withBase(v.route)}>{v.label}</a>
+                ) : (
+                  <a class="vsnav__item vsnav__item--ext" href={v.externalHref} target="_blank" rel="noopener">
+                    <span>{v.label}</span>
+                    <EsaIcon name="arrow-up-right" size="xs" paths={ARROW} />
+                  </a>
+                )}
+              </li>
+            ))}
+          </ul>
+        </li>
+      ))}
+    </ul>
+  </nav>
+
+  <nav class="vsnav__trail" aria-label="Vital Signs section">
+    <a class="vsnav__crumb vsnav__crumb--ext" href={SUBNAV_LINKS.about.externalHref} target="_blank" rel="noopener">
+      <span>{SUBNAV_LINKS.about.label}</span>
+      <EsaIcon name="arrow-up-right" size="xs" paths={ARROW} />
+    </a>
+    <span class="vsnav__sep" aria-hidden="true">/</span>
+    {activeAllIndicators ? (
+      <span class="vsnav__crumb vsnav__crumb--current" aria-current="page">{SUBNAV_LINKS.allIndicators.label}</span>
+    ) : (
+      <a class="vsnav__crumb" href={withBase(SUBNAV_LINKS.allIndicators.route)}>{SUBNAV_LINKS.allIndicators.label}</a>
+    )}
+    {currentGoal && (
+      <>
+        <span class="vsnav__sep" aria-hidden="true">/</span>
+        <span class="vsnav__crumb vsnav__crumb--current" aria-current="page">{currentGoal.label}</span>
+      </>
+    )}
+    {goalCrumb && (
+      <>
+        <span class="vsnav__sep" aria-hidden="true">/</span>
+        <a class="vsnav__crumb" href={withBase(goalCrumb.route)}>{goalCrumb.label}</a>
+      </>
+    )}
+    {currentLabel && (
+      <>
+        <span class="vsnav__sep" aria-hidden="true">/</span>
+        <span class="vsnav__crumb vsnav__crumb--current" aria-current="page">{currentLabel}</span>
+      </>
+    )}
+  </nav>
+</div>
+
+<style>
+  .vsnav { display: flex; flex-direction: column; }
+
+  .vsnav__banner {
+    display: flex; flex-direction: column; align-items: center; gap: var(--spacing-100);
+    padding: var(--spacing-400) var(--spacing-500);
+    background: var(--ps-info-blue-800);
+    text-align: center; text-decoration: none;
+    border-radius: var(--radius-100) var(--radius-100) 0 0;
+  }
+  .vsnav__banner:focus-visible { outline: 2px solid var(--focus-ring-color); outline-offset: -2px; }
+  .vsnav__title {
+    font-size: 1.375rem; font-weight: var(--font-weight-bold);
+    letter-spacing: 0.06em; text-transform: uppercase; color: #ffffff;
+  }
+  .vsnav__subtitle { font-size: 1rem; color: rgba(255, 255, 255, 0.92); }
+
+  .vsnav__row {
+    list-style: none; margin: 0; padding: 0;
+    display: grid; grid-template-columns: repeat(5, 1fr);
+  }
+  .vsnav__cell { position: relative; }
+  .vsnav__goal {
+    display: flex; align-items: center; justify-content: center;
+    min-height: 72px; padding: var(--spacing-200) var(--spacing-300);
+    background: var(--goal);
+    color: #ffffff; text-align: center; text-decoration: none;
+    font-size: 1.1875rem; font-weight: var(--font-weight-bold);
+    text-transform: uppercase; letter-spacing: 0.02em; line-height: 1.25;
+  }
+  .vsnav__goal:focus-visible { outline: 2px solid var(--focus-ring-color); outline-offset: -3px; }
+  .vsnav__goal--current { text-decoration: underline; text-underline-offset: 4px; }
+  .vsnav__cell:hover .vsnav__goal, .vsnav__cell:focus-within .vsnav__goal {
+    filter: brightness(0.92);
+  }
+
+  .vsnav__menu {
+    list-style: none; margin: 0; padding: var(--spacing-200) 0;
+    position: absolute; top: 100%; left: 0; min-width: 100%; z-index: 900;
+    background: color-mix(in srgb, var(--goal) 78%, #000000);
+    box-shadow: 0 10px 24px rgba(16, 42, 67, 0.28);
+    display: none;
+  }
+  .vsnav__cell:hover .vsnav__menu, .vsnav__cell:focus-within .vsnav__menu { display: block; }
+  .vsnav__item {
+    display: flex; align-items: center; gap: var(--spacing-100);
+    padding: var(--spacing-200) var(--spacing-400);
+    color: #ffffff; text-decoration: none;
+    font-size: 1rem; font-weight: var(--font-weight-semibold);
+    text-transform: uppercase; letter-spacing: 0.02em; white-space: nowrap;
+  }
+  .vsnav__item:hover { background: rgba(0, 0, 0, 0.22); }
+  .vsnav__item:focus-visible { outline: 2px solid var(--focus-ring-color); outline-offset: -2px; }
+  .vsnav__item--ext :global(.esa-icon) { color: rgba(255, 255, 255, 0.75); flex: none; }
+
+  .vsnav__trail {
+    display: flex; align-items: center; flex-wrap: wrap; gap: var(--spacing-200);
+    padding: var(--spacing-300) 0 0;
+  }
+  .vsnav__crumb {
+    display: inline-flex; align-items: center; gap: var(--spacing-100);
+    font-size: var(--ps-info-text-meta-lg); font-weight: var(--font-weight-semibold);
+    letter-spacing: 0.04em; text-transform: uppercase;
+    color: var(--color-text-link); text-decoration: underline; text-underline-offset: 3px;
+  }
+  .vsnav__crumb:focus-visible { outline: 2px solid var(--focus-ring-color); outline-offset: 2px; }
+  .vsnav__crumb--current { color: var(--color-text-primary); text-decoration: none; }
+  .vsnav__crumb--ext :global(.esa-icon) { color: var(--color-text-muted); }
+  .vsnav__sep { color: var(--color-text-muted); }
+
+  @media (max-width: 860px) {
+    .vsnav__row { grid-template-columns: 1fr; }
+    .vsnav__goal { min-height: 48px; }
+    .vsnav__menu { position: static; box-shadow: none; }
+  }
+</style>

@@ -114,3 +114,12 @@ Hero image: the literal home page carries **no photograph at all** — its only 
 - The wheel's goal-sector and Vital-Sign-sector labels are pixels baked into a PNG (`/Content/img/vitalsigns_wheel.png` / `vitalsigns_stacked_plain.png`), not extractable text via curl. Confidence in the inventory above is high but indirect: every image-map area's target id (`VitalSignGoal/Detail/{1,2,3,7,6}`, `VitalSign/Detail/{2,3,4,…}`) was cross-checked against `goals.ts`'s `sourceGoalId` and each Vital Sign's `href`, and the **declared order of the areas in the raw HTML matches `goals.ts`'s grouping and order exactly** — not a literal OCR of the graphic, but a verified structural match.
 - The "Vital Signs en Español" link's real target (`https://pspwa.box.com/s/q6s03tmenge1219trpxa00bcmios1xja`, decoded from the Safelinks wrapper) was not opened/verified — Box's own auth/redirect wasn't followed. Left as a flagged judgment call above, not a hard fact.
 - No other gaps. Every other string above (breadcrumb, intro paragraphs, "Contributing Partners" heading, all 33 partner names/ids) was read directly off the fetched HTML on 2026-07-17.
+
+## Amendments (2026-07-17, Andy — Vital Signs module fidelity)
+- The wheel is reproduced NATIVELY (PsInfoVsWheel): 7×7 tile ring per the
+  source image map (every tile a live link), edge goal bands, five-arc donut +
+  two-tone disc wordmark. Colors sampled from vitalsigns_wheel.png; tile fills
+  use the goal tokens (quality darkened 12%) so white labels hold WCAG AA.
+- Contributing Partners renders the source's real logo files
+  (/photos/vital-signs/partners/p01–p33.png, DOM order) at standardized cells
+  (PsInfoVsPartners).
