@@ -1,0 +1,69 @@
+---
+// PsInfoVitalSignsIntro — the Vital Signs home page's un-headed intro block:
+// a standalone "en Español" link, then two body paragraphs (the first with
+// two inline links in their original sentence position). Renders straight
+// after the wheel with no heading, matching the source, which runs directly
+// from the graphic into three <p> tags with no h2/h3 above them.
+//
+// bcn-lego-checked: checked PsInfoAboutNarrative (Q&A prose block, reused
+// below for Contributing Partners) — its segmented-paragraph idea is the
+// right shape for the two body paragraphs, but it has no "large standalone
+// link" paragraph variant (the source wraps this one in <big>), so it
+// doesn't fit whole; that one shape is authored here instead. esa-icon
+// renders the external-link mark; nothing heavier is reused.
+import EsaIcon from '@esa/ecology/esa-icon.astro';
+import type { IntroLink, IntroParagraph } from '../../data/pages/vital-signs';
+
+interface Props {
+  espanolLink: IntroLink;
+  paragraphs: IntroParagraph[];
+}
+const { espanolLink, paragraphs } = Astro.props;
+
+const ARROW = '<path d="M7 7h10v10"/><path d="M7 17 17 7"/>';
+---
+<div class="intro">
+  <p class="intro__espanol">
+    <a href={espanolLink.href} target="_blank" rel="noopener">
+      {espanolLink.text}
+      <EsaIcon name="arrow-up-right" size="sm" paths={ARROW} />
+    </a>
+  </p>
+  {paragraphs.map((p) => (
+    <p class="intro__p">
+      {p.segments.map((seg) =>
+        seg.type === 'text' ? (
+          seg.text
+        ) : (
+          <a class="intro__link" href={seg.link.href} target="_blank" rel="noopener">
+            {seg.link.text}
+            <EsaIcon name="arrow-up-right" size="xs" paths={ARROW} />
+          </a>
+        ),
+      )}
+    </p>
+  ))}
+</div>
+
+<style>
+  .intro { display: flex; flex-direction: column; gap: var(--spacing-400); max-width: 74ch; }
+
+  .intro__espanol { margin: 0; }
+  .intro__espanol a {
+    display: inline-flex; align-items: center; gap: var(--spacing-150);
+    font-family: var(--font-display); font-size: 1.375rem; font-weight: var(--font-weight-semibold);
+    color: var(--color-text-link); text-decoration: underline;
+    text-decoration-color: color-mix(in srgb, currentColor 35%, transparent);
+  }
+  .intro__espanol a:hover { text-decoration-color: currentColor; }
+  .intro__espanol a:focus-visible { outline: 2px solid var(--focus-ring-color); outline-offset: 2px; }
+
+  .intro__p { margin: 0; font-size: var(--ps-info-text-body); line-height: 1.65; color: var(--color-text-primary); }
+  .intro__link {
+    color: var(--color-text-link); text-decoration: underline;
+    text-decoration-color: color-mix(in srgb, currentColor 35%, transparent);
+  }
+  .intro__link:hover { text-decoration-color: currentColor; }
+  .intro__link:focus-visible { outline: 2px solid var(--focus-ring-color); outline-offset: 2px; }
+  .intro__link :global(.esa-icon) { color: var(--color-text-muted); margin-left: 2px; vertical-align: -2px; }
+</style>

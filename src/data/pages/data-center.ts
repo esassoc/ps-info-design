@@ -26,7 +26,7 @@
 // Program Targets, and the archived Outcomes & Strategies) that this demo
 // does not rebuild; their `href` is the absolute live URL, external.
 
-export interface DataCenterHero {
+export interface DataCenterPageHeader {
   title: string;
   lede: string;
 }
@@ -41,10 +41,10 @@ export interface DataCenterResource {
   icon: string;
 }
 
-// ── Hero ─────────────────────────────────────────────────────────────────
+// ── Page header (plain — EsaPageHeader, no photo band) ──────────────────────
 // Title matches the page's own breadcrumb/<title> ("Data Center"); lede is
 // the source's sole intro paragraph, verbatim.
-export const DATA_CENTER_HERO: DataCenterHero = {
+export const DATA_CENTER_PAGE_HEADER: DataCenterPageHeader = {
   title: 'Data Center',
   lede: 'Welcome to the Puget Sound Info Data Center, the main repository for restoration, protection and recovery data across Puget Sound Info programs.',
 };

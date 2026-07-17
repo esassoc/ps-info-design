@@ -7,10 +7,15 @@
 // recovered from the widget's own backing feature service (see
 // src/data/pages/lios.ts header for full sourcing) and rendered here as a
 // card directory in place of the un-embeddable map+list iframe.
+//
+// Header is plain (esa-page-header): the source carries no photography of
+// its own (only a 15x15 decorative external-link glyph), and its two-
+// sentence intro sits directly under the H2 title with no separate
+// "Overview" heading — so the full intro lives in the header lede and there
+// is no boxed Overview section below it.
 import PsInfoAppShell from '../../layouts/PsInfoAppShell.astro';
-import PsInfoPhotoHeader from '../../components/psinfo/PsInfoPhotoHeader.astro';
+import EsaPageHeader from '@esa/ecology/esa-page-header.astro';
 import PsInfoSectionTitle from '../../components/psinfo/PsInfoSectionTitle.astro';
-import PsInfoActionAgendaRefreshProse from '../../components/psinfo/PsInfoActionAgendaRefreshProse.astro';
 import PsInfoLiosCallout from '../../components/psinfo/PsInfoLiosCallout.astro';
 import PsInfoLiosDirectory from '../../components/psinfo/PsInfoLiosDirectory.astro';
 import PsInfoLiosPlanTypes from '../../components/psinfo/PsInfoLiosPlanTypes.astro';
@@ -18,7 +23,6 @@ import EsaButton from '@esa/ecology/esa-button.astro';
 import EsaIcon from '@esa/ecology/esa-icon.astro';
 import {
   PAGE_TITLE, PAGE_LEDE,
-  INTRO_PARAGRAPHS,
   PARTICIPANTS,
   LIO_AREAS, TOTAL_ACTIVE_LIOS,
   PLANS_SECTION,
@@ -30,25 +34,19 @@ const ARROW = '<path d="M7 7h10v10"/><path d="M7 17 17 7"/>';
 <!-- manifest:
   layout: PsInfoAppShell (active Plans > Local Ecosystem Recovery Plans) > center+stack spine
   sections:
-    - page header            -> psinfo-photo-header (photo band, composes esa-page-header)
-    - overview                -> psinfo-action-agenda-refresh-prose (reused as-is)
-    - what makes an lio?      -> psinfo-section-title + psinfo-lios-callout (wraps esa-alert-box)
-    - local areas & lios      -> psinfo-section-title + psinfo-lios-directory
-    - each lio develops       -> psinfo-section-title + psinfo-lios-plan-types
+    - page header            -> esa-page-header (plain, title + full intro lede)
+    - local areas and lios    -> psinfo-section-title + psinfo-lios-directory
+    - what makes an lio?      -> psinfo-lios-callout (esa-alert-box carries the heading)
+    - each lio develops       -> psinfo-lios-plan-types (lead paragraph carries the heading)
     - public meeting calendar -> psinfo-section-title + esa-button (external CTA)
 -->
 <PsInfoAppShell title="LIOs — Puget Sound Info" active={{ moduleId: 'plans', leafId: 'local-recovery-plans' }}>
   <div class="center stack" data-gap="xl">
-    <PsInfoPhotoHeader
-      size="band"
-      image="/photos/sound-aerial.jpg"
-      focus="50% 50%"
-      title={PAGE_TITLE}
-      lede={PAGE_LEDE}
-    />
+    <EsaPageHeader title={PAGE_TITLE} lede={PAGE_LEDE} />
 
-    <div class="stack" data-gap="md" id="overview">
-      <PsInfoActionAgendaRefreshProse paragraphs={INTRO_PARAGRAPHS} />
+    <div class="stack" data-gap="md" id="local-areas">
+      <PsInfoSectionTitle title="Local Areas and LIOs" count={TOTAL_ACTIVE_LIOS} />
+      <PsInfoLiosDirectory areas={LIO_AREAS} />
     </div>
 
     <div class="stack" data-gap="md" id="what-makes-an-lio">
@@ -58,11 +56,6 @@ const ARROW = '<path d="M7 7h10v10"/><path d="M7 17 17 7"/>';
         items={PARTICIPANTS.items}
         closing={PARTICIPANTS.closing}
       />
-    </div>
-
-    <div class="stack" data-gap="md" id="local-areas">
-      <PsInfoSectionTitle title="Local Areas &amp; LIOs" count={TOTAL_ACTIVE_LIOS} />
-      <PsInfoLiosDirectory areas={LIO_AREAS} />
     </div>
 
     <div class="stack" data-gap="md" id="each-lio-develops">

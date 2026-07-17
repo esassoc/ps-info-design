@@ -39,15 +39,10 @@ const ARROW = '<path d="M7 7h10v10"/><path d="M7 17 17 7"/>';
         >
           <span class="liosdir__area">{a.localArea}</span>
           <span class="liosdir__region">{a.actionArea}</span>
-          <span class="liosdir__org">{a.organization}</span>
-          {a.website ? (
-            <span class="liosdir__link">
-              Visit website
-              <EsaIcon name="arrow-up-right" size="xs" paths={ARROW} />
-            </span>
-          ) : (
-            <span class="liosdir__pending">Website coming soon</span>
-          )}
+          <span class="liosdir__org">
+            {a.organization}
+            {a.website && <EsaIcon name="arrow-up-right" size="xs" paths={ARROW} />}
+          </span>
         </Tag>
       </li>
     );
@@ -75,17 +70,6 @@ const ARROW = '<path d="M7 7h10v10"/><path d="M7 17 17 7"/>';
   }
   .liosdir__region { font-size: var(--ps-info-text-meta); color: var(--color-text-muted); }
   .liosdir__org { font-size: var(--ps-info-text-body); color: var(--color-text-secondary); line-height: 1.4; }
-  .liosdir__link {
-    display: inline-flex; align-items: center; gap: var(--spacing-100);
-    margin-top: var(--spacing-100);
-    font-size: var(--ps-info-text-meta-lg); font-weight: var(--font-weight-medium);
-    color: var(--color-text-link);
-  }
-  a.liosdir__card:hover .liosdir__link { color: var(--color-primary); }
-  .liosdir__link :global(.esa-icon) { color: var(--color-text-muted); }
-  a.liosdir__card:hover .liosdir__link :global(.esa-icon) { color: var(--color-primary); }
-  .liosdir__pending {
-    margin-top: var(--spacing-100);
-    font-size: var(--ps-info-text-meta-lg); font-style: italic; color: var(--color-text-muted);
-  }
+  .liosdir__org :global(.esa-icon) { color: var(--color-text-muted); margin-left: var(--spacing-100); }
+  a.liosdir__card:hover .liosdir__org :global(.esa-icon) { color: var(--color-primary); }
 </style>

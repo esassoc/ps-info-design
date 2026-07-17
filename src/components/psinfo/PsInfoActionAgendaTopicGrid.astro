@@ -1,0 +1,77 @@
+---
+// PsInfoActionAgendaTopicGrid — the real 2026–2030 Action Agenda Explorer
+// landing page's flat 26-card Topic grid, source order preserved. Each card
+// is exactly what the source renders: cover photo, a quiet "TOPIC {n}" badge,
+// and the title — no blurb/description text (the source's long topic
+// description is a hidden search-index attribute, not rendered card copy;
+// see the action-agenda contract). The 5-category taxonomy is page-chrome
+// navigation on the source (a persistent sub-nav dropdown), not a grouping
+// this landing page's body content uses, so this grid is intentionally
+// unbroken — no category subheadings.
+//
+// bcn-lego-checked: composes esa-card (outlined, no padding) + esa-badge (the
+// quiet "TOPIC {n}" mark — a badge, never a colored left border) + esa-icon;
+// same photo-card shape as psinfo-home-cards, minus the blurb slot that page
+// doesn't have. Checked Beacon (no matching card-grid-with-eyebrow-badge
+// pattern); this component is the reusable home.
+import EsaCard from '@esa/ecology/esa-card.astro';
+import EsaBadge from '@esa/ecology/esa-badge.astro';
+import EsaIcon from '@esa/ecology/esa-icon.astro';
+import { withBase } from '../../lib/base';
+import type { ActionAgendaTopic } from '../../data/pages/action-agenda';
+
+interface Props {
+  topics: ActionAgendaTopic[];
+}
+const { topics } = Astro.props;
+
+const ARROW = '<path d="M7 7h10v10"/><path d="M7 17 17 7"/>';
+---
+<ul class="aatopics" role="list">
+  {topics.map((topic) => (
+    <li>
+      <a class="aatopic" href={topic.href} target="_blank" rel="noopener">
+        <EsaCard variant="outlined" padding="none">
+          <img class="aatopic__img" src={withBase(topic.image)} alt="" loading="lazy" decoding="async" />
+          <div class="aatopic__body">
+            <EsaBadge value={topic.label} variant="primary" size="xs" />
+            <span class="aatopic__title">
+              {topic.title}
+              <EsaIcon name="arrow-up-right" size="xs" paths={ARROW} />
+            </span>
+          </div>
+        </EsaCard>
+      </a>
+    </li>
+  ))}
+</ul>
+
+<style>
+  .aatopics {
+    list-style: none; margin: 0; padding: 0;
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: var(--spacing-400);
+  }
+  .aatopic {
+    display: block; height: 100%; text-decoration: none; border-radius: var(--radius-100);
+    transition: transform 150ms ease, box-shadow 150ms ease;
+  }
+  .aatopic:hover { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(16, 42, 67, 0.12); }
+  .aatopic:focus-visible { outline: 2px solid var(--focus-ring-color); outline-offset: 2px; }
+  .aatopic :global(.esa-card) { height: 100%; overflow: hidden; }
+
+  .aatopic__img {
+    display: block; width: 100%; aspect-ratio: 43 / 26; object-fit: cover;
+    border-bottom: 1px solid var(--color-border-light);
+  }
+  .aatopic__body {
+    display: flex; flex-direction: column; align-items: flex-start; gap: var(--spacing-150);
+    padding: var(--spacing-300);
+  }
+  .aatopic__title {
+    font-size: 1.0625rem; font-weight: var(--font-weight-semibold);
+    color: var(--color-text-primary); line-height: 1.35;
+  }
+  .aatopic__title :global(.esa-icon) { color: var(--color-text-muted); margin-left: var(--spacing-100); vertical-align: baseline; }
+  .aatopic:hover .aatopic__title { color: var(--color-primary); }
+</style>

@@ -1,34 +1,63 @@
 ---
-// PsInfoOngoingProgramsIntro — the Ongoing Programs Portal's own intro copy:
-// 2 verbatim paragraphs from OngoingProgram/Index. Modeled directly on
-// PsInfoAboutNarrative's plain-paragraph case, but with local Props only —
-// About's component is typed to about.ts's AboutBlock (inline text/link
-// segments), which this page has no reason to reuse across the write-scope
-// boundary; this page's intro is plain prose with no inline links.
+// PsInfoOngoingProgramsIntro — the Ongoing Programs (Index) page's entire
+// body: its regional map image floated beside 2 verbatim paragraphs, the
+// same image-floated-beside-prose composition the source page itself uses.
+// Modeled directly on PsInfoAboutNarrative's plain-paragraph case, but with
+// local Props only — About's component is typed to about.ts's AboutBlock
+// (inline text/link segments), which this page has no reason to reuse
+// across the write-scope boundary; this page's intro is plain prose with no
+// inline links.
 //
-// bcn-lego-checked: no esa- lego renders bare prose paragraphs as a section
-// (esa-card's body is a slot, not a paragraph renderer); esa-card (outlined)
-// is the reused surface — same card treatment as every other prose block
-// already established (PsInfoAboutNarrative, PsInfoIndicatorsDefinitions).
-// Checked Beacon: no matching plain-narrative pattern either.
+// bcn-lego-checked: no esa- lego renders bare prose paragraphs with a
+// floated inline image as a section (esa-card's body is a slot, not a
+// paragraph/image renderer); esa-card (outlined) is the reused surface —
+// same card treatment as every other prose block already established
+// (PsInfoAboutNarrative, PsInfoIndicatorsDefinitions). The float layout
+// itself is bespoke structure mirroring the source's own composition, not a
+// lego gap. Checked Beacon: no matching plain-narrative pattern either.
 // psinfo-ongoing-programs-intro is the reusable home for this page.
 import EsaCard from '@esa/ecology/esa-card.astro';
 
 interface Props {
   paragraphs: string[];
+  image?: { src: string; alt: string; width: number; height: number };
 }
-const { paragraphs } = Astro.props;
+const { paragraphs, image } = Astro.props;
 ---
 <EsaCard variant="outlined">
   <div class="intro">
+    {image && (
+      <img
+        class="intro__image"
+        src={image.src}
+        alt={image.alt}
+        width={image.width}
+        height={image.height}
+        loading="lazy"
+      />
+    )}
     {paragraphs.map((p) => <p class="intro__p">{p}</p>)}
   </div>
 </EsaCard>
 
 <style>
-  .intro { display: flex; flex-direction: column; gap: var(--spacing-400); }
+  .intro::after { content: ''; display: table; clear: both; }
+
+  .intro__image {
+    float: right;
+    width: 280px; height: auto;
+    margin: 0 0 var(--spacing-300) var(--spacing-400);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-100);
+  }
+
   .intro__p {
-    margin: 0; font-size: var(--ps-info-text-body); line-height: 1.65;
+    margin: 0 0 var(--spacing-400) 0; font-size: var(--ps-info-text-body); line-height: 1.65;
     color: var(--color-text-primary); max-width: 74ch;
+  }
+  .intro__p:last-child { margin-bottom: 0; }
+
+  @media (max-width: 560px) {
+    .intro__image { float: none; display: block; width: 100%; max-width: 320px; margin: 0 auto var(--spacing-300); }
   }
 </style>

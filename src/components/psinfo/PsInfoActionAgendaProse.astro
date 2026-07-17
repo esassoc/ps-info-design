@@ -1,0 +1,36 @@
+---
+// PsInfoActionAgendaProse — verbatim body copy from the real 2026–2030 Action
+// Agenda Explorer landing page: plain paragraphs with inline bold spans in
+// their original sentence position (the source's own <strong>/<b> markup,
+// e.g. "Action Agenda Topics", "Action Agenda Explorer"). Same card treatment
+// as PsInfoAboutNarrative so prose reads consistently across the site.
+//
+// bcn-lego-checked: no esa- lego renders ordered prose paragraphs with inline
+// bold emphasis; checked Beacon (no matching narrative-body pattern).
+// esa-card (outlined) is the reused surface, same as PsInfoAboutNarrative.
+import EsaCard from '@esa/ecology/esa-card.astro';
+import type { ProseParagraph } from '../../data/pages/action-agenda';
+
+interface Props {
+  paragraphs: ProseParagraph[];
+}
+const { paragraphs } = Astro.props;
+---
+<EsaCard variant="outlined">
+  <div class="aaprose">
+    {paragraphs.map((segments) => (
+      <p class="aaprose__p">
+        {segments.map((seg) => (seg.bold ? <strong>{seg.text}</strong> : seg.text))}
+      </p>
+    ))}
+  </div>
+</EsaCard>
+
+<style>
+  .aaprose { display: flex; flex-direction: column; gap: var(--spacing-400); }
+  .aaprose__p {
+    margin: 0; font-size: var(--ps-info-text-body); line-height: 1.65;
+    color: var(--color-text-primary); max-width: 74ch;
+  }
+  .aaprose__p strong { font-weight: var(--font-weight-semibold); }
+</style>

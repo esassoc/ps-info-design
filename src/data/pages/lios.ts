@@ -50,8 +50,10 @@ export const INTRO_PARAGRAPHS: string[] = [
   'Local Integrating Organizations (LIOs) are local forums that bring people together to protect and restore the ecosystem through locally specific strategies and actions. LIOs provide a venue for stakeholders and partners to identify and develop locally driven recovery strategies.',
   'There are currently 10 active LIOs representing different areas of Puget Sound. Each LIO receives funding to support planning and coordination efforts within their regional watershed.',
 ];
-/** Suggested PsInfoPhotoHeader lede — INTRO_PARAGRAPHS[0]. */
-export const PAGE_LEDE = INTRO_PARAGRAPHS[0];
+/** EsaPageHeader lede — the full two-sentence intro, joined as one paragraph
+ *  (this unit's header treatment is plain; there is no separate "Overview"
+ *  section below it, so both INTRO_PARAGRAPHS sentences live in the lede). */
+export const PAGE_LEDE = INTRO_PARAGRAPHS.join(' ');
 
 /** The "What makes an LIO?" callout box (source: light-blue-tinted table cell). */
 export interface LioParticipants {

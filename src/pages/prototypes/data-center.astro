@@ -5,13 +5,14 @@
 // carries body copy in source (every sectionDetails span is empty), so tiles
 // resolve to icon + title only. Two tiles route into this prototype's own
 // pages (Indicators, Web Services); the rest point at the live admin/list
-// tools this demo does not rebuild.
+// tools this demo does not rebuild. Header treatment is plain (esa-page-header)
+// per contract — the source page carries no imagery beyond site chrome.
 import PsInfoAppShell from '../../layouts/PsInfoAppShell.astro';
-import PsInfoPhotoHeader from '../../components/psinfo/PsInfoPhotoHeader.astro';
+import EsaPageHeader from '@esa/ecology/esa-page-header.astro';
 import PsInfoSectionTitle from '../../components/psinfo/PsInfoSectionTitle.astro';
 import PsInfoDataCenterGrid from '../../components/psinfo/PsInfoDataCenterGrid.astro';
 import {
-  DATA_CENTER_HERO,
+  DATA_CENTER_PAGE_HEADER,
   DATA_CENTER_RESOURCES,
   DATA_CENTER_ARCHIVED_HEADING,
   DATA_CENTER_ARCHIVED,
@@ -20,18 +21,15 @@ import {
 <!-- manifest:
   layout: PsInfoAppShell (active Overview/Data Center) > center+stack spine
   sections:
-    - page header       -> psinfo-photo-header (band)
+    - page header       -> esa-page-header (plain, title + lede)
     - active resources   -> psinfo-data-center-grid
     - archived resource  -> psinfo-section-title + psinfo-data-center-grid
 -->
 <PsInfoAppShell title="Data Center — Puget Sound Info" active={{ moduleId: 'overview', leafId: 'data-center' }}>
   <div class="center stack" data-gap="xl">
-    <PsInfoPhotoHeader
-      size="band"
-      image="/photos/sound-aerial.jpg"
-      focus="50% 60%"
-      title={DATA_CENTER_HERO.title}
-      lede={DATA_CENTER_HERO.lede}
+    <EsaPageHeader
+      title={DATA_CENTER_PAGE_HEADER.title}
+      lede={DATA_CENTER_PAGE_HEADER.lede}
     />
 
     <PsInfoDataCenterGrid items={DATA_CENTER_RESOURCES} />

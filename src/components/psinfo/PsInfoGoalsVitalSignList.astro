@@ -28,6 +28,12 @@ interface Props {
 }
 const { vitalSigns, hueVar } = Astro.props;
 
+// The source's two column headers ("Indicator Progress" / "Target Status")
+// don't survive the table -> card-list transform as literal <th> text, but
+// their DISTINCTION must: without a label, two adjacent badges read as one
+// group. Sentence-case, meta-size labels (not the banned uppercase/
+// letter-spaced section-label treatment) restore that distinction per-row.
+
 // Two of this goal's Vital Signs get their own dedicated page from a sibling
 // unit; everything else stays a link into the live (out-of-scope) VitalSign/
 // Detail page. "Salmon" -> chinook-salmon because Chinook is the Vital Sign's
@@ -53,11 +59,10 @@ const ARROW = '<path d="M7 7h10v10"/><path d="M7 17 17 7"/>';
 <ul class="vslist" role="list">
   {vitalSigns.map((vs) => {
     const internalRoute = INTERNAL_ROUTE[vs.name];
-    const count = vs.indicators.length;
     return (
       <li>
         <EsaCard variant="outlined">
-          <div class="vs__head repel" data-gap="sm">
+          <div class="vs__head">
             <span class="cluster" data-gap="xs">
               <span class="vs__hue" style={`background:var(${hueVar})`} aria-hidden="true" />
               {internalRoute ? (
@@ -69,7 +74,6 @@ const ARROW = '<path d="M7 7h10v10"/><path d="M7 17 17 7"/>';
                 </a>
               )}
             </span>
-            <span class="vs__count">{count} {count === 1 ? 'indicator' : 'indicators'}</span>
           </div>
 
           <ul class="indlist" role="list">
@@ -80,9 +84,15 @@ const ARROW = '<path d="M7 7h10v10"/><path d="M7 17 17 7"/>';
                   <EsaIcon name="arrow-up-right" size="xs" paths={ARROW} />
                 </a>
                 <span class="ind__badges cluster" data-gap="2xs">
-                  <EsaBadge value={ind.progress} variant={TONE_VARIANT[PROGRESS_TONE[ind.progress]]} size="sm" />
+                  <span class="ind__stat">
+                    <span class="ind__stat-label">Progress</span>
+                    <EsaBadge value={ind.progress} variant={TONE_VARIANT[PROGRESS_TONE[ind.progress]]} size="sm" />
+                  </span>
                   {ind.targetStatus && (
-                    <EsaBadge value={ind.targetStatus} variant={TONE_VARIANT[TARGET_STATUS_TONE[ind.targetStatus]]} size="sm" />
+                    <span class="ind__stat">
+                      <span class="ind__stat-label">Target</span>
+                      <EsaBadge value={ind.targetStatus} variant={TONE_VARIANT[TARGET_STATUS_TONE[ind.targetStatus]]} size="sm" />
+                    </span>
                   )}
                 </span>
               </li>
@@ -107,7 +117,6 @@ const ARROW = '<path d="M7 7h10v10"/><path d="M7 17 17 7"/>';
   .vs__link:hover { color: var(--color-primary); text-decoration: underline; }
   .vs__link:focus-visible { outline: 2px solid var(--focus-ring-color); outline-offset: 2px; }
   .vs__link :global(.esa-icon) { color: var(--color-text-muted); }
-  .vs__count { font-size: var(--ps-info-text-meta); color: var(--color-text-muted); white-space: nowrap; font-variant-numeric: tabular-nums; }
 
   .indlist { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
   .ind { padding: var(--spacing-250) 0; }
@@ -121,4 +130,6 @@ const ARROW = '<path d="M7 7h10v10"/><path d="M7 17 17 7"/>';
   .ind__link:focus-visible { outline: 2px solid var(--focus-ring-color); outline-offset: 2px; }
   .ind__link :global(.esa-icon) { color: var(--color-text-muted); flex: none; }
   .ind__badges { flex: none; }
+  .ind__stat { display: inline-flex; align-items: center; gap: var(--spacing-100); }
+  .ind__stat-label { font-size: var(--ps-info-text-meta); color: var(--color-text-muted); white-space: nowrap; }
 </style>

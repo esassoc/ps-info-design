@@ -4,10 +4,11 @@
 // a flat, alphabetically-ordered list of 28 real download endpoints (Action
 // Agenda outcomes/strategies, Funds, NEP activity/expenditure/funding/award
 // records, Ongoing Programs, Progress Indicators, Puget Sound Indicators,
-// Vital Signs). No imagery on the source page beyond site chrome, so the
-// header uses the shared Sound photograph like every other module band.
+// Vital Signs). The source page carries no imagery beyond site chrome, so
+// per contract this unit's header treatment is plain (esa-page-header), not
+// a photo band.
 import PsInfoAppShell from '../../layouts/PsInfoAppShell.astro';
-import PsInfoPhotoHeader from '../../components/psinfo/PsInfoPhotoHeader.astro';
+import EsaPageHeader from '@esa/ecology/esa-page-header.astro';
 import PsInfoSectionTitle from '../../components/psinfo/PsInfoSectionTitle.astro';
 import PsInfoWebServicesCatalog from '../../components/psinfo/PsInfoWebServicesCatalog.astro';
 import { PAGE_TITLE, INTRO_PARAGRAPH, WEB_SERVICES, TOTAL_SERVICES } from '../../data/pages/web-services';
@@ -15,18 +16,12 @@ import { PAGE_TITLE, INTRO_PARAGRAPH, WEB_SERVICES, TOTAL_SERVICES } from '../..
 <!-- manifest:
   layout: PsInfoAppShell (active Overview > Web Services) > center+stack spine
   sections:
-    - page header       -> psinfo-photo-header (photo band, composes esa-page-header)
+    - page header       -> esa-page-header (plain, no photo band)
     - available services -> psinfo-section-title + psinfo-web-services-catalog (28 endpoints, one esa-collapsible each)
 -->
 <PsInfoAppShell title={`${PAGE_TITLE} — Puget Sound Info`} active={{ moduleId: 'overview', leafId: 'web-services' }}>
   <div class="center stack" data-gap="xl">
-    <PsInfoPhotoHeader
-      size="band"
-      image="/photos/sound-aerial.jpg"
-      focus="50% 30%"
-      title={PAGE_TITLE}
-      lede={INTRO_PARAGRAPH}
-    />
+    <EsaPageHeader title={PAGE_TITLE} lede={INTRO_PARAGRAPH} />
 
     <div class="stack" data-gap="md">
       <PsInfoSectionTitle title="Available services" count={`${TOTAL_SERVICES} services`} />

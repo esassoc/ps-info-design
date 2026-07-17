@@ -5,7 +5,7 @@
 // notes); the source's three ALL-CAPS <p> "headings" render here as real,
 // sentence-case <h2>s.
 import PsInfoAppShell from '../../layouts/PsInfoAppShell.astro';
-import PsInfoPhotoHeader from '../../components/psinfo/PsInfoPhotoHeader.astro';
+import EsaPageHeader from '@esa/ecology/esa-page-header.astro';
 import PsInfoSectionTitle from '../../components/psinfo/PsInfoSectionTitle.astro';
 import PsInfoAboutPhotoTrio from '../../components/psinfo/PsInfoAboutPhotoTrio.astro';
 import PsInfoAboutNarrative from '../../components/psinfo/PsInfoAboutNarrative.astro';
@@ -14,7 +14,7 @@ import { ABOUT_HERO, ABOUT_PHOTOS, ABOUT_SECTIONS } from '../../data/pages/about
 <!-- manifest:
   layout: PsInfoAppShell (active Overview > About) > center+stack spine
   sections:
-    - page header       -> psinfo-photo-header (band, composes esa-page-header)
+    - page header       -> esa-page-header (plain, title only, no lede)
     - page photography  -> psinfo-about-photo-trio (3-up, esa-card frames)
     - what is it         -> psinfo-section-title + psinfo-about-narrative
     - who is involved    -> psinfo-section-title + psinfo-about-narrative (+ partner list)
@@ -22,13 +22,7 @@ import { ABOUT_HERO, ABOUT_PHOTOS, ABOUT_SECTIONS } from '../../data/pages/about
 -->
 <PsInfoAppShell title="About — Puget Sound Info" active={{ moduleId: 'overview', leafId: 'about' }}>
   <div class="center stack" data-gap="xl">
-    <PsInfoPhotoHeader
-      size="band"
-      image="/photos/sound-aerial.jpg"
-      focus="50% 55%"
-      title={ABOUT_HERO.title}
-      lede={ABOUT_HERO.lede}
-    />
+    <EsaPageHeader title={ABOUT_HERO.title} />
 
     <PsInfoAboutPhotoTrio photos={ABOUT_PHOTOS} />
 

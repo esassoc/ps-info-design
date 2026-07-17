@@ -72,11 +72,12 @@ export interface AboutSection {
 }
 
 // ── Hero ─────────────────────────────────────────────────────────────────
-// Title matches the page's own <title>/breadcrumb ("About Puget Sound Info");
-// lede is the source's first sentence, verbatim.
+// Title matches the page's own <title>/breadcrumb ("About Puget Sound Info").
+// Header is plain (esa-page-header) with no lede: the source has no intro
+// copy distinct from Section 2's own opening sentence, so a lede here would
+// duplicate content the source states once (see contract).
 export const ABOUT_HERO = {
   title: 'About Puget Sound Info',
-  lede: 'Puget Sound Info is a collaborative platform for sharing and reporting information about Puget Sound recovery priorities, investments, accomplishments, and progress toward near-term results and long-term recovery goals.',
 };
 
 // ── The page's own photography (3 inline images at the top of the article) ─
