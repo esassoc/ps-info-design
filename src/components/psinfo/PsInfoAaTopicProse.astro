@@ -1,0 +1,62 @@
+---
+// PsInfoAaTopicProse — verbatim Topic-page body prose (Overview intro, "What
+// We're Tracking" intro, Commitments/Indicators intros, Financial Investments
+// footnotes): plain paragraphs whose inline segments can be bold AND/OR a
+// link — the Overview intro's closing paragraph links out to four sibling
+// Topics. Distinct from PsInfoActionAgendaProse (the landing-page prose,
+// bold-only, no link segments) because this Topic-page dataset threads real
+// inline links through the bold runs.
+//
+// bcn-lego-checked: no esa- lego renders ordered prose paragraphs with mixed
+// inline bold/link segments; checked Beacon (no matching narrative-body
+// pattern). Modeled on PsInfoActionAgendaProse's card treatment, extended
+// for the href segment case.
+import EsaIcon from '@esa/ecology/esa-icon.astro';
+import { isExternalHref, EXTERNAL_LINK_ICON_PATHS } from '../../lib/psinfoExternalLink';
+import type { TopicProseParagraph } from '../../data/pages/action-agenda';
+
+interface Props {
+  paragraphs: TopicProseParagraph[];
+}
+const { paragraphs } = Astro.props;
+---
+<div class="aatprose">
+  {paragraphs.map((segments) => (
+    <p class="aatprose__p">
+      {segments.map((seg) => {
+        if (seg.href) {
+          const external = isExternalHref(seg.href);
+          return (
+            <a
+              class="aatprose__link"
+              href={seg.href}
+              {...(external ? { target: '_blank', rel: 'noopener' } : {})}
+            >
+              {seg.text}
+              {external && <EsaIcon name="external-link" size="xs" paths={EXTERNAL_LINK_ICON_PATHS} label="(external)" />}
+            </a>
+          );
+        }
+        return seg.bold ? <strong>{seg.text}</strong> : seg.text;
+      })}
+    </p>
+  ))}
+</div>
+
+<style>
+  /* Normal flow (not flex) so parent float layouts can wrap these paragraphs
+     around a floated aside (the Overview tab's photo + Vital Signs column). */
+  .aatprose__p {
+    margin: 0 0 var(--spacing-400); font-size: var(--ps-info-text-body); line-height: 1.65;
+    color: var(--color-text-secondary);
+  }
+  .aatprose__p:last-child { margin-bottom: 0; }
+  .aatprose__p strong { font-weight: var(--font-weight-semibold); color: var(--color-text-primary); }
+  .aatprose__link {
+    display: inline-flex; align-items: baseline; gap: var(--spacing-100);
+    color: var(--color-text-link); text-decoration: underline; text-underline-offset: 2px;
+  }
+  .aatprose__link:hover { color: var(--color-text-link-hover); }
+  .aatprose__link:focus-visible { outline: 2px solid var(--focus-ring-color); outline-offset: 2px; }
+  .aatprose__link :global(.esa-icon) { color: var(--color-text-muted); }
+</style>

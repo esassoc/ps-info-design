@@ -15,7 +15,9 @@
     "@esa/docs": "file:../ecology/packages/docs",
     "@esa/ecology": "file:../ecology/packages/ecology",
     "@esa/tokens": "file:../ecology/packages/tokens",
-    "astro": "^5.0.0"
+    "ag-grid-community": "^36.0.2",
+    "astro": "^5.0.0",
+    "leaflet": "^1.9.4"
   },
   "devDependencies": {
     "@esa/handoff": "file:../ecology/packages/handoff",

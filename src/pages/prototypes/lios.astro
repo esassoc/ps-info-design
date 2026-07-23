@@ -1,52 +1,55 @@
 ---
-// LIOs — Local Integrating Organizations (pugetsoundinfo.wa.gov/LIOs). The
-// live page's own server-rendered HTML is an intro, a "What makes an LIO?"
-// callout, an "Each LIO develops" plan-types section, and a calendar CTA; its
-// one interactive piece — the per-LIO list — lives inside an ArcGIS
-// Experience Builder map widget with no static HTML fallback. That list is
-// recovered from the widget's own backing feature service (see
-// src/data/pages/lios.ts header for full sourcing) and rendered here as a
-// card directory in place of the un-embeddable map+list iframe.
+// LIOs — Local Integrating Organizations (qa.pugetsoundinfo.wa.gov/lios).
+// The source page is: centered H2 title, two intro paragraphs, the ArcGIS
+// Experience Builder map+list widget (iframe), the "What makes an LIO?"
+// tinted callout, the "Each LIO develops:" list + closing paragraph, and the
+// LIO Public Meeting calendar (heading, open-in-new-window link, PowerBI
+// iframe). Both live widgets are embedded here with the source's own iframe
+// srcs. The map widget carries its own visible titling and per-LIO list, so
+// its section renders headingless (revision direction 2026-07-23; the HTML
+// directory complement was cut the same round — LIO_AREAS stays documented
+// in src/data/pages/lios.ts).
 //
 // Header is plain (esa-page-header): the source carries no photography of
-// its own (only a 15x15 decorative external-link glyph), and its two-
-// sentence intro sits directly under the H2 title with no separate
-// "Overview" heading — so the full intro lives in the header lede and there
-// is no boxed Overview section below it.
+// its own, and its two intro paragraphs sit directly under the H2 title —
+// rendered as a two-paragraph lede (psinfo-header-lede below the title-only
+// lego, matching www's paragraph break); there is no separate Overview section.
 import PsInfoAppShell from '../../layouts/PsInfoAppShell.astro';
 import EsaPageHeader from '@esa/ecology/esa-page-header.astro';
+import PsInfoHeaderLede from '../../components/psinfo/PsInfoHeaderLede.astro';
 import PsInfoSectionTitle from '../../components/psinfo/PsInfoSectionTitle.astro';
+import PsInfoLiosEmbed from '../../components/psinfo/PsInfoLiosEmbed.astro';
 import PsInfoLiosCallout from '../../components/psinfo/PsInfoLiosCallout.astro';
-import PsInfoLiosDirectory from '../../components/psinfo/PsInfoLiosDirectory.astro';
 import PsInfoLiosPlanTypes from '../../components/psinfo/PsInfoLiosPlanTypes.astro';
 import EsaButton from '@esa/ecology/esa-button.astro';
 import EsaIcon from '@esa/ecology/esa-icon.astro';
+import { EXTERNAL_LINK_ICON_PATHS } from '../../lib/psinfoExternalLink';
 import {
-  PAGE_TITLE, PAGE_LEDE,
+  PAGE_TITLE, INTRO_PARAGRAPHS,
+  LIO_MAP_EMBED,
   PARTICIPANTS,
-  LIO_AREAS, TOTAL_ACTIVE_LIOS,
   PLANS_SECTION,
-  CALENDAR_CTA,
+  CALENDAR_CTA, CALENDAR_EMBED,
 } from '../../data/pages/lios';
-
-const ARROW = '<path d="M7 7h10v10"/><path d="M7 17 17 7"/>';
 ---
 <!-- manifest:
   layout: PsInfoAppShell (active Plans > Local Ecosystem Recovery Plans) > center+stack spine
   sections:
-    - page header            -> esa-page-header (plain, title + full intro lede)
-    - local areas and lios    -> psinfo-section-title + psinfo-lios-directory
-    - what makes an lio?      -> psinfo-lios-callout (esa-alert-box carries the heading)
-    - each lio develops       -> psinfo-lios-plan-types (lead paragraph carries the heading)
-    - public meeting calendar -> psinfo-section-title + esa-button (external CTA)
+    - page header             -> esa-page-header (title-only) + psinfo-header-lede (the source's two intro paragraphs, full measure)
+    - local areas and lios    -> psinfo-lios-embed (source ArcGIS iframe carries its own titling)
+    - what makes an lio?      -> psinfo-lios-callout (esa-alert-box carries the title)
+    - each lio develops       -> psinfo-lios-plan-types (no links — QA source carries none)
+    - public meeting calendar -> psinfo-section-title + esa-button (external CTA, hugging in a cluster) + psinfo-lios-embed (source PowerBI iframe)
 -->
 <PsInfoAppShell title="LIOs — Puget Sound Info" active={{ moduleId: 'plans', leafId: 'local-recovery-plans' }}>
-  <div class="center stack" data-gap="xl">
-    <EsaPageHeader title={PAGE_TITLE} lede={PAGE_LEDE} />
+  <div class="center stack" data-gap="2xl" id="lios">
+    <div class="stack" data-gap="xs">
+      <EsaPageHeader title={PAGE_TITLE} />
+      <PsInfoHeaderLede paragraphs={INTRO_PARAGRAPHS} />
+    </div>
 
     <div class="stack" data-gap="md" id="local-areas">
-      <PsInfoSectionTitle title="Local Areas and LIOs" count={TOTAL_ACTIVE_LIOS} />
-      <PsInfoLiosDirectory areas={LIO_AREAS} />
+      <PsInfoLiosEmbed title={LIO_MAP_EMBED.title} src={LIO_MAP_EMBED.src} height={LIO_MAP_EMBED.height} />
     </div>
 
     <div class="stack" data-gap="md" id="what-makes-an-lio">
@@ -68,10 +71,13 @@ const ARROW = '<path d="M7 7h10v10"/><path d="M7 17 17 7"/>';
 
     <div class="stack" data-gap="md" id="calendar">
       <PsInfoSectionTitle title={CALENDAR_CTA.heading} />
-      <EsaButton href={CALENDAR_CTA.href} target="_blank" rel="noopener">
-        {CALENDAR_CTA.linkLabel}
-        <EsaIcon name="arrow-up-right" size="xs" paths={ARROW} />
-      </EsaButton>
+      <div class="cluster">
+        <EsaButton href={CALENDAR_CTA.href} target="_blank" rel="noopener">
+          {CALENDAR_CTA.linkLabel}
+          <EsaIcon name="external-link" size="xs" paths={EXTERNAL_LINK_ICON_PATHS} />
+        </EsaButton>
+      </div>
+      <PsInfoLiosEmbed title={CALENDAR_EMBED.title} src={CALENDAR_EMBED.src} height={CALENDAR_EMBED.height} />
     </div>
   </div>
 </PsInfoAppShell>

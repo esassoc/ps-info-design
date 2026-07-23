@@ -5,6 +5,9 @@
 // source's OWN circular progress/target-status icons
 // (/photos/vital-signs/icons/*, downloaded from
 // vitalsigns.pugetsoundinfo.wa.gov/Content/img/VitalSignIndicatorIcons/).
+// Two roots, matching the source's two grids: goal-rooted (`goals` — the goal
+// pages and All Indicators) and vital-sign-rooted (`vitalSigns` — a Vital Sign
+// Detail page's own VITAL SIGN > INDICATOR grid, one level shallower).
 //
 // bcn-lego-checked: checked esa-collapsible (single disclosure block, no
 // tree/level semantics, no column layout) and esa-tab-layout /
@@ -14,20 +17,24 @@
 // alt text; search input is labeled.
 import EsaIcon from '@esa/ecology/esa-icon.astro';
 import { withBase } from '../../lib/base';
-import type { GoalDetail, ProgressLabel, TargetStatusLabel } from '../../data/pages/goals';
+import { isExternalHref } from '../../lib/psinfoExternalLink';
+import type { GoalDetail, GoalVitalSign, ProgressLabel, TargetStatusLabel } from '../../data/pages/goals';
 
 interface Props {
-  goals: GoalDetail[];
+  /** Goal-rooted tree (GOAL > VITAL SIGN > INDICATOR). Omit when passing `vitalSigns`. */
+  goals?: GoalDetail[];
+  /** Vital-sign-rooted tree (VITAL SIGN > INDICATOR) — a detail page's own grid. */
+  vitalSigns?: GoalVitalSign[];
   /** Frame color token, e.g. '--ps-info-goal-population'; defaults to brand navy. */
   frameHueVar?: string;
   /** ViewAll mode: goal + vital sign links render in their goal's ThemeColor. */
   colorCoded?: boolean;
-  /** Which levels start expanded: 1 = goals only, 2 = goals + vital signs. */
+  /** Which levels start expanded: 1 = root rows only, 2 = root rows + vital signs. */
   expandedLevels?: 1 | 2;
   /** Unique id when multiple trees share a page. */
   treeId?: string;
 }
-const { goals, frameHueVar, colorCoded = false, expandedLevels = 1, treeId = 'vstree' } = Astro.props;
+const { goals = [], vitalSigns, frameHueVar, colorCoded = false, expandedLevels = 1, treeId = 'vstree' } = Astro.props;
 
 const PROGRESS_ICON: Record<ProgressLabel, string> = {
   'Getting Better': 'progress-gettingbetter.png',
@@ -69,12 +76,58 @@ const uid = (...parts: (string | number)[]) =>
   </div>
 
   <div class="vstree__head" aria-hidden="true">
-    <span class="vstree__head-path">Goal <EsaIcon name="chevron-right" size="xs" paths='<path d="m9 18 6-6-6-6"/>' /> Vital Sign <EsaIcon name="chevron-right" size="xs" paths='<path d="m9 18 6-6-6-6"/>' /> Indicator</span>
+    <span class="vstree__head-path">
+      {!vitalSigns && <>Goal <EsaIcon name="chevron-right" size="xs" paths='<path d="m9 18 6-6-6-6"/>' /> </>}
+      Vital Sign <EsaIcon name="chevron-right" size="xs" paths='<path d="m9 18 6-6-6-6"/>' /> Indicator
+    </span>
     <span class="vstree__head-col">Indicator Progress</span>
     <span class="vstree__head-col">Target Status</span>
   </div>
 
-  <ul class="vstree__l0" role="list">
+  {vitalSigns && (
+    <ul class="vstree__l0" role="list">
+      {vitalSigns.map((vsign) => (
+        <li class="vstree__goal" data-tree-row data-level="0" data-text={vsign.name.toLowerCase()}>
+          <div class="vstree__row">
+            <button
+              type="button"
+              class="vstree__toggle"
+              data-tree-toggle
+              aria-expanded={expandedLevels >= 1 ? 'true' : 'false'}
+              aria-controls={uid(vsign.name)}
+              aria-label={`Toggle ${vsign.name}`}
+            >
+              <EsaIcon name="tree-toggle" size="sm" paths={expandedLevels >= 1 ? MINUS : PLUS} />
+            </button>
+            <a
+              class="vstree__link vstree__link--goal"
+              href={vsign.href}
+              {...(isExternalHref(vsign.href) ? { target: '_blank', rel: 'noopener' } : {})}
+            >{vsign.name}</a>
+          </div>
+          <ul class="vstree__l1" role="list" id={uid(vsign.name)} hidden={expandedLevels < 1}>
+            {vsign.indicators.map((ind) => (
+              <li data-tree-row data-level="1" data-text={ind.name.toLowerCase()}>
+                <div class="vstree__row vstree__row--ind vstree__row--ind-shallow">
+                  <a class="vstree__link vstree__link--ind" href={ind.href} {...(isExternalHref(ind.href) ? { target: '_blank', rel: 'noopener' } : {})}>{ind.name}</a>
+                  <span class="vstree__cell">
+                    <img src={withBase(`/photos/vital-signs/icons/${PROGRESS_ICON[ind.progress]}`)} alt={progressAlt(ind.progress)} width="64" height="64" loading="lazy" />
+                  </span>
+                  <span class="vstree__cell">
+                    {ind.targetStatus && (
+                      <img src={withBase(`/photos/vital-signs/icons/${TARGET_ICON[ind.targetStatus]}`)} alt={targetAlt(ind.targetStatus)} width="64" height="64" loading="lazy" />
+                    )}
+                  </span>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </li>
+      ))}
+    </ul>
+  )}
+
+  {!vitalSigns && <ul class="vstree__l0" role="list">
     {goals.map((goal) => (
       <li class="vstree__goal" data-tree-row data-level="0" data-text={goal.name.toLowerCase()}>
         <div class="vstree__row">
@@ -119,7 +172,7 @@ const uid = (...parts: (string | number)[]) =>
                     class="vstree__link"
                     style={colorCoded ? `color: color-mix(in srgb, var(${goal.hueVar}) 80%, #000000)` : undefined}
                     href={vsign.href}
-                    target="_blank" rel="noopener"
+                    {...(isExternalHref(vsign.href) ? { target: '_blank', rel: 'noopener' } : {})}
                   >{vsign.name}</a>
                 )}
               </div>
@@ -127,7 +180,7 @@ const uid = (...parts: (string | number)[]) =>
                 {vsign.indicators.map((ind) => (
                   <li data-tree-row data-level="2" data-text={ind.name.toLowerCase()}>
                     <div class="vstree__row vstree__row--ind">
-                      <a class="vstree__link vstree__link--ind" href={ind.href} target="_blank" rel="noopener">{ind.name}</a>
+                      <a class="vstree__link vstree__link--ind" href={ind.href} {...(isExternalHref(ind.href) ? { target: '_blank', rel: 'noopener' } : {})}>{ind.name}</a>
                       <span class="vstree__cell">
                         <img src={withBase(`/photos/vital-signs/icons/${PROGRESS_ICON[ind.progress]}`)} alt={progressAlt(ind.progress)} width="64" height="64" loading="lazy" />
                       </span>
@@ -145,7 +198,7 @@ const uid = (...parts: (string | number)[]) =>
         </ul>
       </li>
     ))}
-  </ul>
+  </ul>}
 </div>
 
 <script>
@@ -291,6 +344,8 @@ const uid = (...parts: (string | number)[]) =>
     padding-left: calc(var(--spacing-400) + 4.5rem);
     background: var(--color-surface);
   }
+  /* Vital-sign-rooted trees have indicators one level up — indent one step, not two. */
+  .vstree__row--ind-shallow { padding-left: calc(var(--spacing-400) + 2.25rem); }
 
   .vstree__toggle {
     flex: none; display: inline-flex; align-items: center; justify-content: center;

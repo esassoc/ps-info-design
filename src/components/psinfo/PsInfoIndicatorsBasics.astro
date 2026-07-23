@@ -17,14 +17,13 @@
 import EsaCard from '@esa/ecology/esa-card.astro';
 import EsaBadge from '@esa/ecology/esa-badge.astro';
 import EsaIcon from '@esa/ecology/esa-icon.astro';
+import { isExternalHref, EXTERNAL_LINK_ICON_PATHS } from '../../lib/psinfoExternalLink';
 import type { ExemplarBasics } from '../../data/pages/indicators';
 
 interface Props {
   basics: ExemplarBasics;
 }
 const { basics } = Astro.props;
-
-const ARROW = '<path d="M7 7h10v10"/><path d="M7 17 17 7"/>';
 ---
 <EsaCard variant="outlined">
   <div class="basics">
@@ -41,10 +40,14 @@ const ARROW = '<path d="M7 7h10v10"/><path d="M7 17 17 7"/>';
       <div class="basics__fact">
         <dt>Vital Sign</dt>
         <dd>
-          <a href={basics.vitalSignHref} target="_blank" rel="noopener">
-            {basics.vitalSign}
-            <EsaIcon name="arrow-up-right" size="xs" paths={ARROW} />
-          </a>
+          {isExternalHref(basics.vitalSignHref) ? (
+            <a href={basics.vitalSignHref} target="_blank" rel="noopener">
+              {basics.vitalSign}
+              <EsaIcon name="external-link" size="xs" paths={EXTERNAL_LINK_ICON_PATHS} label="(external)" />
+            </a>
+          ) : (
+            <a href={basics.vitalSignHref}>{basics.vitalSign}</a>
+          )}
         </dd>
       </div>
       <div class="basics__fact">
@@ -61,12 +64,16 @@ const ARROW = '<path d="M7 7h10v10"/><path d="M7 17 17 7"/>';
       <h3 class="basics__subhead">Target</h3>
       {basics.targetParagraphs.map((p) => <p class="basics__p">{p}</p>)}
       <div class="basics__links">
-        {basics.targetLinks.map((l) => (
-          <a href={l.href} target="_blank" rel="noopener">
-            {l.text}
-            <EsaIcon name="arrow-up-right" size="xs" paths={ARROW} />
-          </a>
-        ))}
+        {basics.targetLinks.map((l) =>
+          isExternalHref(l.href) ? (
+            <a href={l.href} target="_blank" rel="noopener">
+              {l.text}
+              <EsaIcon name="external-link" size="xs" paths={EXTERNAL_LINK_ICON_PATHS} label="(external)" />
+            </a>
+          ) : (
+            <a href={l.href}>{l.text}</a>
+          )
+        )}
       </div>
     </div>
 
@@ -76,10 +83,14 @@ const ARROW = '<path d="M7 7h10v10"/><path d="M7 17 17 7"/>';
         <p class="basics__p">
           {basics.reporter.name} — <a href={`mailto:${basics.reporter.email}`}>{basics.reporter.email}</a>
         </p>
-        <a class="basics__orglink" href={basics.reporter.orgHref} target="_blank" rel="noopener">
-          {basics.reporter.org}
-          <EsaIcon name="arrow-up-right" size="xs" paths={ARROW} />
-        </a>
+        {isExternalHref(basics.reporter.orgHref) ? (
+          <a class="basics__orglink" href={basics.reporter.orgHref} target="_blank" rel="noopener">
+            {basics.reporter.org}
+            <EsaIcon name="external-link" size="xs" paths={EXTERNAL_LINK_ICON_PATHS} label="(external)" />
+          </a>
+        ) : (
+          <a class="basics__orglink" href={basics.reporter.orgHref}>{basics.reporter.org}</a>
+        )}
       </div>
 
       <div class="basics__section">
@@ -87,10 +98,14 @@ const ARROW = '<path d="M7 7h10v10"/><path d="M7 17 17 7"/>';
         <ul class="basics__partners" role="list">
           {basics.contributingPartners.map((p) => (
             <li>
-              <a class="basics__orglink" href={p.href} target="_blank" rel="noopener">
-                {p.name}
-                <EsaIcon name="arrow-up-right" size="xs" paths={ARROW} />
-              </a>
+              {isExternalHref(p.href) ? (
+                <a class="basics__orglink" href={p.href} target="_blank" rel="noopener">
+                  {p.name}
+                  <EsaIcon name="external-link" size="xs" paths={EXTERNAL_LINK_ICON_PATHS} label="(external)" />
+                </a>
+              ) : (
+                <a class="basics__orglink" href={p.href}>{p.name}</a>
+              )}
             </li>
           ))}
         </ul>
@@ -110,8 +125,7 @@ const ARROW = '<path d="M7 7h10v10"/><path d="M7 17 17 7"/>';
   .basics__fact { display: flex; flex-direction: column; gap: 2px; }
   .basics__fact dt { font-size: var(--ps-info-text-meta); color: var(--color-text-muted); }
   .basics__fact dd { margin: 0; font-size: var(--ps-info-text-body); font-weight: var(--font-weight-medium); color: var(--color-text-primary); }
-  .basics__fact dd a { color: var(--color-text-link); text-decoration: none; }
-  .basics__fact dd a:hover { text-decoration: underline; }
+  .basics__fact dd a { color: var(--color-text-link); text-decoration: underline; text-underline-offset: 3px;  }
   .basics__fact dd a:focus-visible { outline: 2px solid var(--focus-ring-color); outline-offset: 2px; }
   .basics__fact dd :global(.esa-icon) { color: var(--color-text-muted); margin-left: 2px; vertical-align: -1px; }
 
@@ -120,14 +134,13 @@ const ARROW = '<path d="M7 7h10v10"/><path d="M7 17 17 7"/>';
   .basics__section { display: flex; flex-direction: column; gap: var(--spacing-200); }
   .basics__subhead { margin: 0; font-family: var(--font-display); font-size: 1rem; font-weight: var(--font-weight-semibold); color: var(--color-text-primary); }
   .basics__p { margin: 0; font-size: var(--ps-info-text-body); color: var(--color-text-secondary); line-height: 1.6; }
-  .basics__p a { color: var(--color-text-link); }
+  .basics__p a { color: var(--color-text-link); text-decoration: underline; text-underline-offset: 3px; }
 
   .basics__links { display: flex; flex-wrap: wrap; gap: var(--spacing-300); }
   .basics__links a {
     display: inline-flex; align-items: center; gap: var(--spacing-100);
-    font-size: var(--ps-info-text-meta-lg); color: var(--color-text-link);
+    font-size: var(--ps-info-text-meta-lg); color: var(--color-text-link); text-decoration: underline; text-underline-offset: 3px;
   }
-  .basics__links a:hover { text-decoration: underline; }
   .basics__links a:focus-visible { outline: 2px solid var(--focus-ring-color); outline-offset: 2px; }
 
   .basics__partners { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--spacing-150); }

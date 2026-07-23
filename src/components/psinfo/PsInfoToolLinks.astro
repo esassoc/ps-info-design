@@ -5,6 +5,7 @@
 import EsaCard from '@esa/ecology/esa-card.astro';
 import EsaIcon from '@esa/ecology/esa-icon.astro';
 import { withBase } from '../../lib/base';
+import { isExternalHref, EXTERNAL_LINK_ICON_PATHS } from '../../lib/psinfoExternalLink';
 
 export interface ToolLinkItem {
   title: string;
@@ -17,17 +18,16 @@ interface Props {
   items: ToolLinkItem[];
 }
 const { items } = Astro.props;
-
-const ARROW = '<path d="M7 7h10v10"/><path d="M7 17 17 7"/>';
 ---
 <div class="toolrow">
   {items.map((item) => {
     const internal = item.href.startsWith('/');
+    const external = !internal && isExternalHref(item.href);
     return (
       <a
         class="tool"
         href={internal ? withBase(item.href) : item.href}
-        {...(internal ? {} : { target: '_blank', rel: 'noopener' })}
+        {...(external ? { target: '_blank', rel: 'noopener' } : {})}
       >
         <EsaCard variant="outlined" padding="none">
           <div class="tool__row">
@@ -37,7 +37,7 @@ const ARROW = '<path d="M7 7h10v10"/><path d="M7 17 17 7"/>';
             <span class="tool__body">
               <span class="tool__title">
                 {item.title}
-                {!internal && <EsaIcon name="arrow-up-right" size="xs" paths={ARROW} />}
+                {external && <EsaIcon name="external-link" size="xs" paths={EXTERNAL_LINK_ICON_PATHS} label="(external)" />}
               </span>
               <span class="tool__blurb">{item.blurb}</span>
             </span>

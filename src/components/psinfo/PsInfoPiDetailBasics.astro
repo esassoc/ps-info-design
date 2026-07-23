@@ -1,0 +1,107 @@
+---
+// PsInfoPiDetailBasics — the Progress Indicator detail page's Basics card:
+// the source's dt/dd fact rows (name, type, unit, the Progress/Status icon
+// pair, the empty Target row, Topics link, Reporter, the partners link grid,
+// Last Updated). Sibling of PsInfoIndicatorsBasics, which carries the Vital
+// Sign exemplar's different fact set (recovery goal + Vital Sign rows, no
+// Progress/Status icon pair) — the two shapes share no data model.
+//
+// bcn-lego-checked: esa-card is the surface; the dt/dd fact list mirrors
+// PsInfoIndicatorsBasics' own bespoke shape (no esa- definition-list lego).
+// psinfo-pi-detail-basics is the reusable home for PI detail exemplars.
+import EsaCard from '@esa/ecology/esa-card.astro';
+import { withBase } from '../../lib/base';
+import type { FarmlandBasics } from '../../data/pages/indicators';
+
+interface Props {
+  basics: FarmlandBasics;
+}
+const { basics } = Astro.props;
+---
+<EsaCard variant="outlined">
+  <dl class="pib">
+    <div class="pib__row">
+      <dt>Puget Sound Indicator Name</dt>
+      <dd>{basics.indicatorName}</dd>
+    </div>
+    <div class="pib__row">
+      <dt>Indicator Type</dt>
+      <dd>{basics.indicatorType}</dd>
+    </div>
+    <div class="pib__row">
+      <dt>Measurement Unit</dt>
+      <dd>{basics.measurementUnit}</dd>
+    </div>
+    <div class="pib__row">
+      <dt>Progress / Status</dt>
+      <dd class="pib__icons">
+        <img src={withBase(basics.progressIcon.src)} alt={basics.progressIcon.alt} width="72" height="72" />
+        <img src={withBase(basics.statusIcon.src)} alt={basics.statusIcon.alt} width="72" height="72" />
+      </dd>
+    </div>
+    <div class="pib__row">
+      <dt>Progress Indicator Target</dt>
+      <dd>{basics.target ?? ''}</dd>
+    </div>
+    <div class="pib__row">
+      <dt>Topics</dt>
+      <dd>
+        {basics.topics.map((t) => (
+          <a class="pib__link" href={t.href}>{t.text}</a>
+        ))}
+      </dd>
+    </div>
+    <div class="pib__row">
+      <dt>Progress Indicator Reporter</dt>
+      <dd class="pib__stack">
+        <span>{basics.reporter.name}</span>
+        <a class="pib__link" href={`mailto:${basics.reporter.email}`}>{basics.reporter.email}</a>
+        <a class="pib__link" href={basics.reporter.orgHref}>{basics.reporter.org}</a>
+      </dd>
+    </div>
+    <div class="pib__row pib__row--full">
+      <dt>Contributing Partners</dt>
+      <dd>
+        <ul class="pib__partners" role="list">
+          {basics.contributingPartners.map((p) => (
+            <li><a class="pib__link" href={p.href}>{p.name}</a></li>
+          ))}
+        </ul>
+      </dd>
+    </div>
+    <div class="pib__row">
+      <dt>Last Updated</dt>
+      <dd>{basics.lastUpdated}</dd>
+    </div>
+  </dl>
+</EsaCard>
+
+<style>
+  .pib { margin: 0; display: flex; flex-direction: column; gap: var(--spacing-400); }
+  .pib__row {
+    display: grid; grid-template-columns: minmax(160px, 220px) minmax(0, 1fr);
+    gap: var(--spacing-400); align-items: start;
+  }
+  .pib__row dt {
+    font-size: var(--ps-info-text-body); font-weight: var(--font-weight-semibold);
+    color: var(--color-text-primary); line-height: 1.5;
+  }
+  .pib__row dd {
+    margin: 0; font-size: var(--ps-info-text-body); color: var(--color-text-primary); line-height: 1.6;
+  }
+  .pib__icons { display: flex; gap: var(--spacing-400); align-items: center; }
+  .pib__icons img { width: 72px; height: 72px; }
+  .pib__stack { display: flex; flex-direction: column; gap: var(--spacing-100); }
+  .pib__partners {
+    list-style: none; margin: 0; padding: 0;
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: var(--spacing-200) var(--spacing-500);
+  }
+  .pib__link { color: var(--color-text-link); text-decoration: underline; text-underline-offset: 3px; }
+  .pib__link:hover { color: var(--color-text-link-hover); }
+  .pib__link:focus-visible { outline: 2px solid var(--focus-ring-color); outline-offset: 2px; }
+
+  @media (max-width: 640px) {
+    .pib__row { grid-template-columns: 1fr; gap: var(--spacing-100); }
+  }
+</style>

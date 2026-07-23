@@ -1,0 +1,126 @@
+---
+// Indicator Detail — second exemplar, built out in full: "Farmland
+// protection" (Progress Indicator 182, Agricultural Land Protection topic).
+// Content is verbatim from Indicator/Detail/182 (fetched 2026-07-23),
+// including the source's own inconsistencies; chart figures are the source's
+// OWN images (one FileResource download + six decoded base64 embeds), each
+// with the source's full descriptive alt text. Header is plain
+// (esa-page-header), matching the sibling exemplar — the source has no
+// page-level photograph and runs straight from its breadcrumb band into the
+// card grid; its breadcrumb band ("Progress Indicators > Farmland
+// protection") is site chrome the shell breadcrumbs already carry. The top
+// region mirrors the source's col-md split: Basics left, Map + Related
+// Ongoing Programs as the right rail. The source's Map card is genuinely
+// EMPTY (header with a blank body) — reproduced as an empty card, recorded
+// in the contract. Static route beside [slug].astro (static wins over the
+// dynamic segment), keeping the first exemplar untouched.
+import PsInfoAppShell from '../../../layouts/PsInfoAppShell.astro';
+import EsaPageHeader from '@esa/ecology/esa-page-header.astro';
+import EsaCard from '@esa/ecology/esa-card.astro';
+import PsInfoSectionTitle from '../../../components/psinfo/PsInfoSectionTitle.astro';
+import PsInfoPiDetailBasics from '../../../components/psinfo/PsInfoPiDetailBasics.astro';
+import PsInfoPiDetailRichCard from '../../../components/psinfo/PsInfoPiDetailRichCard.astro';
+import {
+  FARMLAND_BASICS, FARMLAND_RELATED_PROGRAMS, FARMLAND_CHART,
+  FARMLAND_DESCRIPTION, FARMLAND_IMPORTANCE, FARMLAND_KEY_RESULTS,
+  FARMLAND_METHODS, FARMLAND_INTERPRETATION,
+  FARMLAND_DATASETS, FARMLAND_REPORTING_GUIDANCE, FARMLAND_SUBCATEGORIES,
+} from '../../../data/pages/indicators';
+---
+<!-- manifest:
+  layout: PsInfoAppShell (active Progress > Indicators) > center+stack spine
+  sections:
+    - page header             -> esa-page-header (plain, no photo band — sibling-exemplar precedent)
+    - basics + right rail     -> psinfo-pi-detail-basics beside (empty Map card + Related
+                                 Ongoing Programs rich card) in the source's col-md split
+    - progress indicator chart -> psinfo-section-title + psinfo-pi-detail-rich-card (figure)
+    - description             -> psinfo-section-title + psinfo-pi-detail-rich-card
+    - importance              -> psinfo-section-title + psinfo-pi-detail-rich-card (footnote)
+    - key progress indicator results -> psinfo-section-title + psinfo-pi-detail-rich-card
+    - methods                 -> psinfo-section-title + psinfo-pi-detail-rich-card
+    - interpretation of results -> psinfo-section-title + psinfo-pi-detail-rich-card (6 figures, 3 footnotes)
+    - datasets / reporting guidance / subcategories -> psinfo-section-title + psinfo-pi-detail-rich-card (stubs)
+-->
+<PsInfoAppShell title="Farmland protection — Puget Sound Info" active={{ moduleId: 'progress', leafId: 'indicators' }}>
+  <div class="center stack" data-gap="xl">
+    <EsaPageHeader title="Farmland protection" />
+
+    <!-- bcn-lego-checked: pure page-region layout (the source's Basics-left /
+         Map+Related-right col-md split); no esa- lego is a page-layout grid.
+         Same pattern as vital-signs/[slug].astro's vsd-split. -->
+    <div class="fpd-split">
+      <div class="stack" data-gap="md">
+        <PsInfoSectionTitle title="Basics" />
+        <PsInfoPiDetailBasics basics={FARMLAND_BASICS} />
+      </div>
+      <div class="stack" data-gap="lg">
+        <div class="stack" data-gap="md">
+          <PsInfoSectionTitle title="Map" />
+          <EsaCard variant="outlined"><p class="fpd-empty" aria-hidden="true"></p></EsaCard>
+        </div>
+        <div class="stack" data-gap="md">
+          <PsInfoSectionTitle title="Related Ongoing Programs" />
+          <PsInfoPiDetailRichCard blocks={[{ kind: 'bullets', items: FARMLAND_RELATED_PROGRAMS }]} />
+        </div>
+      </div>
+    </div>
+
+    <div class="stack" data-gap="md">
+      <PsInfoSectionTitle title="Progress Indicator Chart" />
+      <PsInfoPiDetailRichCard blocks={FARMLAND_CHART} />
+    </div>
+
+    <div class="stack" data-gap="md">
+      <PsInfoSectionTitle title="Description" />
+      <PsInfoPiDetailRichCard blocks={FARMLAND_DESCRIPTION} />
+    </div>
+
+    <div class="stack" data-gap="md">
+      <PsInfoSectionTitle title="Importance" />
+      <PsInfoPiDetailRichCard blocks={FARMLAND_IMPORTANCE} footnoteIdPrefix="farmland-importance" />
+    </div>
+
+    <div class="stack" data-gap="md">
+      <PsInfoSectionTitle title="Key Progress Indicator Results" />
+      <PsInfoPiDetailRichCard blocks={FARMLAND_KEY_RESULTS} />
+    </div>
+
+    <div class="stack" data-gap="md">
+      <PsInfoSectionTitle title="Methods" />
+      <PsInfoPiDetailRichCard blocks={FARMLAND_METHODS} />
+    </div>
+
+    <div class="stack" data-gap="md">
+      <PsInfoSectionTitle title="Interpretation of Results" />
+      <PsInfoPiDetailRichCard blocks={FARMLAND_INTERPRETATION} footnoteIdPrefix="farmland-interp" />
+    </div>
+
+    <div class="stack" data-gap="md">
+      <PsInfoSectionTitle title="Datasets" />
+      <PsInfoPiDetailRichCard blocks={FARMLAND_DATASETS} />
+    </div>
+
+    <div class="stack" data-gap="md">
+      <PsInfoSectionTitle title="Reporting Guidance" />
+      <PsInfoPiDetailRichCard blocks={FARMLAND_REPORTING_GUIDANCE} />
+    </div>
+
+    <div class="stack" data-gap="md">
+      <PsInfoSectionTitle title="Subcategories" />
+      <PsInfoPiDetailRichCard blocks={FARMLAND_SUBCATEGORIES} />
+    </div>
+  </div>
+</PsInfoAppShell>
+
+<style>
+  .fpd-split {
+    display: grid;
+    grid-template-columns: minmax(0, 3fr) minmax(280px, 2fr);
+    gap: var(--spacing-700);
+    align-items: start;
+  }
+  @media (max-width: 960px) {
+    .fpd-split { grid-template-columns: 1fr; }
+  }
+  .fpd-empty { margin: 0; min-height: var(--spacing-600); }
+</style>

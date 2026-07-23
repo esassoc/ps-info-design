@@ -1,41 +1,35 @@
 ---
 // Vital Sign Detail — the two Vital Signs built out in full under the
 // Thriving Species and Food Web goal: Salmon (task/nav shorthand "Chinook
-// Salmon" — the source's own title is "Salmon"; its lede photo and most key
-// messages are Chinook-specific, though the tracked indicators also cover
-// coho, steelhead, and chum) and Orcas. Content is verbatim from
-// vitalsigns.pugetsoundinfo.wa.gov/VitalSign/Detail/{32,19}; per-indicator
-// progress/target-status labels came from each source page's embedded
-// Fancytree JSON (the visible table itself renders client-side from that
-// same JSON — there are no static table rows to scrape). Nested beside the
-// sibling "vital-signs" overview's own route, mirroring how the built
-// indicators unit nests its exemplar detail page under
-// /prototypes/indicators/[slug].
+// Salmon" — the source's own title is "Salmon") and Orcas. Content is
+// verbatim from vitalsigns.pugetsoundinfo.wa.gov/VitalSign/Detail/{32,19};
+// per-indicator progress/target-status labels came from each source page's
+// embedded Fancytree JSON.
 //
-// Header is plain (title only, no eyebrow/lede) per contract — the source's
-// intro paragraph is body content (Section 3, beside its own photo), not a
-// header lede; reusing it there would duplicate content the source states
-// once. The source's own top-of-page breadcrumb ("About the Vital Signs" >
-// "All Indicators" > "Goal" > "Vital Sign") is identical chrome on every
-// vitalsigns.pugetsoundinfo.wa.gov page (same precedent as goals.md /
-// vital-signs.md, which exclude it entirely as site chrome) — but two of its
-// items are this page's own real cross-references (the Goal it belongs to,
-// and the indicator index), so per this unit's contract carve-out they
-// survive as a genuine esa-breadcrumbs trail positioned exactly where source
-// has it: above the title, ending in the current page as the non-link final
-// crumb. No invented descriptive copy, no third "About the Vital Signs" /
-// "All Vital Signs" item (neither has a real equivalent from this page).
+// Framed in the standard hero + band sub-nav pattern (home / Action Agenda /
+// Vital Signs / goal pages): the photo hero carries the Vital Sign's H1 and
+// its source photograph, the band carries the five goal-tinted links with
+// Vital Signs dropdowns (parent goal current). Below the hero the body is the
+// source's own col-md-9/col-md-3 split, full height: EVERY body section in
+// the narrower left column (overview prose, the VITAL SIGN > INDICATOR
+// Fancytree grid with no heading of its own, then the h4 sections in source
+// order — Key Vital Sign Messages, Background Documents, Other Resources,
+// Contributing Partners) with the reference sidebar (Print To PDF, Related
+// Strategies, Vital Sign Reporter + help definition, Last Updated) as the
+// right rail alongside it.
 import PsInfoAppShell from '../../../layouts/PsInfoAppShell.astro';
-import EsaPageHeader from '@esa/ecology/esa-page-header.astro';
-import PsInfoVsSubnav from '../../../components/psinfo/PsInfoVsSubnav.astro';
+import PsInfoPhotoHeader from '../../../components/psinfo/PsInfoPhotoHeader.astro';
+import PsInfoGoalsNav from '../../../components/psinfo/PsInfoGoalsNav.astro';
 import PsInfoSectionTitle from '../../../components/psinfo/PsInfoSectionTitle.astro';
 import PsInfoVitalSignDetailIntro from '../../../components/psinfo/PsInfoVitalSignDetailIntro.astro';
-import PsInfoVitalSignDetailIndicators from '../../../components/psinfo/PsInfoVitalSignDetailIndicators.astro';
+import PsInfoVitalSignDetailSidebar from '../../../components/psinfo/PsInfoVitalSignDetailSidebar.astro';
+import PsInfoVsFancyTree from '../../../components/psinfo/PsInfoVsFancyTree.astro';
 import PsInfoVitalSignDetailMessages from '../../../components/psinfo/PsInfoVitalSignDetailMessages.astro';
 import PsInfoVitalSignDetailResources from '../../../components/psinfo/PsInfoVitalSignDetailResources.astro';
-import PsInfoIndicatorsContentCard from '../../../components/psinfo/PsInfoIndicatorsContentCard.astro';
-import PsInfoVitalSignDetailFooter from '../../../components/psinfo/PsInfoVitalSignDetailFooter.astro';
-import { VITAL_SIGN_DETAILS, type VitalSignDetail } from '../../../data/pages/vital-sign-details';
+import PsInfoVitalSignDetailPartners from '../../../components/psinfo/PsInfoVitalSignDetailPartners.astro';
+import { VITAL_SIGN_DETAILS, VITAL_SIGN_REPORTER_DEFINITION, type VitalSignDetail } from '../../../data/pages/vital-sign-details';
+import type { GoalVitalSign, ProgressLabel, TargetStatusLabel } from '../../../data/pages/goals';
+import { withBase } from '../../../lib/base';
 
 export function getStaticPaths() {
   return VITAL_SIGN_DETAILS.map((detail) => ({ params: { slug: detail.slug }, props: { detail } }));
@@ -47,67 +41,111 @@ interface Props {
 const { detail } = Astro.props;
 
 // Both Salmon and Orcas roll up to the same goal (Thriving Species and Food
-// Web) — an existing route, matching the original crossLinks band's target.
-const GOAL_ROUTE = '/prototypes/goals/thriving-species-and-food-web';
+// Web) — the band marks it as this page's parent, and the tree frame + the
+// sidebar headings carry its ThemeColor.
+const PARENT_GOAL_SLUG = 'thriving-species-and-food-web';
+const GOAL_HUE = '--ps-info-goal-species';
 
+// The page's own VITAL SIGN > INDICATOR grid, from this detail's indicator
+// rows (same verbatim progress/target labels the goal trees use). The root
+// row self-links, as the source's grid does.
+const treeVitalSigns: GoalVitalSign[] = [
+  {
+    name: detail.name,
+    href: withBase(detail.route),
+    indicators: detail.indicators.map((ind) => ({
+      name: ind.name,
+      href: ind.internalRoute ? withBase(ind.internalRoute) : ind.detailUrl,
+      progress: ind.progress as ProgressLabel,
+      targetStatus: (ind.targetStatus ?? undefined) as TargetStatusLabel | undefined,
+    })),
+  },
+];
 ---
 <!-- manifest:
   layout: PsInfoAppShell (active Goals, no leaf — Vital Sign detail pages aren't
     in the 5-goal-overview leaf list) > center+stack spine
   sections:
-    - vital signs module nav    -> psinfo-vs-subnav (banner + goal dropdowns + trail)
-    - page header               -> esa-page-header (plain)
-    - intro + photo             -> psinfo-vital-sign-detail-intro
-    - indicators                -> psinfo-section-title + psinfo-vital-sign-detail-indicators
-    - key vital sign messages   -> psinfo-section-title + psinfo-vital-sign-detail-messages
-    - background documents      -> psinfo-section-title + psinfo-vital-sign-detail-resources
-    - other resources           -> psinfo-section-title + psinfo-vital-sign-detail-resources
-    - related strategies        -> psinfo-section-title + psinfo-indicators-content-card
-    - partners / reporter / print -> psinfo-section-title + psinfo-vital-sign-detail-footer
+    - page header       -> psinfo-photo-header (source photo, Vital Sign H1) with
+                           psinfo-goals-nav in its band slot (parent goal current)
+    - body split (col-md-9/col-md-3, full height):
+      left column:
+        - overview                -> psinfo-vital-sign-detail-intro
+        - indicators grid         -> psinfo-vs-fancy-tree (vital-sign-rooted,
+                                     no heading, matching source)
+        - key vital sign messages -> psinfo-section-title + psinfo-vital-sign-detail-messages
+        - background documents    -> psinfo-section-title + psinfo-vital-sign-detail-resources
+        - other resources         -> psinfo-section-title + psinfo-vital-sign-detail-resources
+        - contributing partners   -> psinfo-section-title + psinfo-vital-sign-detail-partners
+      right rail:
+        - reference sidebar -> psinfo-vital-sign-detail-sidebar (print / related
+                               strategies / reporter + help dialog / last updated)
 -->
 <PsInfoAppShell title={`${detail.name} — Puget Sound Info`} active={{ moduleId: 'goals' }}>
   <div class="center stack" data-gap="xl">
-    <PsInfoVsSubnav goalCrumb={{ label: detail.goalName, route: GOAL_ROUTE }} currentLabel={detail.name} />
+    <PsInfoPhotoHeader
+      size="band"
+      image={detail.photo.image}
+      title={detail.name}
+    >
+      <PsInfoGoalsNav slot="band" parentGoal={PARENT_GOAL_SLUG} />
+    </PsInfoPhotoHeader>
 
-    <EsaPageHeader title={detail.name} />
+    <!-- bcn-lego-checked: pure page-region layout (the source's full-height
+         col-md-9/col-md-3 split — all body sections in the left column, the
+         reference rail beside them); no esa- lego is a page-layout grid. -->
+    <div class="vsd-split">
+      <div class="stack" data-gap="xl">
+        <PsInfoVitalSignDetailIntro intro={detail.intro} />
 
-    <PsInfoVitalSignDetailIntro intro={detail.intro} photo={detail.photo} />
+        <PsInfoVsFancyTree
+          vitalSigns={treeVitalSigns}
+          frameHueVar={GOAL_HUE}
+          expandedLevels={1}
+          treeId={`tree-${detail.slug}`}
+        />
 
-    <div class="stack" data-gap="md">
-      <PsInfoSectionTitle title="Indicators" count={`${detail.indicators.length} indicator${detail.indicators.length === 1 ? '' : 's'}`} />
-      <PsInfoVitalSignDetailIndicators indicators={detail.indicators} />
-    </div>
+        <div class="stack" data-gap="md">
+          <PsInfoSectionTitle title="Key Vital Sign Messages" />
+          <PsInfoVitalSignDetailMessages messages={detail.keyMessages} links={detail.keyMessageLinks} />
+        </div>
 
-    <div class="stack" data-gap="md">
-      <PsInfoSectionTitle title="Key Vital Sign Messages" />
-      <PsInfoVitalSignDetailMessages messages={detail.keyMessages} links={detail.keyMessageLinks} />
-    </div>
+        <div class="stack" data-gap="md">
+          <PsInfoSectionTitle title="Background Documents" />
+          <PsInfoVitalSignDetailResources sections={detail.backgroundDocuments} />
+        </div>
 
-    <div class="stack" data-gap="md">
-      <PsInfoSectionTitle title="Background Documents" />
-      <PsInfoVitalSignDetailResources sections={detail.backgroundDocuments} />
-    </div>
+        <div class="stack" data-gap="md">
+          <PsInfoSectionTitle title="Other Resources" />
+          <PsInfoVitalSignDetailResources sections={detail.otherResources} />
+        </div>
 
-    <div class="stack" data-gap="md">
-      <PsInfoSectionTitle title="Other Resources" />
-      <PsInfoVitalSignDetailResources sections={detail.otherResources} />
-    </div>
+        <div class="stack" data-gap="md">
+          <PsInfoSectionTitle title="Contributing Partners" />
+          <PsInfoVitalSignDetailPartners intro={detail.contributingPartnersIntro} partners={detail.contributingPartners} />
+        </div>
+      </div>
 
-    <div class="stack" data-gap="md">
-      <PsInfoSectionTitle title="Related Strategies" />
-      <PsInfoIndicatorsContentCard links={detail.relatedStrategies} />
-    </div>
-
-    <div class="stack" data-gap="md">
-      <PsInfoSectionTitle title="Partners & Reporting" />
-      <PsInfoVitalSignDetailFooter
-        contributingPartnersIntro={detail.contributingPartnersIntro}
-        contributingPartners={detail.contributingPartners}
+      <PsInfoVitalSignDetailSidebar
+        relatedStrategies={detail.relatedStrategies}
         reporterOrg={detail.reporterOrg}
-        reporterEmail={detail.reporterEmail}
+        reporterDefinition={VITAL_SIGN_REPORTER_DEFINITION}
         lastUpdated={detail.lastUpdated}
         printUrl={detail.printUrl}
+        hueVar={GOAL_HUE}
       />
     </div>
   </div>
 </PsInfoAppShell>
+
+<style>
+  .vsd-split {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(240px, 300px);
+    gap: var(--spacing-700);
+    align-items: start;
+  }
+  @media (max-width: 900px) {
+    .vsd-split { grid-template-columns: 1fr; }
+  }
+</style>

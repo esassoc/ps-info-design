@@ -1,0 +1,86 @@
+---
+// NEP Atlas — NEP Investment Summaries (/Activity/Summary, fetched
+// 2026-07-22). Two chart tabs (Activities by Vital Signs / Activities by
+// Geography) built on the esa-tab-layout lego, each holding a carded native
+// stacked-bar chart (PsInfoNepAtlasSummaryChart) derived from prod's own
+// inlined 1,608-activity payload, with working filters over the two
+// dimensions that aggregation actually carries (row axis + NEP Award —
+// revision direction 2026-07-23; prod's "Investment Type" dimension is not
+// in the captured data and stays omitted). Prod renders its
+// related-activities table inside each tab; here it renders ONCE below the
+// tab layout (see contract). Chart Expand/Save/Configure controls remain
+// omitted — see src/data/contracts/nep-atlas.md.
+import PsInfoAppShell from '../../../layouts/PsInfoAppShell.astro';
+import PsInfoPhotoHeader from '../../../components/psinfo/PsInfoPhotoHeader.astro';
+import PsInfoNepAtlasNav from '../../../components/psinfo/PsInfoNepAtlasNav.astro';
+import PsInfoNepAtlasNarrative from '../../../components/psinfo/PsInfoNepAtlasNarrative.astro';
+import PsInfoNepAtlasSummaryChart from '../../../components/psinfo/PsInfoNepAtlasSummaryChart.astro';
+import PsInfoNepAtlasActivityTable from '../../../components/psinfo/PsInfoNepAtlasActivityTable.astro';
+import {
+  HERO_TITLE, WELCOME_PHOTO, SUMMARY_PAGE, SUMMARY_FILTERS,
+  SUMMARY_CHART_VITAL_SIGNS_TITLE, SUMMARY_CHART_GEOGRAPHY_TITLE,
+  SUMMARY_BY_VITAL_SIGN, SUMMARY_BY_LEMA,
+} from '../../../data/pages/nep-atlas';
+---
+<!-- manifest:
+  layout: PsInfoAppShell (active Implementation and Funding > NEP Atlas) > center+stack spine
+  sections:
+    - page header + band nav -> psinfo-photo-header (photo band, current=investment-summary) + psinfo-nep-atlas-nav
+    - intro narrative         -> psinfo-nep-atlas-narrative (3 verbatim paragraphs)
+    - chart tabs              -> esa-tab-layout (2 tabs) > psinfo-nep-atlas-summary-chart (esa-card container; real aggregation per tab; row-axis + NEP Award filters)
+    - related activities      -> psinfo-nep-atlas-activity-table (12 of 1,608, rendered once below the tabs)
+-->
+<PsInfoAppShell title="NEP Investment Summaries — NEP Atlas — Puget Sound Info" active={{ moduleId: 'implementation', leafId: 'nep-atlas' }}>
+  <div class="center stack" data-gap="xl">
+    <PsInfoPhotoHeader
+      size="band"
+      image={WELCOME_PHOTO.image}
+      focus="50% 35%"
+      eyebrow={HERO_TITLE}
+      title={SUMMARY_PAGE.title}
+    >
+      <PsInfoNepAtlasNav slot="band" current="investment-summary" />
+    </PsInfoPhotoHeader>
+
+    <div class="stack" data-gap="md" id="intro">
+      <PsInfoNepAtlasNarrative paragraphs={SUMMARY_PAGE.paragraphs} />
+    </div>
+
+    <div class="stack" data-gap="md" id="summary-tabs">
+      <esa-tab-layout id="psinfo-nep-summary-tabs">
+        <div slot="panel-0">
+          <PsInfoNepAtlasSummaryChart
+            title={SUMMARY_CHART_VITAL_SIGNS_TITLE}
+            bars={SUMMARY_BY_VITAL_SIGN}
+            dimensionLabel={SUMMARY_FILTERS.vitalSignLabel}
+          />
+        </div>
+        <div slot="panel-1">
+          <PsInfoNepAtlasSummaryChart
+            title={SUMMARY_CHART_GEOGRAPHY_TITLE}
+            bars={SUMMARY_BY_LEMA}
+            dimensionLabel={SUMMARY_FILTERS.lemaLabel}
+          />
+        </div>
+      </esa-tab-layout>
+    </div>
+
+    <div class="stack" data-gap="md" id="related-activities">
+      <PsInfoNepAtlasActivityTable />
+    </div>
+  </div>
+</PsInfoAppShell>
+
+<script>
+  import '@esa/ecology/esa-tab-layout';
+  import { SUMMARY_PAGE } from '../../../data/pages/nep-atlas';
+
+  const tabs = document.getElementById('psinfo-nep-summary-tabs') as HTMLElement & { tabs: unknown };
+  if (tabs) tabs.tabs = SUMMARY_PAGE.tabs;
+</script>
+
+<style>
+  /* esa-tab-layout's default tab font is 14px via --type-size-200; this
+     repo's 16px body minimum applies here too. Page-scoped override. */
+  esa-tab-layout { --type-size-200: 1rem; }
+</style>

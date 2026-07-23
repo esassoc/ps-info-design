@@ -1,53 +1,36 @@
 ---
-// PsInfoVsGoalIntro — a goal page's title block, in the source's exact order
-// and hierarchy (VitalSignGoal/Detail/N): the goal name as an uppercase
-// heading in the goal's own ThemeColor, the bold navy "Our goal is…"
-// statement, the narrative paragraph, then the page's inline photograph.
+// PsInfoVsGoalIntro — a goal page's statement block: the bold navy "Our goal
+// is…" statement then the narrative paragraph, both verbatim from the source
+// (VitalSignGoal/Detail/N). The goal's NAME and PHOTOGRAPH now live in the
+// page's standard photo hero (PsInfoPhotoHeader renders the H1; the source's
+// inline photo is the hero image) — a deliberate divergence from the source's
+// in-body title block, standardizing the hero/h1 + band sub-nav pattern
+// across home, Action Agenda, Vital Signs, and the goal pages.
 //
-// bcn-lego-checked: checked esa-page-header (neutral title/lede header — it
-// can't render the source's goal-colored uppercase H1 followed by a bold
-// statement line at a LARGER size than the narrative); this block reproduces
-// the source hierarchy with type tokens. The goal hue colors ONLY the H1,
-// exactly as the source does (all five goal hues hold ≥4.5:1 on white).
-import { withBase } from '../../lib/base';
-
+// bcn-lego-checked: checked esa-page-header (title/lede header — this block
+// has no title; its statement must render BOLDER and LARGER than the
+// narrative, a two-tier prose hierarchy no lego models). Type tokens only;
+// psinfo-vs-goal-intro is the reusable home.
 interface Props {
-  name: string;
   statement: string;
   narrative: string;
-  image: string;
-  imageAlt: string;
-  /** --ps-info-goal-* token. */
-  hueVar: string;
 }
-const { name, statement, narrative, image, imageAlt, hueVar } = Astro.props;
+const { statement, narrative } = Astro.props;
 ---
-<header class="goalintro">
-  <h1 class="goalintro__name" style={`color: var(${hueVar})`}>{name}</h1>
+<section class="goalintro" aria-label="Goal statement">
   <p class="goalintro__statement">{statement}</p>
   <p class="goalintro__narrative">{narrative}</p>
-  <img class="goalintro__photo" src={withBase(image)} alt={imageAlt} />
-</header>
+</section>
 
 <style>
   .goalintro { display: flex; flex-direction: column; gap: var(--spacing-300); }
-  .goalintro__name {
-    margin: 0;
-    font-size: 2rem; font-weight: var(--font-weight-bold);
-    text-transform: uppercase; letter-spacing: 0.02em; line-height: 1.15;
-  }
   .goalintro__statement {
-    margin: 0; max-width: 62ch;
+    margin: 0;
     font-size: 1.375rem; font-weight: var(--font-weight-bold);
     color: var(--ps-info-blue-800); line-height: 1.35;
   }
   .goalintro__narrative {
-    margin: 0; max-width: 75ch;
+    margin: 0;
     font-size: var(--ps-info-text-body); color: var(--color-text-primary); line-height: 1.6;
-  }
-  .goalintro__photo {
-    margin-top: var(--spacing-200);
-    width: 100%; max-width: 720px; height: auto;
-    border-radius: var(--radius-100);
   }
 </style>

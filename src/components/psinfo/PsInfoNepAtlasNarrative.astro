@@ -1,9 +1,11 @@
 ---
 // PsInfoNepAtlasNarrative — renders NEP Atlas prose blocks built from
-// AtlasParagraph[] (text/link segments kept in their original sentence
-// position, same shape as the sitewide About page's segments): the home
-// page's welcome paragraph and its pipe-separated funders line, each with
-// inline internal/external links kept in their original sentence position.
+// AtlasParagraph[]/AtlasBlock[] (text/link segments kept in their original
+// sentence position, same shape as the sitewide About page's segments): the
+// home page's welcome paragraph and pipe-separated funders line, the About
+// page's paragraphs + 7-item funding-recipients list, and the Map/Activities/
+// Awards/Summary pages' intro paragraphs — each with inline internal/external
+// links kept in their original sentence position.
 //
 // bcn-lego-checked: no esa- lego renders ordered prose with inline
 // internal/external links kept in original sentence position; checked Beacon
@@ -16,34 +18,58 @@
 import EsaCard from '@esa/ecology/esa-card.astro';
 import EsaIcon from '@esa/ecology/esa-icon.astro';
 import { withBase } from '../../lib/base';
-import type { AtlasParagraph, AtlasLink } from '../../data/pages/nep-atlas';
+import { EXTERNAL_LINK_ICON_PATHS } from '../../lib/psinfoExternalLink';
+import type { AtlasParagraph, AtlasLink, AtlasBlock } from '../../data/pages/nep-atlas';
 
 interface Props {
-  paragraphs: AtlasParagraph[];
+  paragraphs?: AtlasParagraph[];
+  blocks?: AtlasBlock[];
 }
-const { paragraphs } = Astro.props;
-
-const ARROW = '<path d="M7 7h10v10"/><path d="M7 17 17 7"/>';
+const { paragraphs, blocks } = Astro.props;
 
 const linkAttrs = (link: AtlasLink) =>
   link.kind === 'internal' ? { href: withBase(link.route) } : { href: link.href, target: '_blank', rel: 'noopener' };
+
+// Normalize both input shapes to a single block list so the template only
+// has one rendering path.
+const resolvedBlocks: AtlasBlock[] =
+  blocks ?? (paragraphs ?? []).map((paragraph) => ({ kind: 'paragraph' as const, paragraph }));
 ---
 <EsaCard variant="outlined">
   <div class="narrative">
-    {paragraphs.map((paragraph) => (
-      <p class="narrative__p">
-        {paragraph.segments.map((seg) =>
-          seg.type === 'text' ? (
-            seg.text
-          ) : (
-            <a {...linkAttrs(seg.link)} class="narrative__link">
-              {seg.link.text}
-              {seg.link.kind === 'external' && <EsaIcon name="arrow-up-right" size="xs" paths={ARROW} />}
-            </a>
-          )
-        )}
-      </p>
-    ))}
+    {resolvedBlocks.map((block) =>
+      block.kind === 'paragraph' ? (
+        <p class="narrative__p">
+          {block.paragraph.segments.map((seg) =>
+            seg.type === 'text' ? (
+              seg.text
+            ) : (
+              <a {...linkAttrs(seg.link)} class="narrative__link">
+                {seg.link.text}
+                {seg.link.kind === 'external' && <EsaIcon name="external-link" size="xs" paths={EXTERNAL_LINK_ICON_PATHS} label="(external)" />}
+              </a>
+            )
+          )}
+        </p>
+      ) : (
+        <ul class="narrative__list">
+          {block.items.map((item) => (
+            <li>
+              {item.segments.map((seg) =>
+                seg.type === 'text' ? (
+                  seg.text
+                ) : (
+                  <a {...linkAttrs(seg.link)} class="narrative__link">
+                    {seg.link.text}
+                    {seg.link.kind === 'external' && <EsaIcon name="external-link" size="xs" paths={EXTERNAL_LINK_ICON_PATHS} label="(external)" />}
+                  </a>
+                )
+              )}
+            </li>
+          ))}
+        </ul>
+      )
+    )}
   </div>
 </EsaCard>
 
@@ -51,7 +77,13 @@ const linkAttrs = (link: AtlasLink) =>
   .narrative { display: flex; flex-direction: column; gap: var(--spacing-400); min-width: 0; }
   .narrative__p {
     margin: 0; font-size: var(--ps-info-text-body); line-height: 1.65;
-    color: var(--color-text-primary); max-width: 74ch;
+    color: var(--color-text-primary);
+  }
+  .narrative__list {
+    margin: 0; padding-left: var(--spacing-600);
+    display: flex; flex-direction: column; gap: var(--spacing-200);
+    font-size: var(--ps-info-text-body); line-height: 1.65;
+    color: var(--color-text-primary);
   }
   .narrative__link {
     color: var(--color-text-link); text-decoration: underline;
@@ -60,4 +92,11 @@ const linkAttrs = (link: AtlasLink) =>
   .narrative__link:hover { text-decoration-color: currentColor; }
   .narrative__link:focus-visible { outline: 2px solid var(--focus-ring-color); outline-offset: 2px; }
   .narrative__link :global(.esa-icon) { color: var(--color-text-muted); margin-left: 2px; vertical-align: -2px; }
+  /* Each list item here is a stand-alone link (not inline-in-sentence), so
+     the WCAG 2.2 §2.5.8 inline-text exception doesn't apply — guarantee a
+     real 24x24px interactive box rather than relying on line-height. */
+  .narrative__list .narrative__link {
+    display: inline-flex; align-items: center; min-height: 1.5rem;
+    padding-block: var(--spacing-100);
+  }
 </style>

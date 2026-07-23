@@ -1,0 +1,160 @@
+---
+// PsInfoAaTopicsNav — the Action Agenda module's prod topic-categories bar
+// (actionagenda.pugetsoundinfo.wa.gov's .navbar.aa2026-outcomes-nav): five
+// category dropdowns grouping the 26 Topics. Designed for the photo header's
+// `band` slot (the homepage PsInfoAnchorNav pattern) — the translucent band
+// layer supplies the surface, this nav supplies the cells. Every label/href
+// is verbatim, derived from TOPICS_NAV (category → topic ids) resolved
+// against TOPICS (id → title/href) so the labels can never drift from the
+// topic grid.
+//
+// bcn-lego-checked: checked esa-header-nav + esa-nav-dropdown (details/summary
+// disclosure — no button+aria-expanded, no Escape-close/focus-return) and
+// esa-dropdown-menu (role=menu action-emitter, wrong semantics for navigation
+// links); the WCAG disclosure-nav pattern with button[aria-expanded] + Escape
+// + focus management required here has no lego. PsInfoAaTopicsNav is the
+// reusable home for this module's topic-category chrome.
+import { TOPICS_NAV, TOPICS_NAV_ARIA_LABEL, TOPICS } from '../../data/pages/action-agenda';
+import { withBase } from '../../lib/base';
+
+const CHEVRON = '<path d="m6 9 6 6 6-6"/>';
+---
+<nav class="aacats" aria-label={TOPICS_NAV_ARIA_LABEL} data-aa-topicsnav>
+  <ul class="aacats__row" role="list">
+    {TOPICS_NAV.map((cat, i) => (
+      <li class="aacats__cell" data-aa-disclosure>
+        <button type="button" class="aacats__trigger" aria-expanded="false" aria-controls={`aacats-panel-${i}`}>
+          {cat.label}
+          <svg class="aacats__chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" set:html={CHEVRON} />
+        </button>
+        <ul class:list={['aacats__panel', { 'aacats__panel--end': i === TOPICS_NAV.length - 1 }]} id={`aacats-panel-${i}`} role="list" hidden>
+          {cat.topicIds.map((topicId) => {
+            const topic = TOPICS.find((t) => t.id === topicId);
+            return topic ? (
+              <li><a class="aacats__item" href={topic.href.startsWith('/') ? withBase(topic.href) : topic.href}>{topic.title}</a></li>
+            ) : null;
+          })}
+        </ul>
+      </li>
+    ))}
+  </ul>
+</nav>
+
+<style>
+  /* Same container-driven row policy as PsInfoGoalsNav: 5 across, 3 over 2,
+     or the mobile stack — never an orphan wrap. */
+  .aacats { container-type: inline-size; }
+  .aacats__row {
+    list-style: none; margin: 0; padding: 0;
+    display: grid; grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+  .aacats__cell { position: relative; }
+  @container (max-width: 720px) {
+    .aacats__row { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+    .aacats__cell { grid-column: span 2; }
+    .aacats__cell:nth-child(4), .aacats__cell:nth-child(5) { grid-column: span 3; }
+  }
+
+  .aacats__trigger {
+    width: 100%; background: none; border: 0; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; gap: var(--spacing-100);
+    padding: var(--spacing-300) var(--spacing-300);
+    color: #ffffff; font-size: 1rem; font-weight: var(--font-weight-medium);
+    font-family: inherit;
+  }
+  .aacats__trigger:hover,
+  .aacats__trigger[aria-expanded="true"] { background: rgba(255, 255, 255, 0.12); }
+  .aacats__trigger:focus-visible { outline: 2px solid var(--focus-ring-color); outline-offset: -2px; }
+  .aacats__chevron { transition: transform 150ms ease; }
+  .aacats__trigger[aria-expanded="true"] .aacats__chevron { transform: rotate(180deg); }
+
+  .aacats__panel {
+    position: absolute; top: 100%; left: 0; z-index: var(--z-dropdown);
+    min-width: 280px; padding: var(--spacing-200) 0;
+    background: var(--color-surface, #fff);
+    border: 1px solid var(--color-border, #e5e5e5);
+    border-radius: 0 0 var(--radius-100) var(--radius-100);
+    box-shadow: 0 8px 24px rgba(16, 42, 67, 0.2);
+    list-style: none; margin: 0;
+  }
+  .aacats__panel--end { left: auto; right: 0; }
+
+  .aacats__item {
+    display: block; padding: var(--spacing-150) var(--spacing-400);
+    font-size: 1rem; color: var(--color-text-secondary); text-decoration: none;
+  }
+  .aacats__item:hover { background: var(--ps-info-blue-50); color: var(--color-text-primary); }
+  .aacats__item:focus-visible { outline: 2px solid var(--focus-ring-color); outline-offset: -2px; }
+
+  @media (max-width: 860px) {
+    .aacats__row { display: flex; flex-direction: column; }
+    .aacats__trigger { justify-content: flex-start; padding-left: var(--spacing-400); }
+    .aacats__panel {
+      position: static; box-shadow: none;
+      border: 0; border-radius: 0;
+      background: var(--ps-info-blue-50);
+    }
+    .aacats__item { padding-left: var(--spacing-500); }
+  }
+</style>
+
+<script>
+  // WCAG disclosure-nav contract: button[aria-expanded] toggles, Escape closes
+  // and refocuses the trigger, focusout/outside-click closes. Scoped to this
+  // nav's own [data-aa-disclosure] cells.
+  const nav = document.querySelector<HTMLElement>('[data-aa-topicsnav]');
+  if (nav) {
+    const roots = Array.from(nav.querySelectorAll<HTMLElement>('[data-aa-disclosure]'));
+
+    function closeDisclosure(root: HTMLElement, refocus: boolean): void {
+      const trigger = root.querySelector<HTMLButtonElement>('button[aria-expanded]');
+      const panel = trigger ? document.getElementById(trigger.getAttribute('aria-controls') || '') : null;
+      if (!trigger || !panel) return;
+      trigger.setAttribute('aria-expanded', 'false');
+      panel.hidden = true;
+      if (refocus) trigger.focus();
+    }
+
+    function openDisclosure(root: HTMLElement): void {
+      roots.forEach((r) => { if (r !== root) closeDisclosure(r, false); });
+      const trigger = root.querySelector<HTMLButtonElement>('button[aria-expanded]');
+      const panel = trigger ? document.getElementById(trigger.getAttribute('aria-controls') || '') : null;
+      if (!trigger || !panel) return;
+      trigger.setAttribute('aria-expanded', 'true');
+      panel.hidden = false;
+    }
+
+    roots.forEach((root) => {
+      const trigger = root.querySelector<HTMLButtonElement>('button[aria-expanded]');
+      if (!trigger) return;
+
+      trigger.addEventListener('click', () => {
+        const isOpen = trigger.getAttribute('aria-expanded') === 'true';
+        if (isOpen) closeDisclosure(root, false);
+        else openDisclosure(root);
+      });
+
+      root.addEventListener('keydown', (event: KeyboardEvent) => {
+        if (event.key === 'Escape' && trigger.getAttribute('aria-expanded') === 'true') {
+          event.stopPropagation();
+          closeDisclosure(root, true);
+        }
+      });
+
+      root.addEventListener('focusout', (event: FocusEvent) => {
+        const next = event.relatedTarget as Node | null;
+        if (!next || !root.contains(next)) closeDisclosure(root, false);
+      });
+    });
+
+    document.addEventListener('click', (event: MouseEvent) => {
+      const target = event.target as Node;
+      roots.forEach((root) => {
+        const trigger = root.querySelector<HTMLButtonElement>('button[aria-expanded]');
+        if (trigger?.getAttribute('aria-expanded') === 'true' && !root.contains(target)) {
+          closeDisclosure(root, false);
+        }
+      });
+    });
+  }
+</script>

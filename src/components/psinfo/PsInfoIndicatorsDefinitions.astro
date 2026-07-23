@@ -1,14 +1,20 @@
 ---
 // PsInfoIndicatorsDefinitions — the two Indicator Type definitions (Vital Sign
-// Indicators / Progress Indicators) as a two-up card pair, with the closing
-// paragraph beneath. Verbatim from the Indicator/Index page body.
+// Indicators / Progress Indicators) plus the closing paragraph, rendered as
+// plain prose. Verbatim from the Indicator/Index page body: back-to-back <p>
+// tags with no card surface — matched here (2026-07-22 re-audit corrected a
+// prior build that wrapped these in EsaCard, duplicating the portal cards'
+// logo+definition pairing below). The www source marks the terms <strong><u>
+// WITHOUT linking them; here each term is a REAL link to its portal
+// destination (revision direction 2026-07-23) — bold, link-colored, and
+// underlined per the site-wide inline-content-link convention, so the
+// underline now signals an actual hyperlink.
 //
-// bcn-lego-checked: no esa- lego renders a bold-term + definition pair (esa-card
-// has title/subtitle slots but no "term: definition" prose body); esa-card
-// (outlined) is still the reused surface for each definition, same treatment
-// as every other card on this page. Checked Beacon: no matching definition-list
-// pattern. psinfo-indicators-definitions is the reusable home.
-import EsaCard from '@esa/ecology/esa-card.astro';
+// bcn-lego-checked: bare prose paragraphs — the source renders these as
+// plain <p> tags with no card surface, so esa-card is deliberately NOT used
+// and no esa- lego exists for body prose; checked Beacon (no prose-block
+// component). psinfo-indicators-definitions stays the reusable home.
+import { withBase } from '../../lib/base';
 import type { IndicatorTypeDefinition } from '../../data/pages/indicators';
 
 interface Props {
@@ -17,28 +23,24 @@ interface Props {
 }
 const { definitions, closing } = Astro.props;
 ---
-<div class="stack" data-gap="md">
-  <div class="defs">
-    {definitions.map((d) => (
-      <EsaCard variant="outlined">
-        <p class="defs__term">{d.term}</p>
-        <p class="defs__def">{d.definition}</p>
-      </EsaCard>
-    ))}
-  </div>
-  {closing && <p class="defs__closing">{closing}</p>}
+<div class="defs">
+  {definitions.map((d) => (
+    <p class="defs__p"><a class="defs__term" href={withBase(d.href)}><strong>{d.term}</strong></a>{' '}{d.definition}</p>
+  ))}
+  {closing && <p class="defs__p">{closing}</p>}
 </div>
 
 <style>
-  .defs {
-    display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: var(--spacing-400);
+  /* bcn-lego-checked: see frontmatter comment — bare prose paragraphs, no card surface in the source. */
+  .defs { display: flex; flex-direction: column; gap: var(--spacing-300); }
+  .defs__p {
+    margin: 0; font-size: var(--ps-info-text-body); line-height: 1.65;
+    color: var(--color-text-secondary);
   }
   .defs__term {
-    margin: 0 0 var(--spacing-150);
-    font-size: 1.0625rem; font-weight: var(--font-weight-semibold);
-    color: var(--color-text-primary);
+    color: var(--color-text-link);
+    text-decoration: underline; text-underline-offset: 3px;
   }
-  .defs__def { margin: 0; font-size: var(--ps-info-text-body); color: var(--color-text-secondary); line-height: 1.6; }
-  .defs__closing { margin: 0; font-size: var(--ps-info-text-body); color: var(--color-text-secondary); line-height: 1.65; max-width: 74ch; }
+  .defs__term:hover { color: var(--color-text-link-hover); }
+  .defs__term:focus-visible { outline: 2px solid var(--focus-ring-color); outline-offset: 2px; }
 </style>

@@ -1,0 +1,140 @@
+---
+// PsInfoPiDetailRichCard — the Progress Indicator detail page's content card:
+// an ordered block stream (paragraphs with inline bold/italic/underline/link
+// runs, bold label lines, bullet lists, chart figures with italic captions,
+// an inline status icon, and card-foot footnotes) on the same outlined
+// esa-card surface as the sibling exemplar's PsInfoIndicatorsContentCard.
+// Built because that card stores flat strings and cannot carry this page's
+// inline footnote markers, embedded chart figures, or mixed-run bullets
+// without corrupting verbatim text.
+//
+// bcn-lego-checked: esa-card is the surface; the block-stream body (prose +
+// figures + footnotes) has no esa- lego — same call as
+// psinfo-indicators-content-card, extended for figure/footnote blocks.
+// psinfo-pi-detail-rich-card is the reusable home for PI detail exemplars.
+import EsaCard from '@esa/ecology/esa-card.astro';
+import EsaIcon from '@esa/ecology/esa-icon.astro';
+import { withBase } from '../../lib/base';
+import { isExternalHref, EXTERNAL_LINK_ICON_PATHS } from '../../lib/psinfoExternalLink';
+import type { PiBlock, PiRun } from '../../data/pages/indicators';
+
+interface Props {
+  blocks: PiBlock[];
+  /** Prefix for in-card footnote anchor ids (matches the runs' # hrefs). */
+  footnoteIdPrefix?: string;
+}
+const { blocks, footnoteIdPrefix } = Astro.props;
+
+const runClass = (run: PiRun) =>
+  [run.bold && 'rc--b', run.italic && 'rc--i', run.underline && 'rc--u'].filter(Boolean).join(' ') || undefined;
+let footnoteIndex = 0;
+---
+<EsaCard variant="outlined">
+  <div class="rc">
+    {blocks.map((block) => {
+      if (block.kind === 'p') {
+        return (
+          <p class="rc__p">
+            {block.runs.map((run) =>
+              run.href ? (
+                <a class:list={['rc__link', runClass(run)]} href={run.href} {...(isExternalHref(run.href) ? { target: '_blank', rel: 'noopener' } : {})}>{run.text}{isExternalHref(run.href) && <EsaIcon name="external-link" size="xs" paths={EXTERNAL_LINK_ICON_PATHS} label="(external)" />}</a>
+              ) : (
+                <span class={runClass(run)}>{run.text}</span>
+              )
+            )}
+          </p>
+        );
+      }
+      if (block.kind === 'label') {
+        return <p class="rc__label">{block.text}</p>;
+      }
+      if (block.kind === 'bullets') {
+        return (
+          <ul class="rc__bullets">
+            {block.items.map((item) => (
+              <li>
+                {item.map((run) =>
+                  run.href ? (
+                    <a class:list={['rc__link', runClass(run)]} href={run.href} {...(isExternalHref(run.href) ? { target: '_blank', rel: 'noopener' } : {})}>{run.text}{isExternalHref(run.href) && <EsaIcon name="external-link" size="xs" paths={EXTERNAL_LINK_ICON_PATHS} label="(external)" />}</a>
+                  ) : (
+                    <span class={runClass(run)}>{run.text}</span>
+                  )
+                )}
+              </li>
+            ))}
+          </ul>
+        );
+      }
+      if (block.kind === 'figure') {
+        return (
+          <figure class="rc__figure">
+            <img class="rc__figimg" src={withBase(block.src)} alt={block.alt} loading="lazy" decoding="async" />
+            <figcaption class="rc__figcaption">{block.caption}</figcaption>
+          </figure>
+        );
+      }
+      if (block.kind === 'icon') {
+        return <img class="rc__icon" src={withBase(block.src)} alt={block.alt} width="116" height="116" loading="lazy" />;
+      }
+      if (block.kind === 'footnote') {
+        footnoteIndex += 1;
+        return (
+          <p class="rc__footnote" id={footnoteIdPrefix ? `${footnoteIdPrefix}-ftn${footnoteIndex}` : undefined}>
+            {block.runs.map((run) =>
+              run.href && !run.href.startsWith('#') ? (
+                <a class:list={['rc__link', runClass(run)]} href={run.href} {...(isExternalHref(run.href) ? { target: '_blank', rel: 'noopener' } : {})}>{run.text}{isExternalHref(run.href) && <EsaIcon name="external-link" size="xs" paths={EXTERNAL_LINK_ICON_PATHS} label="(external)" />}</a>
+              ) : (
+                <span class={runClass(run)}>{run.text}</span>
+              )
+            )}
+          </p>
+        );
+      }
+      return null;
+    })}
+  </div>
+</EsaCard>
+
+<style>
+  .rc { display: flex; flex-direction: column; gap: var(--spacing-400); }
+
+  .rc__p, .rc__bullets li {
+    margin: 0; font-size: var(--ps-info-text-body); color: var(--color-text-primary); line-height: 1.65;
+  }
+  .rc--b { font-weight: var(--font-weight-semibold); }
+  .rc--i { font-style: italic; }
+  .rc--u { text-decoration: underline; text-underline-offset: 3px; }
+
+  .rc__label {
+    margin: var(--spacing-200) 0 0;
+    font-size: var(--ps-info-text-body); font-weight: var(--font-weight-semibold);
+    color: var(--color-text-primary);
+  }
+
+  .rc__bullets {
+    margin: 0; padding-left: var(--spacing-500);
+    display: flex; flex-direction: column; gap: var(--spacing-200);
+  }
+
+  /* Inline content links: underlined at rest per house policy. */
+  .rc__link { color: var(--color-text-link); text-decoration: underline; text-underline-offset: 3px; }
+  .rc__link:hover { color: var(--color-text-link-hover); }
+  .rc__link:focus-visible { outline: 2px solid var(--focus-ring-color); outline-offset: 2px; }
+  .rc__link :global(.esa-icon) { color: var(--color-text-muted); margin-left: 2px; vertical-align: baseline; }
+
+  .rc__figure {
+    margin: 0; display: flex; flex-direction: column; align-items: center; gap: var(--spacing-300);
+  }
+  .rc__figimg { display: block; max-width: 100%; height: auto; }
+  .rc__figcaption {
+    font-style: italic; font-size: var(--ps-info-text-body); color: var(--color-text-secondary);
+    line-height: 1.5; text-align: center;
+  }
+
+  .rc__icon { display: block; width: 116px; height: 116px; }
+
+  .rc__footnote {
+    margin: 0; font-size: var(--ps-info-text-body); color: var(--color-text-secondary); line-height: 1.6;
+  }
+  .rc__footnote:first-of-type { border-top: 1px solid var(--color-border-light); padding-top: var(--spacing-400); }
+</style>

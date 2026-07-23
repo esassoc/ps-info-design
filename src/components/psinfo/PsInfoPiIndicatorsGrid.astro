@@ -1,0 +1,200 @@
+---
+// PsInfoPiIndicatorsGrid — the Progress Indicators home page's "Explore all
+// Progress Indicators" ag-grid: 16 rows, 5 columns, with the source's toolbar
+// (row count + clear filters + Download Table). ag-grid-community v36.0.2.
+// Mirrors psinfo-indicators-grid's proven pattern (same engine, same toolbar
+// wiring, same legacy-theme token mapping) for the sibling Indicators unit.
+//
+// bcn-lego-checked: no esa- data-grid/table lego exists (checked the full
+// catalog — closest are esa-link-column/esa-pagination, not a data grid);
+// ag-grid-community is the table engine per Andrew's direction (same engine
+// psinfo-indicators-grid already uses); toolbar buttons are the esa-button
+// lego; CSS below is the grid's legacy-theme custom-property mapping onto
+// ecology tokens.
+import EsaButton from '@esa/ecology/esa-button.astro';
+import { GRID_CLEAR_FILTERS_LABEL, GRID_DOWNLOAD_LABEL, gridRowCountText } from '../../data/pages/progress-indicators';
+import type { PiGridColumn, PiIndicatorRow } from '../../data/pages/progress-indicators';
+import 'ag-grid-community/styles/ag-grid.css';
+import 'ag-grid-community/styles/ag-theme-alpine.css';
+import '../../styles/psinfo-ag-grid.css';
+
+interface Props {
+  rows: PiIndicatorRow[];
+  columns: PiGridColumn[];
+}
+const { rows, columns } = Astro.props;
+---
+<div class="pigrid">
+  <div class="pigrid__bar">
+    <p class="pigrid__count">
+      <span id="pi-grid-count" aria-live="polite">{gridRowCountText(rows.length, rows.length)}</span>
+      <span id="pi-grid-clear-wrap" hidden>
+        <EsaButton size="sm" color="ghost" appearance="soft" id="pi-grid-clear">{GRID_CLEAR_FILTERS_LABEL}</EsaButton>
+      </span>
+    </p>
+    <EsaButton size="sm" color="primary" appearance="outline" id="pi-grid-download">{GRID_DOWNLOAD_LABEL}</EsaButton>
+  </div>
+  <div id="pi-grid" class="ag-theme-alpine psinfo-agrid" role="region" aria-label="All Progress Indicators"></div>
+  <script type="application/json" id="pi-grid-data" set:html={JSON.stringify({ rows, columns })}></script>
+</div>
+
+<script>
+  import { createGrid, ModuleRegistry, AllCommunityModule } from 'ag-grid-community';
+  import type { GridOptions, ICellRendererParams } from 'ag-grid-community';
+  import { GRID_EXPORT_FILE_NAME, gridRowCountText } from '../../data/pages/progress-indicators';
+  import type { PiGridColumn, PiIndicatorRow, PiLinkCell } from '../../data/pages/progress-indicators';
+
+  ModuleRegistry.registerModules([AllCommunityModule]);
+
+  function makeLink(label: string, href: string): HTMLAnchorElement {
+    const a = document.createElement('a');
+    a.className = 'pigrid__link';
+    a.textContent = label;
+    a.href = href;
+    return a;
+  }
+
+  function linkList(cells: PiLinkCell[]): HTMLSpanElement {
+    const span = document.createElement('span');
+    cells.forEach((cell, i) => {
+      if (i > 0) span.appendChild(document.createTextNode('; '));
+      span.appendChild(makeLink(cell.label, cell.href));
+    });
+    return span;
+  }
+
+  const payloadEl = document.getElementById('pi-grid-data');
+  const { rows, columns } = JSON.parse(payloadEl?.textContent ?? '{"rows":[],"columns":[]}') as {
+    rows: PiIndicatorRow[];
+    columns: PiGridColumn[];
+  };
+
+  const RENDERERS: Record<PiGridColumn['field'], (p: ICellRendererParams<PiIndicatorRow>) => HTMLElement | string> = {
+    indicator: (p) => makeLink(p.data!.indicator, p.data!.href),
+    description: (p) => p.data!.description,
+    topics: (p) => linkList(p.data!.topics),
+    aaTopicLinks: (p) => linkList(p.data!.aaTopicLinks),
+    programs: (p) => p.data!.programs,
+  };
+
+  const VALUE_GETTERS: Record<PiGridColumn['field'], (p: ICellRendererParams<PiIndicatorRow>) => string> = {
+    indicator: (p) => p.data!.indicator,
+    description: (p) => p.data!.description,
+    topics: (p) => p.data!.topics.map((t) => t.label).join('; '),
+    aaTopicLinks: (p) => p.data!.aaTopicLinks.map((t) => t.label).join('; '),
+    programs: (p) => p.data!.programs,
+  };
+
+  const columnDefs = columns.map((col) => ({
+    field: col.field,
+    headerName: col.headerName,
+    initialWidth: col.initialWidth,
+    valueGetter: VALUE_GETTERS[col.field],
+    cellRenderer: RENDERERS[col.field],
+    filter: 'agTextColumnFilter',
+  }));
+
+  const host = document.getElementById('pi-grid') as HTMLDivElement;
+  const countEl = document.getElementById('pi-grid-count')!;
+  const clearWrap = document.getElementById('pi-grid-clear-wrap')!;
+  const clearBtn = document.getElementById('pi-grid-clear');
+  const downloadBtn = document.getElementById('pi-grid-download');
+
+  const gridOptions: GridOptions<PiIndicatorRow> = {
+    theme: 'legacy',
+    columnDefs,
+    rowData: rows,
+    defaultColDef: {
+      sortable: true,
+      filter: 'agTextColumnFilter',
+      floatingFilter: true,
+      resizable: true,
+      wrapHeaderText: true,
+      autoHeaderHeight: true,
+    },
+    animateRows: true,
+    ensureDomOrder: true,
+    suppressCellFocus: false,
+    onCellFocused: (event) => {
+      if (event.rowIndex == null || typeof event.column !== 'object' || event.column === null) return;
+      const colId = (event.column as { getColId: () => string }).getColId();
+      const cell = host.querySelector(`[row-index="${event.rowIndex}"] [col-id="${colId}"]`);
+      cell?.querySelector('a')?.focus();
+    },
+    onFilterChanged: () => {
+      const shown = api.getDisplayedRowCount();
+      countEl.textContent = gridRowCountText(shown, rows.length);
+      const hasFilters = Object.keys(api.getFilterModel()).length !== 0;
+      clearWrap.hidden = !hasFilters;
+    },
+  };
+
+  const api = createGrid(host, gridOptions);
+
+  // Post-init a11y patches (mirrors psinfo-indicators-grid's own fix).
+  host.querySelector('[role="grid"]')?.setAttribute('aria-label', 'All Progress Indicators');
+  host.querySelectorAll('.ag-center-cols-container[role="rowgroup"]').forEach((el) => {
+    el.setAttribute('tabindex', '0');
+    el.setAttribute('aria-label', 'Progress Indicator rows');
+  });
+
+  clearBtn?.addEventListener('click', () => {
+    api.setFilterModel(null);
+    clearWrap.hidden = true;
+  });
+  downloadBtn?.addEventListener('click', () => {
+    api.exportDataAsCsv({ fileName: GRID_EXPORT_FILE_NAME });
+  });
+</script>
+
+<style>
+  /* bcn-lego-checked: see frontmatter comment. */
+  .pigrid { display: flex; flex-direction: column; gap: var(--spacing-300); }
+
+  .pigrid__bar {
+    display: flex; align-items: center; justify-content: space-between;
+    flex-wrap: wrap; gap: var(--spacing-400);
+  }
+  .pigrid__count {
+    margin: 0; font-size: var(--ps-info-text-body); color: var(--color-text-secondary);
+    display: inline-flex; align-items: center; gap: var(--spacing-200);
+  }
+
+  /* size="sm" EsaButton falls back to a 12px native font-size (no
+     --form-font-size-sm token is defined in this theme) — override to the
+     16px body minimum on these two toolbar instances by id (higher
+     specificity than .esa-button__native's class rule). Same fix as
+     psinfo-indicators-grid. */
+  :global(#pi-grid-clear),
+  :global(#pi-grid-download) {
+    font-size: var(--ps-info-text-body);
+  }
+
+  #pi-grid {
+    block-size: 37.5rem; /* mirrors prod's 600px grid viewport */
+  }
+  /* Dark header + grid type sizes come from the shared .psinfo-agrid skin
+     (src/styles/psinfo-ag-grid.css); only per-grid concerns live here. */
+  #pi-grid {
+    --ag-font-family: var(--font-sans);
+    --ag-foreground-color: var(--color-text-primary);
+    --ag-data-color: var(--color-text-primary);
+    --ag-secondary-foreground-color: var(--color-text-secondary);
+    --ag-background-color: var(--color-surface);
+    --ag-odd-row-background-color: var(--color-surface);
+    --ag-row-hover-color: var(--ps-info-blue-50);
+    --ag-selected-row-background-color: var(--ps-info-blue-100);
+    --ag-border-color: var(--color-border);
+    --ag-secondary-border-color: var(--color-border-light);
+    --ag-row-border-color: var(--color-border-light);
+    --ag-alpine-active-color: var(--ps-info-blue-600);
+    --ag-input-focus-border-color: var(--ps-info-blue-600);
+    --ag-border-radius: var(--radius-100);
+    --ag-row-height: 48px;
+  }
+  #pi-grid :global(.pigrid__link) { color: var(--color-text-link); }
+  #pi-grid :global(.pigrid__link:hover) { color: var(--color-text-link-hover); }
+  #pi-grid :global(.pigrid__link:focus-visible) {
+    outline: 2px solid var(--focus-ring-color); outline-offset: 1px;
+  }
+</style>

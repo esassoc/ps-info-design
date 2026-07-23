@@ -1,0 +1,205 @@
+---
+// PsInfoNepAtlasAwardsGrid — AG Grid of AWARD_ROWS, the FULL 14-row
+// /Award/IndexGridJsonData feed, all 9 columns — no truncation. Cloned from
+// PsInfoIndicatorsGrid's toolbar/theme/token-mapping/a11y-patch conventions.
+// domLayout: 'autoHeight' — prod's own auto-fit branch shows all 14 rows
+// without an inner scroll when the full set fits.
+//
+// bcn-lego-checked: same lookup as PsInfoIndicatorsGrid/PsInfoNepAtlasActivitiesGrid
+// (no esa- data-grid lego); ag-grid-community is the engine; toolbar button
+// is the esa-button lego.
+import EsaButton from '@esa/ecology/esa-button.astro';
+import { AWARD_ROWS, awardsCountText, GRID_DOWNLOAD_LABEL } from '../../data/pages/nep-atlas';
+import 'ag-grid-community/styles/ag-grid.css';
+import 'ag-grid-community/styles/ag-theme-alpine.css';
+import '../../styles/psinfo-ag-grid.css';
+---
+<div class="nepgrid">
+  <div class="nepgrid__bar">
+    <p class="nepgrid__count">
+      <span id="psinfo-nep-awards-grid-count" aria-live="polite">{awardsCountText(AWARD_ROWS.length, AWARD_ROWS.length)}</span>
+    </p>
+    <EsaButton size="sm" color="primary" appearance="outline" id="psinfo-nep-awards-grid-download">{GRID_DOWNLOAD_LABEL}</EsaButton>
+  </div>
+  <div id="psinfo-nep-awards-grid" class="ag-theme-alpine psinfo-agrid"></div>
+</div>
+
+<script>
+  import { createGrid, ModuleRegistry, AllCommunityModule } from 'ag-grid-community';
+  import type { GridOptions, ICellRendererParams } from 'ag-grid-community';
+  import { AWARD_ROWS, AWARD_GRID_COLUMNS, awardsCountText, formatUsd } from '../../data/pages/nep-atlas';
+  import type { AtlasAwardRow } from '../../data/pages/nep-atlas';
+
+  ModuleRegistry.registerModules([AllCommunityModule]);
+
+  function makeLink(name: string, href: string): HTMLAnchorElement {
+    const a = document.createElement('a');
+    a.className = 'nepgrid__link';
+    a.textContent = name;
+    a.href = href;
+    return a;
+  }
+
+  const byId = new Map(AWARD_GRID_COLUMNS.map((c) => [c.colId, c]));
+  const col = (id: (typeof AWARD_GRID_COLUMNS)[number]['colId']) => byId.get(id)!;
+
+  const columnDefs = [
+    {
+      colId: col('NEPAward').colId,
+      headerName: col('NEPAward').header,
+      valueGetter: (p: ICellRendererParams<AtlasAwardRow>) => p.data?.name,
+      cellRenderer: (p: ICellRendererParams<AtlasAwardRow>) =>
+        p.data?.detailHref ? makeLink(p.data.name, p.data.detailHref) : (p.value ?? ''),
+      initialWidth: 260,
+    },
+    {
+      colId: col('NEPAwardShortName').colId,
+      headerName: col('NEPAwardShortName').header,
+      valueGetter: (p: ICellRendererParams<AtlasAwardRow>) => p.data?.shortName,
+      initialWidth: 190,
+    },
+    {
+      colId: col('NEPAwardDescription').colId,
+      headerName: col('NEPAwardDescription').header,
+      valueGetter: (p: ICellRendererParams<AtlasAwardRow>) => p.data?.description,
+      initialWidth: 530,
+      wrapText: true,
+      autoHeight: true,
+    },
+    {
+      colId: col('NEPAwardReportingLeads').colId,
+      headerName: col('NEPAwardReportingLeads').header,
+      valueGetter: (p: ICellRendererParams<AtlasAwardRow>) => p.data?.reportingLeads,
+      initialWidth: 220,
+    },
+    {
+      colId: col('AwardingFund').colId,
+      headerName: col('AwardingFund').header,
+      valueGetter: (p: ICellRendererParams<AtlasAwardRow>) => p.data?.awardingFund,
+      initialWidth: 260,
+    },
+    {
+      colId: col('Funds').colId,
+      headerName: col('Funds').header,
+      valueGetter: (p: ICellRendererParams<AtlasAwardRow>) => p.data?.funds,
+      initialWidth: 300,
+    },
+    {
+      colId: col('TotalCost').colId,
+      headerName: col('TotalCost').header,
+      type: 'rightAligned',
+      valueGetter: (p: ICellRendererParams<AtlasAwardRow>) => p.data?.totalCost,
+      valueFormatter: (p: { value: number | null }) => formatUsd(p.value),
+      initialWidth: 160,
+    },
+    {
+      colId: col('NEPInvestment').colId,
+      headerName: col('NEPInvestment').header,
+      type: 'rightAligned',
+      valueGetter: (p: ICellRendererParams<AtlasAwardRow>) => p.data?.nepInvestment,
+      valueFormatter: (p: { value: number | null }) => formatUsd(p.value),
+      initialWidth: 160,
+    },
+    {
+      colId: col('LeveragedFunds').colId,
+      headerName: col('LeveragedFunds').header,
+      type: 'rightAligned',
+      valueGetter: (p: ICellRendererParams<AtlasAwardRow>) => p.data?.leveragedFunds,
+      valueFormatter: (p: { value: number | null }) => formatUsd(p.value),
+      initialWidth: 160,
+    },
+  ];
+
+  const totalCost = AWARD_ROWS.reduce((sum, r) => sum + r.totalCost, 0);
+  const totalNep = AWARD_ROWS.reduce((sum, r) => sum + r.nepInvestment, 0);
+  const totalLeveraged = AWARD_ROWS.reduce((sum, r) => sum + r.leveragedFunds, 0);
+
+  const host = document.getElementById('psinfo-nep-awards-grid') as HTMLDivElement;
+  const countEl = document.getElementById('psinfo-nep-awards-grid-count')!;
+  const downloadBtn = document.getElementById('psinfo-nep-awards-grid-download');
+
+  const gridOptions: GridOptions<AtlasAwardRow> = {
+    theme: 'legacy',
+    columnDefs,
+    rowData: AWARD_ROWS,
+    domLayout: 'autoHeight',
+    pinnedBottomRowData: [
+      { TotalCost: totalCost, NEPInvestment: totalNep, LeveragedFunds: totalLeveraged } as unknown as AtlasAwardRow,
+    ],
+    defaultColDef: {
+      sortable: true,
+      filter: 'agTextColumnFilter',
+      floatingFilter: true,
+      resizable: true,
+      wrapHeaderText: true,
+      autoHeaderHeight: true,
+    },
+    ensureDomOrder: true,
+    suppressCellFocus: false,
+    onCellFocused: (event) => {
+      if (event.rowIndex == null || typeof event.column !== 'object' || event.column === null) return;
+      const colId = (event.column as { getColId: () => string }).getColId();
+      const cell = host.querySelector(`[row-index="${event.rowIndex}"] [col-id="${colId}"]`);
+      cell?.querySelector('a')?.focus();
+    },
+    onFilterChanged: () => {
+      const shown = api.getDisplayedRowCount();
+      countEl.textContent = awardsCountText(shown, AWARD_ROWS.length);
+    },
+  };
+
+  const api = createGrid(host, gridOptions);
+
+  host.querySelector('[role="grid"]')?.setAttribute('aria-label', 'NEP Awards');
+  host.querySelectorAll('.ag-center-cols-container[role="rowgroup"]').forEach((el) => {
+    el.setAttribute('tabindex', '0');
+    el.setAttribute('aria-label', 'NEP Award rows');
+  });
+
+  downloadBtn?.addEventListener('click', () => {
+    api.exportDataAsCsv({
+      fileName: 'awardsGridExport',
+      columnKeys: AWARD_GRID_COLUMNS.map((c) => c.colId),
+    });
+  });
+</script>
+
+<style>
+  /* bcn-lego-checked: see frontmatter comment. */
+  .nepgrid { display: flex; flex-direction: column; gap: var(--spacing-300); }
+
+  .nepgrid__bar {
+    display: flex; align-items: center; justify-content: space-between;
+    flex-wrap: wrap; gap: var(--spacing-400);
+  }
+  .nepgrid__count {
+    margin: 0; font-size: var(--ps-info-text-body); color: var(--color-text-secondary);
+    display: inline-flex; align-items: center; gap: var(--spacing-200);
+  }
+
+  :global(#psinfo-nep-awards-grid-download) { font-size: var(--ps-info-text-body); }
+
+  /* Dark header + grid type sizes come from the shared .psinfo-agrid skin
+     (src/styles/psinfo-ag-grid.css); only per-grid concerns live here. */
+  #psinfo-nep-awards-grid {
+    --ag-font-family: var(--font-sans);
+    --ag-foreground-color: var(--color-text-primary);
+    --ag-data-color: var(--color-text-primary);
+    --ag-secondary-foreground-color: var(--color-text-secondary);
+    --ag-background-color: var(--color-surface);
+    --ag-odd-row-background-color: var(--color-surface);
+    --ag-row-hover-color: var(--color-surface-sunken);
+    --ag-border-color: var(--color-border);
+    --ag-secondary-border-color: var(--color-border-light);
+    --ag-row-border-color: var(--color-border-light);
+    --ag-alpine-active-color: var(--color-primary);
+    --ag-input-focus-border-color: var(--focus-ring-color);
+    --ag-border-radius: var(--radius-100);
+  }
+  #psinfo-nep-awards-grid :global(.nepgrid__link) { color: var(--color-text-link); }
+  #psinfo-nep-awards-grid :global(.nepgrid__link:hover) { color: var(--color-text-link-hover); }
+  #psinfo-nep-awards-grid :global(.nepgrid__link:focus-visible) {
+    outline: 2px solid var(--focus-ring-color); outline-offset: 1px;
+  }
+  #psinfo-nep-awards-grid :global(.ag-row-pinned) { font-weight: var(--font-weight-semibold); }
+</style>

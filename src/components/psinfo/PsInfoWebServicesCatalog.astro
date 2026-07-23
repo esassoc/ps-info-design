@@ -3,9 +3,11 @@
 // WebServices/Index, one esa-collapsible per service (collapsed by default —
 // 28 items would otherwise dump the whole reference doc on the page at once,
 // same reasoning as the sibling PsInfoActionAgendaRefreshStrategies). Each
-// entry expands to its description, real example-URL links (CSV/JSON, both
-// live download endpoints on pugetsoundinfo.wa.gov), the Parameters line, and
-// — for the 17 of 28 that carry one — a Last Updated date + Change Notes.
+// entry expands to its description, real example-URL links (both live
+// download endpoints on pugetsoundinfo.wa.gov, rendered with prod's verbatim
+// field labels — "Example Urls:", "Parameters:", "Last Updated Date:",
+// "Change Notes:" — and prod's relative-path link text), the Parameters
+// line, and — for 18 of 28 — a Last Updated date + Change Notes.
 //
 // bcn-lego-checked: esa-collapsible is the disclosure primitive (no bespoke
 // accordion). The example-URL / meta-line layout is plain content
@@ -13,25 +15,31 @@
 // PsInfoActionAgendaRefreshStrategies — not a reinvented control.
 import EsaCollapsible from '@esa/ecology/esa-collapsible.astro';
 import EsaIcon from '@esa/ecology/esa-icon.astro';
+import { isExternalHref, EXTERNAL_LINK_ICON_PATHS } from '../../lib/psinfoExternalLink';
 import type { WebService } from '../../data/pages/web-services';
+import { SITE_ORIGIN } from '../../data/pages/web-services';
+
+// Prod's visible anchor text is the site-relative path (e.g.
+// "/WebServices/GetOutcomeByID/CSV/1"); the href stays absolute because this
+// prototype serves from a different origin.
+const displayPath = (url: string) => (url.startsWith(SITE_ORIGIN) ? url.slice(SITE_ORIGIN.length) : url);
 
 interface Props {
   services: WebService[];
 }
 const { services } = Astro.props;
-const ARROW = '<path d="M7 7h10v10"/><path d="M7 17 17 7"/>';
 ---
 <div class="svccat">
   {services.map((service) => (
     <EsaCollapsible title={service.title}>
       <p class="svccat__desc">{service.description}</p>
 
+      <p class="svccat__label">Example Urls:</p>
       <div class="svccat__urls">
         {service.exampleUrls.map((u) => (
-          <a class="svccat__url" href={u.url} target="_blank" rel="noopener">
-            <span class="svccat__url-label">{u.label}</span>
-            <span class="svccat__url-value">{u.url}</span>
-            <EsaIcon name="arrow-up-right" size="xs" paths={ARROW} />
+          <a class="svccat__url" href={u.url} {...(isExternalHref(u.url) ? { target: '_blank', rel: 'noopener' } : {})}>
+            <span class="svccat__url-value">{displayPath(u.url)}</span>
+            {isExternalHref(u.url) && <EsaIcon name="external-link" size="xs" paths={EXTERNAL_LINK_ICON_PATHS} label="(external)" />}
           </a>
         ))}
       </div>
@@ -40,7 +48,8 @@ const ARROW = '<path d="M7 7h10v10"/><path d="M7 17 17 7"/>';
 
       {service.lastUpdated && (
         <div class="svccat__updated">
-          <p class="svccat__updated-date">Last updated {service.lastUpdated}</p>
+          <p class="svccat__updated-date">Last Updated Date: {service.lastUpdated}</p>
+          {service.changeNotes && <p class="svccat__notes-label">Change Notes:</p>}
           {service.changeNotes?.map((note) => <p class="svccat__note">{note}</p>)}
         </div>
       )}
@@ -56,6 +65,12 @@ const ARROW = '<path d="M7 7h10v10"/><path d="M7 17 17 7"/>';
     color: var(--color-text-primary); line-height: 1.6;
   }
 
+  .svccat__label {
+    margin: 0 0 calc(-1 * var(--spacing-100));
+    font-size: var(--ps-info-text-meta-lg); font-weight: var(--font-weight-semibold);
+    color: var(--color-text-secondary);
+  }
+
   .svccat__urls { display: flex; flex-direction: column; gap: var(--spacing-150); margin-bottom: var(--spacing-300); }
   .svccat__url {
     display: flex; align-items: baseline; flex-wrap: wrap; gap: var(--spacing-200);
@@ -65,20 +80,14 @@ const ARROW = '<path d="M7 7h10v10"/><path d="M7 17 17 7"/>';
   }
   .svccat__url:hover { background: var(--color-primary-subtle); }
   .svccat__url:focus-visible { outline: 2px solid var(--focus-ring-color); outline-offset: 2px; }
-  .svccat__url-label {
-    flex: none; font-family: var(--font-mono); font-size: var(--ps-info-text-meta);
-    font-weight: var(--font-weight-semibold); color: var(--color-primary);
-    padding: 2px var(--spacing-200); border-radius: var(--radius-100); background: var(--color-primary-subtle);
-  }
-  .svccat__url:hover .svccat__url-label { background: var(--color-surface); }
   .svccat__url-value {
-    font-size: var(--ps-info-text-meta-lg); color: var(--color-text-link);
+    font-size: var(--ps-info-text-body); color: var(--color-text-link); text-decoration: underline; text-underline-offset: 3px;
     word-break: break-all; line-height: 1.5;
   }
   .svccat__url:hover .svccat__url-value { text-decoration: underline; }
   .svccat__url :global(.esa-icon) { flex: none; color: var(--color-text-muted); align-self: center; }
 
-  .svccat__params { margin: 0; font-size: var(--ps-info-text-meta-lg); color: var(--color-text-secondary); }
+  .svccat__params { margin: 0; font-size: var(--ps-info-text-body); color: var(--color-text-secondary); }
 
   .svccat__updated {
     margin-top: var(--spacing-300); padding-top: var(--spacing-300);
@@ -88,6 +97,10 @@ const ARROW = '<path d="M7 7h10v10"/><path d="M7 17 17 7"/>';
   .svccat__updated-date {
     margin: 0; font-size: var(--ps-info-text-meta); font-weight: var(--font-weight-semibold);
     color: var(--color-text-muted);
+  }
+  .svccat__notes-label {
+    margin: 0; font-size: var(--ps-info-text-meta-lg); font-weight: var(--font-weight-semibold);
+    color: var(--color-text-secondary);
   }
   .svccat__note { margin: 0; font-size: var(--ps-info-text-meta); color: var(--color-text-muted); line-height: 1.5; }
 </style>

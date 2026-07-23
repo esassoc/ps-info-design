@@ -1,0 +1,40 @@
+---
+// PsInfoAaInfoCallout — shared info callout, used 3x on the Topic page
+// (Overview commitments, Progress commitments, Progress indicators legend).
+// Composes esa-alert-box, tinted to the module's periwinkle.
+//
+// `paragraphs` takes ONE `TopicProseParagraph` (a flat array of inline
+// segments) — every real usage (both callout constants in the data module)
+// is a single paragraph, matching their own `TopicProseParagraph` type; this
+// wraps it in an array itself before handing off to `PsInfoAaTopicProse`
+// (whose prop is `TopicProseParagraph[]`, an array of paragraphs).
+//
+// bcn-lego-checked: esa-alert-box IS the lego, tinted to the module's
+// periwinkle via consumer-side tokens (variant="info", background/border
+// overridden locally). Its info icon is already aria-hidden.
+import EsaAlertBox from '@esa/ecology/esa-alert-box.astro';
+import PsInfoAaTopicProse from './PsInfoAaTopicProse.astro';
+import type { TopicProseParagraph } from '../../data/pages/action-agenda';
+
+interface Props {
+  paragraphs: TopicProseParagraph;
+}
+const { paragraphs } = Astro.props;
+---
+<div class="aacallout">
+  <EsaAlertBox variant="info">
+    <PsInfoAaTopicProse paragraphs={[paragraphs]} />
+  </EsaAlertBox>
+</div>
+
+<style>
+  .aacallout :global(.esa-alert-box) {
+    background: var(--ps-info-blue-100);
+    border: 1px solid var(--ps-info-blue-200);
+    border-radius: var(--radius-100);
+    --_alert-icon-color: var(--ps-info-blue-800);
+  }
+  .aacallout :global(.esa-alert-box__message) {
+    font-style: italic;
+  }
+</style>

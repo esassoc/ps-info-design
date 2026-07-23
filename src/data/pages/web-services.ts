@@ -20,7 +20,7 @@ export const INTRO_PARAGRAPH =
   'Web Services are functions that can be accessed over the web (using the http protocol), typically consumed by software or programs rather than humans. The services we provide here allow programmatic access to PS Info data. The intent of these web services is to facilitate coordination and information sharing between agencies, interested parties, and the public within and outside of the Puget Sound.';
 
 export interface WebServiceExampleUrl {
-  /** Return-type label as shown in source ("CSV" or "JSON"). */
+  /** Return type ("CSV" | "JSON") — derived from the endpoint path's return-type segment; metadata only, NOT rendered (prod's visible link text is just the path). */
   label: string;
   /** Absolute URL to the real endpoint on pugetsoundinfo.wa.gov. */
   url: string;
@@ -32,7 +32,7 @@ export interface WebService {
   exampleUrls: WebServiceExampleUrl[];
   /** "Parameters:" line, split on ", " into its listed terms — verbatim. */
   parameters: string[];
-  /** "Last Updated Date:" — present on 17 of 28 services; the rest carry none. */
+  /** "Last Updated Date:" — present on 18 of 28 services; the rest carry none. */
   lastUpdated?: string;
   /** "Change Notes:" — split on the source's <br/> line breaks where multiple notes stack. */
   changeNotes?: string[];
@@ -350,8 +350,3 @@ export const WEB_SERVICES: WebService[] = [
     parameters: ['Return Type'],
   },
 ];
-
-// ── Footer note (verbatim, page-level — shared site chrome elsewhere reuses
-// the same "contact the Partnership" copy, but this page's own support link
-// is the nav-bar "Request Support" action, not page body copy) ─────────────
-export const TOTAL_SERVICES = WEB_SERVICES.length;

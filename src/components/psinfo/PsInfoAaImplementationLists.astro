@@ -1,0 +1,326 @@
+---
+// PsInfoAaImplementationLists — the Implementation tab's three parallel
+// lists (Ongoing Programs / NEP Activities / Legislative Bills), each a
+// count-labeled column of disclosure cards. Title link and disclosure toggle
+// are SEPARATE interactive elements (prod's own shape) — esa-collapsible's
+// summary-as-toggle would swallow the linked title, so this composes
+// esa-card + a hand-built disclosure per card instead. Prod's Bootstrap
+// accordion auto-closes siblings within a column; here each card discloses
+// independently (simpler, keyboard-friendlier — recorded in the contract).
+// Each card's body AND footer (Program Website / Activity Stage + Project
+// Website / bill Status + House Bill Link) live INSIDE the single toggled
+// [hidden] region — matching prod's own collapse contents (verified in the
+// Implementation DOM: `#collapse_program_259 > .footer` etc.) — nothing
+// renders always-visible outside the disclosure.
+//
+// bcn-lego-checked: checked esa-collapsible (summary/details toggle IS the
+// clickable header — cannot host a separately-focusable title link inside
+// the same disclosure control) and esa-tab-layout / esa-filter-container
+// (wrong shapes for a three-column card list); esa-card supplies each card's
+// surface, the disclosure region is a hand-built [hidden] region toggled by a
+// real button. Checked Beacon (Angular accordion, not portable to this
+// exact shape). PsInfoAaImplementationLists is the reusable home.
+import EsaCard from '@esa/ecology/esa-card.astro';
+import EsaIcon from '@esa/ecology/esa-icon.astro';
+import { withBase } from '../../lib/base';
+import { isExternalHref, EXTERNAL_LINK_ICON_PATHS } from '../../lib/psinfoExternalLink';
+import { TOPICS } from '../../data/pages/action-agenda';
+import type { AaOngoingProgram, AaNepActivity, AaLegislativeBill } from '../../data/pages/action-agenda';
+
+interface Props {
+  programs: AaOngoingProgram[];
+  activities: AaNepActivity[];
+  bills: AaLegislativeBill[];
+}
+const { programs, activities, bills } = Astro.props;
+
+function topicLink(id: string): { label: string; href: string } | null {
+  const topic = TOPICS.find((t) => t.id === id);
+  if (!topic) return null;
+  return { label: `${id} - ${topic.title}`, href: topic.href.startsWith('/') ? withBase(topic.href) : topic.href };
+}
+
+const externalLinkProps = (href: string) => (isExternalHref(href) ? { target: '_blank', rel: 'noopener' } : {});
+---
+<div class="aaimpl" data-aa-implementation>
+  <div class="aaimpl__col">
+    <div class="aaimpl__colhead">
+      <h3>Ongoing Programs <span>({programs.length} results)</span></h3>
+    </div>
+    <ul class="aaimpl__list" role="list">
+      {programs.map((program, i) => {
+        const bodyId = `impl-prog-body-${i}`;
+        const related = program.topicIds.map(topicLink).filter((t): t is { label: string; href: string } => !!t);
+        return (
+          <li>
+            <EsaCard variant="outlined" padding="none">
+              <div class="aaimpl__head">
+                <img class="aaimpl__icon" src={withBase('/photos/action-agenda/icons/ongoing-program.png')} alt="" width="32" height="32" loading="lazy" />
+                <div class="aaimpl__headtext">
+                  <strong class="aaimpl__pretitle">{program.org}</strong>
+                  <a class="aaimpl__title" href={program.href} {...externalLinkProps(program.href)}>{program.title}</a>
+                </div>
+                <button type="button" class="aaimpl__toggle" aria-expanded="false" aria-controls={bodyId} aria-label={`Toggle ${program.title}`} data-aa-impl-toggle>
+                  <EsaIcon name="chevron-down" size="sm" />
+                </button>
+              </div>
+              <div class="aaimpl__region" id={bodyId} hidden>
+                <div class="aaimpl__body">
+                  <div class="aaimpl__field">
+                    <span class="aaimpl__fieldlabel">Related Activity Types</span>
+                    <ul role="list" class="aaimpl__taglist">
+                      {program.activityTypes.map((t) => <li><a href={t.href}>{t.label}</a></li>)}
+                    </ul>
+                  </div>
+                  <div class="aaimpl__field">
+                    <span class="aaimpl__fieldlabel">Related Topics</span>
+                    <ul role="list" class="aaimpl__taglist">
+                      {related.map((t) => <li><a href={t.href}>{t.label}</a></li>)}
+                    </ul>
+                  </div>
+                </div>
+                {program.websiteHref && (
+                  <div class="aaimpl__foot">
+                    <a href={program.websiteHref} {...externalLinkProps(program.websiteHref)}>
+                      Program Website
+                      {isExternalHref(program.websiteHref) && <EsaIcon name="external-link" size="xs" paths={EXTERNAL_LINK_ICON_PATHS} label="(external)" />}
+                    </a>
+                  </div>
+                )}
+              </div>
+            </EsaCard>
+          </li>
+        );
+      })}
+    </ul>
+  </div>
+
+  <div class="aaimpl__col">
+    <div class="aaimpl__colhead">
+      <h3>NEP Activities <span>({activities.length} results)</span></h3>
+    </div>
+    <ul class="aaimpl__list" role="list">
+      {activities.map((activity, i) => {
+        const bodyId = `impl-act-body-${i}`;
+        const related = activity.topicIds.map(topicLink).filter((t): t is { label: string; href: string } => !!t);
+        return (
+          <li>
+            <EsaCard variant="outlined" padding="none">
+              <div class="aaimpl__head">
+                <img class="aaimpl__icon" src={withBase('/photos/action-agenda/icons/nep-activity-map.png')} alt="" width="32" height="32" loading="lazy" />
+                <div class="aaimpl__headtext">
+                  <a class="aaimpl__pretitle aaimpl__pretitle--link" href={activity.orgHref} {...externalLinkProps(activity.orgHref)}>{activity.org}</a>
+                  <a class="aaimpl__title" href={activity.href} {...externalLinkProps(activity.href)}>{activity.title}</a>
+                </div>
+                <button type="button" class="aaimpl__toggle" aria-expanded="false" aria-controls={bodyId} aria-label={`Toggle ${activity.title}`} data-aa-impl-toggle>
+                  <EsaIcon name="chevron-down" size="sm" />
+                </button>
+              </div>
+              <div class="aaimpl__region" id={bodyId} hidden>
+                <div class="aaimpl__body">
+                  <div class="aaimpl__field">
+                    <span class="aaimpl__fieldlabel">NEP Award</span>
+                    <a href={activity.award.href} {...externalLinkProps(activity.award.href)}>{activity.award.label}</a>
+                  </div>
+                  <div class="aaimpl__field">
+                    <span class="aaimpl__fieldlabel">Related Activity Types</span>
+                    <ul role="list" class="aaimpl__taglist">
+                      {activity.activityTypes.map((t) => <li><a href={t.href}>{t.label}</a></li>)}
+                    </ul>
+                  </div>
+                  <div class="aaimpl__field">
+                    <span class="aaimpl__fieldlabel">Related Topics</span>
+                    <ul role="list" class="aaimpl__taglist">
+                      {related.map((t) => <li><a href={t.href}>{t.label}</a></li>)}
+                    </ul>
+                  </div>
+                  <div class="aaimpl__field">
+                    <span class="aaimpl__fieldlabel">Start Year</span>
+                    <span>{activity.startYear}</span>
+                  </div>
+                </div>
+                <div class="aaimpl__foot">
+                  <span class="aaimpl__stage">Activity Stage: {activity.stage}</span>
+                  {activity.websiteHref && (
+                    <a href={activity.websiteHref} {...externalLinkProps(activity.websiteHref)}>
+                      Project Website
+                      {isExternalHref(activity.websiteHref) && <EsaIcon name="external-link" size="xs" paths={EXTERNAL_LINK_ICON_PATHS} label="(external)" />}
+                    </a>
+                  )}
+                </div>
+              </div>
+            </EsaCard>
+          </li>
+        );
+      })}
+    </ul>
+  </div>
+
+  <div class="aaimpl__col aaimpl__col--full">
+    <div class="aaimpl__colhead">
+      <h3>Legislative Bills <span>({bills.length} results)</span></h3>
+    </div>
+    <ul class="aaimpl__list" role="list">
+      {bills.map((bill, i) => {
+        const bodyId = `impl-bill-body-${i}`;
+        const related = bill.topicIds.map(topicLink).filter((t): t is { label: string; href: string } => !!t);
+        const passed = bill.status === 'Passed';
+        return (
+          <li>
+            <EsaCard variant="outlined" padding="none">
+              <div class="aaimpl__head">
+                <span class="aaimpl__iconwrap">
+                  <img class="aaimpl__icon" src={withBase('/photos/action-agenda/icons/bill-scroll.png')} alt="" width="32" height="32" loading="lazy" />
+                  <img
+                    class="aaimpl__iconbadge"
+                    src={withBase(passed ? '/photos/action-agenda/icons/bill-status-yes.png' : '/photos/action-agenda/icons/bill-status-no.png')}
+                    alt=""
+                    width="16"
+                    height="16"
+                    loading="lazy"
+                  />
+                </span>
+                <div class="aaimpl__headtext">
+                  <strong class="aaimpl__pretitle">{bill.pretitle}</strong>
+                  <span class="aaimpl__title aaimpl__title--plain">{bill.title}</span>
+                </div>
+                <button type="button" class="aaimpl__toggle" aria-expanded="false" aria-controls={bodyId} aria-label={`Toggle ${bill.title}`} data-aa-impl-toggle>
+                  <EsaIcon name="chevron-down" size="sm" />
+                </button>
+              </div>
+              <div class="aaimpl__region" id={bodyId} hidden>
+                <div class="aaimpl__body">
+                  <div class="aaimpl__field">
+                    <span class="aaimpl__fieldlabel">Related Activity Types</span>
+                    <ul role="list" class="aaimpl__taglist">
+                      {bill.activityTypes.map((t) => <li><a href={t.href}>{t.label}</a></li>)}
+                    </ul>
+                  </div>
+                  <div class="aaimpl__field">
+                    <span class="aaimpl__fieldlabel">Related Topics</span>
+                    <ul role="list" class="aaimpl__taglist">
+                      {related.map((t) => <li><a href={t.href}>{t.label}</a></li>)}
+                    </ul>
+                  </div>
+                </div>
+                <div class="aaimpl__foot">
+                  <span class="aaimpl__stage">
+                    Status:
+                    <img
+                      src={withBase(passed ? '/photos/action-agenda/icons/bill-status-yes.png' : '/photos/action-agenda/icons/bill-status-no.png')}
+                      alt=""
+                      width="16"
+                      height="16"
+                      loading="lazy"
+                    />
+                    {bill.status}
+                  </span>
+                  <a href={bill.link.href} target="_blank" rel="noopener">
+                    {bill.link.label}
+                    <EsaIcon name="external-link" size="xs" paths={EXTERNAL_LINK_ICON_PATHS} label="(external)" />
+                  </a>
+                </div>
+              </div>
+            </EsaCard>
+          </li>
+        );
+      })}
+    </ul>
+  </div>
+</div>
+
+<script>
+  document.querySelectorAll<HTMLElement>('[data-aa-implementation]').forEach((root) => {
+    root.querySelectorAll<HTMLButtonElement>('[data-aa-impl-toggle]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const open = btn.getAttribute('aria-expanded') === 'true';
+        const body = document.getElementById(btn.getAttribute('aria-controls') || '');
+        btn.setAttribute('aria-expanded', String(!open));
+        if (body) body.hidden = open;
+      });
+    });
+  });
+</script>
+
+<style>
+  .aaimpl {
+    container-type: inline-size;
+    display: grid; grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--spacing-500);
+    align-items: start;
+  }
+  @container (max-width: 1100px) {
+    .aaimpl { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .aaimpl__col--full { grid-column: 1 / -1; }
+  }
+  @container (max-width: 700px) {
+    .aaimpl { grid-template-columns: 1fr; }
+  }
+
+  .aaimpl__col { display: flex; flex-direction: column; gap: var(--spacing-300); min-width: 0; }
+  .aaimpl__colhead { border-bottom: 2px solid var(--color-border); padding-bottom: var(--spacing-200); }
+  .aaimpl__colhead h3 {
+    margin: 0; font-size: 1.0625rem; font-weight: var(--font-weight-semibold); color: var(--color-text-primary);
+  }
+  .aaimpl__colhead h3 span { font-weight: var(--font-weight-regular); color: var(--color-text-secondary); font-size: 1rem; }
+
+  .aaimpl__list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--spacing-300); }
+
+  .aaimpl__head { display: flex; align-items: flex-start; gap: var(--spacing-250); padding: var(--spacing-300) var(--spacing-400); }
+  .aaimpl__icon { flex: none; border-radius: var(--radius-100); }
+  .aaimpl__iconwrap { position: relative; flex: none; display: inline-flex; }
+  .aaimpl__iconbadge { position: absolute; right: -4px; bottom: -4px; border-radius: var(--radius-full); background: var(--color-surface); }
+
+  .aaimpl__headtext { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: var(--spacing-050); }
+  .aaimpl__pretitle { font-size: var(--ps-info-text-meta-lg); font-weight: var(--font-weight-semibold); color: var(--color-text-secondary); }
+  /* Card-chrome links, not inline content — no underline at rest (Andrew,
+     2026-07-23); hover restores the affordance. */
+  .aaimpl__pretitle--link { color: var(--color-text-link); text-decoration: none; }
+  .aaimpl__pretitle--link:hover { text-decoration: underline; text-underline-offset: 3px; }
+  .aaimpl__pretitle--link:focus-visible { outline: 2px solid var(--focus-ring-color); outline-offset: 2px; }
+  .aaimpl__title {
+    font-size: 1rem; font-weight: var(--font-weight-semibold); line-height: 1.4;
+    color: var(--color-text-link); text-decoration: none;
+  }
+  .aaimpl__title:hover { text-decoration: underline; text-underline-offset: 3px; }
+  .aaimpl__title:focus-visible { outline: 2px solid var(--focus-ring-color); outline-offset: 2px; }
+  .aaimpl__title--plain { color: var(--color-text-primary); }
+
+  .aaimpl__toggle {
+    flex: none; display: inline-flex; align-items: center; justify-content: center;
+    width: 28px; height: 28px; border-radius: var(--radius-100); color: var(--color-text-secondary);
+    background: transparent;
+  }
+  .aaimpl__toggle :global(.esa-icon) { transition: transform 150ms ease; }
+  .aaimpl__toggle[aria-expanded="true"] :global(.esa-icon) { transform: rotate(180deg); }
+  .aaimpl__toggle:hover { background: var(--color-surface-sunken); }
+  .aaimpl__toggle:focus-visible { outline: 2px solid var(--focus-ring-color); outline-offset: 2px; }
+
+  .aaimpl__region { border-top: 1px solid var(--color-border-light); }
+  .aaimpl__body {
+    display: flex; flex-direction: column; gap: var(--spacing-300);
+    padding: var(--spacing-300) var(--spacing-400) var(--spacing-400);
+  }
+  .aaimpl__field { display: flex; flex-direction: column; gap: var(--spacing-100); }
+  .aaimpl__fieldlabel { font-size: var(--ps-info-text-meta-lg); font-weight: var(--font-weight-semibold); color: var(--color-text-secondary); }
+  .aaimpl__taglist { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--spacing-100); }
+  .aaimpl__taglist a { font-size: 1rem; color: var(--color-text-link); text-decoration: none; }
+  .aaimpl__taglist a:hover { text-decoration: underline; text-underline-offset: 3px; }
+  .aaimpl__taglist a:focus-visible { outline: 2px solid var(--focus-ring-color); outline-offset: 2px; }
+  .aaimpl__field > a { font-size: 1rem; color: var(--color-text-link); text-decoration: none; align-self: flex-start; }
+  .aaimpl__field > a:hover { text-decoration: underline; text-underline-offset: 3px; }
+  .aaimpl__field > span { font-size: 1rem; color: var(--color-text-primary); }
+
+  .aaimpl__foot {
+    display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: var(--spacing-200);
+    padding: var(--spacing-300) var(--spacing-400);
+    border-top: 1px solid var(--color-border-light); background: var(--color-surface-sunken);
+    font-size: var(--ps-info-text-meta-lg);
+  }
+  .aaimpl__stage { display: inline-flex; align-items: center; gap: var(--spacing-100); color: var(--color-text-secondary); }
+  .aaimpl__stage img { border-radius: var(--radius-full); }
+  .aaimpl__foot a { display: inline-flex; align-items: center; gap: var(--spacing-100); color: var(--color-text-link); text-decoration: none; }
+  .aaimpl__foot a:hover { text-decoration: underline; text-underline-offset: 3px; }
+  .aaimpl__foot a:focus-visible { outline: 2px solid var(--focus-ring-color); outline-offset: 2px; }
+  .aaimpl__foot :global(.esa-icon) { color: var(--color-text-muted); }
+</style>

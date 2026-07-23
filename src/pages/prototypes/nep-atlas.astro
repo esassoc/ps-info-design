@@ -1,37 +1,35 @@
 ---
-// NEP Atlas — a directed reproduction of a SINGLE URL:
-// https://nepatlas.pugetsoundinfo.wa.gov/ (the NEP Atlas mini-site's home
-// page only, fetched 2026-07-17). The home page's server-rendered HTML is
-// genuinely short — one welcome block, one map teaser, one funders line —
-// and that is the entire content of this page; nothing is invented and
-// nothing from the mini-site's other pages (About, Activity Index, Award
-// Index, Activity Summary) is in scope. See
+// NEP Atlas — the module HOME page, one of six pages in this lane (see
+// src/data/contracts/nep-atlas.md for the full URL list). Prod's home page
+// server-rendered HTML is genuinely short — one welcome block, one map
+// block, one funders line — reproduced here in full, PLUS the module's own
+// nav bar riding the photo header's band slot. Sub-pages (About, NEP Activity
+// Map, NEP Activities, NEP Awards, NEP Investment Summaries) live under
+// /prototypes/nep-atlas/*. Prod mounts an interactive Leaflet "Activities"
+// map inline on the home page (a projectLocationsMapInitJson blob carrying
+// 1,614 GeoJSON point features); this build reproduces the map's presence
+// and interaction with INVENTED representative points. See
 // src/data/contracts/nep-atlas.md and src/data/pages/nep-atlas.ts for full
-// sourcing notes and the documented gap (the map is a client-side-only
-// Leaflet mount with zero server-rendered content).
+// sourcing notes and provenance.
 import PsInfoAppShell from '../../layouts/PsInfoAppShell.astro';
 import PsInfoPhotoHeader from '../../components/psinfo/PsInfoPhotoHeader.astro';
 import PsInfoSectionTitle from '../../components/psinfo/PsInfoSectionTitle.astro';
+import PsInfoNepAtlasNav from '../../components/psinfo/PsInfoNepAtlasNav.astro';
 import PsInfoNepAtlasNarrative from '../../components/psinfo/PsInfoNepAtlasNarrative.astro';
-import EsaCard from '@esa/ecology/esa-card.astro';
-import EsaButton from '@esa/ecology/esa-button.astro';
-import EsaIcon from '@esa/ecology/esa-icon.astro';
+import PsInfoNepAtlasMap from '../../components/psinfo/PsInfoNepAtlasMap.astro';
 import {
-  PAGE_EYEBROW, PAGE_TITLE, PAGE_LEDE,
+  HERO_TITLE, PAGE_LEDE,
   WELCOME_PARAGRAPH, WELCOME_PHOTO,
-  MAP_TEASER,
   FUNDERS_PARAGRAPH,
 } from '../../data/pages/nep-atlas';
-
-const ARROW = '<path d="M7 7h10v10"/><path d="M7 17 17 7"/>';
 ---
 <!-- manifest:
   layout: PsInfoAppShell (active Implementation and Funding > NEP Atlas) > center+stack spine
   sections:
-    - page header       -> psinfo-photo-header (photo band; hero = the source's own welcome photo)
-    - welcome            -> psinfo-section-title + psinfo-nep-atlas-narrative (verbatim paragraph)
-    - map teaser         -> esa-card + esa-button (link out; source's map mount is client-side-only, see data file gaps)
-    - funding provided by -> psinfo-section-title + psinfo-nep-atlas-narrative (pipe-separated funder links)
+    - page header + band nav -> psinfo-photo-header (photo band; hero = the source's own welcome photo) + psinfo-nep-atlas-nav (module bar, no cell current — prod's bar has no Home item)
+    - welcome                -> psinfo-section-title + psinfo-nep-atlas-narrative (verbatim paragraph)
+    - activities map          -> psinfo-nep-atlas-map (interactive Leaflet reproduction; invented representative points; verbatim "Click to view the full map" link, now internal to /prototypes/nep-atlas/map)
+    - funding provided by     -> psinfo-section-title + psinfo-nep-atlas-narrative (pipe-separated funder links)
 -->
 <PsInfoAppShell title="NEP Atlas — Puget Sound Info" active={{ moduleId: 'implementation', leafId: 'nep-atlas' }}>
   <div class="center stack" data-gap="xl">
@@ -39,10 +37,11 @@ const ARROW = '<path d="M7 7h10v10"/><path d="M7 17 17 7"/>';
       size="band"
       image={WELCOME_PHOTO.image}
       focus="50% 35%"
-      eyebrow={PAGE_EYEBROW}
-      title={PAGE_TITLE}
+      title={HERO_TITLE}
       lede={PAGE_LEDE}
-    />
+    >
+      <PsInfoNepAtlasNav slot="band" />
+    </PsInfoPhotoHeader>
 
     <div class="stack" data-gap="md" id="welcome">
       <PsInfoSectionTitle title="Welcome to the NEP Atlas" />
@@ -50,14 +49,7 @@ const ARROW = '<path d="M7 7h10v10"/><path d="M7 17 17 7"/>';
     </div>
 
     <div class="stack" data-gap="md" id="map">
-      <EsaCard variant="outlined">
-        <div class="stack" data-align="center" data-gap="sm">
-          <EsaButton href={MAP_TEASER.href} target="_blank" rel="noopener" size="lg">
-            {MAP_TEASER.linkText}
-            <EsaIcon name="arrow-up-right" size="xs" paths={ARROW} />
-          </EsaButton>
-        </div>
-      </EsaCard>
+      <PsInfoNepAtlasMap />
     </div>
 
     <div class="stack" data-gap="md" id="funding">

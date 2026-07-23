@@ -1,0 +1,35 @@
+---
+// Ongoing Programs — Program Targets. Prod's Targets intro (2 verbatim
+// paragraphs, both with a bolded inline link — the Action Agenda and the
+// Program Target Task Board's Outlook-safelinks-wrapped Power BI URL,
+// carried verbatim), its own floated photo, and the full ACTION AGENDA
+// CYCLE > ONGOING PROGRAM > TARGET Fancytree reproduction (2 cycles, 22
+// programs, 37 targets — complete, no truncation). See
+// src/data/contracts/ongoing-programs.md for the full inventory.
+import PsInfoAppShell from '../../../layouts/PsInfoAppShell.astro';
+import PsInfoPhotoHeader from '../../../components/psinfo/PsInfoPhotoHeader.astro';
+import PsInfoOgpSubnav from '../../../components/psinfo/PsInfoOgpSubnav.astro';
+import PsInfoOgpIntroProse from '../../../components/psinfo/PsInfoOgpIntroProse.astro';
+import PsInfoOgpTargetsTree from '../../../components/psinfo/PsInfoOgpTargetsTree.astro';
+import {
+  HERO_IMAGE, TARGETS_TITLE, TARGETS_PARAGRAPHS, TARGETS_PHOTO, TARGET_CYCLES,
+} from '../../../data/pages/ongoing-programs';
+---
+<!-- manifest:
+  layout: PsInfoAppShell (active Implementation and Funding > Ongoing Programs Portal) > center+stack spine
+  sections:
+    - page header -> psinfo-photo-header (photo band) with psinfo-ogp-subnav (current: targets) in the band slot
+    - intro       -> psinfo-ogp-intro-prose (floated photo + 2 intro paragraphs with inline links)
+    - target tree -> psinfo-ogp-targets-tree (2 cycles / 22 programs / 37 targets, complete)
+-->
+<PsInfoAppShell title={`${TARGETS_TITLE} — Puget Sound Info`} active={{ moduleId: 'implementation', leafId: 'ongoing-programs' }}>
+  <div class="center stack" data-gap="xl">
+    <PsInfoPhotoHeader size="band" image={HERO_IMAGE.src} focus={HERO_IMAGE.focus} title={TARGETS_TITLE}>
+      <PsInfoOgpSubnav slot="band" current="targets" />
+    </PsInfoPhotoHeader>
+
+    <PsInfoOgpIntroProse image={TARGETS_PHOTO} paragraphs={TARGETS_PARAGRAPHS} />
+
+    <PsInfoOgpTargetsTree cycles={TARGET_CYCLES} />
+  </div>
+</PsInfoAppShell>

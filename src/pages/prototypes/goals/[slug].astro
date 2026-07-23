@@ -1,14 +1,16 @@
 ---
 // Goals — the five statutory recovery goals, one dynamic template mirroring
-// vitalsigns.pugetsoundinfo.wa.gov/VitalSignGoal/Detail/{1,2,3,7,6}: the
-// Vital Signs module sub-nav (color-coded goal columns with Vital Sign
-// dropdowns), then the goal's title block in source order (colored uppercase
-// name, bold statement, narrative, inline photo), then the Fancytree of the
-// goal's Vital Signs and indicators framed in the goal's ThemeColor, with the
-// source's own progress/target-status icons. All content is verbatim from the
-// source (src/data/pages/goals.ts).
+// vitalsigns.pugetsoundinfo.wa.gov/VitalSignGoal/Detail/{1,2,3,7,6}, framed
+// in the standard hero + band sub-nav pattern (home / Action Agenda / Vital
+// Signs): the photo hero carries the goal's H1 and its source photograph,
+// the band carries the five goal-tinted links with Vital Signs dropdowns
+// (this goal current), then the goal's statement/narrative block, then the
+// Fancytree of the goal's Vital Signs and indicators framed in the goal's
+// ThemeColor with the source's own progress/target-status icons. All content
+// is verbatim from the source (src/data/pages/goals.ts).
 import PsInfoAppShell from '../../../layouts/PsInfoAppShell.astro';
-import PsInfoVsSubnav from '../../../components/psinfo/PsInfoVsSubnav.astro';
+import PsInfoPhotoHeader from '../../../components/psinfo/PsInfoPhotoHeader.astro';
+import PsInfoGoalsNav from '../../../components/psinfo/PsInfoGoalsNav.astro';
 import PsInfoVsGoalIntro from '../../../components/psinfo/PsInfoVsGoalIntro.astro';
 import PsInfoVsFancyTree from '../../../components/psinfo/PsInfoVsFancyTree.astro';
 import { GOALS, type GoalDetail } from '../../../data/pages/goals';
@@ -25,22 +27,23 @@ const { goal } = Astro.props;
 <!-- manifest:
   layout: PsInfoAppShell (active Goals > this goal) > center+stack spine
   sections:
-    - vital signs module nav -> psinfo-vs-subnav (banner + goal dropdowns + trail)
-    - goal title block       -> psinfo-vs-goal-intro (name/statement/narrative/photo)
+    - page header      -> psinfo-photo-header (goal photo, goal name H1) with
+                          psinfo-goals-nav in its band slot (goal-tinted links +
+                          Vital Signs dropdowns, this goal current)
+    - goal statement   -> psinfo-vs-goal-intro (statement + narrative)
     - vital signs & indicators tree -> psinfo-vs-fancy-tree (goal-framed, prod icons)
 -->
 <PsInfoAppShell title={`${goal.name} — Puget Sound Info`} active={{ moduleId: 'goals', leafId: goal.navLeafId }}>
   <div class="center stack" data-gap="xl">
-    <PsInfoVsSubnav activeGoal={goal.slug} />
-
-    <PsInfoVsGoalIntro
-      name={goal.name}
-      statement={goal.statement}
-      narrative={goal.narrative}
+    <PsInfoPhotoHeader
+      size="band"
       image={goal.image}
-      imageAlt={goal.imageAlt}
-      hueVar={goal.hueVar}
-    />
+      title={goal.name}
+    >
+      <PsInfoGoalsNav slot="band" activeGoal={goal.slug} />
+    </PsInfoPhotoHeader>
+
+    <PsInfoVsGoalIntro statement={goal.statement} narrative={goal.narrative} />
 
     <PsInfoVsFancyTree goals={[goal]} frameHueVar={goal.hueVar} expandedLevels={1} treeId={`tree-${goal.slug}`} />
   </div>

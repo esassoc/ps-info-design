@@ -19,11 +19,14 @@ const { items } = Astro.props;
 </nav>
 
 <style>
+  /* Same container-driven row policy as the module band navs (PsInfoGoalsNav /
+     PsInfoAaTopicsNav): 5 across, 3 over 2, or the mobile stack — never an
+     orphan wrap. Encodes the band's five-link shape. */
   .anchornav {
-    display: flex; flex-wrap: wrap;
+    container-type: inline-size;
+    display: grid; grid-template-columns: repeat(5, minmax(0, 1fr));
   }
   .anchornav__link {
-    flex: 1 1 auto;
     text-align: center;
     padding: var(--spacing-300) var(--spacing-400);
     font-size: 0.9375rem; font-weight: var(--font-weight-medium);
@@ -32,4 +35,15 @@ const { items } = Astro.props;
   }
   .anchornav__link:hover { background: rgba(255, 255, 255, 0.12); }
   .anchornav__link:focus-visible { outline: 2px solid var(--focus-ring-color); outline-offset: -2px; }
+
+  @container (max-width: 720px) {
+    .anchornav { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+    .anchornav__link { grid-column: span 2; white-space: normal; }
+    .anchornav__link:nth-child(4), .anchornav__link:nth-child(5) { grid-column: span 3; }
+  }
+
+  @media (max-width: 860px) {
+    .anchornav { display: flex; flex-direction: column; }
+    .anchornav__link { text-align: left; padding-left: var(--spacing-400); }
+  }
 </style>

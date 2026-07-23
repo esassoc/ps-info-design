@@ -1,0 +1,270 @@
+---
+// PsInfoNepAtlasSummaryChart — native stacked horizontal bar chart, the
+// representative stand-in for prod's Google Charts BarChart (isStacked,
+// legend top; prod ships no iframe for this content, so there's nothing to
+// embed). Renders either the by-Vital-Sign or by-Lead-Entity-Management-Area
+// breakdown, both real aggregations derived from prod's own inlined
+// 1,608-activity payload (see src/data/pages/nep-atlas.ts for the derivation
+// formula).
+//
+// Revision 2026-07-23: the chart now lives in an esa-card container with a
+// working filter bar (prod's summary page filters its charts too). The two
+// filters are exactly the two dimensions the stored aggregation carries —
+// the chart's own row axis (Vital Sign / Lead Entity Management Area) and
+// the NEP Award stack — recomputed client-side from the server-rendered
+// counts; empty selection means unfiltered, like the lego's own clear state.
+// Prod's "Investment Type" filter dimension is not in the captured data and
+// is NOT faked. Server render = the unfiltered chart (no-JS fallback).
+//
+// bcn-lego-checked: surface is esa-card; filters compose esa-filter-container
+// + esa-filter-dropdown + esa-filter-clear-button (the ui-filter lego set) —
+// no bespoke control. The bars themselves: checked the catalog —
+// esa-progress-bar is a single-value meter, no stacked/categorical chart lego
+// exists; checked Beacon (no chart wrapper). Native HTML/CSS stacked bars
+// using prod's own marker palette; psinfo-nep-atlas-summary-chart is the
+// reusable home. Color is never the only channel: per-row sr-only breakdowns
+// + visible totals + legend labels carry the same information.
+import EsaCard from '@esa/ecology/esa-card.astro';
+import EsaFilterContainer from '@esa/ecology/esa-filter-container.astro';
+import EsaFilterClearButton from '@esa/ecology/esa-filter-clear-button.astro';
+import { SUMMARY_AWARD_ORDER, SUMMARY_AWARD_COLORS, SUMMARY_FILTERS } from '../../data/pages/nep-atlas';
+import type { AtlasSummaryBar, SummaryAward } from '../../data/pages/nep-atlas';
+
+interface Props {
+  title: string;
+  bars: AtlasSummaryBar[];
+  /** The row axis's dimension name (labels the row filter + status line). */
+  dimensionLabel: string;
+}
+const { title, bars, dimensionLabel } = Astro.props;
+
+const total = (bar: AtlasSummaryBar) => Object.values(bar.counts).reduce((sum, n) => sum + (n ?? 0), 0);
+const maxTotal = Math.max(...bars.map(total));
+
+const awardsInUse = SUMMARY_AWARD_ORDER.filter((award) =>
+  bars.some((bar) => (bar.counts[award] ?? 0) > 0)
+);
+
+const breakdown = (bar: AtlasSummaryBar) =>
+  awardsInUse
+    .filter((award) => (bar.counts[award] ?? 0) > 0)
+    .map((award) => `${award} ${bar.counts[award]}`)
+    .join(', ');
+---
+<div class="schart-host">
+  <EsaCard variant="outlined">
+    <div class="summarychart" data-summary-chart data-dimension-label={dimensionLabel}>
+      <figure class="summarychart__figure">
+        <figcaption class="summarychart__title">{title}</figcaption>
+        <div class="summarychart__filters">
+          <EsaFilterContainer>
+            <esa-filter-dropdown multiple size="sm" label={dimensionLabel} data-dim-filter></esa-filter-dropdown>
+            <esa-filter-dropdown multiple size="sm" label={SUMMARY_FILTERS.awardLabel} data-award-filter></esa-filter-dropdown>
+            <EsaFilterClearButton label={SUMMARY_FILTERS.clearLabel} />
+          </EsaFilterContainer>
+          <p class="summarychart__status" aria-live="polite" data-status>
+            {bars.length} of {bars.length} {dimensionLabel}s · {awardsInUse.length} of {awardsInUse.length} {SUMMARY_FILTERS.awardLabel}s
+          </p>
+        </div>
+        <ul class="summarychart__legend" role="list">
+          {awardsInUse.map((award) => (
+            <li class="summarychart__legenditem" data-legend-award={award}>
+              <span class="summarychart__swatch" aria-hidden="true" style={`background:${SUMMARY_AWARD_COLORS[award]}`}></span>
+              {award}
+            </li>
+          ))}
+        </ul>
+        <ol class="summarychart__rows" role="list">
+          {bars.map((bar) => (
+            <li class="summarychart__row" data-row data-label={bar.label}>
+              <span class="sr-only" data-sr>{bar.label}: {total(bar)} activities — {breakdown(bar)}</span>
+              <div class="summarychart__visual" aria-hidden="true">
+                <span class="summarychart__label" title={bar.label}>{bar.label}</span>
+                <div class="summarychart__track">
+                  <div class="summarychart__bar" data-bar style={`width: ${(total(bar) / maxTotal) * 100}%`}>
+                    {awardsInUse
+                      .filter((award) => (bar.counts[award] ?? 0) > 0)
+                      .map((award) => (
+                        <span
+                          class="summarychart__segment"
+                          data-award={award}
+                          data-count={bar.counts[award]}
+                          style={`width: ${((bar.counts[award] ?? 0) / total(bar)) * 100}%; background: ${SUMMARY_AWARD_COLORS[award as SummaryAward]}`}
+                        ></span>
+                      ))}
+                  </div>
+                </div>
+                <span class="summarychart__total" data-total>{total(bar)}</span>
+              </div>
+            </li>
+          ))}
+        </ol>
+      </figure>
+    </div>
+  </EsaCard>
+</div>
+
+<script>
+  import '@esa/ecology/esa-filter-dropdown';
+  import { SUMMARY_AWARD_COLORS } from '../../data/pages/nep-atlas';
+  import type { SummaryAward } from '../../data/pages/nep-atlas';
+
+  type FilterDropdownEl = HTMLElement & {
+    options: { label: string; value: string; color?: string }[];
+    _selected: string[];
+  };
+
+  document.querySelectorAll<HTMLElement>('[data-summary-chart]').forEach((host) => {
+    const rows = [...host.querySelectorAll<HTMLElement>('[data-row]')];
+    const legendItems = [...host.querySelectorAll<HTMLElement>('[data-legend-award]')];
+    const allLabels = rows.map((r) => r.dataset.label!);
+    const allAwards = legendItems.map((l) => l.dataset.legendAward!);
+    const dimLabel = host.dataset.dimensionLabel!;
+    const dimDd = host.querySelector<FilterDropdownEl>('[data-dim-filter]')!;
+    const awardDd = host.querySelector<FilterDropdownEl>('[data-award-filter]')!;
+    const status = host.querySelector<HTMLElement>('[data-status]')!;
+
+    dimDd.options = allLabels.map((l) => ({ label: l, value: l }));
+    awardDd.options = allAwards.map((a) => ({
+      label: a,
+      value: a,
+      color: SUMMARY_AWARD_COLORS[a as SummaryAward],
+    }));
+
+    let dimSel: string[] = [];
+    let awardSel: string[] = [];
+
+    function apply() {
+      const activeRows = dimSel.length ? dimSel : allLabels;
+      const activeAwards = awardSel.length ? awardSel : allAwards;
+
+      const totals = new Map<HTMLElement, number>();
+      for (const row of rows) {
+        const visible = activeRows.includes(row.dataset.label!);
+        row.hidden = !visible;
+        if (!visible) continue;
+        let t = 0;
+        row.querySelectorAll<HTMLElement>('[data-award]').forEach((seg) => {
+          if (activeAwards.includes(seg.dataset.award!)) t += Number(seg.dataset.count);
+        });
+        totals.set(row, t);
+      }
+      const max = Math.max(1, ...totals.values());
+
+      for (const row of rows) {
+        if (row.hidden) continue;
+        const t = totals.get(row) ?? 0;
+        const bar = row.querySelector<HTMLElement>('[data-bar]')!;
+        bar.style.width = `${(t / max) * 100}%`;
+        const parts: string[] = [];
+        row.querySelectorAll<HTMLElement>('[data-award]').forEach((seg) => {
+          const on = t > 0 && activeAwards.includes(seg.dataset.award!);
+          seg.style.display = on ? '' : 'none';
+          if (on) {
+            seg.style.width = `${(Number(seg.dataset.count) / t) * 100}%`;
+            parts.push(`${seg.dataset.award} ${seg.dataset.count}`);
+          }
+        });
+        row.querySelector<HTMLElement>('[data-total]')!.textContent = String(t);
+        row.querySelector<HTMLElement>('[data-sr]')!.textContent =
+          `${row.dataset.label}: ${t} activities — ${parts.join(', ')}`;
+      }
+
+      legendItems.forEach((li) => {
+        li.hidden = !activeAwards.includes(li.dataset.legendAward!);
+      });
+      status.textContent =
+        `${activeRows.length} of ${allLabels.length} ${dimLabel}s · ${activeAwards.length} of ${allAwards.length} NEP Awards`;
+    }
+
+    dimDd.addEventListener('selection-change', (e) => {
+      dimSel = ((e as CustomEvent).detail.value as string[] | undefined) ?? [];
+      apply();
+    });
+    awardDd.addEventListener('selection-change', (e) => {
+      awardSel = ((e as CustomEvent).detail.value as string[] | undefined) ?? [];
+      apply();
+    });
+    // esa-filter-clear-button dispatches a bubbling esa-filter-clear; the
+    // dropdown keeps _selected as reactive Lit state with no public reset,
+    // so the host clears it directly (prototype-sanctioned reach-in).
+    host.addEventListener('esa-filter-clear', () => {
+      dimSel = [];
+      awardSel = [];
+      dimDd._selected = [];
+      awardDd._selected = [];
+      apply();
+    });
+  });
+</script>
+
+<style>
+  /* esa-card clips overflow for its corner radius, which would sever the
+     esa-filter-dropdown options panel at the card edge — re-point overflow
+     (same fix as PsInfoAaFilterPanel). */
+  .schart-host :global(.esa-card) { overflow: visible; }
+
+  .summarychart [hidden] { display: none !important; }
+
+  .summarychart__figure { margin: 0; display: flex; flex-direction: column; gap: var(--spacing-400); }
+  .summarychart__title {
+    font-size: 1.0625rem; font-weight: var(--font-weight-semibold);
+    color: var(--color-text-primary);
+  }
+  .summarychart__filters {
+    display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
+    gap: var(--spacing-300);
+    padding-block-end: var(--spacing-300);
+    border-bottom: 1px solid var(--color-border-light);
+  }
+  .summarychart__status {
+    margin: 0; font-size: var(--ps-info-text-meta-lg); color: var(--color-text-muted);
+    font-variant-numeric: tabular-nums;
+  }
+  .summarychart__legend {
+    list-style: none; margin: 0; padding: 0;
+    display: flex; flex-wrap: wrap; gap: var(--spacing-150) var(--spacing-300);
+  }
+  .summarychart__legenditem {
+    display: flex; align-items: center; gap: var(--spacing-150);
+    font-size: var(--ps-info-text-meta-lg); color: var(--color-text-secondary);
+  }
+  .summarychart__swatch {
+    display: block; width: 12px; height: 12px; flex: none;
+    border-radius: var(--radius-100);
+    border: 1px solid color-mix(in srgb, var(--color-text-primary) 25%, transparent);
+  }
+
+  .summarychart__rows { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--spacing-150); }
+  .summarychart__visual {
+    display: grid; grid-template-columns: minmax(0, 14rem) 1fr auto;
+    align-items: center; gap: var(--spacing-300);
+  }
+  .summarychart__label {
+    font-size: var(--ps-info-text-meta-lg); color: var(--color-text-primary);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .summarychart__track { display: flex; }
+  .summarychart__bar {
+    display: flex; gap: 1px; background: #ffffff;
+    min-height: var(--spacing-400);
+  }
+  .summarychart__segment { display: block; min-height: var(--spacing-400); }
+  @media (prefers-reduced-motion: no-preference) {
+    .summarychart__bar, .summarychart__segment { transition: width 200ms ease; }
+  }
+  .summarychart__total {
+    font-size: var(--ps-info-text-meta-lg); font-weight: var(--font-weight-semibold);
+    color: var(--color-text-primary); font-variant-numeric: tabular-nums;
+  }
+
+  @media (max-width: 640px) {
+    .summarychart__visual { grid-template-columns: 1fr; gap: var(--spacing-150); }
+    .summarychart__label { font-weight: var(--font-weight-medium); white-space: normal; }
+  }
+
+  .sr-only {
+    position: absolute; width: 1px; height: 1px; margin: -1px;
+    overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap;
+  }
+</style>

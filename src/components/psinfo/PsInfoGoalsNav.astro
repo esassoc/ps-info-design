@@ -1,0 +1,235 @@
+---
+// PsInfoGoalsNav — the five recovery-goal links as a photo-header band nav,
+// the standard band-under-photo pattern (PsInfoAnchorNav on home,
+// PsInfoAaTopicsNav on the Action Agenda page) applied to the Vital Signs
+// module: each cell links to its goal page and carries a SUBTLE tint of the
+// goal's own ThemeColor over the band's translucent navy; a chevron
+// disclosure beside each link opens that goal's Vital Signs. Data:
+// SUBNAV_GOALS (vital-signs-module.ts) — labels, routes, hue tokens, and
+// per-goal Vital Sign links, all verbatim from prod.
+//
+// bcn-lego-checked: checked esa-header-nav + esa-nav-dropdown (neutral
+// app-chrome nav, no on-photo band surface, no per-item brand tinting, and
+// details/summary disclosure without Escape/focus-return) and
+// esa-dropdown-menu (role=menu action-emitter — wrong semantics for
+// navigation links); the band nav with link+disclosure split cells has no
+// lego. psinfo-goals-nav is the reusable home; disclosure contract matches
+// PsInfoAaTopicsNav.
+import { SUBNAV_GOALS } from '../../data/pages/vital-signs-module';
+import EsaIcon from '@esa/ecology/esa-icon.astro';
+import { withBase } from '../../lib/base';
+import { isExternalHref, EXTERNAL_LINK_ICON_PATHS } from '../../lib/psinfoExternalLink';
+
+interface Props {
+  /** Slug of the goal page being viewed (marks that cell current, aria-current="page"). */
+  activeGoal?: string;
+  /** Goal a DETAIL page belongs to: same current tint, but aria-current="true" —
+      the goal is an ancestor of the current page, not the page itself. */
+  parentGoal?: string;
+}
+const { activeGoal, parentGoal } = Astro.props;
+
+const currentFor = (slug: string): 'page' | 'true' | undefined =>
+  slug === activeGoal ? 'page' : slug === parentGoal ? 'true' : undefined;
+
+const CHEVRON = '<path d="m6 9 6 6 6-6"/>';
+---
+<nav class="goalsnav" aria-label="Vital Signs goals" data-goalsnav>
+  <ul class="goalsnav__row" role="list">
+    {SUBNAV_GOALS.map((g, i) => (
+      <li
+        class:list={['goalsnav__cell', { 'goalsnav__cell--current': g.slug === activeGoal || g.slug === parentGoal }]}
+        data-goals-disclosure
+        style={`--goal: var(${g.hueVar})`}
+      >
+        <div class="goalsnav__pair">
+          <a
+            class="goalsnav__link"
+            href={withBase(g.route)}
+            aria-current={currentFor(g.slug)}
+          >
+            {g.label}
+          </a>
+          <button
+            type="button"
+            class="goalsnav__toggle"
+            aria-expanded="false"
+            aria-controls={`goalsnav-panel-${i}`}
+            aria-label={`${g.label} Vital Signs`}
+          >
+            <svg class="goalsnav__chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" set:html={CHEVRON} />
+          </button>
+        </div>
+        <ul class:list={['goalsnav__panel', { 'goalsnav__panel--end': i === SUBNAV_GOALS.length - 1 }]} id={`goalsnav-panel-${i}`} role="list" hidden>
+          {g.vitalSigns.map((v) => (
+            <li>
+              {v.route ? (
+                <a class="goalsnav__item" href={withBase(v.route)}>{v.label}</a>
+              ) : isExternalHref(v.externalHref) ? (
+                <a class="goalsnav__item goalsnav__item--ext" href={v.externalHref} target="_blank" rel="noopener">
+                  <span>{v.label}</span>
+                  <EsaIcon name="external-link" size="xs" paths={EXTERNAL_LINK_ICON_PATHS} label="(external)" />
+                </a>
+              ) : (
+                <a class="goalsnav__item" href={v.externalHref}>{v.label}</a>
+              )}
+            </li>
+          ))}
+        </ul>
+      </li>
+    ))}
+  </ul>
+</nav>
+
+<style>
+  /* Row geometry is container-driven (the band's own width — the rail opening
+     and closing changes content width without a viewport change) and only ever
+     one of three configurations: 5 across, 3 over 2, or the mobile stack.
+     Free flex-wrap produced orphan rows (4+1) at in-between widths. */
+  .goalsnav { container-type: inline-size; }
+  .goalsnav__row {
+    list-style: none; margin: 0; padding: 0;
+    display: grid; grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+  @container (max-width: 720px) {
+    .goalsnav__row { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+    .goalsnav__cell { grid-column: span 2; }
+    .goalsnav__cell:nth-child(4), .goalsnav__cell:nth-child(5) { grid-column: span 3; }
+  }
+  /* The subtle goal tint: a low-strength mix of the goal hue over the band's
+     translucent navy. Tune --goalsnav-tint / --goalsnav-tint-current to taste. */
+  .goalsnav__cell {
+    --goalsnav-tint: 24%;
+    --goalsnav-tint-current: 44%;
+    position: relative;
+    background: color-mix(in srgb, var(--goal) var(--goalsnav-tint), transparent);
+  }
+  .goalsnav__cell--current {
+    background: color-mix(in srgb, var(--goal) var(--goalsnav-tint-current), transparent);
+  }
+  .goalsnav__cell:hover,
+  .goalsnav__cell:has(.goalsnav__toggle[aria-expanded="true"]) {
+    background: color-mix(in srgb, var(--goal) 36%, transparent);
+  }
+
+  .goalsnav__pair { display: flex; align-items: stretch; justify-content: center; }
+  .goalsnav__link {
+    display: flex; align-items: center;
+    padding: var(--spacing-300) var(--spacing-100) var(--spacing-300) var(--spacing-300);
+    color: #ffffff; text-decoration: none; text-align: center;
+    font-size: 1rem; font-weight: var(--font-weight-medium); line-height: 1.25;
+  }
+  .goalsnav__link:hover { text-decoration: underline; text-underline-offset: 4px; }
+  .goalsnav__link[aria-current] {
+    font-weight: var(--font-weight-bold);
+    text-decoration: underline; text-underline-offset: 4px;
+  }
+  .goalsnav__link:focus-visible { outline: 2px solid var(--focus-ring-color); outline-offset: -2px; }
+
+  .goalsnav__toggle {
+    background: none; border: 0; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    min-width: 24px; padding: 0 var(--spacing-200);
+    color: #ffffff; font-family: inherit;
+  }
+  .goalsnav__toggle:hover { background: rgba(255, 255, 255, 0.12); }
+  .goalsnav__toggle:focus-visible { outline: 2px solid var(--focus-ring-color); outline-offset: -2px; }
+  .goalsnav__chevron { transition: transform 150ms ease; }
+  .goalsnav__toggle[aria-expanded="true"] .goalsnav__chevron { transform: rotate(180deg); }
+
+  .goalsnav__panel {
+    position: absolute; top: 100%; left: 0; z-index: var(--z-dropdown);
+    min-width: 260px; padding: var(--spacing-200) 0;
+    background: var(--color-surface, #fff);
+    border: 1px solid var(--color-border, #e5e5e5);
+    border-radius: 0 0 var(--radius-100) var(--radius-100);
+    box-shadow: 0 8px 24px rgba(16, 42, 67, 0.2);
+    list-style: none; margin: 0;
+  }
+  .goalsnav__panel--end { left: auto; right: 0; }
+
+  .goalsnav__item {
+    display: flex; align-items: center; gap: var(--spacing-100);
+    padding: var(--spacing-150) var(--spacing-400);
+    font-size: 1rem; color: var(--color-text-secondary); text-decoration: none;
+  }
+  .goalsnav__item:hover { background: var(--ps-info-blue-50); color: var(--color-text-primary); }
+  .goalsnav__item:focus-visible { outline: 2px solid var(--focus-ring-color); outline-offset: -2px; }
+  .goalsnav__item--ext :global(.esa-icon) { color: var(--color-text-muted); flex: none; }
+
+  @media (max-width: 860px) {
+    .goalsnav__row { display: flex; flex-direction: column; }
+    .goalsnav__pair { justify-content: flex-start; }
+    .goalsnav__link { padding-left: var(--spacing-400); }
+    /* Static in-flow panel, faintly tinted with its goal hue so the open menu
+       reads as a surface rather than floating rows. */
+    .goalsnav__panel {
+      position: static; box-shadow: none;
+      border: 0; border-radius: 0;
+      background: color-mix(in srgb, var(--goal) 8%, #ffffff);
+    }
+    .goalsnav__item { padding-left: var(--spacing-500); }
+  }
+</style>
+
+<script>
+  // WCAG disclosure-nav contract (same as PsInfoAaTopicsNav): the toggle
+  // button owns aria-expanded, Escape closes and refocuses the toggle,
+  // focusout/outside-click closes, opening one closes the others. The goal
+  // LINK navigates; only the chevron toggles.
+  const nav = document.querySelector<HTMLElement>('[data-goalsnav]');
+  if (nav) {
+    const roots = Array.from(nav.querySelectorAll<HTMLElement>('[data-goals-disclosure]'));
+
+    function closeDisclosure(root: HTMLElement, refocus: boolean): void {
+      const trigger = root.querySelector<HTMLButtonElement>('button[aria-expanded]');
+      const panel = trigger ? document.getElementById(trigger.getAttribute('aria-controls') || '') : null;
+      if (!trigger || !panel) return;
+      trigger.setAttribute('aria-expanded', 'false');
+      panel.hidden = true;
+      if (refocus) trigger.focus();
+    }
+
+    function openDisclosure(root: HTMLElement): void {
+      roots.forEach((r) => { if (r !== root) closeDisclosure(r, false); });
+      const trigger = root.querySelector<HTMLButtonElement>('button[aria-expanded]');
+      const panel = trigger ? document.getElementById(trigger.getAttribute('aria-controls') || '') : null;
+      if (!trigger || !panel) return;
+      trigger.setAttribute('aria-expanded', 'true');
+      panel.hidden = false;
+    }
+
+    roots.forEach((root) => {
+      const trigger = root.querySelector<HTMLButtonElement>('button[aria-expanded]');
+      if (!trigger) return;
+
+      trigger.addEventListener('click', () => {
+        const isOpen = trigger.getAttribute('aria-expanded') === 'true';
+        if (isOpen) closeDisclosure(root, false);
+        else openDisclosure(root);
+      });
+
+      root.addEventListener('keydown', (event: KeyboardEvent) => {
+        if (event.key === 'Escape' && trigger.getAttribute('aria-expanded') === 'true') {
+          event.stopPropagation();
+          closeDisclosure(root, true);
+        }
+      });
+
+      root.addEventListener('focusout', (event: FocusEvent) => {
+        const next = event.relatedTarget as Node | null;
+        if (!next || !root.contains(next)) closeDisclosure(root, false);
+      });
+    });
+
+    document.addEventListener('click', (event: MouseEvent) => {
+      const target = event.target as Node;
+      roots.forEach((root) => {
+        const trigger = root.querySelector<HTMLButtonElement>('button[aria-expanded]');
+        if (trigger?.getAttribute('aria-expanded') === 'true' && !root.contains(target)) {
+          closeDisclosure(root, false);
+        }
+      });
+    });
+  }
+</script>

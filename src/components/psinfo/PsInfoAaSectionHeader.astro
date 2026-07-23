@@ -1,0 +1,31 @@
+---
+// PsInfoAaSectionHeader — the blue + hairline section heading used across all
+// three Topic-page tabs (prod's h2.sectionHeader / h3.subsectionHeader).
+// Renders the real heading element at the level the caller supplies — never
+// skip levels for looks.
+//
+// bcn-lego-checked: heading treatment — no esa- section-heading lego
+// (esa-page-header is page-level chrome, not an in-body section rule);
+// checked Beacon (no matching pattern). Reusable home for the AA module's
+// section headers. (PsInfoSectionTitle stays untouched — other pages use it.)
+interface Props {
+  title: string;
+  as?: 'h2' | 'h3';
+}
+const { title, as = 'h2' } = Astro.props;
+const Tag = as;
+---
+<Tag class:list={['aasecthd', `aasecthd--${as}`]}>{title}</Tag>
+
+<style>
+  .aasecthd {
+    margin: 0 0 var(--spacing-400) 0;
+    padding-bottom: var(--spacing-200);
+    border-bottom: 1px solid var(--color-border);
+    color: var(--ps-info-blue-800);
+    font-family: var(--font-display);
+    font-weight: var(--font-weight-semibold);
+  }
+  .aasecthd--h2 { font-size: 1.5rem; }
+  .aasecthd--h3 { font-size: 1.25rem; }
+</style>

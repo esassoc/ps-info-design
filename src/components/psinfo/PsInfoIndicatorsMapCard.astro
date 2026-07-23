@@ -12,14 +12,13 @@
 import EsaCard from '@esa/ecology/esa-card.astro';
 import EsaIcon from '@esa/ecology/esa-icon.astro';
 import { withBase } from '../../lib/base';
+import { isExternalHref, EXTERNAL_LINK_ICON_PATHS } from '../../lib/psinfoExternalLink';
 import type { ExemplarMap } from '../../data/pages/indicators';
 
 interface Props {
   map: ExemplarMap;
 }
 const { map } = Astro.props;
-
-const ARROW = '<path d="M7 7h10v10"/><path d="M7 17 17 7"/>';
 ---
 <EsaCard variant="outlined" padding="none">
   <div class="mapcard">
@@ -28,10 +27,14 @@ const ARROW = '<path d="M7 7h10v10"/><path d="M7 17 17 7"/>';
     </div>
     <div class="mapcard__body">
       <p class="mapcard__caption">{map.caption}</p>
-      <a class="mapcard__link" href={map.overviewLink.href} target="_blank" rel="noopener">
-        {map.overviewLink.text}
-        <EsaIcon name="arrow-up-right" size="xs" paths={ARROW} />
-      </a>
+      {isExternalHref(map.overviewLink.href) ? (
+        <a class="mapcard__link" href={map.overviewLink.href} target="_blank" rel="noopener">
+          {map.overviewLink.text}
+          <EsaIcon name="external-link" size="xs" paths={EXTERNAL_LINK_ICON_PATHS} label="(external)" />
+        </a>
+      ) : (
+        <a class="mapcard__link" href={map.overviewLink.href}>{map.overviewLink.text}</a>
+      )}
     </div>
   </div>
 </EsaCard>
@@ -48,9 +51,8 @@ const ARROW = '<path d="M7 7h10v10"/><path d="M7 17 17 7"/>';
   .mapcard__caption { margin: 0; font-size: var(--ps-info-text-body); color: var(--color-text-secondary); line-height: 1.6; }
   .mapcard__link {
     display: inline-flex; align-items: center; gap: var(--spacing-100); align-self: flex-start;
-    font-size: var(--ps-info-text-meta-lg); color: var(--color-text-link); text-decoration: none;
+    font-size: var(--ps-info-text-meta-lg); color: var(--color-text-link); text-decoration: underline; text-underline-offset: 3px; 
   }
-  .mapcard__link:hover { text-decoration: underline; }
   .mapcard__link:focus-visible { outline: 2px solid var(--focus-ring-color); outline-offset: 2px; }
 
   @media (max-width: 640px) {

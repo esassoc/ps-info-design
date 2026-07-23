@@ -1,0 +1,93 @@
+---
+// PsInfoPiTopicProse — rich-prose renderer for the Topic Detail page's
+// PiTopicBlock[] content: paragraphs and bullet lists with strong/em runs and
+// inline links. This page's body is CMS rich text (unlike PsInfoPiIntro's
+// plain paragraphs), so segments carry strong/em flags. Most links on this
+// page are pugetsoundinfo hosts (internal-class, same tab, no mark); the one
+// genuinely external link (RCW 36.70A.170) gets the mark + new tab.
+//
+// bcn-lego-checked: prose paragraphs/lists with inline links; no esa- lego is
+// a prose block — same rationale as psinfo-pi-intro, extended with strong/em
+// runs for this page's CMS rich text.
+import EsaIcon from '@esa/ecology/esa-icon.astro';
+import { withBase } from '../../lib/base';
+import { isExternalHref, EXTERNAL_LINK_ICON_PATHS } from '../../lib/psinfoExternalLink';
+import type { PiTopicBlock, PiRichSegment } from '../../data/pages/progress-indicators';
+
+interface Props {
+  blocks: PiTopicBlock[];
+}
+const { blocks } = Astro.props;
+
+const linkHref = (seg: Extract<PiRichSegment, { type: 'link' }>) =>
+  seg.link.kind === 'internal' ? withBase(seg.link.route) : seg.link.href;
+---
+<div class="pitprose">
+  {blocks.map((block) =>
+    block.kind === 'paragraph' ? (
+      <p class="pitprose__p">
+        {block.segments.map((seg) => {
+          if (seg.type === 'link') {
+            const href = linkHref(seg);
+            const ext = isExternalHref(href);
+            return (
+              <a class="pitprose__link" href={href} {...(ext ? { target: '_blank', rel: 'noopener' } : {})}>
+                <span>{seg.link.text}</span>
+                {ext && <EsaIcon name="external-link" size="xs" paths={EXTERNAL_LINK_ICON_PATHS} label="(external)" />}
+              </a>
+            );
+          }
+          const content = seg.text;
+          if (seg.strong && seg.em) return <strong><em>{content}</em></strong>;
+          if (seg.strong) return <strong>{content}</strong>;
+          if (seg.em) return <em>{content}</em>;
+          return content;
+        })}
+      </p>
+    ) : (
+      <ul class="pitprose__list" role="list">
+        {block.items.map((item) => (
+          <li>
+            {item.map((seg) => {
+              if (seg.type === 'link') {
+                const href = linkHref(seg);
+                const ext = isExternalHref(href);
+                return (
+                  <a class="pitprose__link" href={href} {...(ext ? { target: '_blank', rel: 'noopener' } : {})}>
+                    <span>{seg.link.text}</span>
+                    {ext && <EsaIcon name="external-link" size="xs" paths={EXTERNAL_LINK_ICON_PATHS} label="(external)" />}
+                  </a>
+                );
+              }
+              const content = seg.text;
+              if (seg.strong && seg.em) return <strong><em>{content}</em></strong>;
+              if (seg.strong) return <strong>{content}</strong>;
+              if (seg.em) return <em>{content}</em>;
+              return content;
+            })}
+          </li>
+        ))}
+      </ul>
+    )
+  )}
+</div>
+
+<style>
+  .pitprose { display: flex; flex-direction: column; gap: var(--spacing-400); min-width: 0; }
+  .pitprose__p {
+    margin: 0; font-size: var(--ps-info-text-body); line-height: 1.6;
+    color: var(--color-text-primary);
+  }
+  .pitprose__list {
+    list-style: disc; margin: 0; padding-left: var(--spacing-500);
+    display: flex; flex-direction: column; gap: var(--spacing-200);
+    font-size: var(--ps-info-text-body); line-height: 1.6; color: var(--color-text-primary);
+  }
+  .pitprose__link {
+    display: inline-flex; align-items: center; gap: var(--spacing-100);
+    color: var(--color-text-link); text-decoration: underline; text-underline-offset: 3px;
+  }
+  .pitprose__link:hover { color: var(--color-text-link-hover); }
+  .pitprose__link:focus-visible { outline: 2px solid var(--focus-ring-color); outline-offset: 2px; }
+  .pitprose__link :global(.esa-icon) { color: var(--color-text-muted); flex: none; }
+</style>

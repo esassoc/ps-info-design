@@ -1,0 +1,79 @@
+---
+// PsInfoNepAtlasActivityTable — the Investment Summary page's related-
+// activities table (prod renders a plain bootstrap table inside each tab;
+// here it renders once below the tab layout — see contract). Renders
+// ACTIVITY_ROWS (12 of prod's 1,608 summary-tab activities); the RPA column
+// is omitted (see contract). Cell values are prod's own shortened display
+// fields (duration/activityTypeShort/vitalSignShort/lemaShort) — verbatim
+// from prod's summary-tab payload.
+//
+// bcn-lego-checked: no esa- table lego (esa-link-column/esa-pagination are
+// not data tables); esa-card is the reused surface, same treatment as
+// PsInfoNepAtlasMapTable.
+import EsaCard from '@esa/ecology/esa-card.astro';
+import { ACTIVITY_ROWS, SUMMARY_ACTIVITIES_TOTAL, SUMMARY_PAGE, formatUsd } from '../../data/pages/nep-atlas';
+---
+<EsaCard variant="outlined">
+  <p class="activitytable__header">{SUMMARY_PAGE.tableHeader(ACTIVITY_ROWS.length, SUMMARY_ACTIVITIES_TOTAL)}</p>
+  <div class="activitytable__scroll">
+    <table class="activitytable">
+      <caption class="sr-only">NEP activities included in the investment summaries</caption>
+      <thead>
+        <tr>
+          <th scope="col">Name</th>
+          <th scope="col">Stage</th>
+          <th scope="col">Duration</th>
+          <th scope="col" class="activitytable__num">Total Cost</th>
+          <th scope="col">Investment Type</th>
+          <th scope="col">Activity Type</th>
+          <th scope="col">Vital Sign</th>
+          <th scope="col">Lead Entity Mgmt Area</th>
+        </tr>
+      </thead>
+      <tbody>
+        {ACTIVITY_ROWS.map((row) => (
+          <tr>
+            <td><a class="activitytable__link" href={row.detailHref}>{row.name}</a></td>
+            <td>{row.stage}</td>
+            <td>{row.duration}</td>
+            <td class="activitytable__num">{formatUsd(row.totalCost)}</td>
+            <td>{row.investmentType}</td>
+            <td>{row.activityTypeShort}</td>
+            <td>{row.vitalSignShort}</td>
+            <td>{row.lemaShort ?? ''}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+</EsaCard>
+
+<style>
+  .activitytable__header {
+    margin: 0 0 var(--spacing-300); font-size: var(--ps-info-text-body);
+    font-weight: var(--font-weight-semibold); color: var(--color-text-primary);
+  }
+  .activitytable__scroll { overflow-x: auto; }
+  .activitytable { width: 100%; border-collapse: collapse; font-size: 1rem; }
+  .activitytable th, .activitytable td {
+    padding: var(--spacing-200) var(--spacing-300); text-align: left;
+    border-bottom: 1px solid var(--color-border-light);
+    white-space: nowrap;
+  }
+  .activitytable th {
+    background: var(--color-surface-sunken); color: var(--color-text-primary);
+    font-weight: var(--font-weight-semibold);
+  }
+  .activitytable td { color: var(--color-text-primary); }
+  .activitytable__num { text-align: right; font-variant-numeric: tabular-nums; }
+  .activitytable__link {
+    color: var(--color-text-link); text-decoration: underline;
+    text-decoration-color: color-mix(in srgb, currentColor 35%, transparent);
+  }
+  .activitytable__link:hover { text-decoration-color: currentColor; }
+  .activitytable__link:focus-visible { outline: 2px solid var(--focus-ring-color); outline-offset: 1px; }
+  .sr-only {
+    position: absolute; width: 1px; height: 1px; margin: -1px;
+    overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap;
+  }
+</style>

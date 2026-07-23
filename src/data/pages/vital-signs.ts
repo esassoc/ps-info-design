@@ -117,3 +117,22 @@ export const CONTRIBUTING_PARTNERS: PartnerOrg[] = [
   { name: 'Rivershed SPC', href: 'https://www.pugetsoundinfo.wa.gov/Organization/Detail/553' },
   { name: 'Blue Water GIS', href: 'https://www.pugetsoundinfo.wa.gov/Organization/Detail/559' },
 ];
+
+export interface WheelCenterLogo {
+  src: string;    // public path; run through withBase() at render
+  alt: string;
+  width: number;  // intrinsic px
+  height: number;
+}
+
+// The center medallion of the source wheel graphic — the Puget Sound Vital
+// Signs circle logo WITH the "v.3" tag, cropped 1:1 from the source's own
+// /Content/img/vitalsigns_wheel.png (center box 403,409–1428,1434; donut
+// outer diameter 1021px). The standalone vitalsigns_circle_logo.png the
+// source serves on mobile omits "v.3"; the crop is the faithful desktop center.
+export const WHEEL_CENTER_LOGO: WheelCenterLogo = {
+  src: '/logos/vitalsigns-wheel-center.png',
+  alt: 'Puget Sound Vital Signs — Reporting Ecosystem Health, v.3',
+  width: 1025,
+  height: 1025,
+};

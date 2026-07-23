@@ -1,0 +1,57 @@
+---
+// PsInfoPiIntro — the Progress Indicators home page's intro block: three
+// verbatim paragraphs with inline links kept in their original sentence
+// position (the third wrapped whole in <strong>, matching the source).
+//
+// bcn-lego-checked: prose paragraphs with inline links; no esa- lego is a
+// prose block. Mirrors psinfo-nep-atlas-narrative's segment renderer (and
+// psinfo-vital-signs-intro's link styling) — kept local rather than imported
+// since this page's PiParagraph/PiLink shapes are its own data module's, and
+// every link on this page is internal-class (*.pugetsoundinfo.wa.gov or a
+// prototype route), so unlike those siblings this renderer never opens a new
+// tab and never shows an external-link mark.
+import { withBase } from '../../lib/base';
+import type { PiParagraph, PiLink } from '../../data/pages/progress-indicators';
+
+interface Props {
+  paragraphs: PiParagraph[];
+}
+const { paragraphs } = Astro.props;
+
+const linkHref = (link: PiLink) => (link.kind === 'internal' ? withBase(link.route) : link.href);
+---
+<div class="piintro">
+  {paragraphs.map((paragraph) => (
+    <p class="piintro__p">
+      {paragraph.emphasis ? (
+        <strong>
+          {paragraph.segments.map((seg) =>
+            seg.type === 'text' ? seg.text : (
+              <a class="piintro__link" href={linkHref(seg.link)}>{seg.link.text}</a>
+            )
+          )}
+        </strong>
+      ) : (
+        paragraph.segments.map((seg) =>
+          seg.type === 'text' ? seg.text : (
+            <a class="piintro__link" href={linkHref(seg.link)}>{seg.link.text}</a>
+          )
+        )
+      )}
+    </p>
+  ))}
+</div>
+
+<style>
+  .piintro { display: flex; flex-direction: column; gap: var(--spacing-400); min-width: 0; }
+  .piintro__p {
+    margin: 0; font-size: var(--ps-info-text-body); line-height: 1.6;
+    color: var(--color-text-primary);
+  }
+  .piintro__link {
+    color: var(--color-text-link); text-decoration: underline;
+    text-decoration-color: color-mix(in srgb, currentColor 35%, transparent);
+  }
+  .piintro__link:hover { text-decoration-color: currentColor; }
+  .piintro__link:focus-visible { outline: 2px solid var(--focus-ring-color); outline-offset: 2px; }
+</style>

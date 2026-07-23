@@ -14,24 +14,24 @@
 import EsaCard from '@esa/ecology/esa-card.astro';
 import EsaIcon from '@esa/ecology/esa-icon.astro';
 import { withBase } from '../../lib/base';
+import { isExternalHref, EXTERNAL_LINK_ICON_PATHS } from '../../lib/psinfoExternalLink';
 import type { DataCenterResource } from '../../data/pages/data-center';
 
 interface Props {
   items: DataCenterResource[];
 }
 const { items } = Astro.props;
-
-const ARROW = '<path d="M7 7h10v10"/><path d="M7 17 17 7"/>';
 ---
 <ul class="dctiles" role="list">
   {items.map((item) => {
     const internal = item.href.startsWith('/');
+    const external = !internal && isExternalHref(item.href);
     return (
       <li>
         <a
           class="dctile"
           href={internal ? withBase(item.href) : item.href}
-          {...(internal ? {} : { target: '_blank', rel: 'noopener' })}
+          {...(external ? { target: '_blank', rel: 'noopener' } : {})}
         >
           <EsaCard variant="outlined" padding="none">
             <span class="dctile__glyph" aria-hidden="true">
@@ -39,7 +39,7 @@ const ARROW = '<path d="M7 7h10v10"/><path d="M7 17 17 7"/>';
             </span>
             <span class="dctile__title">
               {item.title}
-              {!internal && <EsaIcon name="arrow-up-right" size="xs" paths={ARROW} />}
+              {external && <EsaIcon name="external-link" size="xs" paths={EXTERNAL_LINK_ICON_PATHS} label="(external)" />}
             </span>
           </EsaCard>
         </a>
@@ -51,7 +51,10 @@ const ARROW = '<path d="M7 7h10v10"/><path d="M7 17 17 7"/>';
 <style>
   .dctiles {
     list-style: none; margin: 0; padding: 0;
-    display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    /* auto-fill (not auto-fit): empty tracks must survive so a sparse section
+       — the single Archived tile — stays one column wide instead of spanning
+       the full row. */
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
     gap: var(--spacing-400);
   }
   .dctile {

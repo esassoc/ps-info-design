@@ -1,0 +1,76 @@
+/* bcn-lego-checked: no esa- data-grid lego exists (ag-grid-community is the
+ * repo's established table engine); this file is the SHARED skin every psinfo
+ * grid host opts into via the .psinfo-agrid class — the spoke's equivalent of
+ * prod's own ScriptsCustom/agGrid/esa-ag-grid.css, on ecology tokens.
+ *
+ * psinfo-ag-grid.css — the site-wide ag-grid treatment (revision direction
+ * 2026-07-23, mirroring prod's esa-ag-grid.css):
+ *   - dark header band: prod paints .ag-header #666666 with white text/icons;
+ *     here that is the token-true --ps-info-gray-600 (#59646f — white text
+ *     measures 6.0:1, AA-clear) with --ps-info-gray-0 foreground.
+ *   - grid type at the sanctioned meta floors, matching prod's scale: header
+ *     text 14px (--ps-info-text-meta-lg, prod's own .ag-header font-size),
+ *     cell/filter text 13px (--ps-info-text-meta, alpine's stock cell size
+ *     prod leaves in place). Grid cells are dense tabular meta — the one
+ *     surface class the theme's sub-16px floors exist for.
+ *   - keyboard focus inside the dark header outlines white (prod's own
+ *     esa-ag-grid.css :focus-visible rule) — the shared orange ring reads
+ *     ~1.8:1 against the dark band and would vanish.
+ *
+ * Per-grid concerns (viewport height, row hover/selected accents, link
+ * classes, pinned-row weight) stay in each component's own style block.
+ * Selector shape: .ag-theme-alpine.psinfo-agrid / .psinfo-agrid .ag-* out-
+ * specifies alpine's stock .ag-theme-alpine declarations regardless of
+ * bundle order; the bare-descendant .ag-theme-alpine rule re-asserts
+ * --ag-font-size on the nested .ag-styled-root wrapper ag-grid v36 renders
+ * inside the host (it re-declares alpine's 13px default, which would shadow
+ * the host-level token). */
+
+/* ag-grid v36 nests a .ag-styled-root.ag-theme-alpine wrapper INSIDE the
+   host that re-declares alpine's stock custom properties, shadowing anything
+   set only on the host — so the skin's vars are declared on BOTH the host
+   and the nested wrapper, and the load-bearing dark-header rules paint the
+   elements directly (prod's own esa-ag-grid.css does the same). */
+.ag-theme-alpine.psinfo-agrid,
+.psinfo-agrid .ag-theme-alpine {
+  --ag-font-size: var(--ps-info-text-meta);
+  --ag-header-background-color: var(--ps-info-gray-600);
+  --ag-header-foreground-color: var(--ps-info-gray-0);
+}
+
+.psinfo-agrid .ag-header,
+.psinfo-agrid .ag-advanced-filter-header {
+  background-color: var(--ps-info-gray-600);
+}
+
+.psinfo-agrid .ag-cell,
+.psinfo-agrid .ag-floating-filter input {
+  font-size: var(--ps-info-text-meta);
+}
+
+/* Inline links in grid cells are always underlined — the site-wide content-
+   link convention (revision direction 2026-07-23). Tighter offset at the
+   grid's 13px scale. */
+.psinfo-agrid .ag-cell a {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.psinfo-agrid .ag-header-cell-text {
+  font-size: var(--ps-info-text-meta-lg);
+  font-weight: var(--font-weight-semibold);
+}
+
+/* Every header glyph reads white on the dark band — column labels, sort
+   arrows, multi-sort order numerals, menu/filter funnels (prod whitens the
+   same set). */
+.psinfo-agrid .ag-header-cell-text,
+.psinfo-agrid .ag-header .ag-icon,
+.psinfo-agrid .ag-header .ag-sort-order {
+  color: var(--ps-info-gray-0);
+}
+
+.psinfo-agrid .ag-header [tabindex]:focus-visible {
+  outline-color: var(--ps-info-gray-0);
+  outline-offset: 1px;
+}

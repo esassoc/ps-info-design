@@ -1,0 +1,91 @@
+---
+// Progress Indicators — Topic Detail exemplar. Directed reproduction of a
+// SINGLE URL: https://qa-progressindicators.pugetsoundinfo.wa.gov/Topic/Detail/2
+// (QA site, fetched 2026-07-22). All copy verbatim via the TOPIC2 data
+// object; see src/data/contracts/progress-indicators.md.
+import PsInfoAppShell from '../../../layouts/PsInfoAppShell.astro';
+import PsInfoPhotoHeader from '../../../components/psinfo/PsInfoPhotoHeader.astro';
+import PsInfoPiTopicProse from '../../../components/psinfo/PsInfoPiTopicProse.astro';
+import PsInfoSectionTitle from '../../../components/psinfo/PsInfoSectionTitle.astro';
+import PsInfoPiTopicTree from '../../../components/psinfo/PsInfoPiTopicTree.astro';
+import PsInfoVsPartners from '../../../components/psinfo/PsInfoVsPartners.astro';
+import PsInfoPiTopicSidebar from '../../../components/psinfo/PsInfoPiTopicSidebar.astro';
+import { TOPIC2 } from '../../../data/pages/progress-indicators';
+---
+<!-- manifest:
+  layout: PsInfoAppShell (active Progress > Progress Indicators) > center+stack spine
+  sections:
+    - page header (standard hero)    -> psinfo-photo-header (Skagit tulip fields,
+                                        credit Lowestock — AA carousel alternate;
+                                        topic title as H1). The source's identity
+                                        band + its own breadcrumb row are NOT
+                                        reproduced (shell breadcrumbs carry the
+                                        trail — same call as the Orca page)
+    - intro (verbatim, full width)   -> psinfo-pi-topic-prose
+    - description (left column)      -> psinfo-pi-topic-prose
+    - "Progress Indicators" tree     -> psinfo-pi-topic-tree (bordered section)
+    - narrative sections (h2 + body) -> psinfo-pi-topic-prose (bordered sections)
+    - "Contributing Partners"        -> psinfo-vs-partners (the site-wide logo wall; bordered section)
+    - reference rail (col-md-3)      -> psinfo-pi-topic-sidebar
+  note: the QA source's #embeddedContent iframe (placeholder test video) is
+        NOT reproduced — cut by revision direction 2026-07-23
+-->
+<PsInfoAppShell title={`${TOPIC2.title} — Puget Sound Info`} active={{ moduleId: 'progress', leafId: 'progress-indicators' }}>
+  <div class="center stack" data-gap="xl">
+    <PsInfoPhotoHeader
+      size="band"
+      image="/photos/pi/tulip-fields-skagit.jpg"
+      focus="50% 55%"
+      title={TOPIC2.title}
+    />
+
+    <PsInfoPiTopicProse blocks={TOPIC2.intro} />
+
+    <!-- bcn-lego-checked: pure page-region layout (the source's col-md-9/col-md-3
+         split — body sections left, reference rail beside); no esa- lego is a
+         page-layout grid. Same pattern as vital-signs/[slug].astro's vsd-split. -->
+    <div class="pit-split">
+      <div class="stack" data-gap="xl">
+        <PsInfoPiTopicProse blocks={TOPIC2.description} />
+        <div class="stack pit-section" data-gap="md">
+          <PsInfoSectionTitle title={TOPIC2.treeHeading} />
+          <PsInfoPiTopicTree tree={TOPIC2.tree} treeId="pitree-topic-2" />
+        </div>
+        {TOPIC2.narrativeSections.map((sec) => (
+          <div class="stack pit-section" data-gap="md">
+            <PsInfoSectionTitle title={sec.heading} />
+            <PsInfoPiTopicProse blocks={sec.blocks} />
+          </div>
+        ))}
+        <div class="stack pit-section" data-gap="md">
+          <PsInfoSectionTitle title={TOPIC2.partnersHeading} />
+          <PsInfoVsPartners partners={TOPIC2.partners} heading={null} />
+        </div>
+      </div>
+      <PsInfoPiTopicSidebar
+        aaTopicsHeading={TOPIC2.aaTopicsHeading}
+        aaTopicCard={TOPIC2.aaTopicCard}
+        lastUpdatedHeading={TOPIC2.lastUpdatedHeading}
+        lastUpdated={TOPIC2.lastUpdated}
+      />
+    </div>
+  </div>
+</PsInfoAppShell>
+
+<style>
+  .pit-split {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(240px, 300px);
+    gap: var(--spacing-700);
+    align-items: start;
+  }
+  @media (max-width: 900px) {
+    .pit-split { grid-template-columns: 1fr; }
+  }
+  /* Prod closes each h2 section with a bottom rule; the padding + the column
+     stack's own gap give the sections their air. */
+  .pit-section {
+    padding-block-end: var(--spacing-600);
+    border-bottom: 1px solid var(--color-border);
+  }
+</style>

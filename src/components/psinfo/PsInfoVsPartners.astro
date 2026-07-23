@@ -1,26 +1,39 @@
 ---
-// PsInfoVsPartners — the Contributing Partners logo wall, with the source
-// site's real logo files (downloaded to /photos/vital-signs/partners/, DOM
-// order) rendered at a standardized cell size instead of the source's
-// mixed-dimension originals. Each logo links to its organization page.
+// PsInfoVsPartners — the Contributing Partners logo wall: real logo files in
+// DOM order, rendered at a standardized bordered cell size instead of the
+// sources' mixed-dimension originals. Each logo links to its organization
+// page. Defaults to the Vital Signs module's PARTNER_LOGOS with its centered
+// heading; other units pass their own `partners` (and `heading={null}` when
+// the page's own section title carries the heading) — the PI Topic Detail
+// page reuses this wall so Contributing Partners reads identically site-wide
+// (revision direction 2026-07-23; it previously had a bare-logo grid of its
+// own).
 //
 // bcn-lego-checked: checked esa-card / esa-avatar (content card / person
 // avatar — not a logo wall); a normalized logo grid is this component's own
 // single job. Logos carry their organization name as alt text.
 import { PARTNER_LOGOS } from '../../data/pages/vital-signs-module';
 import { withBase } from '../../lib/base';
+import { isExternalHref } from '../../lib/psinfoExternalLink';
 
-interface Props {
-  heading?: string;
+export interface PartnerLogo {
+  name: string;
+  image: string;
+  href: string;
 }
-const { heading = 'Contributing Partners' } = Astro.props;
+interface Props {
+  /** null renders no heading (the page's own section title carries it). */
+  heading?: string | null;
+  partners?: PartnerLogo[];
+}
+const { heading = 'Contributing Partners', partners = PARTNER_LOGOS } = Astro.props;
 ---
-<section class="partners" aria-label={heading}>
-  <h2 class="partners__heading">{heading}</h2>
+<section class="partners" aria-label={heading ?? 'Contributing Partners'}>
+  {heading && <h2 class="partners__heading">{heading}</h2>}
   <ul class="partners__grid" role="list">
-    {PARTNER_LOGOS.map((p) => (
+    {partners.map((p) => (
       <li>
-        <a class="partners__cell" href={p.href} target="_blank" rel="noopener">
+        <a class="partners__cell" href={p.href} {...(isExternalHref(p.href) ? { target: '_blank', rel: 'noopener' } : {})}>
           <img src={withBase(p.image)} alt={p.name} loading="lazy" />
         </a>
       </li>

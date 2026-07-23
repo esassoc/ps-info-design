@@ -1,0 +1,50 @@
+---
+// PsInfoAaTopicContents — the Topic page's left "Contents" jump-nav sidebar
+// (Overview + Progress tabs). Renders a readable "Contents" label (NOT an
+// ornamental micro-label) followed by same-page anchor links; `sub` items
+// (Commitments/Indicators nested under their parent section) get one indent
+// step.
+//
+// bcn-lego-checked: checked esa-link-column (footer/sitemap column — no
+// sub-level indent, the prod format here needs an indented subsection row)
+// and esa-sidebar-nav (the app-shell rail component, wrong context/registers
+// its own nav data shape); the indented jump-nav list has no matching lego.
+// PsInfoAaTopicContents is the reusable home.
+interface Props {
+  items: { label: string; href: string; sub?: boolean }[];
+  navLabel: string;
+}
+const { items, navLabel } = Astro.props;
+---
+<nav class="aatcontents" aria-label={navLabel}>
+  <strong class="aatcontents__heading">Contents</strong>
+  <ul class="aatcontents__list" role="list">
+    {items.map((item) => (
+      <li class:list={['aatcontents__item', item.sub && 'aatcontents__item--sub']}>
+        <a class="aatcontents__link" href={item.href}>{item.label}</a>
+      </li>
+    ))}
+  </ul>
+</nav>
+
+<style>
+  .aatcontents {
+    display: flex; flex-direction: column; gap: var(--spacing-200);
+    align-self: start; /* hug content — never stretch to the column's height */
+    border: 1px solid var(--color-border); border-radius: var(--radius-100);
+    background: var(--color-surface); padding: var(--spacing-400);
+  }
+  .aatcontents__heading {
+    font-size: 1rem; font-weight: var(--font-weight-semibold); color: var(--color-text-primary);
+  }
+  .aatcontents__list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+  .aatcontents__item--sub { padding-left: var(--spacing-400); }
+  /* Jump-nav links, not inline content — no underline at rest (Andrew,
+     2026-07-23); hover restores the affordance. */
+  .aatcontents__link {
+    display: block; padding: var(--spacing-100) 0; min-height: 24px;
+    font-size: var(--ps-info-text-meta-lg); color: var(--color-text-link); text-decoration: none;
+  }
+  .aatcontents__link:hover { text-decoration: underline; text-underline-offset: 3px; }
+  .aatcontents__link:focus-visible { outline: 2px solid var(--focus-ring-color); outline-offset: 2px; }
+</style>

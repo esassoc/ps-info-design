@@ -1,0 +1,227 @@
+---
+// PsInfoIndicatorsGrid — the source page's #pugetSoundIndicatorsGridDivID
+// ag-grid: one grid, all 86 rows, 6 columns, with the source's toolbar (row
+// count + clear filters + Download Table). ag-grid-community v36.0.2.
+//
+// bcn-lego-checked: no esa- data-grid/table lego exists (checked the full
+// catalog — closest are esa-link-column/esa-pagination, not a data grid);
+// ag-grid-community is the table engine, same engine the source page and
+// Beacon use; toolbar buttons are the esa-button lego; CSS below is the
+// grid's legacy-theme custom-property mapping onto ecology tokens.
+import EsaButton from '@esa/ecology/esa-button.astro';
+import { TOTAL_INDICATORS, gridRowCountText, GRID_CLEAR_FILTERS_LABEL, GRID_DOWNLOAD_LABEL } from '../../data/pages/indicators';
+import 'ag-grid-community/styles/ag-grid.css';
+import 'ag-grid-community/styles/ag-theme-alpine.css';
+import '../../styles/psinfo-ag-grid.css';
+---
+<div class="indgrid">
+  <div class="indgrid__bar">
+    <p class="indgrid__count">
+      <span id="psinfo-indicators-grid-count" aria-live="polite">{gridRowCountText(TOTAL_INDICATORS, TOTAL_INDICATORS)}</span>
+      <span id="psinfo-indicators-grid-clear-wrap" hidden>
+        <EsaButton size="sm" color="ghost" appearance="soft" id="psinfo-indicators-grid-clear">{GRID_CLEAR_FILTERS_LABEL}</EsaButton>
+      </span>
+    </p>
+    <EsaButton size="sm" color="primary" appearance="outline" id="psinfo-indicators-grid-download">{GRID_DOWNLOAD_LABEL}</EsaButton>
+  </div>
+  <div id="psinfo-indicators-grid" class="ag-theme-alpine psinfo-agrid"></div>
+</div>
+
+<script>
+  import { createGrid, ModuleRegistry, AllCommunityModule } from 'ag-grid-community';
+  import type { GridOptions, ICellRendererParams } from 'ag-grid-community';
+  import {
+    INDICATORS, TOTAL_INDICATORS, EXEMPLAR_ID, EXEMPLAR_ROUTE, FARMLAND_ID, FARMLAND_ROUTE,
+    GRID_COLUMNS, gridRowCountText, GRID_EXPORT_FILE_NAME, GRID_EMPTY_MESSAGE,
+  } from '../../data/pages/indicators';
+  import type { IndicatorRow, IndicatorTag } from '../../data/pages/indicators';
+  import { withBase } from '../../lib/base';
+
+  ModuleRegistry.registerModules([AllCommunityModule]);
+
+  // Source duplicates a strategy tag within a single row (e.g. the same 2022
+  // strategy listed 2-3x) — dedupe by name for display; data stays verbatim.
+  // Same precedent as PsInfoIndicatorsBoard.
+  function dedupe(tags: IndicatorTag[]): IndicatorTag[] {
+    const seen = new Set<string>();
+    return tags.filter((t) => {
+      if (seen.has(t.name)) return false;
+      seen.add(t.name);
+      return true;
+    });
+  }
+
+  function makeLink(name: string, href: string): HTMLAnchorElement {
+    const a = document.createElement('a');
+    a.className = 'indgrid__link';
+    a.textContent = name;
+    a.href = href;
+    return a;
+  }
+
+  function tagList(tags: IndicatorTag[]): HTMLSpanElement {
+    const span = document.createElement('span');
+    tags.forEach((t, i) => {
+      if (i > 0) span.appendChild(document.createTextNode(', '));
+      span.appendChild(makeLink(t.name, t.href));
+    });
+    return span;
+  }
+
+  const columnDefs = [
+    {
+      colId: GRID_COLUMNS[0].colId,
+      headerName: GRID_COLUMNS[0].header,
+      valueGetter: (p: ICellRendererParams<IndicatorRow>) => p.data?.type,
+      initialWidth: 230,
+    },
+    {
+      colId: GRID_COLUMNS[1].colId,
+      headerName: GRID_COLUMNS[1].header,
+      valueGetter: (p: ICellRendererParams<IndicatorRow>) => p.data?.name,
+      initialWidth: 530,
+      cellRenderer: (p: ICellRendererParams<IndicatorRow>) => {
+        const row = p.data!;
+        return makeLink(row.name, row.id === EXEMPLAR_ID ? withBase(EXEMPLAR_ROUTE) : row.id === FARMLAND_ID ? withBase(FARMLAND_ROUTE) : row.detailUrl);
+      },
+    },
+    {
+      colId: GRID_COLUMNS[2].colId,
+      headerName: GRID_COLUMNS[2].header,
+      valueGetter: (p: ICellRendererParams<IndicatorRow>) => p.data?.org ?? '',
+      initialWidth: 530,
+      cellRenderer: (p: ICellRendererParams<IndicatorRow>) => {
+        const row = p.data!;
+        if (row.org && row.orgHref) return makeLink(row.org, row.orgHref);
+        const span = document.createElement('span');
+        span.textContent = row.org ?? '';
+        return span;
+      },
+    },
+    {
+      colId: GRID_COLUMNS[3].colId,
+      headerName: GRID_COLUMNS[3].header,
+      valueGetter: (p: ICellRendererParams<IndicatorRow>) => p.data?.vitalSign ?? '',
+      initialWidth: 230,
+    },
+    {
+      colId: GRID_COLUMNS[4].colId,
+      headerName: GRID_COLUMNS[4].header,
+      valueGetter: (p: ICellRendererParams<IndicatorRow>) => p.data!.topics.map((t) => t.name).join(', '),
+      cellRenderer: (p: ICellRendererParams<IndicatorRow>) => tagList(p.data!.topics),
+      initialWidth: 230,
+    },
+    {
+      colId: GRID_COLUMNS[5].colId,
+      headerName: GRID_COLUMNS[5].header,
+      valueGetter: (p: ICellRendererParams<IndicatorRow>) => dedupe(p.data!.strategies2022).map((t) => t.name).join(', '),
+      cellRenderer: (p: ICellRendererParams<IndicatorRow>) => tagList(dedupe(p.data!.strategies2022)),
+      initialWidth: 230,
+    },
+  ];
+
+  const host = document.getElementById('psinfo-indicators-grid') as HTMLDivElement;
+  const countEl = document.getElementById('psinfo-indicators-grid-count')!;
+  const clearWrap = document.getElementById('psinfo-indicators-grid-clear-wrap')!;
+  const clearBtn = document.getElementById('psinfo-indicators-grid-clear');
+  const downloadBtn = document.getElementById('psinfo-indicators-grid-download');
+
+  const gridOptions: GridOptions<IndicatorRow> = {
+    theme: 'legacy',
+    columnDefs,
+    rowData: INDICATORS,
+    defaultColDef: {
+      sortable: true,
+      filter: 'agTextColumnFilter',
+      floatingFilter: true,
+      resizable: true,
+      wrapHeaderText: true,
+      autoHeaderHeight: true,
+    },
+    ensureDomOrder: true,
+    suppressCellFocus: false,
+    overlayNoRowsTemplate: `<span>${GRID_EMPTY_MESSAGE}</span>`,
+    onCellFocused: (event) => {
+      if (event.rowIndex == null || typeof event.column !== 'object' || event.column === null) return;
+      const colId = (event.column as { getColId: () => string }).getColId();
+      const cell = host.querySelector(`[row-index="${event.rowIndex}"] [col-id="${colId}"]`);
+      cell?.querySelector('a')?.focus();
+    },
+    onFilterChanged: () => {
+      const shown = api.getDisplayedRowCount();
+      countEl.textContent = gridRowCountText(shown, TOTAL_INDICATORS);
+      const hasFilters = Object.keys(api.getFilterModel()).length !== 0;
+      clearWrap.hidden = !hasFilters;
+    },
+  };
+
+  const api = createGrid(host, gridOptions);
+
+  // Post-init a11y patches (mirrors the source page's own WCAG fix, with a
+  // more descriptive label).
+  host.querySelector('[role="grid"]')?.setAttribute('aria-label', 'Puget Sound Indicators');
+  host.querySelectorAll('.ag-center-cols-container[role="rowgroup"]').forEach((el) => {
+    el.setAttribute('tabindex', '0');
+    el.setAttribute('aria-label', 'Indicator rows');
+  });
+
+  clearBtn?.addEventListener('click', () => {
+    api.setFilterModel(null);
+    clearWrap.hidden = true;
+  });
+  downloadBtn?.addEventListener('click', () => {
+    api.exportDataAsCsv({
+      fileName: GRID_EXPORT_FILE_NAME,
+      columnKeys: GRID_COLUMNS.map((c) => c.colId),
+    });
+  });
+</script>
+
+<style>
+  /* bcn-lego-checked: see frontmatter comment. */
+  .indgrid { display: flex; flex-direction: column; gap: var(--spacing-300); }
+
+  .indgrid__bar {
+    display: flex; align-items: center; justify-content: space-between;
+    flex-wrap: wrap; gap: var(--spacing-400);
+  }
+  .indgrid__count {
+    margin: 0; font-size: var(--ps-info-text-body); color: var(--color-text-secondary);
+    display: inline-flex; align-items: center; gap: var(--spacing-200);
+  }
+
+  /* size="sm" EsaButton falls back to a 12px native font-size (no
+     --form-font-size-sm token is defined in this theme) — override to the
+     16px body minimum on these two toolbar instances by id (higher
+     specificity than .esa-button__native's class rule). */
+  :global(#psinfo-indicators-grid-clear),
+  :global(#psinfo-indicators-grid-download) {
+    font-size: var(--ps-info-text-body);
+  }
+
+  #psinfo-indicators-grid {
+    block-size: 31.25rem; /* mirrors the source grid's 500px viewport; no spacing token exists at viewport scale */
+  }
+  /* Dark header + grid type sizes come from the shared .psinfo-agrid skin
+     (src/styles/psinfo-ag-grid.css); only per-grid concerns live here. */
+  #psinfo-indicators-grid {
+    --ag-font-family: var(--font-sans);
+    --ag-foreground-color: var(--color-text-primary);
+    --ag-data-color: var(--color-text-primary);
+    --ag-secondary-foreground-color: var(--color-text-secondary);
+    --ag-background-color: var(--color-surface);
+    --ag-odd-row-background-color: var(--color-surface);
+    --ag-row-hover-color: var(--color-surface-sunken);
+    --ag-border-color: var(--color-border);
+    --ag-secondary-border-color: var(--color-border-light);
+    --ag-row-border-color: var(--color-border-light);
+    --ag-alpine-active-color: var(--color-primary);
+    --ag-input-focus-border-color: var(--focus-ring-color);
+    --ag-border-radius: var(--radius-100);
+  }
+  #psinfo-indicators-grid :global(.indgrid__link) { color: var(--color-text-link); }
+  #psinfo-indicators-grid :global(.indgrid__link:hover) { color: var(--color-text-link-hover); }
+  #psinfo-indicators-grid :global(.indgrid__link:focus-visible) {
+    outline: 2px solid var(--focus-ring-color); outline-offset: 1px;
+  }
+</style>

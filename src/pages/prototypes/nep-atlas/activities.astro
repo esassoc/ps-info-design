@@ -1,0 +1,40 @@
+---
+// NEP Atlas — NEP Activities (/Activity/Index, fetched 2026-07-22). Grid
+// carries a REPRESENTATIVE SUBSET (12 of 1,614 feed rows, 13 of 32 prod
+// columns) — see src/data/pages/nep-atlas.ts (ACTIVITY_ROWS) and
+// src/data/contracts/nep-atlas.md for the full accounting.
+import PsInfoAppShell from '../../../layouts/PsInfoAppShell.astro';
+import PsInfoPhotoHeader from '../../../components/psinfo/PsInfoPhotoHeader.astro';
+import PsInfoNepAtlasNav from '../../../components/psinfo/PsInfoNepAtlasNav.astro';
+import PsInfoNepAtlasNarrative from '../../../components/psinfo/PsInfoNepAtlasNarrative.astro';
+import PsInfoNepAtlasActivitiesGrid from '../../../components/psinfo/PsInfoNepAtlasActivitiesGrid.astro';
+import { HERO_TITLE, WELCOME_PHOTO, ACTIVITIES_PAGE } from '../../../data/pages/nep-atlas';
+---
+<!-- manifest:
+  layout: PsInfoAppShell (active Implementation and Funding > NEP Atlas) > center+stack spine
+  sections:
+    - page header + band nav -> psinfo-photo-header (photo band, current=activities) + psinfo-nep-atlas-nav
+    - intro narrative         -> psinfo-nep-atlas-narrative (2 verbatim paragraphs)
+    - activities grid         -> psinfo-nep-atlas-activities-grid (AG Grid, 12 of 1,614 rows, 13 of 32 columns)
+-->
+<PsInfoAppShell title="NEP Activities — NEP Atlas — Puget Sound Info" active={{ moduleId: 'implementation', leafId: 'nep-atlas' }}>
+  <div class="center stack" data-gap="xl">
+    <PsInfoPhotoHeader
+      size="band"
+      image={WELCOME_PHOTO.image}
+      focus="50% 35%"
+      eyebrow={HERO_TITLE}
+      title={ACTIVITIES_PAGE.title}
+    >
+      <PsInfoNepAtlasNav slot="band" current="activities" />
+    </PsInfoPhotoHeader>
+
+    <div class="stack" data-gap="md" id="intro">
+      <PsInfoNepAtlasNarrative paragraphs={ACTIVITIES_PAGE.paragraphs} />
+    </div>
+
+    <div class="stack" data-gap="md" id="activities">
+      <PsInfoNepAtlasActivitiesGrid />
+    </div>
+  </div>
+</PsInfoAppShell>

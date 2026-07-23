@@ -1,53 +1,42 @@
 ---
 // Indicators — the Progress module's measurement system: 86 indicators (70
-// Vital Sign Indicators + 16 Progress Indicators) pulled from the live
-// Indicator/Index grid, grouped by Vital Sign the way the source data groups
-// them. One indicator — "Number of Southern Resident killer whales" — is
-// fully built out as the exemplar detail page; every other row links out to
-// its real detail page on pugetsoundinfo.wa.gov (content is exact; this
-// prototype hasn't built the other 85 detail pages, so those stay external).
+// Vital Sign Indicators + 16 Progress Indicators). The listing renders as the
+// source page's own ag-grid (ag-grid-community) — one grid, every row, with
+// the source's sortable/filterable columns and toolbar. Rows link to their
+// real detail pages on pugetsoundinfo.wa.gov (internal destinations — no
+// external marks); the exemplar row (id 32, "Number of Southern Resident
+// killer whales") routes internally to the built prototype detail page —
+// every other row links out to its real detail page (this prototype hasn't
+// built the other 85 detail pages).
+//
+// RE-AUDITED 2026-07-23 against the live www page (https://www.pugetsoundinfo
+// .wa.gov/Indicator/Index — source of truth per revision direction; the
+// 2026-07-22 QA audit had folded in QA-only regressions, now reversed).
+// Sections, source order: page header (photo band, title "Puget Sound
+// Indicators", lede = intro P1) -> intro definitions prose (P2-P4 verbatim,
+// psinfo-indicators-definitions) -> portal cards (psinfo-indicators-portals)
+// -> indicator grid (psinfo-indicators-grid, shared .psinfo-agrid dark-header
+// skin). See src/data/contracts/indicators.md.
 import PsInfoAppShell from '../../layouts/PsInfoAppShell.astro';
 import PsInfoPhotoHeader from '../../components/psinfo/PsInfoPhotoHeader.astro';
 import PsInfoIndicatorsDefinitions from '../../components/psinfo/PsInfoIndicatorsDefinitions.astro';
-import PsInfoToolLinks from '../../components/psinfo/PsInfoToolLinks.astro';
-import PsInfoSectionTitle from '../../components/psinfo/PsInfoSectionTitle.astro';
-import PsInfoIndicatorsBoard from '../../components/psinfo/PsInfoIndicatorsBoard.astro';
+import PsInfoIndicatorsPortals from '../../components/psinfo/PsInfoIndicatorsPortals.astro';
+import PsInfoIndicatorsGrid from '../../components/psinfo/PsInfoIndicatorsGrid.astro';
 import {
   PAGE_TITLE,
   INTRO_PARAGRAPH,
   INDICATOR_TYPE_DEFINITIONS,
   CLOSING_PARAGRAPH,
   PORTALS,
-  VITAL_SIGN_INDICATORS,
-  PROGRESS_INDICATORS,
-  VITAL_SIGNS_COVERED,
-  groupByVitalSign,
-  EXEMPLAR_ID,
-  EXEMPLAR_ROUTE,
 } from '../../data/pages/indicators';
-
-const portalItems = PORTALS.map((p, i) => ({
-  ...p,
-  // Decorative Lucide glyphs — a presentation choice, not source content.
-  icon: i === 0
-    ? '<path d="M22 12h-2.48a2 2 0 0 0-1.93 1.46l-2.35 8.36a.25.25 0 0 1-.48 0L9.24 2.18a.25.25 0 0 0-.48 0l-2.35 8.36A2 2 0 0 1 4.49 12H2"/>'
-    : '<path d="M16 7h6v6"/><path d="m22 7-8.5 8.5-5-5L2 17"/>',
-}));
-
-const vsSections = groupByVitalSign(VITAL_SIGN_INDICATORS).map((g) => ({
-  heading: g.vitalSign,
-  indicators: g.indicators,
-}));
-const progressSections = [{ indicators: PROGRESS_INDICATORS }];
 ---
 <!-- manifest:
   layout: PsInfoAppShell (active Progress > Indicators) > center+stack spine
   sections:
     - page header             -> psinfo-photo-header (photo band, composes esa-page-header)
     - indicator type defs     -> psinfo-indicators-definitions
-    - portal cards            -> psinfo-tool-links
-    - Vital Sign Indicators   -> psinfo-section-title + psinfo-indicators-board (grouped by Vital Sign)
-    - Progress Indicators     -> psinfo-section-title + psinfo-indicators-board (flat)
+    - portal cards            -> psinfo-indicators-portals (source psiButtonCards: program logo + title + blurb)
+    - indicator grid          -> psinfo-indicators-grid (ag-grid-community, one grid, all 86 rows, prod toolbar)
 -->
 <PsInfoAppShell title={`${PAGE_TITLE} — Puget Sound Info`} active={{ moduleId: 'progress', leafId: 'indicators' }}>
   <div class="center stack" data-gap="xl">
@@ -61,24 +50,8 @@ const progressSections = [{ indicators: PROGRESS_INDICATORS }];
 
     <PsInfoIndicatorsDefinitions definitions={INDICATOR_TYPE_DEFINITIONS} closing={CLOSING_PARAGRAPH} />
 
-    <PsInfoToolLinks items={portalItems} />
+    <PsInfoIndicatorsPortals portals={PORTALS} />
 
-    <div class="stack" data-gap="md">
-      <PsInfoSectionTitle
-        title="Vital Sign Indicators"
-        count={`${VITAL_SIGN_INDICATORS.length} indicators`}
-        note={`Ecosystem-status measures, grouped by the ${VITAL_SIGNS_COVERED.length} Vital Signs they track.`}
-      />
-      <PsInfoIndicatorsBoard sections={vsSections} exemplarId={EXEMPLAR_ID} exemplarRoute={EXEMPLAR_ROUTE} />
-    </div>
-
-    <div class="stack" data-gap="md">
-      <PsInfoSectionTitle
-        title="Progress Indicators"
-        count={`${PROGRESS_INDICATORS.length} indicators`}
-        note="Human-activity measures — no Vital Sign to group by, so these list flat."
-      />
-      <PsInfoIndicatorsBoard sections={progressSections} exemplarId={EXEMPLAR_ID} exemplarRoute={EXEMPLAR_ROUTE} />
-    </div>
+    <PsInfoIndicatorsGrid />
   </div>
 </PsInfoAppShell>

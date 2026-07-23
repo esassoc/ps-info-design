@@ -1,0 +1,50 @@
+---
+// PsInfoAaOverviewBody — the Overview tab's bordered white content card
+// (prod aa2026OverviewBody): the topic photo + Vital Signs ribbon FLOAT at
+// the top right and the prose wraps around them, running full width once it
+// clears the float — prod's own float geometry, not a column split.
+//
+// bcn-lego-checked: pure composition (esa-card + existing PsInfoAaTopicProse
+// / PsInfoAaTopicVitalSignsCard). KNOWN TRAP: esa-card clips overflow —
+// content here is static, nothing needs to escape the card, so no override.
+import EsaCard from '@esa/ecology/esa-card.astro';
+import { withBase } from '../../lib/base';
+import PsInfoAaTopicProse from './PsInfoAaTopicProse.astro';
+import PsInfoAaTopicVitalSignsCard from './PsInfoAaTopicVitalSignsCard.astro';
+import type { TopicProseParagraph, AaTopicVitalSignLink } from '../../data/pages/action-agenda';
+
+interface Props {
+  paragraphs: TopicProseParagraph[];
+  photo: { src: string; alt: string };
+  vitalSignsLabel: string;
+  vitalSigns: AaTopicVitalSignLink[];
+}
+const { paragraphs, photo, vitalSignsLabel, vitalSigns } = Astro.props;
+---
+<EsaCard variant="outlined">
+  <div class="aaovb">
+    <div class="aaovb__aside">
+      <img class="aaovb__photo" src={withBase(photo.src)} alt={photo.alt} loading="lazy" />
+      <PsInfoAaTopicVitalSignsCard label={vitalSignsLabel} links={vitalSigns} />
+    </div>
+    <PsInfoAaTopicProse paragraphs={paragraphs} />
+  </div>
+</EsaCard>
+
+<style>
+  /* Contain the float without clipping (flow-root = self-clearing block). */
+  .aaovb { display: flow-root; }
+  .aaovb__aside {
+    float: right;
+    width: min(24rem, 46%);
+    margin: 0 0 var(--spacing-400) var(--spacing-500);
+    display: flex; flex-direction: column; gap: var(--spacing-400);
+  }
+  .aaovb__photo {
+    display: block; width: 100%; height: auto;
+    border-radius: var(--radius-100);
+  }
+  @media (max-width: 720px) {
+    .aaovb__aside { float: none; width: 100%; margin: 0 0 var(--spacing-400); }
+  }
+</style>

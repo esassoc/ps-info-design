@@ -1,0 +1,74 @@
+---
+// PsInfoPiTopicSidebar — the Topic Detail page's right rail (source's
+// col-md-3): Action Agenda Topics card + Last Updated. Follows
+// PsInfoVitalSignDetailSidebar's structure (aside + h2 sections).
+//
+// bcn-lego-checked: composes esa-card + esa-badge (the source's
+// aa2026-topic-card shape, same family as psinfo-action-agenda-topic-grid);
+// no esa- lego renders a titled reference rail — PsInfoPiTopicSidebar is the
+// PI unit's reusable home.
+import EsaCard from '@esa/ecology/esa-card.astro';
+import EsaBadge from '@esa/ecology/esa-badge.astro';
+import { withBase } from '../../lib/base';
+import type { PiAaTopicCardRef } from '../../data/pages/progress-indicators';
+
+interface Props {
+  aaTopicsHeading: string;
+  aaTopicCard: PiAaTopicCardRef;
+  lastUpdatedHeading: string;
+  lastUpdated: string;
+}
+const { aaTopicsHeading, aaTopicCard, lastUpdatedHeading, lastUpdated } = Astro.props;
+---
+<aside class="pitside" aria-label="Topic reference">
+  <section class="pitside__sec" aria-labelledby="pitside-aa">
+    <h2 class="pitside__h" id="pitside-aa">{aaTopicsHeading}</h2>
+    <a class="pitside__card" href={aaTopicCard.href}>
+      <EsaCard variant="outlined" padding="none">
+        <img class="pitside__img" src={withBase(aaTopicCard.image)} alt="" loading="lazy" decoding="async" />
+        <div class="pitside__body">
+          <EsaBadge value={aaTopicCard.label} variant="primary" size="xs" />
+          <span class="pitside__title">{aaTopicCard.title}</span>
+        </div>
+      </EsaCard>
+    </a>
+  </section>
+
+  <section class="pitside__sec" aria-labelledby="pitside-updated">
+    <h2 class="pitside__h" id="pitside-updated">{lastUpdatedHeading}</h2>
+    <p class="pitside__p">{lastUpdated}</p>
+  </section>
+</aside>
+
+<style>
+  .pitside { display: flex; flex-direction: column; gap: var(--spacing-400); }
+  .pitside__sec { display: flex; flex-direction: column; gap: var(--spacing-200); }
+  .pitside__h {
+    margin: 0; font-size: 1.0625rem; font-weight: var(--font-weight-semibold);
+    color: var(--color-primary); line-height: 1.3;
+  }
+
+  .pitside__card {
+    display: block; text-decoration: none; border-radius: var(--radius-100);
+    transition: transform 150ms ease, box-shadow 150ms ease;
+  }
+  .pitside__card:hover { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(16, 42, 67, 0.12); }
+  .pitside__card:focus-visible { outline: 2px solid var(--focus-ring-color); outline-offset: 2px; }
+  .pitside__card :global(.esa-card) { height: 100%; overflow: hidden; }
+
+  .pitside__img {
+    display: block; width: 100%; aspect-ratio: 43 / 26; object-fit: cover;
+    border-bottom: 1px solid var(--color-border-light);
+  }
+  .pitside__body {
+    display: flex; flex-direction: column; align-items: flex-start; gap: var(--spacing-150);
+    padding: var(--spacing-300);
+  }
+  .pitside__title {
+    font-size: 1rem; font-weight: var(--font-weight-semibold);
+    color: var(--color-text-primary); line-height: 1.35;
+  }
+  .pitside__card:hover .pitside__title { color: var(--color-primary); }
+
+  .pitside__p { margin: 0; font-size: var(--ps-info-text-body); color: var(--color-text-primary); line-height: 1.5; }
+</style>

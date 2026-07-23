@@ -1,0 +1,121 @@
+---
+// PsInfoAaTopicHeaderBar — recreates prod's aa2026TopicHeader full-width
+// navy bar directly under the Topic hero: a "TOPIC N" chip, the Topic title
+// (an H2 — the hero above carries the module's H1, "2026-2030 Action Agenda
+// Explorer"; Andrew 2026-07-23), an outlined category pill, and a
+// right-aligned "About the Action Agenda Explorer" link. Prod's 3D
+// badge-fold notch effect is explicitly waived (Andrew, 2026-07-22) — flat
+// navy bar only.
+//
+// bcn-lego-checked: composed module chrome — esa-badge/esa-pill render
+// token-colored badges, not a full-bleed navy bar with an edge chip block +
+// H1 + outlined pill + right link (prod's aa2026TopicHeader shape); checked
+// Beacon (no equivalent). PsInfoAaTopicHeaderBar is the reusable home.
+// EsaIcon supplies the (decorative) info glyph.
+import EsaIcon from "@esa/ecology/esa-icon.astro";
+
+interface Props {
+    badge: string;
+    title: string;
+    category: string;
+    aboutLabel: string;
+    aboutHref: string;
+}
+const { badge, title, category, aboutLabel, aboutHref } = Astro.props;
+---
+
+<div class="aathb">
+    <span class="aathb__chip">{badge}</span>
+    <h2 class="aathb__title">{title}</h2>
+    <span class="aathb__pill">{category}</span>
+    <div class="aathb__right">
+        <a class="aathb__about" href={aboutHref}>
+            <EsaIcon name="info" size="sm" />
+            {aboutLabel}
+        </a>
+    </div>
+</div>
+
+<style>
+    .aathb {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: stretch;
+        gap: var(--spacing-500);
+        min-height: 72px;
+        background: var(--ps-info-blue-800);
+        border-radius: var(--radius-100);
+    }
+
+    .aathb__chip {
+        display: flex;
+        align-items: center;
+        flex: none;
+        background: var(--ps-info-blue-500);
+        color: #ffffff;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        font-weight: var(--font-weight-semibold);
+        font-size: var(--ps-info-text-meta-lg);
+        padding: var(--spacing-400) var(--spacing-600);
+        border-radius: var(--radius-100) 0 0 var(--radius-100);
+    }
+
+    .aathb__title {
+        align-self: center;
+        margin: 0;
+        font-family: var(--font-display);
+        font-size: 1.25rem;
+        font-weight: var(--font-weight-semibold);
+        color: #ffffff;
+    }
+
+    .aathb__pill {
+        align-self: center;
+        color: #ffffff;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        font-size: 0.8125rem;
+        font-weight: var(--font-weight-semibold);
+        border: 1px solid #ffffff;
+        border-radius: var(--radius-100);
+        padding: var(--spacing-100) var(--spacing-250);
+    }
+
+    .aathb__right {
+        align-self: center;
+        margin-left: auto;
+        padding-right: var(--spacing-500);
+    }
+
+    .aathb__about {
+        display: inline-flex;
+        align-items: center;
+        gap: var(--spacing-150);
+        color: #ffffff;
+        font-size: 0.9375rem;
+        font-weight: var(--font-weight-semibold);
+        text-decoration: none;
+    }
+    .aathb__about:hover {
+        text-decoration: underline;
+        text-underline-offset: 2px;
+    }
+    .aathb__about:focus-visible {
+        outline: 2px solid var(--focus-ring-color);
+        outline-offset: 2px;
+    }
+
+    @media (max-width: 640px) {
+        .aathb {
+            padding: var(--spacing-300);
+        }
+        .aathb__chip {
+            border-radius: var(--radius-100);
+        }
+        .aathb__right {
+            margin-left: 0;
+            padding-right: 0;
+        }
+    }
+</style>

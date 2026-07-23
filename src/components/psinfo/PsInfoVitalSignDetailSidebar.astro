@@ -1,0 +1,120 @@
+---
+// PsInfoVitalSignDetailSidebar — the Vital Sign Detail page's reference rail,
+// reproduced from the source's right column (col-md-3 beside the body):
+// the Print To PDF button, then Related Strategies (links into the Action
+// Agenda's Strategy pages), Vital Sign Reporter (with the source's own
+// help-definition popup), and Last Updated. Section headings render in the
+// owning goal's ThemeColor, exactly as the source colors its sectionHeaders.
+//
+// bcn-lego-checked: esa-button is the print CTA and esa-dialog is the help
+// popup (both legos); no esa- lego renders a titled link-list rail — checked
+// esa-card (surface card, wrong shape for an unboxed reference column) and
+// esa-empty-state. Type tokens only; psinfo-vital-sign-detail-sidebar is the
+// reusable home for this unit's two pages.
+import EsaButton from '@esa/ecology/esa-button.astro';
+import EsaIcon from '@esa/ecology/esa-icon.astro';
+import type { VitalSignResourceLink } from '../../data/pages/vital-sign-details';
+
+interface Props {
+  relatedStrategies: VitalSignResourceLink[];
+  reporterOrg: string;
+  /** Verbatim source definition shown by the Vital Sign Reporter help popup. */
+  reporterDefinition: string;
+  lastUpdated: string;
+  printUrl: string;
+  /** --ps-info-goal-* token for the section headings (the source's sectionHeader color). */
+  hueVar: string;
+}
+const { relatedStrategies, reporterOrg, reporterDefinition, lastUpdated, printUrl, hueVar } = Astro.props;
+
+const PRINTER = '<path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M6 9V3a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v6"/><rect x="6" y="14" width="12" height="8" rx="1"/>';
+const HELP = '<circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/>';
+---
+<aside class="vsdside" aria-label="Vital Sign reference" style={`--side-hue: var(${hueVar})`}>
+  <div class="vsdside__print">
+    <EsaButton href={printUrl}>
+      <EsaIcon name="printer" size="sm" paths={PRINTER} />
+      Print To PDF
+    </EsaButton>
+  </div>
+
+  <section class="vsdside__sec" aria-labelledby="vsdside-strategies">
+    <h2 class="vsdside__h" id="vsdside-strategies">Related Strategies</h2>
+    <ul class="vsdside__list" role="list">
+      {relatedStrategies.map((link) => (
+        <li><a class="vsdside__link" href={link.href}>{link.text}</a></li>
+      ))}
+    </ul>
+  </section>
+
+  <section class="vsdside__sec" aria-labelledby="vsdside-reporter">
+    <h2 class="vsdside__h" id="vsdside-reporter">
+      Vital Sign Reporter
+      <button
+        type="button"
+        class="vsdside__help"
+        aria-haspopup="dialog"
+        aria-label="View definition for Vital Sign Reporter"
+        data-vsd-help
+      >
+        <EsaIcon name="circle-help" size="sm" paths={HELP} />
+      </button>
+    </h2>
+    <p class="vsdside__p">{reporterOrg}</p>
+  </section>
+
+  <section class="vsdside__sec" aria-labelledby="vsdside-updated">
+    <h2 class="vsdside__h" id="vsdside-updated">Last Updated</h2>
+    <p class="vsdside__p">{lastUpdated}</p>
+  </section>
+</aside>
+
+<esa-dialog data-vsd-dialog heading="Vital Sign Reporter" show-close-button>
+  <p class="vsdside__definition">{reporterDefinition}</p>
+</esa-dialog>
+
+<style>
+  .vsdside { display: flex; flex-direction: column; gap: var(--spacing-400); }
+  .vsdside__print { display: flex; }
+
+  .vsdside__sec { display: flex; flex-direction: column; gap: var(--spacing-200); }
+  .vsdside__h {
+    margin: 0;
+    display: flex; align-items: center; gap: var(--spacing-100);
+    font-size: 1.0625rem; font-weight: var(--font-weight-semibold);
+    color: var(--side-hue); line-height: 1.3;
+  }
+
+  .vsdside__list {
+    list-style: disc; margin: 0; padding-left: var(--spacing-500);
+    display: flex; flex-direction: column; gap: var(--spacing-150);
+  }
+  .vsdside__link {
+    font-size: var(--ps-info-text-body); color: var(--color-text-link);
+    text-decoration: underline; text-underline-offset: 3px; line-height: 1.4;
+  }
+  .vsdside__link:hover { color: var(--color-text-link-hover); }
+  .vsdside__link:focus-visible { outline: 2px solid var(--focus-ring-color); outline-offset: 2px; }
+
+  .vsdside__p { margin: 0; font-size: var(--ps-info-text-body); color: var(--color-text-primary); line-height: 1.5; }
+
+  .vsdside__help {
+    display: inline-flex; align-items: center; justify-content: center;
+    min-width: 24px; min-height: 24px;
+    background: none; border: 0; padding: 0; cursor: pointer;
+    color: var(--side-hue);
+  }
+  .vsdside__help:hover { color: var(--color-text-primary); }
+  .vsdside__help:focus-visible { outline: 2px solid var(--focus-ring-color); outline-offset: 2px; }
+
+  .vsdside__definition { margin: 0; font-size: var(--ps-info-text-body); color: var(--color-text-primary); line-height: 1.6; }
+</style>
+
+<script>
+  import '@esa/ecology/esa-dialog';
+
+  type DialogEl = HTMLElement & { show(): void };
+  const help = document.querySelector<HTMLButtonElement>('[data-vsd-help]');
+  const dialog = document.querySelector<DialogEl>('[data-vsd-dialog]');
+  help?.addEventListener('click', () => dialog?.show());
+</script>

@@ -18,7 +18,10 @@
 // stage points them at the in-shell route instead of the live subdomain.
 // Links to sites outside this prototype's IA (psp.wa.gov, epa.gov, partner
 // orgs) stay `external`. The two "contact the Partnership" CTAs are the
-// source's own mailto (wessyl.kelly@psp.wa.gov).
+// source's own mailto (wessyl.kelly@psp.wa.gov). The disclaimer's nested
+// <strong> around the grant number (source: an <em> wrapping plain text with
+// a <strong>-wrapped grant number, brackets outside the strong) is modeled
+// via an optional `strong` flag on the text-segment variant of AboutSegment.
 
 export interface AboutPhoto {
   /** public/ path of the photograph. */
@@ -47,7 +50,7 @@ export interface AboutMailtoLink {
 export type AboutLink = AboutInternalLink | AboutExternalLink | AboutMailtoLink;
 
 export type AboutSegment =
-  | { type: 'text'; text: string }
+  | { type: 'text'; text: string; /** Source wrapped this run in <strong> (nested inside the disclaimer's <em>). */ strong?: boolean }
   | { type: 'link'; link: AboutLink };
 
 export interface AboutParagraph {
@@ -189,7 +192,12 @@ export const ABOUT_SECTIONS: AboutSection[] = [
           segments: [
             {
               type: 'text',
-              text: 'This project has been funded wholly or in part by the United States Environmental Protection Agency under Assistance Agreement [CE-01J31901]. The contents of this platform do not necessarily reflect the views and policies of the Environmental Protection Agency, nor does mention of trade names or commercial products constitute endorsement or recommendation for use.',
+              text: 'This project has been funded wholly or in part by the United States Environmental Protection Agency under Assistance Agreement [',
+            },
+            { type: 'text', text: 'CE-01J31901', strong: true },
+            {
+              type: 'text',
+              text: ']. The contents of this platform do not necessarily reflect the views and policies of the Environmental Protection Agency, nor does mention of trade names or commercial products constitute endorsement or recommendation for use.',
             },
           ],
         },

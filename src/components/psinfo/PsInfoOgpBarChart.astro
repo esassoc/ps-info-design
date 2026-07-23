@@ -1,0 +1,250 @@
+---
+// PsInfoOgpBarChart — the Data Dashboard's two horizontal bar charts (Number
+// of Programs by Vital Sign / by Activity Type). Prod renders these with
+// Google Charts (BarChart, horizontal); rebuilt here as token-styled DOM bars
+// so the label/value are always real text (not a canvas/SVG raster).
+//
+// Revision 2026-07-23 — prod format match: the chart lives in an esa-card
+// container; the filter is prod's multi-select shape (esa-filter-dropdown,
+// "Filter by Organization Type", subset SUMS the selected org types — the
+// captured per-row byOrgType matrix makes that real); the plot draws prod's
+// gridlines + 0/25/50/75/100 tick row, a rotated category-axis title
+// (Vital Sign / Activity Type), squared slate-blue bars on white (prod's
+// Google BarChart look, at the token --ps-info-blue-400), and a centered
+// "Number of Programs" axis label. Prod's expander band ("VIEW N SELECTED
+// PROGRAMS") renders as a link band to the Program List page carrying the
+// chart's stored unfiltered count; it hides while filtered (the aggregation
+// can't compute a filtered distinct-program count) — see contract.
+//
+// bcn-lego-checked: surface is esa-card; the filter composes
+// esa-filter-container + esa-filter-dropdown + esa-filter-clear-button (the
+// ui-filter lego set); no esa- chart lego exists (esa-progress-bar is a
+// single-value meter) — bars are token-styled DOM driven by the data module;
+// psinfo-ogp-bar-chart is the reusable home.
+import EsaCard from '@esa/ecology/esa-card.astro';
+import EsaFilterContainer from '@esa/ecology/esa-filter-container.astro';
+import EsaFilterClearButton from '@esa/ecology/esa-filter-clear-button.astro';
+import EsaIcon from '@esa/ecology/esa-icon.astro';
+import { withBase } from '../../lib/base';
+import type { OgpChartCategoryRow } from '../../data/pages/ongoing-programs';
+
+interface Props {
+  chartId: string;
+  title: string;
+  rows: OgpChartCategoryRow[];
+  orgTypes: string[];
+  /** x-axis label, centered under the plot ("Number of Programs"). */
+  axisLabel: string;
+  /** Rotated category-axis title ("Vital Sign" / "Activity Type"). */
+  categoryAxisLabel: string;
+  filterLabel: string;
+  /** Prod's expander band, as a link: label + destination. */
+  viewPrograms?: { label: string; route: string };
+}
+const { chartId, title, rows, orgTypes, axisLabel, categoryAxisLabel, filterLabel, viewPrograms } = Astro.props;
+
+// Prod's axis runs to the next 25-step ABOVE the max (75 → 100, 87 → 100).
+const maxTotal = Math.max(...rows.map((r) => r.total), 1);
+const TICK_STEP = 25;
+const niceMax = (Math.floor(maxTotal / TICK_STEP) + 1) * TICK_STEP;
+const ticks = Array.from({ length: niceMax / TICK_STEP + 1 }, (_, i) => i * TICK_STEP);
+const pctOf = (n: number) => (n <= 0 ? 0 : (n / niceMax) * 100);
+---
+<div class="ogpbar-host">
+  <EsaCard variant="outlined">
+    <figure class="ogpbar" data-chart-id={chartId} data-nice-max={niceMax} style={`--ogpbar-tick: ${(TICK_STEP / niceMax) * 100}%`}>
+      <figcaption class="ogpbar__title">{title}</figcaption>
+
+      <div class="ogpbar__filters">
+        <EsaFilterContainer>
+          <esa-filter-dropdown multiple size="sm" label={filterLabel} id={`${chartId}-filter`}></esa-filter-dropdown>
+          <EsaFilterClearButton label="Clear all" />
+        </EsaFilterContainer>
+        <p class="ogpbar__status" aria-live="polite" data-status>
+          {orgTypes.length} of {orgTypes.length} organization types
+        </p>
+      </div>
+      <script type="application/json" id={`${chartId}-orgtypes`} set:html={JSON.stringify(orgTypes)} />
+
+      <div class="ogpbar__plotwrap">
+        <span class="ogpbar__vaxis" aria-hidden="true">{categoryAxisLabel}</span>
+        <div class="ogpbar__plot">
+          <ul class="ogpbar__list" role="list" data-rows>
+            {rows.map((row) => (
+              <li class="ogpbar__row" data-row data-total={row.total} data-byorg={JSON.stringify(row.byOrgType)}>
+                <span class="ogpbar__label" title={row.label}>{row.label}</span>
+                <span class="ogpbar__track">
+                  <span class="ogpbar__bar" aria-hidden="true" style={`inline-size: ${pctOf(row.total)}%`}></span>
+                </span>
+                <span class="ogpbar__value" data-value>{row.total}</span>
+              </li>
+            ))}
+            <li class="ogpbar__row ogpbar__row--ticks" aria-hidden="true">
+              <span></span>
+              <span class="ogpbar__ticks">
+                {ticks.map((t) => (
+                  <span class="ogpbar__tick" style={`inset-inline-start: ${(t / niceMax) * 100}%`}>{t}</span>
+                ))}
+              </span>
+              <span></span>
+            </li>
+          </ul>
+          <p class="ogpbar__axis">{axisLabel}</p>
+        </div>
+      </div>
+
+      {viewPrograms && (
+        <a class="ogpbar__viewband" href={withBase(viewPrograms.route)} data-viewband>
+          <span>{viewPrograms.label}</span>
+          <EsaIcon name="chevron-right" size="sm" />
+        </a>
+      )}
+    </figure>
+  </EsaCard>
+</div>
+
+<script>
+  import '@esa/ecology/esa-filter-dropdown';
+
+  type FilterDropdownEl = HTMLElement & {
+    options: { label: string; value: string }[];
+    _selected: string[];
+  };
+
+  document.querySelectorAll<HTMLElement>('.ogpbar').forEach((chart) => {
+    const chartId = chart.dataset.chartId;
+    if (!chartId) return;
+    const dd = document.getElementById(`${chartId}-filter`) as FilterDropdownEl | null;
+    const orgTypesEl = document.getElementById(`${chartId}-orgtypes`);
+    if (!dd || !orgTypesEl?.textContent) return;
+    const orgTypes = JSON.parse(orgTypesEl.textContent) as string[];
+    dd.options = orgTypes.map((o) => ({ label: o, value: o }));
+
+    const niceMax = Number(chart.dataset.niceMax ?? '1');
+    const rowEls = [...chart.querySelectorAll<HTMLElement>('[data-row]')];
+    const status = chart.querySelector<HTMLElement>('[data-status]');
+    const viewband = chart.querySelector<HTMLElement>('[data-viewband]');
+
+    let selected: string[] = [];
+
+    const recompute = () => {
+      const active = selected.length ? selected : orgTypes;
+      rowEls.forEach((row) => {
+        const byOrg = JSON.parse(row.dataset.byorg ?? '{}') as Record<string, number>;
+        const v = selected.length
+          ? active.reduce((sum, o) => sum + (byOrg[o] ?? 0), 0)
+          : Number(row.dataset.total ?? '0');
+        const bar = row.querySelector<HTMLElement>('.ogpbar__bar');
+        const valueEl = row.querySelector<HTMLElement>('[data-value]');
+        if (bar) bar.style.inlineSize = `${v <= 0 ? 0 : (v / niceMax) * 100}%`;
+        if (valueEl) valueEl.textContent = String(v);
+      });
+      if (status) status.textContent = `${active.length} of ${orgTypes.length} organization types`;
+      // The band's stored count is the unfiltered total — hide it while filtered.
+      if (viewband) viewband.hidden = selected.length > 0;
+    };
+
+    dd.addEventListener('selection-change', (e) => {
+      selected = ((e as CustomEvent).detail.value as string[] | undefined) ?? [];
+      recompute();
+    });
+    chart.addEventListener('esa-filter-clear', () => {
+      selected = [];
+      dd._selected = [];
+      recompute();
+    });
+  });
+</script>
+
+<style>
+  /* esa-card clips overflow for its corner radius, which would sever the
+     esa-filter-dropdown options panel — re-point overflow (PsInfoAaFilterPanel
+     precedent). */
+  .ogpbar-host :global(.esa-card) { overflow: visible; }
+
+  .ogpbar { margin: 0; display: flex; flex-direction: column; gap: var(--spacing-400); }
+  .ogpbar__title {
+    font-size: 1.0625rem; font-weight: var(--font-weight-semibold);
+    color: var(--color-text-primary);
+  }
+  .ogpbar__filters {
+    display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
+    gap: var(--spacing-300);
+    padding-block-end: var(--spacing-300);
+    border-bottom: 1px solid var(--color-border-light);
+  }
+  .ogpbar__status {
+    margin: 0; font-size: var(--ps-info-text-meta-lg); color: var(--color-text-muted);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .ogpbar__plotwrap { display: flex; align-items: center; gap: var(--spacing-200); }
+  .ogpbar__vaxis {
+    writing-mode: vertical-rl; transform: rotate(180deg);
+    font-size: var(--ps-info-text-meta-lg); color: var(--color-text-secondary);
+    text-align: center; flex: none;
+  }
+  .ogpbar__plot { flex: 1 1 auto; min-inline-size: 0; display: flex; flex-direction: column; gap: var(--spacing-200); }
+
+  .ogpbar__list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--spacing-150); }
+  .ogpbar__row {
+    display: grid; grid-template-columns: minmax(160px, 260px) 1fr 3em;
+    align-items: center; gap: var(--spacing-300);
+  }
+  .ogpbar__label {
+    font-size: var(--ps-info-text-meta-lg); color: var(--color-text-primary);
+    text-align: right; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  /* Prod's plot: bars on white with vertical gridlines at each tick — the
+     gridlines are drawn per-track so they align across the shared grid column. */
+  .ogpbar__track {
+    display: block; block-size: 16px;
+    background-image: repeating-linear-gradient(
+      to right,
+      var(--color-border) 0, var(--color-border) 1px,
+      transparent 1px, transparent var(--ogpbar-tick, 25%)
+    );
+  }
+  .ogpbar__bar {
+    display: block; block-size: 100%;
+    background: var(--ps-info-blue-400);
+    transition: inline-size 200ms ease;
+  }
+  .ogpbar__value {
+    font-size: var(--ps-info-text-meta-lg); font-weight: var(--font-weight-semibold);
+    color: var(--color-text-primary); text-align: right; font-variant-numeric: tabular-nums;
+  }
+
+  .ogpbar__row--ticks { align-items: start; }
+  .ogpbar__ticks { position: relative; display: block; block-size: 1.25rem; }
+  .ogpbar__tick {
+    position: absolute; transform: translateX(-50%);
+    font-size: var(--ps-info-text-meta-lg); color: var(--color-text-secondary);
+    font-variant-numeric: tabular-nums;
+  }
+  .ogpbar__axis {
+    margin: 0; font-size: var(--ps-info-text-meta-lg); color: var(--color-text-secondary);
+    text-align: center;
+  }
+
+  .ogpbar__viewband {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: var(--spacing-300);
+    padding: var(--spacing-300) var(--spacing-400);
+    background: var(--color-surface-sunken);
+    border-radius: var(--radius-100);
+    font-size: var(--ps-info-text-body); font-weight: var(--font-weight-semibold);
+    color: var(--color-text-link); text-decoration: underline; text-underline-offset: 3px;
+  }
+  .ogpbar__viewband:hover { color: var(--color-text-link-hover); background: var(--color-primary-subtle); }
+  .ogpbar__viewband:focus-visible { outline: 2px solid var(--focus-ring-color); outline-offset: 2px; }
+  .ogpbar__viewband[hidden] { display: none; }
+
+  @media (max-width: 640px) {
+    .ogpbar__plotwrap { flex-direction: column; align-items: stretch; }
+    .ogpbar__vaxis { writing-mode: horizontal-tb; transform: none; }
+    .ogpbar__row { grid-template-columns: 1fr; row-gap: var(--spacing-100); }
+    .ogpbar__label { text-align: left; white-space: normal; }
+    .ogpbar__value { text-align: left; }
+  }
+</style>

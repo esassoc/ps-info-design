@@ -7,6 +7,7 @@
 import EsaCard from '@esa/ecology/esa-card.astro';
 import EsaIcon from '@esa/ecology/esa-icon.astro';
 import { withBase } from '../../lib/base';
+import { isExternalHref, EXTERNAL_LINK_ICON_PATHS } from '../../lib/psinfoExternalLink';
 
 export interface HomeCardItem {
   title: string;
@@ -23,24 +24,23 @@ interface Props {
   columns?: number;
 }
 const { items, min = '230px', columns } = Astro.props;
-
-const ARROW = '<path d="M7 7h10v10"/><path d="M7 17 17 7"/>';
 ---
 <div class:list={['homecards', { 'homecards--fixed': !!columns }]} style={`--card-min: ${min}; --cols: ${columns ?? 1}`}>
   {items.map((item) => {
     const internal = item.href.startsWith('/');
+    const external = !internal && isExternalHref(item.href);
     return (
       <a
         class="homecard"
         href={internal ? withBase(item.href) : item.href}
-        {...(internal ? {} : { target: '_blank', rel: 'noopener' })}
+        {...(external ? { target: '_blank', rel: 'noopener' } : {})}
       >
         <EsaCard variant="outlined" padding="none">
           <img class="homecard__img" src={withBase(item.image)} alt="" loading="lazy" decoding="async" />
           <div class="homecard__body">
             <span class="homecard__title">
               {item.title}
-              {!internal && <EsaIcon name="arrow-up-right" size="xs" paths={ARROW} />}
+              {external && <EsaIcon name="external-link" size="xs" paths={EXTERNAL_LINK_ICON_PATHS} label="(external)" />}
             </span>
             <span class="homecard__blurb">{item.blurb}</span>
           </div>

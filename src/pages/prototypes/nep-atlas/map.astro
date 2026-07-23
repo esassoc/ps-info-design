@@ -1,0 +1,49 @@
+---
+// NEP Atlas — NEP Activity Map (/Home/NepAtlasMap, fetched 2026-07-22).
+// Reuses PsInfoNepAtlasMap with legend={true} (activity-type color key,
+// titled with prod's own "NEP Award" legend field name repurposed for our
+// activity-type-colored markers — see contract) and showTeaser={false} (the
+// "Click to view the full map" link would be self-referential on this page).
+// See src/data/pages/nep-atlas.ts (MAP_PAGE) and
+// src/data/contracts/nep-atlas.md for full sourcing + deviation notes.
+import PsInfoAppShell from '../../../layouts/PsInfoAppShell.astro';
+import PsInfoPhotoHeader from '../../../components/psinfo/PsInfoPhotoHeader.astro';
+import PsInfoNepAtlasNav from '../../../components/psinfo/PsInfoNepAtlasNav.astro';
+import PsInfoNepAtlasNarrative from '../../../components/psinfo/PsInfoNepAtlasNarrative.astro';
+import PsInfoNepAtlasMap from '../../../components/psinfo/PsInfoNepAtlasMap.astro';
+import PsInfoNepAtlasMapTable from '../../../components/psinfo/PsInfoNepAtlasMapTable.astro';
+import { HERO_TITLE, WELCOME_PHOTO, MAP_PAGE } from '../../../data/pages/nep-atlas';
+---
+<!-- manifest:
+  layout: PsInfoAppShell (active Implementation and Funding > NEP Atlas) > center+stack spine
+  sections:
+    - page header + band nav -> psinfo-photo-header (photo band, current=map) + psinfo-nep-atlas-nav
+    - intro narrative         -> psinfo-nep-atlas-narrative (3 verbatim paragraphs, prod typos "incoporated"/"activties" kept)
+    - activities map + legend -> psinfo-nep-atlas-map (legend=true, showTeaser=false)
+    - map table               -> psinfo-nep-atlas-map-table (the map's own 14 stand-in points)
+-->
+<PsInfoAppShell title="NEP Activity Map — NEP Atlas — Puget Sound Info" active={{ moduleId: 'implementation', leafId: 'nep-atlas' }}>
+  <div class="center stack" data-gap="xl">
+    <PsInfoPhotoHeader
+      size="band"
+      image={WELCOME_PHOTO.image}
+      focus="50% 35%"
+      eyebrow={HERO_TITLE}
+      title={MAP_PAGE.title}
+    >
+      <PsInfoNepAtlasNav slot="band" current="map" />
+    </PsInfoPhotoHeader>
+
+    <div class="stack" data-gap="md" id="intro">
+      <PsInfoNepAtlasNarrative paragraphs={MAP_PAGE.paragraphs} />
+    </div>
+
+    <div class="stack" data-gap="md" id="map">
+      <PsInfoNepAtlasMap legend={true} showTeaser={false} />
+    </div>
+
+    <div class="stack" data-gap="md" id="map-table">
+      <PsInfoNepAtlasMapTable />
+    </div>
+  </div>
+</PsInfoAppShell>

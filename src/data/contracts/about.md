@@ -66,3 +66,12 @@ The source article ends there. No further sections, no closing CTA band, no rela
 ## Gaps
 
 - None. The page is server-rendered (confirmed via `curl -sL`, no JS-gated content); every heading, paragraph, list item, link href, and inline image was extractable directly from the fetched HTML, including decoding the three base64-embedded photographs to confirm their subjects. The only native gap is accessibility, not content: the source ships `alt=""` on all three inline images, so this prototype's alt text is supplied to meet WCAG rather than lifted from source markup — documented above, not a content fabrication.
+
+## Fidelity audit — 2026-07-22
+
+Structure + content re-audit against the saved prod DOM (scratchpad/prod/about.html; prod main is 4.7KB of markup once its three base64 photos are stripped):
+
+- **Verified verbatim, no changes needed**: h1 + section order (photos → three Q&A sections) matches prod's reading order; all nine prod paragraphs, the 7-item partner list (incl. the source's "Intiative" typo), both mailto CTAs, and every href match the data module exactly. Link classification re-checked against the repo-wide convention: genuinely-external hosts carry the mark and open a new tab; the five consolidated-IA links render as internal same-tab routes with no mark; mailto links carry no mark.
+- **The header fix this contract required has landed**: the page renders plain `EsaPageHeader` (title only, no lede, no photo band) — the "Existing prototype file audit" section above describes the pre-fix state and is retained as history.
+- **Fixed (only divergence found)**: prod nests `<strong>CE-01J31901</strong>` inside the EPA disclaimer's `<em>` (brackets outside the strong). Now modeled via an optional `strong` flag on text segments and rendered by PsInfoAboutNarrative. Previously noted here as optional; the fidelity pass reproduces it.
+- **Kept as established convention**: the three ALL-CAPS `<p>` pseudo-headings render as sentence-case real `<h2>`s (words unchanged — repo's no-shouting-caps rule); prototype-supplied alt text on the three photos (source ships `alt=""`; WCAG fix, not invented content).

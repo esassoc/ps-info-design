@@ -1,0 +1,165 @@
+---
+// PsInfoNepAtlasMap — interactive Leaflet reproduction of the NEP Atlas home
+// page's Activities map (prod mounts Leaflet into #ntaActivitiesMapDivID,
+// 400px tall, one "Activities" point layer, and a "Click to view the full
+// map" text link below — mirrored here). Marker data is invented (see
+// ATLAS_MAP_POINTS provenance in src/data/pages/nep-atlas.ts). Reused on both
+// the home page (teaser link to the map page) and the map page itself
+// (teaser hidden, legend shown instead — see Props below).
+//
+// bcn-lego-checked: no esa- lego renders an interactive slippy map (walked
+// the catalog — esa-card/esa-container are static surfaces, nothing
+// map-shaped); checked Beacon shared ui components (no map wrapper exists
+// there); leaflet (node_modules) is composed directly and this component is
+// the reusable home for the map mount + its a11y contract.
+import { MAP_CONFIG, MAP_TEASER, MAP_PAGE, ATLAS_MAP_CATEGORIES } from '../../data/pages/nep-atlas';
+import { withBase } from '../../lib/base';
+
+interface Props {
+  /** Home page shows the "Click to view the full map" teaser; the map page itself doesn't (self-referential there). */
+  showTeaser?: boolean;
+  /** The map page shows a color-key legend above the map; the home page doesn't. */
+  legend?: boolean;
+}
+const { showTeaser = true, legend = false } = Astro.props;
+---
+<!-- rendered below in markup too -->
+<section class="atlas-map-section" aria-label={MAP_CONFIG.ariaLabel}>
+  <p class="sr-only" id="nep-atlas-map-keys">
+    Arrow keys pan the map; plus and minus keys zoom; Tab moves through map controls and project markers; Enter opens a marker's details.
+  </p>
+  {legend && (
+    <div class="atlas-map__legendwrap">
+      <p class="atlas-map__legendtitle">{MAP_PAGE.legendTitle}</p>
+      <ul class="atlas-map__legend" role="list">
+        {ATLAS_MAP_CATEGORIES.map((cat) => (
+          <li class="atlas-map__legenditem">
+            <span class="atlas-marker__dot" aria-hidden="true" style={`background:${cat.color}`}></span>
+            {cat.label}
+          </li>
+        ))}
+      </ul>
+    </div>
+  )}
+  <div
+    id="nep-atlas-map"
+    class="atlas-map"
+    role="application"
+    aria-label={MAP_CONFIG.ariaLabel}
+    aria-describedby="nep-atlas-map-keys"
+    style={`height: ${MAP_CONFIG.heightPx}px`}
+  ></div>
+  {showTeaser && (
+    <p class="atlas-map__more">
+      <a href={withBase(MAP_TEASER.route)} class="atlas-map__link">{MAP_TEASER.linkText}</a>
+    </p>
+  )}
+</section>
+
+<script>
+  import L from 'leaflet';
+  import 'leaflet/dist/leaflet.css';
+  import { MAP_CONFIG, ATLAS_MAP_CATEGORIES, ATLAS_MAP_POINTS } from '../../data/pages/nep-atlas';
+
+  const el = document.getElementById('nep-atlas-map');
+  if (el && !el.dataset.mapReady) {
+    el.dataset.mapReady = 'true';
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const map = L.map(el, {
+      center: MAP_CONFIG.center,
+      zoom: MAP_CONFIG.zoom,
+      scrollWheelZoom: false,
+      zoomAnimation: !reduceMotion,
+      fadeAnimation: !reduceMotion,
+      markerZoomAnimation: !reduceMotion,
+    });
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+      subdomains: 'abcd',
+      maxZoom: 19,
+      attribution:
+        '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+    }).addTo(map);
+
+    const byId = new Map(ATLAS_MAP_CATEGORIES.map((c) => [c.id, c]));
+    for (const point of ATLAS_MAP_POINTS) {
+      const category = byId.get(point.categoryId);
+      const icon = L.divIcon({
+        className: 'atlas-marker',
+        html: `<span class="atlas-marker__dot" style="background:${category?.color ?? '#003a5d'}"></span>`,
+        // 24x24 meets the WCAG 2.2 §2.5.8 target-size minimum outright
+        // (rather than relying on the essential/spacing exception, which
+        // clustered markers can't reliably claim).
+        iconSize: [24, 24],
+        iconAnchor: [12, 12],
+        popupAnchor: [0, -14],
+      });
+      const marker = L.marker(point.coords, { icon, title: point.name }).addTo(map);
+      // Popup content built with DOM APIs (textContent) — no HTML interpolation.
+      const content = document.createElement('div');
+      const name = document.createElement('strong');
+      name.textContent = point.name;
+      const cat = document.createElement('div');
+      cat.textContent = category?.label ?? '';
+      const lead = document.createElement('div');
+      lead.textContent = `Lead organization: ${point.leadOrg}`;
+      content.append(name, cat, lead);
+      marker.bindPopup(content);
+      const markerEl = marker.getElement();
+      if (markerEl) {
+        markerEl.setAttribute('role', 'button');
+        markerEl.setAttribute('aria-label', point.name);
+      }
+    }
+  }
+</script>
+
+<style is:global>
+/* bcn-lego-checked: Leaflet runtime DOM (markers, popups, controls) is created client-side and cannot take Astro scoped attributes; global rules are namespace-scoped under .atlas-map. No esa- lego provides a slippy map. */
+.atlas-map-section { isolation: isolate; display: flex; flex-direction: column; gap: var(--spacing-300); text-align: center; }
+.atlas-map {
+  width: 100%;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-100);
+  text-align: left;
+}
+.atlas-map:focus-visible { outline: 2px solid var(--focus-ring-color); outline-offset: 2px; }
+.atlas-map .leaflet-marker-icon:focus-visible { outline: 2px solid var(--focus-ring-color); outline-offset: 2px; border-radius: 50%; }
+.atlas-marker__dot {
+  display: block; width: var(--spacing-400); height: var(--spacing-400);
+  border-radius: 50%; border: 2px solid #ffffff;
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--color-text-primary) 55%, transparent);
+  flex: none;
+}
+/* Map-pin markers (Leaflet divIcon) are sized at the 24px iconSize set in
+   the script below, meeting WCAG 2.2 §2.5.8 outright; the legend key dot
+   above stays at --spacing-400 since it isn't an interactive target. */
+.leaflet-marker-icon.atlas-marker .atlas-marker__dot {
+  width: var(--spacing-500); height: var(--spacing-500);
+}
+.atlas-map__legendwrap { display: flex; flex-direction: column; gap: var(--spacing-200); text-align: left; }
+.atlas-map__legendtitle {
+  margin: 0; font-size: var(--ps-info-text-body); font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+}
+.atlas-map__legend {
+  list-style: none; margin: 0; padding: 0;
+  display: flex; flex-wrap: wrap; gap: var(--spacing-300);
+}
+.atlas-map__legenditem {
+  display: flex; align-items: center; gap: var(--spacing-150);
+  font-size: 1rem; color: var(--color-text-secondary);
+}
+.atlas-map .leaflet-popup-content {
+  font-family: inherit; font-size: var(--ps-info-text-body); line-height: 1.5;
+  margin: var(--spacing-300) var(--spacing-400);
+}
+.atlas-map .leaflet-popup-content strong { display: block; margin-bottom: var(--spacing-100); }
+.atlas-map__more { margin: 0; }
+.atlas-map__link { color: var(--color-text-link); text-decoration: underline; text-decoration-color: color-mix(in srgb, currentColor 35%, transparent); }
+.atlas-map__link:hover { text-decoration-color: currentColor; }
+.atlas-map__link:focus-visible { outline: 2px solid var(--focus-ring-color); outline-offset: 2px; }
+.sr-only {
+  position: absolute; width: 1px; height: 1px; margin: -1px;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap;
+}
+</style>

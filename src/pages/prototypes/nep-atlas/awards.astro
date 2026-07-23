@@ -1,0 +1,40 @@
+---
+// NEP Atlas — NEP Awards (/Award/Index, fetched 2026-07-22). Grid carries the
+// FULL 14-row /Award/IndexGridJsonData feed, all 9 columns — no truncation.
+// See src/data/pages/nep-atlas.ts (AWARD_ROWS) and
+// src/data/contracts/nep-atlas.md.
+import PsInfoAppShell from '../../../layouts/PsInfoAppShell.astro';
+import PsInfoPhotoHeader from '../../../components/psinfo/PsInfoPhotoHeader.astro';
+import PsInfoNepAtlasNav from '../../../components/psinfo/PsInfoNepAtlasNav.astro';
+import PsInfoNepAtlasNarrative from '../../../components/psinfo/PsInfoNepAtlasNarrative.astro';
+import PsInfoNepAtlasAwardsGrid from '../../../components/psinfo/PsInfoNepAtlasAwardsGrid.astro';
+import { HERO_TITLE, WELCOME_PHOTO, AWARDS_PAGE } from '../../../data/pages/nep-atlas';
+---
+<!-- manifest:
+  layout: PsInfoAppShell (active Implementation and Funding > NEP Atlas) > center+stack spine
+  sections:
+    - page header + band nav -> psinfo-photo-header (photo band, current=awards) + psinfo-nep-atlas-nav
+    - intro narrative         -> psinfo-nep-atlas-narrative (1 verbatim paragraph, retired-awards list)
+    - awards grid             -> psinfo-nep-atlas-awards-grid (AG Grid, FULL 14 of 14 rows, all 9 columns)
+-->
+<PsInfoAppShell title="NEP Awards — NEP Atlas — Puget Sound Info" active={{ moduleId: 'implementation', leafId: 'nep-atlas' }}>
+  <div class="center stack" data-gap="xl">
+    <PsInfoPhotoHeader
+      size="band"
+      image={WELCOME_PHOTO.image}
+      focus="50% 35%"
+      eyebrow={HERO_TITLE}
+      title={AWARDS_PAGE.title}
+    >
+      <PsInfoNepAtlasNav slot="band" current="awards" />
+    </PsInfoPhotoHeader>
+
+    <div class="stack" data-gap="md" id="intro">
+      <PsInfoNepAtlasNarrative paragraphs={AWARDS_PAGE.paragraphs} />
+    </div>
+
+    <div class="stack" data-gap="md" id="awards">
+      <PsInfoNepAtlasAwardsGrid />
+    </div>
+  </div>
+</PsInfoAppShell>

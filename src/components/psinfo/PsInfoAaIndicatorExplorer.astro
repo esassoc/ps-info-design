@@ -1,0 +1,361 @@
+---
+// PsInfoAaIndicatorExplorer — the Overview tab's indicator carousel, rebuilt
+// as the manual WCAG tabs pattern: icon+label tiles (role=tab) select a
+// tabpanel below (all 10 SSR'd, only the active one visible). Distinct from
+// esa-tab-layout's plain text-label buttons — these tabs are PNG-icon tiles
+// with rich per-indicator panels (trend/target icons, description, a chart
+// area whose shape varies by indicator). The tablist doubles as a carousel
+// viewport (~3 tiles visible) with flanking arrow buttons and dot pagination.
+//
+// bcn-lego-checked: esa-tab-layout renders shadow-DOM text-label buttons with
+// no room for an icon tile + rich SSR'd panel content per tab; this
+// component implements role=tablist/tab/tabpanel + aria-selected + roving
+// tabindex + Arrow/Home/End manually, matching the lego's own keyboard
+// contract. The carousel viewport/arrows/dots reproduce prod's slick-carousel
+// runtime chrome (pmSliderNav — arrows/dots are JS-injected in prod, absent
+// from the static DOM) natively over the manual tabs pattern; esa-tab-layout
+// still can't host icon-tile tabs + SSR'd rich panels. Checked Beacon
+// (Angular carousel, not a portable pattern here).
+import EsaIcon from '@esa/ecology/esa-icon.astro';
+import { withBase } from '../../lib/base';
+import { isExternalHref, EXTERNAL_LINK_ICON_PATHS } from '../../lib/psinfoExternalLink';
+import { AA_TREND_ICON, AA_TARGET_STATUS_ICON } from '../../lib/psinfoAaIcons';
+import type { AaTopicIndicator } from '../../data/pages/action-agenda';
+
+interface Props {
+  indicators: AaTopicIndicator[];
+}
+const { indicators } = Astro.props;
+
+const tabId = (i: number) => `aaind-tab-${i}`;
+const panelId = (i: number) => `aaind-panel-${i}`;
+const tileIcon = (source: AaTopicIndicator['source']) =>
+  source === 'vital-signs'
+    ? '/photos/action-agenda/icons/vital-signs-indicator.png'
+    : '/photos/action-agenda/icons/pi-hexagon.png';
+---
+<div class="aaindx" data-aa-indicator-explorer>
+  <div class="aaindx__carousel">
+    <button type="button" class="aaindx__arrow aaindx__arrow--prev" aria-label="Previous indicators" data-aa-indx-prev disabled>
+      <EsaIcon name="chevron-left" size="sm" />
+    </button>
+    <div class="aaindx__tablist" role="tablist" aria-label="Indicators" data-aa-indx-viewport>
+      {indicators.map((ind, i) => (
+        <button
+          type="button"
+          role="tab"
+          id={tabId(i)}
+          class:list={['aaindx__tab', i === 0 && 'aaindx__tab--active']}
+          aria-selected={i === 0 ? 'true' : 'false'}
+          aria-controls={panelId(i)}
+          tabindex={i === 0 ? 0 : -1}
+        >
+          <img src={withBase(tileIcon(ind.source))} alt="" width="40" height="40" loading="lazy" />
+          <span>{ind.name}</span>
+        </button>
+      ))}
+    </div>
+    <button type="button" class="aaindx__arrow aaindx__arrow--next" aria-label="Next indicators" data-aa-indx-next>
+      <EsaIcon name="chevron-right" size="sm" />
+    </button>
+  </div>
+  <div class="aaindx__dots" role="group" aria-label="Indicator pages" data-aa-indx-dots></div>
+
+  {indicators.map((ind, i) => (
+    <div
+      role="tabpanel"
+      id={panelId(i)}
+      aria-labelledby={tabId(i)}
+      tabindex="0"
+      class="aaindx__panel"
+      hidden={i !== 0}
+    >
+      <div class="aaindx__panelhead">
+        <img src={withBase(tileIcon(ind.source))} alt="" width="40" height="40" loading="lazy" />
+        <strong>{ind.name}</strong>
+        <a
+          class="aaindx__viewlink"
+          href={ind.href}
+          {...(isExternalHref(ind.href) ? { target: '_blank', rel: 'noopener' } : {})}
+        >
+          {ind.linkLabel}
+          {isExternalHref(ind.href) && <EsaIcon name="external-link" size="xs" paths={EXTERNAL_LINK_ICON_PATHS} label="(external)" />}
+        </a>
+      </div>
+
+      <p class="aaindx__desc">{ind.description}</p>
+
+      <div class="aaindx__meta">
+        <span class="aaindx__metaitem">
+          <span class="aaindx__metalabel">Trend</span>
+          <img src={withBase(AA_TREND_ICON[ind.trend])} alt={`Trend: ${ind.trend}`} width="64" height="64" loading="lazy" />
+        </span>
+        {ind.targetStatus && (
+          <span class="aaindx__metaitem">
+            <span class="aaindx__metalabel">Target Status</span>
+            <img src={withBase(AA_TARGET_STATUS_ICON[ind.targetStatus])} alt={`Target Status: ${ind.targetStatus}`} width="64" height="64" loading="lazy" />
+          </span>
+        )}
+      </div>
+
+      <div class="aaindx__chart">
+        {ind.chart.kind === 'image' && (
+          <img class="aaindx__chartimg" src={withBase(ind.chart.src)} alt={`${ind.name} chart`} loading="lazy" />
+        )}
+        {ind.chart.kind === 'columns' && (
+          <figure class="aaindx__figure">
+            <figcaption class="aaindx__figcaption">{ind.chart.title}</figcaption>
+            <div class="aacommit__scroller">
+              <table class="aaindx__table">
+                <caption class="sr-only">{ind.chart.title}</caption>
+                <thead>
+                  <tr>
+                    <th scope="col">{ind.chart.hAxisTitle}</th>
+                    {ind.chart.series.map((s) => <th scope="col">{s}</th>)}
+                  </tr>
+                </thead>
+                <tbody>
+                  {ind.chart.rows.map((row) => (
+                    <tr>
+                      <td>{row.label}</td>
+                      {row.values.map((v) => <td>{v.toLocaleString()}</td>)}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            {ind.chart.vAxisTitle && <p class="aaindx__unitnote">Units: {ind.chart.vAxisTitle}</p>}
+          </figure>
+        )}
+        {ind.chart.kind === 'none' && (
+          <div class="aaindx__nodata">
+            <strong>{ind.name}</strong>
+            <p>No reported data available</p>
+          </div>
+        )}
+      </div>
+    </div>
+  ))}
+</div>
+
+<script>
+  document.querySelectorAll<HTMLElement>('[data-aa-indicator-explorer]').forEach((root) => {
+    const tabs = [...root.querySelectorAll<HTMLButtonElement>('[role="tab"]')];
+    const panels = [...root.querySelectorAll<HTMLElement>('[role="tabpanel"]')];
+
+    function select(index: number, focus: boolean): void {
+      tabs.forEach((tab, i) => {
+        const active = i === index;
+        tab.classList.toggle('aaindx__tab--active', active);
+        tab.setAttribute('aria-selected', String(active));
+        tab.tabIndex = active ? 0 : -1;
+        if (active && focus) {
+          tab.focus();
+          // 2.4.11 Focus Not Obscured: roving focus must stay visible inside the carousel viewport.
+          tab.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+        }
+      });
+      panels.forEach((panel, i) => { panel.hidden = i !== index; });
+    }
+
+    tabs.forEach((tab, i) => {
+      tab.addEventListener('click', () => select(i, false));
+      tab.addEventListener('keydown', (event: KeyboardEvent) => {
+        let target: number | null = null;
+        if (event.key === 'ArrowRight') target = (i + 1) % tabs.length;
+        else if (event.key === 'ArrowLeft') target = (i - 1 + tabs.length) % tabs.length;
+        else if (event.key === 'Home') target = 0;
+        else if (event.key === 'End') target = tabs.length - 1;
+        if (target !== null) {
+          event.preventDefault();
+          select(target, true);
+        }
+      });
+    });
+
+    // ---- carousel chrome: arrows + dot pagination over the tablist viewport ----
+    const viewport = root.querySelector<HTMLElement>('[data-aa-indx-viewport]');
+    const prevBtn = root.querySelector<HTMLButtonElement>('[data-aa-indx-prev]');
+    const nextBtn = root.querySelector<HTMLButtonElement>('[data-aa-indx-next]');
+    const dotsEl = root.querySelector<HTMLElement>('[data-aa-indx-dots]');
+
+    if (viewport && prevBtn && nextBtn) {
+      const reduceMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      // Mirrors the CSS breakpoints below (1-up ≤560px, 2-up ≤900px, else 3-up).
+      const visibleCount = (): number => {
+        if (window.innerWidth <= 560) return 1;
+        if (window.innerWidth <= 900) return 2;
+        return 3;
+      };
+      const pageCount = (): number => Math.max(Math.ceil(tabs.length / visibleCount()), 1);
+
+      const scrollToPage = (page: number): void => {
+        viewport.scrollTo({ left: page * viewport.clientWidth, behavior: reduceMotion() ? 'auto' : 'smooth' });
+      };
+
+      const updateArrows = (): void => {
+        const maxScroll = viewport.scrollWidth - viewport.clientWidth;
+        prevBtn.disabled = viewport.scrollLeft <= 1;
+        nextBtn.disabled = viewport.scrollLeft >= maxScroll - 1;
+      };
+
+      const updateDots = (): void => {
+        if (!dotsEl) return;
+        const pages = pageCount();
+        let dots = [...dotsEl.querySelectorAll<HTMLButtonElement>('button')];
+        if (dots.length !== pages) {
+          dotsEl.innerHTML = '';
+          dots = Array.from({ length: pages }, (_, p) => {
+            const dot = document.createElement('button');
+            dot.type = 'button';
+            dot.className = 'aaindx__dot';
+            dot.setAttribute('aria-label', `Go to indicators page ${p + 1} of ${pages}`);
+            dot.addEventListener('click', () => scrollToPage(p));
+            dotsEl.appendChild(dot);
+            return dot;
+          });
+        }
+        const active = Math.min(Math.round(viewport.scrollLeft / (viewport.clientWidth || 1)), pages - 1);
+        dots.forEach((dot, i) => {
+          const isActive = i === active;
+          dot.classList.toggle('aaindx__dot--active', isActive);
+          if (isActive) dot.setAttribute('aria-current', 'true');
+          else dot.removeAttribute('aria-current');
+        });
+      };
+
+      prevBtn.addEventListener('click', () => {
+        viewport.scrollBy({ left: -viewport.clientWidth, behavior: reduceMotion() ? 'auto' : 'smooth' });
+      });
+      nextBtn.addEventListener('click', () => {
+        viewport.scrollBy({ left: viewport.clientWidth, behavior: reduceMotion() ? 'auto' : 'smooth' });
+      });
+
+      let scrollFrame: number | null = null;
+      viewport.addEventListener('scroll', () => {
+        if (scrollFrame !== null) return;
+        scrollFrame = requestAnimationFrame(() => {
+          updateArrows();
+          updateDots();
+          scrollFrame = null;
+        });
+      });
+      window.addEventListener('resize', () => {
+        updateArrows();
+        updateDots();
+      });
+
+      updateArrows();
+      updateDots();
+    }
+  });
+</script>
+
+<style>
+  .aaindx { display: flex; flex-direction: column; gap: var(--spacing-400); }
+  .sr-only {
+    position: absolute; width: 1px; height: 1px; margin: -1px;
+    overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap;
+  }
+
+  .aaindx__carousel { display: flex; align-items: stretch; gap: var(--spacing-200); }
+
+  .aaindx__arrow {
+    flex: none; align-self: center;
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 36px; height: 36px; border-radius: var(--radius-full);
+    background: var(--color-surface); border: 1px solid var(--color-border);
+    color: var(--color-text-primary);
+  }
+  .aaindx__arrow:hover:not(:disabled) { background: var(--color-surface-sunken); }
+  .aaindx__arrow:focus-visible { outline: 2px solid var(--focus-ring-color); outline-offset: 2px; }
+  .aaindx__arrow:disabled { opacity: 0.4; cursor: default; }
+
+  .aaindx__tablist {
+    flex: 1 1 auto; min-width: 0;
+    display: flex; gap: var(--spacing-200);
+    overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none;
+  }
+  .aaindx__tablist::-webkit-scrollbar { display: none; }
+  .aaindx__tab {
+    flex: 0 0 calc((100% - 2 * var(--spacing-200)) / 3);
+    scroll-snap-align: start;
+    display: flex; flex-direction: column; align-items: center; gap: var(--spacing-150);
+    padding: var(--spacing-300) var(--spacing-200); min-height: 88px;
+    background: var(--color-surface); border: 2px solid var(--color-border);
+    border-radius: var(--radius-100); text-align: center;
+  }
+  .aaindx__tab span { font-size: var(--ps-info-text-meta-lg); font-weight: var(--font-weight-medium); color: var(--color-text-secondary); line-height: 1.3; }
+  .aaindx__tab:hover { border-color: var(--color-primary-border); }
+  .aaindx__tab:focus-visible { outline: 2px solid var(--focus-ring-color); outline-offset: 2px; }
+  .aaindx__tab--active {
+    border-color: var(--color-primary); background: var(--ps-info-blue-50);
+    box-shadow: inset 0 -3px 0 var(--color-primary);
+  }
+  .aaindx__tab--active span { color: var(--color-text-primary); font-weight: var(--font-weight-semibold); }
+
+  @media (max-width: 900px) {
+    .aaindx__tab { flex-basis: calc((100% - 1 * var(--spacing-200)) / 2); }
+  }
+  @media (max-width: 560px) {
+    .aaindx__tab { flex-basis: 100%; }
+  }
+
+  .aaindx__dots { display: flex; align-items: center; justify-content: center; gap: var(--spacing-200); }
+  .aaindx__dots :global(.aaindx__dot) {
+    width: 24px; height: 24px; padding: var(--spacing-100);
+    display: inline-flex; align-items: center; justify-content: center;
+    background: transparent;
+  }
+  .aaindx__dots :global(.aaindx__dot)::before {
+    content: ''; display: block; width: 8px; height: 8px; border-radius: var(--radius-full);
+    background: var(--ps-info-blue-200);
+  }
+  .aaindx__dots :global(.aaindx__dot--active)::before { background: var(--ps-info-blue-800); }
+  .aaindx__dots :global(.aaindx__dot):focus-visible { outline: 2px solid var(--focus-ring-color); outline-offset: 2px; }
+
+  /* Prod's detail surface: a light rounded box under the card row. The
+     [hidden] rule is load-bearing — display:flex on the class otherwise
+     defeats the hidden attribute and every panel stacks visibly. */
+  .aaindx__panel {
+    display: flex; flex-direction: column; gap: var(--spacing-300);
+    background: var(--color-surface-sunken);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-200);
+    padding: var(--spacing-500);
+  }
+  .aaindx__panel[hidden] { display: none; }
+  .aaindx__panel:focus-visible { outline: 2px solid var(--focus-ring-color); outline-offset: 2px; }
+
+  .aaindx__panelhead { display: flex; align-items: center; gap: var(--spacing-200); flex-wrap: wrap; }
+  .aaindx__panelhead strong { font-size: 1.125rem; color: var(--color-text-primary); }
+  .aaindx__viewlink {
+    display: inline-flex; align-items: center; gap: var(--spacing-100);
+    font-size: var(--ps-info-text-meta-lg); color: var(--color-text-link); text-decoration: underline; text-underline-offset: 3px; 
+  }
+  .aaindx__viewlink:focus-visible { outline: 2px solid var(--focus-ring-color); outline-offset: 2px; }
+  .aaindx__viewlink :global(.esa-icon) { color: var(--color-text-muted); }
+
+  .aaindx__desc { margin: 0; font-style: italic; font-size: 1rem; color: var(--color-text-secondary); line-height: 1.6; }
+
+  .aaindx__meta { display: flex; gap: var(--spacing-600); flex-wrap: wrap; }
+  .aaindx__metaitem { display: flex; flex-direction: column; align-items: flex-start; gap: var(--spacing-100); }
+  .aaindx__metalabel { font-size: var(--ps-info-text-meta-lg); font-weight: var(--font-weight-semibold); color: var(--color-text-secondary); }
+
+  .aaindx__chart { display: flex; flex-direction: column; gap: var(--spacing-200); }
+  .aaindx__chartimg { display: block; max-width: 100%; height: auto; border-radius: var(--radius-100); }
+
+  .aaindx__figure { margin: 0; display: flex; flex-direction: column; gap: var(--spacing-200); }
+  .aaindx__figcaption { font-weight: var(--font-weight-semibold); font-size: 1rem; color: var(--color-text-primary); }
+  .aacommit__scroller { overflow-x: auto; border: 1px solid var(--color-border); border-radius: var(--radius-100); }
+  .aaindx__table { width: 100%; border-collapse: collapse; min-width: 420px; }
+  .aaindx__table th, .aaindx__table td { padding: var(--spacing-250) var(--spacing-300); text-align: left; font-size: 1rem; border-bottom: 1px solid var(--color-border-light); }
+  .aaindx__table th { background: var(--color-surface-sunken); color: var(--color-text-secondary); font-weight: var(--font-weight-semibold); font-size: var(--ps-info-text-meta-lg); }
+  .aaindx__table tr:last-child td { border-bottom: 0; }
+  .aaindx__unitnote { margin: 0; font-size: var(--ps-info-text-meta-lg); color: var(--color-text-muted); }
+
+  .aaindx__nodata { display: flex; flex-direction: column; gap: var(--spacing-100); }
+  .aaindx__nodata strong { font-size: 1rem; color: var(--color-text-primary); }
+  .aaindx__nodata p { margin: 0; font-size: 1rem; color: var(--color-text-secondary); font-style: italic; }
+</style>

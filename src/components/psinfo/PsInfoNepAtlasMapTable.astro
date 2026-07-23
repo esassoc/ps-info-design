@@ -1,0 +1,61 @@
+---
+// PsInfoNepAtlasMapTable — the map page's "activities in map view" table, fed
+// by the map's own 14 representative points (ATLAS_MAP_POINTS) — internally
+// consistent with the map above it (this map+table pair is the representative
+// stand-in for prod's interactive map + its 1,608-point live table). Names
+// are invented (no detail pages exist for them) so, unlike the Activities/
+// Awards grids, the Name column is plain text, not a link.
+//
+// bcn-lego-checked: no esa- table lego (esa-link-column/esa-pagination are
+// not data tables); esa-card is the reused surface, same treatment as
+// PsInfoNepAtlasActivityTable.
+import EsaCard from '@esa/ecology/esa-card.astro';
+import { MAP_PAGE, ATLAS_MAP_POINTS, ATLAS_MAP_CATEGORIES } from '../../data/pages/nep-atlas';
+
+const categoryLabel = (id: string) => ATLAS_MAP_CATEGORIES.find((c) => c.id === id)?.label ?? '';
+---
+<EsaCard variant="outlined">
+  <p class="maptable__header">{MAP_PAGE.tableHeader(ATLAS_MAP_POINTS.length, ATLAS_MAP_POINTS.length)}</p>
+  <div class="maptable__scroll">
+    <table class="maptable">
+      <caption class="sr-only">Activities shown on the NEP Atlas map</caption>
+      <thead>
+        <tr>
+          {MAP_PAGE.tableColumns.map((col) => <th scope="col">{col}</th>)}
+        </tr>
+      </thead>
+      <tbody>
+        {ATLAS_MAP_POINTS.map((point) => (
+          <tr>
+            <td>{point.name}</td>
+            <td>{categoryLabel(point.categoryId)}</td>
+            <td>{point.leadOrg}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+</EsaCard>
+
+<style>
+  .maptable__header {
+    margin: 0 0 var(--spacing-300); font-size: var(--ps-info-text-body);
+    font-weight: var(--font-weight-semibold); color: var(--color-text-primary);
+  }
+  .maptable__scroll { overflow-x: auto; }
+  .maptable { width: 100%; border-collapse: collapse; font-size: 1rem; }
+  .maptable th, .maptable td {
+    padding: var(--spacing-200) var(--spacing-300); text-align: left;
+    border-bottom: 1px solid var(--color-border-light);
+    white-space: nowrap;
+  }
+  .maptable th {
+    background: var(--color-surface-sunken); color: var(--color-text-primary);
+    font-weight: var(--font-weight-semibold);
+  }
+  .maptable td { color: var(--color-text-primary); }
+  .sr-only {
+    position: absolute; width: 1px; height: 1px; margin: -1px;
+    overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap;
+  }
+</style>

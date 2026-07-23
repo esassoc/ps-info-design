@@ -1,0 +1,42 @@
+---
+// PsInfoAaAboutPanel — the Action Agenda Explorer's tinted "About" band
+// (Revision 3): the verbatim intro paragraph with its dark pill CTA living
+// INSIDE the same tinted container, directly below the text — matching prod's
+// own .aa2026-bodyone-band layout (bg #dfe5f3, CTA inside, left-aligned).
+//
+// bcn-lego-checked: composition — tinted band surface holding verbatim prod
+// prose + esa-button pill CTA; prod renders this as its own
+// .aa2026-bodyone-band (bg #dfe5f3), mapped to the spoke token
+// --ps-info-blue-100; no esa- lego provides a tinted prose band.
+import EsaButton from '@esa/ecology/esa-button.astro';
+import type { ProseParagraph } from '../../data/pages/action-agenda';
+
+interface Props {
+  paragraphs: ProseParagraph[];
+  cta: { label: string; href: string };
+}
+const { paragraphs, cta } = Astro.props;
+---
+<div class="aaabout">
+  {paragraphs.map((segments) => (
+    <p class="aaabout__p">
+      {segments.map((seg) => (seg.bold ? <strong>{seg.text}</strong> : seg.text))}
+    </p>
+  ))}
+  <div class="aaabout__cta">
+    <EsaButton href={cta.href}>{cta.label}</EsaButton>
+  </div>
+</div>
+
+<style>
+  .aaabout {
+    display: flex; flex-direction: column; gap: var(--spacing-400);
+    background: var(--ps-info-blue-100);
+    border-radius: var(--radius-100);
+    padding: var(--spacing-600) var(--spacing-500);
+  }
+  .aaabout__p { margin: 0; font-size: var(--ps-info-text-body); line-height: 1.65; color: var(--color-text-primary); }
+  .aaabout__p strong { font-weight: var(--font-weight-semibold); }
+  .aaabout__cta { align-self: flex-start; }
+  .aaabout__cta :global(.esa-button) { --form-radius-md: var(--radius-full); }
+</style>

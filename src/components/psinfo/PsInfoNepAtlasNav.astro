@@ -1,0 +1,217 @@
+---
+// PsInfoNepAtlasNav — the NEP Atlas module's own nav bar (About / Activities ▾ /
+// NEP Awards / Summaries ▾), reproduced verbatim from prod's mainNavbar — NOT
+// the sitewide "Puget Sound Info / Explore" mega-menu, which is also present
+// in the saved DOM and is deliberately NOT reproduced (the app shell rail
+// carries that IA). Rides the photo header's `band` slot on every page in
+// this lane. Cloned from the PsInfoGoalsNav/PsInfoAaTopicsNav disclosure-nav
+// pattern: plain link cells (About, NEP Awards) are a single <a>; dropdown
+// cells (Activities, Summaries) are a button[aria-expanded] disclosure with
+// no link of their own (prod's parent items are pure dropdown toggles,
+// href="#"). Data: MODULE_NAV (src/data/pages/nep-atlas.ts) — labels/hrefs
+// verbatim, no invented Home cell (prod's bar carries none).
+//
+// bcn-lego-checked: checked esa-header-nav/esa-nav-dropdown (neutral app
+// chrome, no on-photo band, no Escape/focus-return contract) and
+// esa-dropdown-menu (role=menu action emitter, wrong semantics for nav
+// links); band nav with mixed link/disclosure cells has no lego; disclosure
+// contract matches PsInfoGoalsNav/PsInfoAaTopicsNav. psinfo-nep-atlas-nav is
+// the reusable home.
+import { MODULE_NAV } from '../../data/pages/nep-atlas';
+import type { AtlasNavCurrent } from '../../data/pages/nep-atlas';
+import { withBase } from '../../lib/base';
+
+interface Props {
+  /** Route id of the page being viewed — marks the matching cell/link current. */
+  current?: AtlasNavCurrent;
+}
+const { current } = Astro.props;
+
+const CHEVRON = '<path d="m6 9 6 6 6-6"/>';
+---
+<nav class="atlasnav" aria-label="NEP Atlas" data-atlasnav>
+  <ul class="atlasnav__row" role="list">
+    {MODULE_NAV.map((item, i) =>
+      item.leaf ? (
+        <li class:list={['atlasnav__cell', { 'atlasnav__cell--current': item.leaf.current === current }]}>
+          <a
+            class="atlasnav__link"
+            href={withBase(item.leaf.route)}
+            aria-current={item.leaf.current === current ? 'page' : undefined}
+          >
+            {item.leaf.label}
+          </a>
+        </li>
+      ) : (
+        <li
+          class:list={['atlasnav__cell', { 'atlasnav__cell--current': item.children?.some((c) => c.current === current) }]}
+          data-atlas-disclosure
+        >
+          <button
+            type="button"
+            class="atlasnav__toggle"
+            aria-expanded="false"
+            aria-controls={`atlasnav-panel-${i}`}
+          >
+            {item.label}
+            <svg class="atlasnav__chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" set:html={CHEVRON} />
+          </button>
+          <ul class:list={['atlasnav__panel', { 'atlasnav__panel--end': i === MODULE_NAV.length - 1 }]} id={`atlasnav-panel-${i}`} role="list" hidden>
+            {item.children!.map((child) => (
+              <li>
+                <a
+                  class="atlasnav__item"
+                  href={withBase(child.route)}
+                  aria-current={child.current === current ? 'page' : undefined}
+                >
+                  {child.label}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </li>
+      )
+    )}
+  </ul>
+</nav>
+
+<style>
+  /* Same container-driven row policy as PsInfoGoalsNav/PsInfoAaTopicsNav:
+     4 equal columns, 2x2 at mid-width, or the mobile stack — never an
+     orphan wrap. */
+  .atlasnav { container-type: inline-size; }
+  .atlasnav__row {
+    list-style: none; margin: 0; padding: 0;
+    display: grid; grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+  @container (max-width: 720px) {
+    .atlasnav__row { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+  .atlasnav__cell { position: relative; }
+  /* This module has no per-goal hue system — hover/current read as plain
+     translucent overlays on the band. */
+  .atlasnav__cell:hover,
+  .atlasnav__cell:has(.atlasnav__toggle[aria-expanded="true"]) {
+    background: rgba(255, 255, 255, 0.10);
+  }
+  .atlasnav__cell--current { background: rgba(255, 255, 255, 0.18); }
+
+  .atlasnav__link {
+    display: flex; align-items: center; justify-content: center;
+    padding: var(--spacing-300) var(--spacing-300);
+    color: #ffffff; text-decoration: none; text-align: center;
+    font-size: 1rem; font-weight: var(--font-weight-medium); line-height: 1.25;
+    height: 100%;
+  }
+  .atlasnav__link:hover { text-decoration: underline; text-underline-offset: 4px; }
+  .atlasnav__link[aria-current] {
+    font-weight: var(--font-weight-bold);
+    text-decoration: underline; text-underline-offset: 4px;
+  }
+  .atlasnav__link:focus-visible { outline: 2px solid var(--focus-ring-color); outline-offset: -2px; }
+
+  .atlasnav__toggle {
+    width: 100%; background: none; border: 0; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; gap: var(--spacing-100);
+    padding: var(--spacing-300) var(--spacing-300);
+    color: #ffffff; font-size: 1rem; font-weight: var(--font-weight-medium);
+    font-family: inherit;
+  }
+  .atlasnav__toggle:focus-visible { outline: 2px solid var(--focus-ring-color); outline-offset: -2px; }
+  .atlasnav__chevron { transition: transform 150ms ease; }
+  .atlasnav__toggle[aria-expanded="true"] .atlasnav__chevron { transform: rotate(180deg); }
+
+  .atlasnav__panel {
+    position: absolute; top: 100%; left: 0; z-index: var(--z-dropdown);
+    min-width: 260px; padding: var(--spacing-200) 0;
+    background: var(--color-surface, #fff);
+    border: 1px solid var(--color-border, #e5e5e5);
+    border-radius: 0 0 var(--radius-100) var(--radius-100);
+    box-shadow: 0 8px 24px rgba(16, 42, 67, 0.2);
+    list-style: none; margin: 0;
+  }
+  .atlasnav__panel--end { left: auto; right: 0; }
+
+  .atlasnav__item {
+    display: flex; align-items: center; gap: var(--spacing-100);
+    padding: var(--spacing-150) var(--spacing-400);
+    font-size: 1rem; color: var(--color-text-secondary); text-decoration: none;
+  }
+  .atlasnav__item:hover { background: var(--ps-info-blue-50); color: var(--color-text-primary); }
+  .atlasnav__item:focus-visible { outline: 2px solid var(--focus-ring-color); outline-offset: -2px; }
+  .atlasnav__item[aria-current] { font-weight: var(--font-weight-semibold); color: var(--color-text-primary); }
+
+  @media (max-width: 860px) {
+    .atlasnav__row { display: flex; flex-direction: column; }
+    .atlasnav__link { justify-content: flex-start; padding-left: var(--spacing-400); }
+    .atlasnav__toggle { justify-content: flex-start; padding-left: var(--spacing-400); }
+    /* Static in-flow panel — matches GoalsNav/AaTopicsNav's mobile block. */
+    .atlasnav__panel {
+      position: static; box-shadow: none;
+      border: 0; border-radius: 0;
+      background: color-mix(in srgb, var(--color-primary) 8%, #ffffff);
+    }
+    .atlasnav__item { padding-left: var(--spacing-500); }
+  }
+</style>
+
+<script>
+  // WCAG disclosure-nav contract (same as PsInfoGoalsNav/PsInfoAaTopicsNav):
+  // the toggle button owns aria-expanded, Escape closes and refocuses the
+  // toggle, focusout/outside-click closes, opening one closes the others.
+  const nav = document.querySelector<HTMLElement>('[data-atlasnav]');
+  if (nav) {
+    const roots = Array.from(nav.querySelectorAll<HTMLElement>('[data-atlas-disclosure]'));
+
+    function closeDisclosure(root: HTMLElement, refocus: boolean): void {
+      const trigger = root.querySelector<HTMLButtonElement>('button[aria-expanded]');
+      const panel = trigger ? document.getElementById(trigger.getAttribute('aria-controls') || '') : null;
+      if (!trigger || !panel) return;
+      trigger.setAttribute('aria-expanded', 'false');
+      panel.hidden = true;
+      if (refocus) trigger.focus();
+    }
+
+    function openDisclosure(root: HTMLElement): void {
+      roots.forEach((r) => { if (r !== root) closeDisclosure(r, false); });
+      const trigger = root.querySelector<HTMLButtonElement>('button[aria-expanded]');
+      const panel = trigger ? document.getElementById(trigger.getAttribute('aria-controls') || '') : null;
+      if (!trigger || !panel) return;
+      trigger.setAttribute('aria-expanded', 'true');
+      panel.hidden = false;
+    }
+
+    roots.forEach((root) => {
+      const trigger = root.querySelector<HTMLButtonElement>('button[aria-expanded]');
+      if (!trigger) return;
+
+      trigger.addEventListener('click', () => {
+        const isOpen = trigger.getAttribute('aria-expanded') === 'true';
+        if (isOpen) closeDisclosure(root, false);
+        else openDisclosure(root);
+      });
+
+      root.addEventListener('keydown', (event: KeyboardEvent) => {
+        if (event.key === 'Escape' && trigger.getAttribute('aria-expanded') === 'true') {
+          event.stopPropagation();
+          closeDisclosure(root, true);
+        }
+      });
+
+      root.addEventListener('focusout', (event: FocusEvent) => {
+        const next = event.relatedTarget as Node | null;
+        if (!next || !root.contains(next)) closeDisclosure(root, false);
+      });
+    });
+
+    document.addEventListener('click', (event: MouseEvent) => {
+      const target = event.target as Node;
+      roots.forEach((root) => {
+        const trigger = root.querySelector<HTMLButtonElement>('button[aria-expanded]');
+        if (trigger?.getAttribute('aria-expanded') === 'true' && !root.contains(target)) {
+          closeDisclosure(root, false);
+        }
+      });
+    });
+  }
+</script>

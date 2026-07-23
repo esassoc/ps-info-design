@@ -1,0 +1,256 @@
+---
+// PsInfoNepAtlasActivitiesGrid — AG Grid of ACTIVITY_ROWS, cloned from
+// PsInfoIndicatorsGrid's toolbar/theme/token-mapping/a11y-patch conventions.
+// TRUNCATION: prod's /Activity/IndexGridJsonData feed has 32 columns and
+// 1,614 rows; this grid carries 13 columns × 12 rows (a representative
+// subset spanning all 3 Investment Types and 8 of the 14 NEP Awards) — see
+// src/data/contracts/nep-atlas.md for the full accounting.
+//
+// bcn-lego-checked: no esa- data-grid/table lego exists (same lookup as
+// PsInfoIndicatorsGrid); ag-grid-community is the engine prod itself uses;
+// toolbar buttons are the esa-button lego.
+import EsaButton from '@esa/ecology/esa-button.astro';
+import {
+  ACTIVITY_ROWS, activitiesCountText, GRID_CLEAR_FILTERS_LABEL, GRID_DOWNLOAD_LABEL,
+  ACTIVITIES_FULL_DOWNLOAD,
+} from '../../data/pages/nep-atlas';
+import 'ag-grid-community/styles/ag-grid.css';
+import 'ag-grid-community/styles/ag-theme-alpine.css';
+import '../../styles/psinfo-ag-grid.css';
+---
+<div class="nepgrid">
+  <div class="nepgrid__bar">
+    <p class="nepgrid__count">
+      <span id="psinfo-nep-activities-grid-count" aria-live="polite">{activitiesCountText(ACTIVITY_ROWS.length, ACTIVITY_ROWS.length)}</span>
+      <span id="psinfo-nep-activities-grid-clear-wrap" hidden>
+        <EsaButton size="sm" color="ghost" appearance="soft" id="psinfo-nep-activities-grid-clear">{GRID_CLEAR_FILTERS_LABEL}</EsaButton>
+      </span>
+    </p>
+    <div class="nepgrid__actions">
+      <EsaButton
+        size="sm"
+        color="primary"
+        appearance="outline"
+        href={ACTIVITIES_FULL_DOWNLOAD.href}
+        title={ACTIVITIES_FULL_DOWNLOAD.title}
+      >
+        {ACTIVITIES_FULL_DOWNLOAD.label}
+      </EsaButton>
+      <EsaButton size="sm" color="primary" appearance="outline" id="psinfo-nep-activities-grid-download">{GRID_DOWNLOAD_LABEL}</EsaButton>
+    </div>
+  </div>
+  <div id="psinfo-nep-activities-grid" class="ag-theme-alpine psinfo-agrid"></div>
+</div>
+
+<script>
+  import { createGrid, ModuleRegistry, AllCommunityModule } from 'ag-grid-community';
+  import type { GridOptions, ICellRendererParams } from 'ag-grid-community';
+  import {
+    ACTIVITY_ROWS, ACTIVITY_GRID_COLUMNS, activitiesCountText, formatUsd,
+  } from '../../data/pages/nep-atlas';
+  import type { AtlasActivityRow } from '../../data/pages/nep-atlas';
+
+  ModuleRegistry.registerModules([AllCommunityModule]);
+
+  function makeLink(name: string, href: string): HTMLAnchorElement {
+    const a = document.createElement('a');
+    a.className = 'nepgrid__link';
+    a.textContent = name;
+    a.href = href;
+    return a;
+  }
+
+  const byId = new Map(ACTIVITY_GRID_COLUMNS.map((c) => [c.colId, c]));
+  const col = (id: (typeof ACTIVITY_GRID_COLUMNS)[number]['colId']) => byId.get(id)!;
+
+  const columnDefs = [
+    {
+      colId: col('ActivityName').colId,
+      headerName: col('ActivityName').header,
+      valueGetter: (p: ICellRendererParams<AtlasActivityRow>) => p.data?.name,
+      cellRenderer: (p: ICellRendererParams<AtlasActivityRow>) =>
+        p.data?.detailHref ? makeLink(p.data.name, p.data.detailHref) : (p.value ?? ''),
+      initialWidth: 380,
+    },
+    {
+      colId: col('ActivityID').colId,
+      headerName: col('ActivityID').header,
+      valueGetter: (p: ICellRendererParams<AtlasActivityRow>) => p.data?.activityId,
+      initialWidth: 180,
+    },
+    {
+      colId: col('ActivityStage').colId,
+      headerName: col('ActivityStage').header,
+      valueGetter: (p: ICellRendererParams<AtlasActivityRow>) => p.data?.stage,
+      initialWidth: 140,
+    },
+    {
+      colId: col('NEPAward').colId,
+      headerName: col('NEPAward').header,
+      valueGetter: (p: ICellRendererParams<AtlasActivityRow>) => p.data?.award,
+      initialWidth: 180,
+    },
+    {
+      colId: col('InvestmentType').colId,
+      headerName: col('InvestmentType').header,
+      valueGetter: (p: ICellRendererParams<AtlasActivityRow>) => p.data?.investmentType,
+      initialWidth: 160,
+    },
+    {
+      colId: col('ContractStartYear').colId,
+      headerName: col('ContractStartYear').header,
+      valueGetter: (p: ICellRendererParams<AtlasActivityRow>) => p.data?.startYear,
+      initialWidth: 140,
+    },
+    {
+      colId: col('CompletionYear').colId,
+      headerName: col('CompletionYear').header,
+      valueGetter: (p: ICellRendererParams<AtlasActivityRow>) => p.data?.completionYear,
+      initialWidth: 140,
+    },
+    {
+      colId: col('OwnerOrganization').colId,
+      headerName: col('OwnerOrganization').header,
+      valueGetter: (p: ICellRendererParams<AtlasActivityRow>) => p.data?.org,
+      initialWidth: 220,
+    },
+    {
+      colId: col('County').colId,
+      headerName: col('County').header,
+      valueGetter: (p: ICellRendererParams<AtlasActivityRow>) => p.data?.county,
+      initialWidth: 200,
+    },
+    {
+      colId: col('ActivityType').colId,
+      headerName: col('ActivityType').header,
+      valueGetter: (p: ICellRendererParams<AtlasActivityRow>) => p.data?.activityType,
+      initialWidth: 260,
+    },
+    {
+      colId: col('VitalSign').colId,
+      headerName: col('VitalSign').header,
+      valueGetter: (p: ICellRendererParams<AtlasActivityRow>) => p.data?.vitalSign,
+      initialWidth: 220,
+    },
+    {
+      colId: col('NEPInvestmentAmount').colId,
+      headerName: col('NEPInvestmentAmount').header,
+      type: 'rightAligned',
+      valueGetter: (p: ICellRendererParams<AtlasActivityRow>) => p.data?.nepInvestment,
+      valueFormatter: (p: { value: number | null }) => formatUsd(p.value),
+      initialWidth: 170,
+    },
+    {
+      colId: col('TotalCost').colId,
+      headerName: col('TotalCost').header,
+      type: 'rightAligned',
+      valueGetter: (p: ICellRendererParams<AtlasActivityRow>) => p.data?.totalCost,
+      valueFormatter: (p: { value: number | null }) => formatUsd(p.value),
+      initialWidth: 150,
+    },
+  ];
+
+  const totalNep = ACTIVITY_ROWS.reduce((sum, r) => sum + (r.nepInvestment ?? 0), 0);
+  const totalCost = ACTIVITY_ROWS.reduce((sum, r) => sum + (r.totalCost ?? 0), 0);
+
+  const host = document.getElementById('psinfo-nep-activities-grid') as HTMLDivElement;
+  const countEl = document.getElementById('psinfo-nep-activities-grid-count')!;
+  const clearWrap = document.getElementById('psinfo-nep-activities-grid-clear-wrap')!;
+  const clearBtn = document.getElementById('psinfo-nep-activities-grid-clear');
+  const downloadBtn = document.getElementById('psinfo-nep-activities-grid-download');
+
+  const gridOptions: GridOptions<AtlasActivityRow> = {
+    theme: 'legacy',
+    columnDefs,
+    rowData: ACTIVITY_ROWS,
+    pinnedBottomRowData: [{ NEPInvestmentAmount: totalNep, TotalCost: totalCost } as unknown as AtlasActivityRow],
+    defaultColDef: {
+      sortable: true,
+      filter: 'agTextColumnFilter',
+      floatingFilter: true,
+      resizable: true,
+      wrapHeaderText: true,
+      autoHeaderHeight: true,
+    },
+    ensureDomOrder: true,
+    suppressCellFocus: false,
+    onCellFocused: (event) => {
+      if (event.rowIndex == null || typeof event.column !== 'object' || event.column === null) return;
+      const colId = (event.column as { getColId: () => string }).getColId();
+      const cell = host.querySelector(`[row-index="${event.rowIndex}"] [col-id="${colId}"]`);
+      cell?.querySelector('a')?.focus();
+    },
+    onFilterChanged: () => {
+      const shown = api.getDisplayedRowCount();
+      countEl.textContent = activitiesCountText(shown, ACTIVITY_ROWS.length);
+      const hasFilters = Object.keys(api.getFilterModel()).length !== 0;
+      clearWrap.hidden = !hasFilters;
+    },
+  };
+
+  const api = createGrid(host, gridOptions);
+
+  host.querySelector('[role="grid"]')?.setAttribute('aria-label', 'NEP Activities');
+  host.querySelectorAll('.ag-center-cols-container[role="rowgroup"]').forEach((el) => {
+    el.setAttribute('tabindex', '0');
+    el.setAttribute('aria-label', 'NEP Activity rows');
+  });
+
+  clearBtn?.addEventListener('click', () => {
+    api.setFilterModel(null);
+    clearWrap.hidden = true;
+  });
+  downloadBtn?.addEventListener('click', () => {
+    api.exportDataAsCsv({
+      fileName: 'activitiesGridExport',
+      columnKeys: ACTIVITY_GRID_COLUMNS.map((c) => c.colId),
+    });
+  });
+</script>
+
+<style>
+  /* bcn-lego-checked: see frontmatter comment. */
+  .nepgrid { display: flex; flex-direction: column; gap: var(--spacing-300); }
+
+  .nepgrid__bar {
+    display: flex; align-items: center; justify-content: space-between;
+    flex-wrap: wrap; gap: var(--spacing-400);
+  }
+  .nepgrid__count {
+    margin: 0; font-size: var(--ps-info-text-body); color: var(--color-text-secondary);
+    display: inline-flex; align-items: center; gap: var(--spacing-200);
+  }
+  .nepgrid__actions { display: flex; align-items: center; gap: var(--spacing-200); flex-wrap: wrap; }
+
+  :global(#psinfo-nep-activities-grid-clear),
+  :global(#psinfo-nep-activities-grid-download) {
+    font-size: var(--ps-info-text-body);
+  }
+
+  #psinfo-nep-activities-grid {
+    block-size: 31.25rem; /* mirrors prod's own 500px grid viewport; no spacing token exists at viewport scale */
+  }
+  /* Dark header + grid type sizes come from the shared .psinfo-agrid skin
+     (src/styles/psinfo-ag-grid.css); only per-grid concerns live here. */
+  #psinfo-nep-activities-grid {
+    --ag-font-family: var(--font-sans);
+    --ag-foreground-color: var(--color-text-primary);
+    --ag-data-color: var(--color-text-primary);
+    --ag-secondary-foreground-color: var(--color-text-secondary);
+    --ag-background-color: var(--color-surface);
+    --ag-odd-row-background-color: var(--color-surface);
+    --ag-row-hover-color: var(--color-surface-sunken);
+    --ag-border-color: var(--color-border);
+    --ag-secondary-border-color: var(--color-border-light);
+    --ag-row-border-color: var(--color-border-light);
+    --ag-alpine-active-color: var(--color-primary);
+    --ag-input-focus-border-color: var(--focus-ring-color);
+    --ag-border-radius: var(--radius-100);
+  }
+  #psinfo-nep-activities-grid :global(.nepgrid__link) { color: var(--color-text-link); }
+  #psinfo-nep-activities-grid :global(.nepgrid__link:hover) { color: var(--color-text-link-hover); }
+  #psinfo-nep-activities-grid :global(.nepgrid__link:focus-visible) {
+    outline: 2px solid var(--focus-ring-color); outline-offset: 1px;
+  }
+  #psinfo-nep-activities-grid :global(.ag-row-pinned) { font-weight: var(--font-weight-semibold); }
+</style>

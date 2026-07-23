@@ -100,4 +100,228 @@ The source page ends there. No further sections.
 ## Gaps
 
 - The keyword-search and Vital-Sign-filter controls are live client-side JS on the source (`aa2026FilterTopics()` / Bootstrap-select), filtering the same 26 cards already fully inventoried above. Reproducing the filtering *behavior* is optional; reproducing the controls and their real labels/options (Section 2) is not — they are visible, static page content independent of whether the filter logic is wired up.
-- The source's persistent sub-navigation bar (`aa2026-outcomes-nav`, the 5-category dropdown menu sitting between the carousel and the title band) is out of scope for this contract as page-chrome/navigation, not body content — flagged here only so it isn't mistaken for a missing content section. Its 5-category → 26-topic taxonomy is otherwise unused by this page's own body content.
+- The source's persistent sub-navigation bar (`aa2026-outcomes-nav`, the 5-category dropdown menu sitting between the carousel and the title band) is out of scope for this contract as page-chrome/navigation, not body content — flagged here only so it isn't mistaken for a missing content section. Its 5-category → 26-topic taxonomy is otherwise unused by this page's own body content. **Superseded 2026-07-22 — see the addendum below: `aa2026-outcomes-nav` is now reproduced in the photo header's band slot.**
+
+## Revision 2026-07-22 — prod chrome + filter panel + About band
+
+(a) **The topic-categories bar (`aa2026-outcomes-nav`) is in scope**, reproduced as `PsInfoAaTopicsNav` riding the photo header's `band` slot — the same band-under-photo pattern the homepage uses for `PsInfoAnchorNav`, here with five category dropdowns over the 26 topics (`aria-label="Topic categories"`). This supersedes the Gaps-section bullet above, which had scoped it out as nav-only. Every label/href is verbatim from the saved prod DOM (lines 627–744). Prod's CSS-hover dropdowns are rebuilt as keyboard-operable disclosures (button+aria-expanded, Escape closes + refocuses trigger, focusout/outside-click closes) — required for WCAG 2.2 keyboard operability. The page's OTHER navbar (`aaExplorerNavbar`, the site-wide "Explore" mega-menu) stays OUT of scope — **per Andrew's direct instruction 2026-07-22** ("didn't need you to recreate the entire main nav"): the prototype's app shell rail already carries that site-level IA, so an in-page copy duplicates navigation. Do not re-add it.
+
+(b) **Prod CSS facts** fetched 2026-07-22 from `/Content/Bootstrap/aaExplorer_scss/aaExplorer.min.css`, mapped to spoke tokens:
+   - `.mainNavbar` (outcomes bar): background `#1b556a`, hover `#193b57` → rendered on the photo header's translucent band layer (the homepage band pattern) with white-alpha hover, white dropdown panels with `#333` items unchanged (mapped to `--color-surface`/`--color-text-secondary`).
+   - `.aa2026-bodyone-band` (About band): background `#dfe5f3`, padding 28px/24px, CTA `.btn-primary` border-radius 20px → mapped to `--ps-info-blue-100`, `--radius-full` pill.
+
+(c) **Filter controls** now live in an `esa-card` panel (`PsInfoAaFilterPanel`, composing `esa-filter-container` + `esa-text-field` + `esa-select` + `esa-filter-clear-button`) with working keyword + Vital Sign filtering and a "Clear all Filters" button that resets both controls. `VITAL_SIGN_OPTIONS` now carries prod's own numeric option values (`2`, `31`, `17`, …) instead of derived slugs, and every `TOPICS` entry carries `vitalSignIds: number[]` captured verbatim from prod's `data-vital-sign-ids` card attributes. Keyword matching is against the topic **title only** — prod also indexes a hidden ~3KB-per-topic `data-search-text` description string that is deliberately not carried into the data module (would bloat it for no rendered benefit). Topics A–F (Foundations of Recovery) carry an empty `vitalSignIds` array, matching prod: any Vital Sign filter selection hides all six, which is prod's own behavior, not a prototype gap.
+
+(d) The Explorer description band (prod DOM lines ~1177–1187) now renders as `PsInfoAaAboutPanel` — a tinted panel (`--ps-info-blue-100`) holding the verbatim prose with the "Read more about the Action Agenda Explorer" CTA inside the same container, below the text, left-aligned — matching prod's `.aa2026-bodyone-band` layout.
+
+(e) **Internal-link convention change**: all `*.pugetsoundinfo.wa.gov` links on this page (topic cards, the About CTA, the topics nav) lost `target="_blank"` + the arrow-up-right icon — these are prod-internal pages, not external links, so they now open in the same tab with no external mark. Genuinely external hosts keep the lucide external-link mark.
+
+## Addendum 2026-07-22 — Topic 05 exemplar (Smart Growth)
+
+**Source**: the three Topic 05 tab pages, saved DOMs fetched 2026-07-22 —
+`https://actionagenda.pugetsoundinfo.wa.gov/2026-2030/Topic/05/Overview`,
+`.../Topic/05/Implementation`, `.../Topic/05/Progress`. Route:
+`/prototypes/action-agenda/topic-05` (new file: `src/pages/prototypes/
+action-agenda/topic-05.astro`). This is the Action Agenda module's Topic
+exemplar — proof that the module's 26-topic landing page can route one real
+Topic into a content-exact, three-tab detail page built entirely from
+existing legos + this unit's own new `PsInfoAaTopic*`/`PsInfoAaStrategyTree`/
+`PsInfoAaCommitmentsTable`/`PsInfoAaIndicator*`/`PsInfoAaImplementationLists`/
+`PsInfoAaFinancialChart` components.
+
+**Standard-pattern adaptation**: prod's badge banner ("TOPIC 5" / "Smart
+Growth" h4 / "SUSTAINABLE LAND USE" badge) + a routed 3-link tab bar becomes
+`PsInfoPhotoHeader` (`size="band"`) with the Topic's real cover photo as the
+hero image, "TOPIC 5" as the hero eyebrow, "Smart Growth" as the page's only
+H1, and `PsInfoAaTopicsNav` unchanged in the header's band slot (Smart Growth
+lives under the nav's own "Sustainable Land Use" dropdown — no edits needed
+there). A `PsInfoAaTopicMeta` row directly under the hero carries the
+category badge + the "About the Action Agenda Explorer" link (prod's
+right-floated `<i class="fa-info-circle">` link). The three tabs become
+`esa-tab-layout` (`size="lg"`) with three SSR'd slotted panels — tab
+selection is client-state only on this one route (prod uses separate routed
+URLs per tab); because every panel is server-rendered regardless of which is
+active, `curl`/`grep` verification sees all three tabs' content in one
+fetch.
+
+**Full inventory — NO truncation anywhere**:
+- 7 Overview body paragraphs, verbatim, including the closing paragraph's 4
+  inline links to sibling Topics (15, 06, 07, 09).
+- The "VITAL SIGNS" ribbon card: 5 links, verbatim labels/hrefs.
+- 4 Strategies / 36 Actions (6+13+7+10), verbatim codes and text, in the
+  `PsInfoAaStrategyTree` Fancytree reproduction (Expand Levels / Collapse
+  Levels / search+match-count / reset — prod's own toolbar labels).
+- 73 Commitments across 14 organizations — every row's Status column reads
+  "Not reported" (verified constant across all 73 in prod). Rendered TWICE
+  (Overview panel `#commitments` and Progress panel `#progress-commitments`)
+  because prod repeats the identical table on both of its own pages —
+  verified byte-identical in the saved DOMs. Each instance is independently
+  searchable (`instanceId="ov"` / `"pr"`, ids prefixed accordingly).
+- 10 Indicators with trend + (where present) target-status values, rendered
+  twice: once as `PsInfoAaIndicatorExplorer` (Overview — an icon-tile
+  tablist + rich panel, the manual WCAG tabs pattern) and once as
+  `PsInfoAaIndicatorsTable` (Progress — a plain Indicator/Trend/Target
+  Status table), matching prod's own two renderings of the same dataset.
+- 19 Ongoing Programs / 20 NEP Activities / 40 Legislative Bills in full,
+  each with every field prod carries (activity types, related topics,
+  award/start-year/stage for activities, pass/fail status + bill links for
+  bills) — verified counts: 38/40/80 raw id occurrences in the rendered HTML
+  (each card's disclosure region contributes one `id=` and one
+  `aria-controls=` reference, i.e. 2× the true count of 19/20/40).
+- Financial Investments: all 5 bienniums (2015–2017 through 2023–2025),
+  verbatim state/federal/private-local values and formatted labels from
+  prod's own embedded chart dataTable, plus the 4 footnote paragraphs.
+
+**Honest downgrades** (all deliberate, all recorded here):
+1. Implementation tab's "Export to Excel" / "Clear All Filters" / per-column
+   "Filters" flyouts are omitted — dead controls in a static exemplar (the
+   Organization filter dropdown alone carries roughly 600 options pulled
+   from the whole AA dataset, not just Topic 05).
+2. Interactive Google charts become: prod's own chart PNGs for the 5
+   indicators that ship static images (Estuary area, Feeder bluffs, Housing
+   diversity, Infill development, Urban growth); the 2 indicators with a
+   live Google column chart (Floodplain function, Sense of Place Index)
+   render as accessible `<table>`s built from prod's own embedded
+   dataTable values; the Financial Investments chart is an SSR inline SVG
+   stacked column chart (State→Federal→Private/Local, prod's own legend
+   colors #3366cc/#dc3912/#ff9900) with a `<details>` accessible data table
+   underneath — the 1.4.1 complex-image escape hatch and an honest
+   replacement for prod's "download chart data" affordance.
+3. Prod's h5 list headings (Ongoing Programs / NEP Activities / Legislative
+   Bills column headings) are normalized to h3 — WCAG ordered-heading
+   requirement (this page's heading chain is h1 → h2 → h3, no skips: one h1
+   from the hero, 8 h2s from `PsInfoSectionTitle`, 5 h3s — the Overview
+   tab's "2026-2030 Commitments"/"Indicators" subsections plus the
+   Implementation tab's 3 list-column headings).
+4. The cover photo moves from the Overview sidebar (where prod repeats it)
+   into the hero — not duplicated on the page; recorded as the intentional
+   reading of the standard pattern.
+5. The Implementation tab's disclosure cards open independently (prod's
+   Bootstrap accordion auto-closes siblings within a column) — the simpler,
+   keyboard-friendlier behavior; title link and disclosure toggle are
+   separate interactive elements throughout (esa-collapsible was checked and
+   rejected for exactly this reason — a summary-as-toggle swallows the
+   linked title).
+6. Commitments-table search-match highlighting is not reproduced (the
+   filtering behavior is).
+7. `#progress-commitments` is a uniquified id — prod reuses the plain
+   `#commitments` id on what is, for this exemplar, a second section on the
+   SAME page (prod's Overview and Progress tabs are separate URLs, so the
+   collision never occurs there).
+
+**Routing**: `TOPICS` (`src/data/pages/action-agenda.ts`) — Topic 05's
+`href` changed from the prod absolute URL to the internal route
+`/prototypes/action-agenda/topic-05`; every other Topic keeps its prod
+`href` unchanged. `PsInfoActionAgendaTopicGrid.astro` and
+`PsInfoAaTopicsNav.astro` (both AA-unit files, not on the shared off-limits
+list) now wrap any root-relative `topic.href` in `withBase()` before
+rendering — required so the internal Topic 05 route resolves correctly
+under the production build's `/ps-info-design/` base path (previously both
+rendered every `TOPICS` href raw, safe only because all 26 were prod-absolute
+URLs).
+
+**A11y**: one h1 (hero); ordered h2/h3 heading chain (no skips); every nav
+labeled (`PsInfoAaTopicContents` — "Contents" / "Progress contents"); all
+toggles are real `<button type="button">` with `aria-expanded` +
+`aria-controls`; the Indicator Explorer implements the full manual
+role=tablist/tab/tabpanel pattern with roving tabindex and Arrow/Home/End
+keys (esa-tab-layout's shadow-DOM tabs can't host icon-tile triggers with
+rich SSR'd panels, so its `role="tablist"` doesn't appear in the light DOM —
+the Indicator Explorer's own tablist is the one `role="tablist"` a page
+fetch will see); every image has real or empty `alt` per its data-bearing/
+decorative status (trend/target-status/commitment-status icons carry
+descriptive alt text; nav-card icons, card header icons, and the bill
+pass/fail badge icon are `alt=""` with the status conveyed in adjacent
+text); icon-only controls (search reset, card-disclosure chevrons) carry
+`aria-label`; search inputs are labeled (`esa-text-field` `label` prop /
+`sr-only` span); match-count and no-matches messages are `role="status"`;
+all interactive targets clear 24×24px; body/row text is 1rem+, labels
+0.875rem semibold, nothing below the 13px meta floor (the financial chart's
+SVG axis/segment labels were bumped from 12px → 13px per the `check-a11y`
+hook).
+
+## Revision 2026-07-22 — Andrew's markup pass (header bar, tab skin, carousel chrome)
+
+Directed revision of the Topic 05 exemplar to Andrew's markup, grounded in the
+three saved tab DOMs plus the existing code. No content re-fetched or
+re-typed — this is chrome/restyle work over the same verbatim data
+(73 commitments, 10 indicators, 19/20/40 implementation items, 4 strategies/
+36 actions, financial footnotes). Honest deltas from the previous build:
+
+1. **H1 relocated.** The page's only `<h1>` moves from the hero
+   (`PsInfoPhotoHeader`'s title prop) into the recreated `aa2026TopicHeader`
+   bar (`PsInfoAaTopicHeaderBar`) directly below it. The hero is now a
+   photo-only band (no title, no eyebrow) carrying just the topic cover photo
+   and `PsInfoAaTopicsNav` in its band slot — `PsInfoPhotoHeader`'s `title`
+   prop was already optional (main-thread change), so no shared-file edit was
+   needed here.
+2. **3D badge-fold notch waived.** Prod's `aa2026TopicBadgeFold` corner-notch
+   effect on the header bar is explicitly NOT reproduced — Andrew's direct
+   instruction, 2026-07-22. The bar is a flat navy rectangle.
+3. **Tab strip re-skinned onto `esa-tab-layout` (segmented).** Prod's tabs
+   are three routed links (`role="tab"` on an `<a>`, one per URL); this
+   prototype keeps client-state tabs on one route so `curl`/`grep`
+   verification sees all three panels in one fetch. The strip itself is now
+   skinned to prod's periwinkle/navy look via `PsInfoAaTopicTabs`, using the
+   lego's public inherited custom-prop hooks (`--color-surface`,
+   `--color-surface-sunken`, `--tab-layout-color*`) plus a `::part(tabs)`
+   override for the strip's background/border/radius — a capture-and-restore
+   pattern re-points those same inherited props back to their page defaults
+   inside the slotted panels, so cards/tables inside each tab stay white
+   rather than inheriting the navy skin.
+4. **"Show more (68)" — directed count format.** Prod's static
+   `commitmentsProgressiveDisclosure.js` button DOM reads just "Show more"
+   (the remaining count and the show-more/show-less toggle are runtime
+   behavior, not static markup). Andrew's markup calls for an explicit
+   remaining count and a "Show less" collapsed state; both are rebuilt
+   natively (68 = 73 total − 5 shown). The cap SSRs all 73 rows always — the
+   extra 68 carry `data-aa-commit-extra` + `hidden` — so `curl` still sees
+   every row regardless of the toggle's runtime state.
+5. **June-2026 commitments callout added to Overview too.** The
+   "Reporting for Commitments starts in June 2026…" callout is verbatim from
+   the Progress DOM's `aa2026ProgressLegend` (prod's Overview tab carries no
+   such callout at all). Andrew's markup places it after both Commitments
+   blocks (Overview AND Progress) — the Overview instance is this
+   prototype's own addition, not a prod fact, recorded here so it's never
+   mistaken for a sourcing error.
+6. **Carousel arrows/dots are native chrome.** Prod's Indicator Explorer
+   carousel arrows and dot pagination are injected at runtime by its own
+   slick-carousel bundle (`pmSliderNav`) and are absent from the static saved
+   DOM. They are rebuilt natively here (scroll-snap viewport, `scrollBy`/
+   `scrollTo` arrows and dots, `prefers-reduced-motion`-aware) over the
+   existing manual `role=tablist/tab/tabpanel` machinery — the tabs
+   themselves are unchanged (still the sanctioned WCAG tabs pattern with
+   roving tabindex and Arrow/Home/End); the carousel layer is a presentation
+   concern on top of that, not a replacement for it.
+7. **Implementation card footers moved inside the disclosure.** The
+   disclosure structure (toggle + `aria-expanded`/`aria-controls` + hidden
+   body) already existed; what was missing is that prod's own collapse
+   regions (verified in the Implementation DOM — e.g.
+   `#collapse_program_259 > .footer`) hold the card's footer (Program
+   Website / Activity Stage + Project Website / bill Status + House Bill
+   Link) INSIDE the same toggled region as the body, not always-visible
+   below it. Each card's body + footer are now wrapped in one
+   `.aaimpl__region[hidden]`, toggled by the same button — no carried data
+   moved or changed, only its visibility scope.
+8. **Overview sidebar photo.** `AA_TOPIC05_OVERVIEW_PHOTO` (new export) is a
+   local `topic-05.jpg` standing in for prod's own FileResource cover image
+   in the Overview tab's in-card sidebar (distinct from the hero's own
+   `topic-05-cover.jpg` crop) — alt text (`"Cover photo for Smart Growth"`) is
+   verbatim from the Overview DOM's own `<img alt>`.
+
+**Other component restyles in this pass** (no data changes, chrome only):
+section headers (`PsInfoAaSectionHeader`, new) get prod's blue-text +
+full-width-hairline treatment on all three tabs; the Vital Signs ribbon
+(`PsInfoAaTopicVitalSignsCard`) centers its links with real `aria-hidden`
+`" / "` separator spans (never CSS `content`) over a periwinkle panel; the
+Contents jump-nav (`PsInfoAaTopicContents`) is now a bordered card; the
+Strategies/Actions tree (`PsInfoAaStrategyTree`) indents Action rows one full
+`--spacing-600` step deeper than their parent Strategy row (52px flush →
+124px, one clear step); the Commitments search
+(`PsInfoAaCommitmentsTable`) is rebuilt as a fused icon-addon input group
+(prod's own Bootstrap `.input-group` shape) replacing the previous
+floating-label/detached-Clear layout; the Progress Indicators table
+(`PsInfoAaIndicatorsTable`) gets a navy header row and wider Trend/Target
+Status columns (8.5rem) so the 64px status images stop being squished.
+`PsInfoAaTopicMeta.astro` is deleted (superseded by `PsInfoAaTopicHeaderBar`;
+grep-verified no other caller).

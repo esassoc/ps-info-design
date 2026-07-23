@@ -1,0 +1,51 @@
+---
+// PsInfoPiHero — the Progress Indicators home page's logo-identity header.
+// Prod has no photo hero; the PI logo IS the page's identity, so the h1 wraps
+// the logo image itself (accessible name comes from the img alt). Mirrors
+// prod, which renders the logo centered, block, max-width ~32rem.
+//
+// bcn-lego-checked: no esa- lego renders a logo-identity hero — esa-page-header
+// is a text-only container and the source page's identity IS the logo image;
+// checked Beacon (no logo-hero pattern). psinfo-pi-hero is the reusable home.
+import { withBase } from '../../lib/base';
+
+interface Props {
+  logo: { src: string; alt: string };
+  tagline: string;
+}
+const { logo, tagline } = Astro.props;
+---
+<header class="pihero">
+  <h1 class="pihero__logo">
+    <img src={withBase(logo.src)} alt={logo.alt} width="1152" height="464" />
+  </h1>
+  <p class="pihero__tagline">{tagline}</p>
+</header>
+
+<style>
+  .pihero {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacing-300);
+    text-align: center;
+  }
+  .pihero__logo {
+    margin: 0;
+    display: block;
+    width: 100%;
+  }
+  .pihero__logo img {
+    display: block;
+    width: 100%;
+    max-width: 32rem;
+    height: auto;
+    margin-inline: auto;
+  }
+  .pihero__tagline {
+    margin: 0;
+    font-size: 1.125rem;
+    font-weight: var(--font-weight-bold);
+    color: var(--color-text-secondary);
+  }
+</style>

@@ -17,6 +17,7 @@
 import { SUBNAV_GOALS, SUBNAV_BANNER, SUBNAV_LINKS, type SubnavGoal } from '../../data/pages/vital-signs-module';
 import EsaIcon from '@esa/ecology/esa-icon.astro';
 import { withBase } from '../../lib/base';
+import { isExternalHref, EXTERNAL_LINK_ICON_PATHS } from '../../lib/psinfoExternalLink';
 
 interface Props {
   /** Slug of the goal page being viewed (marks that column current). */
@@ -30,7 +31,6 @@ interface Props {
 }
 const { activeGoal, activeAllIndicators = false, goalCrumb, currentLabel } = Astro.props;
 
-const ARROW = '<path d="M7 7h10v10"/><path d="M7 17 17 7"/>';
 const goalHref = (g: SubnavGoal) => withBase(g.route);
 const currentGoal = SUBNAV_GOALS.find((g) => g.slug === activeGoal);
 ---
@@ -56,11 +56,13 @@ const currentGoal = SUBNAV_GOALS.find((g) => g.slug === activeGoal);
               <li>
                 {v.route ? (
                   <a class="vsnav__item" href={withBase(v.route)}>{v.label}</a>
-                ) : (
+                ) : isExternalHref(v.externalHref) ? (
                   <a class="vsnav__item vsnav__item--ext" href={v.externalHref} target="_blank" rel="noopener">
                     <span>{v.label}</span>
-                    <EsaIcon name="arrow-up-right" size="xs" paths={ARROW} />
+                    <EsaIcon name="external-link" size="xs" paths={EXTERNAL_LINK_ICON_PATHS} label="(external)" />
                   </a>
+                ) : (
+                  <a class="vsnav__item" href={v.externalHref}>{v.label}</a>
                 )}
               </li>
             ))}
@@ -71,10 +73,14 @@ const currentGoal = SUBNAV_GOALS.find((g) => g.slug === activeGoal);
   </nav>
 
   <nav class="vsnav__trail" aria-label="Vital Signs section">
-    <a class="vsnav__crumb vsnav__crumb--ext" href={SUBNAV_LINKS.about.externalHref} target="_blank" rel="noopener">
-      <span>{SUBNAV_LINKS.about.label}</span>
-      <EsaIcon name="arrow-up-right" size="xs" paths={ARROW} />
-    </a>
+    {isExternalHref(SUBNAV_LINKS.about.externalHref) ? (
+      <a class="vsnav__crumb vsnav__crumb--ext" href={SUBNAV_LINKS.about.externalHref} target="_blank" rel="noopener">
+        <span>{SUBNAV_LINKS.about.label}</span>
+        <EsaIcon name="external-link" size="xs" paths={EXTERNAL_LINK_ICON_PATHS} label="(external)" />
+      </a>
+    ) : (
+      <a class="vsnav__crumb" href={SUBNAV_LINKS.about.externalHref}>{SUBNAV_LINKS.about.label}</a>
+    )}
     <span class="vsnav__sep" aria-hidden="true">/</span>
     {activeAllIndicators ? (
       <span class="vsnav__crumb vsnav__crumb--current" aria-current="page">{SUBNAV_LINKS.allIndicators.label}</span>

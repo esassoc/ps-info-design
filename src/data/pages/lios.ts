@@ -1,61 +1,79 @@
 // lios.ts — content for src/pages/prototypes/lios.astro.
 //
-// Sourced 2026-07-17 from https://www.pugetsoundinfo.wa.gov/LIOs (server-
-// rendered ASP.NET; page <title> "PS Info | LIOs", nav breadcrumb "LIOs").
-// Every string below is verbatim from that page's visible HTML — the only
-// change is stripping the source's own decorative &nbsp;/Word-export markup
-// (TextRun/NormalTextRun spans, stray &#8239; narrow-space characters).
+// Sourced 2026-07-23 from https://www.pugetsoundinfo.wa.gov/LIOs (live prod
+// fetch; page <title> "PS Info  | LIOs", breadcrumb "LIOs"), superseding the
+// 2026-07-22 QA DOM snapshot — the QA render dropped this page's inline links
+// and paragraph breaks, and revision direction 2026-07-23 restored www as the
+// source of truth. Every string below is verbatim from the prod HTML — the
+// only change is stripping the source's Word-export markup (TextRun/
+// NormalTextRun spans, trailing &nbsp; and U+202F narrow-space characters).
 //
-// GAP — the list of individual LIOs (name / area / organization / link) is
-// NOT in the static HTML above. The live page renders it only inside an
-// interactive ArcGIS Experience Builder widget (iframe "Local Areas and
-// LIOs", src experience.arcgis.com/experience/aecf0b6c022a41e8b614c702c5513bba)
-// — a JS-rendered map + list, no static thumbnail exists for it. That
-// widget's own Experience config (fetched via the ArcGIS Online item's public
-// /data endpoint) names its data source as a public ArcGIS Online feature
-// service owned by the site's own org (WA_PSP_Admin):
+// The page's two live widgets are embedded with the SAME public iframe srcs
+// the source uses (LIO_MAP_EMBED / CALENDAR_EMBED below) — title attribute,
+// src, and prod pixel height carried verbatim from the source iframes.
+//
+// EXCEPTION — LIO_AREAS is NOT static-DOM copy: the per-LIO directory lives
+// only inside the ArcGIS Experience Builder widget (iframe "Local Areas and
+// LIOs"). The records below are that widget's own backing public feature
+// service, owned by the site's org (WA_PSP_Admin), queried 2026-07-17:
 //   https://services7.arcgis.com/iAd79FjHxHKsLP0y/arcgis/rest/services/
 //   PSP_Local_Areas_and_LIOs/FeatureServer/0
-// LIO_AREAS below is that service's own attribute data (fields LocalArea /
-// ActionArea / Organization / LinktoWebsite), queried 2026-07-17 — the exact
-// same "the site's own ArcGIS-hosted data" pattern home.astro's manifest
-// header already documents (PSInfo_homepage_data FeatureServer) for this
-// site's card photography and bioregion map. The service returns 11 local
-// management areas; one (Skagit / Samish) has LIO="N" ("-- No LIO --") and is
-// excluded here — the remaining 10 match the page's own "There are currently
-// 10 active LIOs" sentence exactly. San Juan's LinktoWebsite attribute is the
-// literal string "Coming....." in the service (not a URL) — modeled as
-// website: null; render that record with no outbound link. RecoveryPlanLink
-// is null for every record — there is no per-LIO recovery-plan link in this
-// data; the page's own body copy instead points to one shared plans folder
-// (see PLANS_SECTION below).
+// (fields LocalArea / ActionArea / Organization / LinktoWebsite). The service
+// returns 11 local management areas; Skagit / Samish has LIO="N" ("-- No LIO
+// --") and is excluded — the remaining 10 match the page's own "There are
+// currently 10 active LIOs" sentence exactly. All 10 records are carried in
+// full (no truncation). San Juan's LinktoWebsite is the literal string
+// "Coming....." (not a URL) — modeled as website: null, rendered with no
+// outbound link. The directory renders as an accessible HTML complement
+// directly below the embedded map widget.
 //
-// GAP — the two PowerBI-embedded dashboards this page links to (Healthy
-// Shorelines Action Plans, Onsite Sewage Systems Action Plans) and the LIO
-// Public Meeting Calendar are themselves JS-rendered PowerBI reports; only
-// their visible link labels + hrefs are captured, not their internal
-// content.
+// The www source's "Each LIO develops" section carries three links the QA DOM
+// lacked: the Box-folder href on "Ecosystem Recovery Plan" and two PowerBI
+// dashboard links nested one level under "Topical LIO Action Plans"
+// (Healthy Shorelines / Onsite Sewage Systems Action Plans). All three are
+// carried below with prod's own hrefs.
 //
-// No photographs to extract from this page: its only image is a 15x15
-// decorative "external link icon" (base64 webp, source's own chrome) — this
-// prototype's external-link convention (arrow-up-right esa-icon mark)
-// supersedes it. No files downloaded to public/photos/lios/.
+// No photographs on this page: its only image is a 15x15 decorative
+// "external link icon" (base64 webp, the source's own link chrome) —
+// superseded by this repo's external-link icon convention.
+
+import type { ProseSegment } from './ongoing-programs';
 
 export const SOURCE_URL = 'https://www.pugetsoundinfo.wa.gov/LIOs';
 
 export const PAGE_TITLE = 'Local Integrating Organizations';
 
-/** The page's own two-paragraph intro (a table cell, centered, no heading beyond the H2 title). */
+/** The page's own two intro paragraphs (verbatim, directly under the H2
+ *  title — prod renders them as two separate paragraphs, i.e. two table rows;
+ *  rendered as the header's multi-paragraph lede, never joined). */
 export const INTRO_PARAGRAPHS: string[] = [
   'Local Integrating Organizations (LIOs) are local forums that bring people together to protect and restore the ecosystem through locally specific strategies and actions. LIOs provide a venue for stakeholders and partners to identify and develop locally driven recovery strategies.',
   'There are currently 10 active LIOs representing different areas of Puget Sound. Each LIO receives funding to support planning and coordination efforts within their regional watershed.',
 ];
-/** EsaPageHeader lede — the full two-sentence intro, joined as one paragraph
- *  (this unit's header treatment is plain; there is no separate "Overview"
- *  section below it, so both INTRO_PARAGRAPHS sentences live in the lede). */
-export const PAGE_LEDE = INTRO_PARAGRAPHS.join(' ');
 
-/** The "What makes an LIO?" callout box (source: light-blue-tinted table cell). */
+/** A live third-party widget embedded with the source page's own iframe src.
+ *  title / src / height are verbatim from the source iframe attributes. */
+export interface LiosEmbed {
+  /** Source iframe's own title attribute (accessible name). */
+  title: string;
+  src: string;
+  /** Source iframe's fixed pixel height. */
+  height: number;
+}
+/** Source: <iframe title="Local Areas and LIOs" ... width="90%" height="950">. */
+export const LIO_MAP_EMBED: LiosEmbed = {
+  title: 'Local Areas and LIOs',
+  src: 'https://experience.arcgis.com/experience/aecf0b6c022a41e8b614c702c5513bba',
+  height: 950,
+};
+/** Source: <iframe title="LIO Public Meeting Calendar_final2" ... width="90%" height="1050">. */
+export const CALENDAR_EMBED: LiosEmbed = {
+  title: 'LIO Public Meeting Calendar_final2',
+  src: 'https://app.powerbigov.us/view?r=eyJrIjoiNmNjZDlkYzctMjRiMi00MDlmLWIzNWEtZmQ1Njc1ZjZkM2FjIiwidCI6IjExZDBlMjE3LTI2NGUtNDAwYS04YmEwLTU3ZGNjMTI3ZDcyZCJ9',
+  height: 1050,
+};
+
+/** The "What makes an LIO?" callout (source: #abbaea-tinted cell, italic h4). */
 export interface LioParticipants {
   title: string;
   lead: string;
@@ -76,7 +94,7 @@ export const PARTICIPANTS: LioParticipants = {
   closing: 'These groups all work together to develop recovery priorities and implement the Action Agenda.',
 };
 
-/** One record from the PSP_Local_Areas_and_LIOs feature service (LIO="Y" rows only). */
+/** One record from the PSP_Local_Areas_and_LIOs feature service (LIO="Y" rows only — see header comment). */
 export interface LioArea {
   /** "LocalArea" field. */
   localArea: string;
@@ -99,42 +117,42 @@ export const LIO_AREAS: LioArea[] = [
   { localArea: 'Snohomish / Stillaguamish', actionArea: 'Whidbey', organization: 'Snohomish-Stillaguamish Local Integrating Organization', website: 'https://snohomishcountywa.gov/3555/Local-Integrating-Organization-LIO' },
   { localArea: 'Puyallup / White', actionArea: 'South Central Puget Sound', organization: 'Puyallup-White River Local Integrating Organization', website: 'https://puyallupwatershed.org/' },
 ];
-export const TOTAL_ACTIVE_LIOS = LIO_AREAS.length; // 10 — matches INTRO_PARAGRAPHS[1]
+export const TOTAL_ACTIVE_LIOS = LIO_AREAS.length; // 10 — the figure the source's own intro states
 
-/** The "Each LIO develops:" section — a lead sentence, two plan types (one a
- *  bold link lead-in, one with two named sub-dashboards), and a closing
- *  paragraph. Source: nested Word-export lists inside a borderless table. */
-export interface LioPlanLink {
-  label: string;
-  href: string;
-}
+/** "Each LIO develops:" — lead, two plan types (bold "label - " lead-in
+ *  including the hyphen, exactly as prod bolds it), closing paragraph.
+ *  Prod wraps part of the first label in a link ("An <a>Ecosystem Recovery
+ *  Plan</a> -" → the PSP Box folder), hence label as ProseSegment[]; the two
+ *  topical dashboards nest one bullet level under "Topical LIO Action Plans". */
 export interface LioPlanType {
-  /** Bold lead-in label, e.g. "An Ecosystem Recovery Plan". */
-  label: string;
-  /** href the label itself carries in source (Ecosystem Recovery Plan only). */
-  href?: string;
-  /** Body text following the label's " - " dash, verbatim. */
+  /** Bold lead-in; prod bolds "label - " with any inline link inside the bold. */
+  label: ProseSegment[];
   body: string;
-  /** Named sub-links nested under this plan type (Topical LIO Action Plans' two dashboards). */
-  links?: LioPlanLink[];
+  /** Linked plan dashboards nested one level under this plan type (prod's
+   *  sub-list under Topical LIO Action Plans). */
+  subLinks?: { label: string; href: string }[];
 }
 export interface LiosPlansSection {
   lead: string;
   planTypes: LioPlanType[];
+  /** Prod indents this paragraph to the list's alignment (source
+   *  padding-left: 40px — rendered at the list's own token step). */
   closing: string;
 }
 export const PLANS_SECTION: LiosPlansSection = {
   lead: 'Each LIO develops:',
   planTypes: [
     {
-      label: 'An Ecosystem Recovery Plan',
-      href: 'https://pspwa.app.box.com/folder/375341439999',
+      label: [
+        { text: 'An ' },
+        { link: { label: 'Ecosystem Recovery Plan', href: 'https://pspwa.app.box.com/folder/375341439999' } },
+      ],
       body: 'These outline key local strategies and actions that support local ecosystem recovery and help inform regional priorities.',
     },
     {
-      label: 'Topical LIO Action Plans',
+      label: [{ text: 'Topical LIO Action Plans' }],
       body: 'These focus on a topic of particular interest to the LIOs and document specific local priorities.',
-      links: [
+      subLinks: [
         { label: 'Healthy Shorelines Action Plans', href: 'https://app.powerbigov.us/view?r=eyJrIjoiYzBlMjgxMGUtOTE3Ny00ZDYzLTk5YmEtZTM2M2NmZjkzMzhiIiwidCI6IjExZDBlMjE3LTI2NGUtNDAwYS04YmEwLTU3ZGNjMTI3ZDcyZCJ9' },
         { label: 'Onsite Sewage Systems Action Plans', href: 'https://app.powerbigov.us/view?r=eyJrIjoiZjIwYzE5YjgtYTBlMi00YzdhLWIxMGEtNmVmYzhiZDhiMThhIiwidCI6IjExZDBlMjE3LTI2NGUtNDAwYS04YmEwLTU3ZGNjMTI3ZDcyZCJ9' },
       ],
@@ -143,8 +161,9 @@ export const PLANS_SECTION: LiosPlansSection = {
   closing: 'LIO Action Plans focus on a particular topic of ecosystem recovery and outline the gaps, needs, and barriers to advance recovery goals. The actions included within these plans represent ambitious yet achievable actions which can be accomplished, tracked, and described during the 4-year cycle of the Action Agenda. These plans tailor Action Agenda goals to the needs and conditions of local areas in Puget Sound.',
 };
 
-/** The public-meeting-calendar callout that closes the page (source heading
- *  is italic + double exclamation — kept verbatim, styling not carried). */
+/** The public-meeting-calendar close: italic double-exclamation h4 (verbatim),
+ *  the "Open calendar in new window" link, then the live embed (CALENDAR_EMBED
+ *  above — same URL as the link). */
 export interface LiosCalendarCta {
   heading: string;
   linkLabel: string;

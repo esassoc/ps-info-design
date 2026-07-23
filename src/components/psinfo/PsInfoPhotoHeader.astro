@@ -14,7 +14,9 @@ import EsaPageHeader from '@esa/ecology/esa-page-header.astro';
 import { withBase } from '../../lib/base';
 
 interface Props {
-  title: string;
+  /** Omit for a photo-only header (e.g. a page whose H1 lives in its own
+      module chrome below the hero — the AA topic pages). */
+  title?: string;
   eyebrow?: string;
   lede?: string;
   /** public/ path of the photograph, e.g. '/photos/sound-aerial.jpg' */
@@ -28,9 +30,11 @@ const { title, eyebrow, lede, image, focus = '50% 45%', size = 'band' } = Astro.
 ---
 <header class:list={['photohead', `photohead--${size}`]}>
   <img class="photohead__img" src={withBase(image)} alt="" decoding="async" style={`object-position: ${focus}`} />
-  <div class="photohead__text">
-    <EsaPageHeader {title} {eyebrow} {lede} as="div" prominence={size === 'hero' ? 'display' : 'page-title'} />
-  </div>
+  {title && (
+    <div class="photohead__text">
+      <EsaPageHeader {title} {eyebrow} {lede} as="div" prominence={size === 'hero' ? 'display' : 'page-title'} />
+    </div>
+  )}
   {Astro.slots.has('band') && (
     <div class="photohead__band">
       <slot name="band" />
@@ -40,7 +44,7 @@ const { title, eyebrow, lede, image, focus = '50% 45%', size = 'band' } = Astro.
 
 <style>
   .photohead {
-    position: relative; overflow: hidden;
+    position: relative;
     display: flex; flex-direction: column; justify-content: flex-end;
     min-height: 250px;
     border-radius: var(--radius-100);
@@ -48,15 +52,20 @@ const { title, eyebrow, lede, image, focus = '50% 45%', size = 'band' } = Astro.
   }
   .photohead--hero { min-height: 400px; }
 
+  /* The corner radius clips per-layer (img, scrim, band) rather than via
+     overflow:hidden on the container — band-slot dropdowns must be able to
+     escape the header box. */
   .photohead__img {
     position: absolute; inset: 0;
     width: 100%; height: 100%; object-fit: cover;
+    border-radius: inherit;
   }
   /* Scrim: deep brand blue rising from the text edge so the type always clears
      the photo; the upper half stays clean water. */
   .photohead::after {
     content: '';
     position: absolute; inset: 0;
+    border-radius: inherit;
     background: linear-gradient(
       to top,
       color-mix(in srgb, var(--ps-info-blue-950) 88%, transparent) 0%,
@@ -76,7 +85,6 @@ const { title, eyebrow, lede, image, focus = '50% 45%', size = 'band' } = Astro.
     --page-header-lede-color: rgba(255, 255, 255, 0.9);
     --page-header-eyebrow-color: var(--ps-info-orange-300);
   }
-  .photohead__text :global(.esa-page-header__lede) { max-width: 62ch; }
 
   /* Optional band across the hero foot (e.g. the front door's section nav) —
      the original site's band-under-photo, elevated to a translucent layer. */
@@ -86,11 +94,41 @@ const { title, eyebrow, lede, image, focus = '50% 45%', size = 'band' } = Astro.
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
     border-top: 1px solid rgba(255, 255, 255, 0.16);
+    border-radius: 0 0 var(--radius-100) var(--radius-100);
   }
 
   @media (max-width: 720px) {
-    .photohead { min-height: 210px; }
-    .photohead--hero { min-height: 280px; }
     .photohead__text { padding: var(--spacing-400); }
+  }
+
+  /* Mobile: the photo becomes its own fixed 16:9 block IN FLOW (title and
+     scrim pinned to that region only) with the band stacked below it as an
+     opaque block — so an expanding dropdown grows the band without resizing
+     or re-cropping the photo, and translucent tints over a tall stacked photo
+     never happen. Breakpoint matches the band navs' own column switch. */
+  @media (max-width: 860px) {
+    .photohead { min-height: 0; }
+    .photohead--hero { min-height: 0; }
+    .photohead__img {
+      position: relative;
+      aspect-ratio: 16 / 9; height: auto;
+      border-radius: var(--radius-100) var(--radius-100) 0 0;
+    }
+    .photohead::after {
+      inset: auto; top: 0; left: 0; right: 0;
+      aspect-ratio: 16 / 9;
+      border-radius: var(--radius-100) var(--radius-100) 0 0;
+    }
+    .photohead__text {
+      position: absolute; top: 0; left: 0; right: 0;
+      aspect-ratio: 16 / 9;
+      display: flex; flex-direction: column; justify-content: flex-end;
+    }
+    .photohead__band {
+      background: var(--ps-info-blue-950);
+      backdrop-filter: none;
+      -webkit-backdrop-filter: none;
+      border-top: 0;
+    }
   }
 </style>

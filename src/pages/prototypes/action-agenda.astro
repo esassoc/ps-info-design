@@ -1,39 +1,41 @@
 ---
 // Action Agenda — the real 2026–2030 Action Agenda Explorer landing page
 // (actionagenda.pugetsoundinfo.wa.gov/2026-2030). Directed reproduction: same
-// 4 sections, same order, same copy as the source, elevated with our
-// components. Per-topic Strategies/Actions/Commitments/Overview text lives on
-// each Topic's own /2026-2030/Topic/{id}/Overview subpage — a different URL,
-// out of scope here — so unlike an earlier draft of this page, no per-topic
-// detail, stat band, or category grouping renders on this landing page; see
-// src/data/contracts/action-agenda.md for the full sourcing notes.
+// 4 body sections, same order, same copy as the source, elevated with our
+// components — the source's topic-categories bar (aa2026-outcomes-nav) rides
+// the photo header's band slot (the homepage PsInfoAnchorNav pattern), plus a
+// proper filter panel and the tinted About band with its CTA inside. The
+// source's site-wide main navbar (aaExplorerNavbar) is NOT reproduced: the
+// app shell rail already carries that IA. Per-topic Strategies/Actions/
+// Commitments/Overview text lives on each Topic's own
+// /2026-2030/Topic/{id}/Overview subpage — a different URL, out of scope
+// here; see src/data/contracts/action-agenda.md for the full sourcing notes
+// and the 2026-07-22 revision addendum.
 import PsInfoAppShell from '../../layouts/PsInfoAppShell.astro';
 import PsInfoPhotoHeader from '../../components/psinfo/PsInfoPhotoHeader.astro';
 import PsInfoSectionTitle from '../../components/psinfo/PsInfoSectionTitle.astro';
 import PsInfoActionAgendaProse from '../../components/psinfo/PsInfoActionAgendaProse.astro';
 import PsInfoActionAgendaTopicGrid from '../../components/psinfo/PsInfoActionAgendaTopicGrid.astro';
-import EsaFilterContainer from '@esa/ecology/esa-filter-container.astro';
-import EsaFilterClearButton from '@esa/ecology/esa-filter-clear-button.astro';
-import EsaButton from '@esa/ecology/esa-button.astro';
-import EsaIcon from '@esa/ecology/esa-icon.astro';
+import PsInfoAaTopicsNav from '../../components/psinfo/PsInfoAaTopicsNav.astro';
+import PsInfoAaFilterPanel from '../../components/psinfo/PsInfoAaFilterPanel.astro';
+import PsInfoAaAboutPanel from '../../components/psinfo/PsInfoAaAboutPanel.astro';
 import {
   HEADER_TITLE, HEADER_IMAGE,
   SECTION_TITLE, INTRO_PARAGRAPHS,
   FILTERS, VITAL_SIGN_OPTIONS, TOPICS,
   EXPLORER_DESCRIPTION, EXPLORER_CTA,
 } from '../../data/pages/action-agenda';
-
-const ARROW = '<path d="M7 7h10v10"/><path d="M7 17 17 7"/>';
-const vitalSignOptionsPayload = JSON.stringify(VITAL_SIGN_OPTIONS);
 ---
 <!-- manifest:
   layout: PsInfoAppShell (active Plans > Action Agenda Explorer) > center+stack spine
   sections:
-    - page header      -> psinfo-photo-header (photo band)
-    - topics intro      -> psinfo-section-title + psinfo-action-agenda-prose
-    - filter controls   -> esa-filter-container(esa-text-field + esa-select + esa-filter-clear-button) + no-results message
-    - topic grid (26)   -> psinfo-action-agenda-topic-grid
-    - explorer band       -> psinfo-action-agenda-prose + esa-button (external CTA)
+    - page header        -> psinfo-photo-header (photo band) with psinfo-aa-topics-nav
+                            in its band slot (aa2026-outcomes-nav chrome, 5 dropdowns —
+                            the homepage anchor-band pattern)
+    - topics intro       -> psinfo-section-title + psinfo-action-agenda-prose
+    - filter panel       -> psinfo-aa-filter-panel (esa-card + esa-filter-container legos) + no-results status
+    - topic grid (26)    -> psinfo-action-agenda-topic-grid (filterable)
+    - about band         -> psinfo-aa-about-panel (tinted panel, prose + pill CTA inside)
 -->
 <PsInfoAppShell title="Action Agenda — Puget Sound Info" active={{ moduleId: 'plans', leafId: 'aa-explorer' }}>
   <div class="center stack" data-gap="xl">
@@ -42,37 +44,21 @@ const vitalSignOptionsPayload = JSON.stringify(VITAL_SIGN_OPTIONS);
       image={HEADER_IMAGE}
       focus="50% 32%"
       title={HEADER_TITLE}
-    />
+    >
+      <PsInfoAaTopicsNav slot="band" />
+    </PsInfoPhotoHeader>
 
     <div class="stack" data-gap="md" id="topics">
       <PsInfoSectionTitle title={SECTION_TITLE} />
       <PsInfoActionAgendaProse paragraphs={INTRO_PARAGRAPHS} />
 
-      <EsaFilterContainer>
-        <esa-text-field
-          label={FILTERS.keywordLabel}
-          size="sm"
-        ></esa-text-field>
-        <esa-select
-          id="aa-vitalsign-select"
-          label={FILTERS.vitalSignLabel}
-          size="sm"
-        ></esa-select>
-        <EsaFilterClearButton label={FILTERS.clearLabel} />
-      </EsaFilterContainer>
-      <script type="application/json" id="aa-vitalsign-options" set:html={vitalSignOptionsPayload}></script>
-      <p class="aa-noresults" hidden>{FILTERS.noResultsMessage}</p>
+      <PsInfoAaFilterPanel filters={FILTERS} vitalSignOptions={VITAL_SIGN_OPTIONS} />
+      <p class="aa-noresults" role="status" hidden>{FILTERS.noResultsMessage}</p>
 
       <PsInfoActionAgendaTopicGrid topics={TOPICS} />
     </div>
 
-    <div class="stack" data-gap="md" id="explorer">
-      <PsInfoActionAgendaProse paragraphs={[EXPLORER_DESCRIPTION]} />
-      <EsaButton href={EXPLORER_CTA.href} target="_blank" rel="noopener">
-        {EXPLORER_CTA.label}
-        <EsaIcon name="arrow-up-right" size="xs" paths={ARROW} />
-      </EsaButton>
-    </div>
+    <PsInfoAaAboutPanel paragraphs={[EXPLORER_DESCRIPTION]} cta={EXPLORER_CTA} />
   </div>
 </PsInfoAppShell>
 
@@ -80,9 +66,34 @@ const vitalSignOptionsPayload = JSON.stringify(VITAL_SIGN_OPTIONS);
   import '@esa/ecology/esa-text-field';
   import '@esa/ecology/esa-select';
 
-  const select = document.getElementById('aa-vitalsign-select') as (HTMLElement & { options?: unknown }) | null;
+  type ValueEl = HTMLElement & { value: string | string[] | null; options?: unknown };
+  const field = document.getElementById('aa-keyword-field') as ValueEl | null;
+  const select = document.getElementById('aa-vitalsign-select') as ValueEl | null;
   const optionsEl = document.getElementById('aa-vitalsign-options');
-  if (select && optionsEl?.textContent) {
-    select.options = JSON.parse(optionsEl.textContent);
+  if (select && optionsEl?.textContent) select.options = JSON.parse(optionsEl.textContent);
+
+  const cards = Array.from(document.querySelectorAll<HTMLElement>('[data-aa-topic]'));
+  const noResults = document.querySelector<HTMLElement>('.aa-noresults');
+
+  function applyFilters(): void {
+    const kw = String(field?.value ?? '').trim().toLowerCase();
+    const vs = String(select?.value ?? '');
+    let visible = 0;
+    for (const li of cards) {
+      const title = li.dataset.aaTopic ?? '';
+      const ids = (li.dataset.aaVitalSigns ?? '').split(',').filter(Boolean);
+      const show = (!kw || title.includes(kw)) && (!vs || ids.includes(vs));
+      li.hidden = !show;
+      if (show) visible += 1;
+    }
+    if (noResults) noResults.hidden = visible > 0;
   }
+
+  field?.addEventListener('change', applyFilters);   // esa-text-field emits bubbling 'change' per keystroke
+  select?.addEventListener('change', applyFilters);  // esa-select emits 'change' on selection
+  document.addEventListener('esa-filter-clear', () => {   // bubbles from EsaFilterClearButton
+    if (field) field.value = '';
+    if (select) select.value = null;                       // public setter clears selection
+    applyFilters();
+  });
 </script>

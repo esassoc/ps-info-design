@@ -1,0 +1,209 @@
+---
+// PsInfoOgpFinancialsGrid — the Budgets page's "Program Financial
+// Information" grid, prod's own financial-records grid: 3,240 rows, 16
+// columns, with prod's toolbar (row count + clear filters + Download Table —
+// prod's Budgets page has NO full-database link, unlike Program List).
+// Same skeleton as PsInfoOgpProgramsGrid / PsInfoIndicatorsGrid.
+//
+// bcn-lego-checked: no esa- data-grid lego exists (walked the catalog);
+// ag-grid-community is the engine prod itself uses; toolbar controls are
+// esa-button; CSS is the established token mapping from PsInfoIndicatorsGrid.
+//
+// PERF NOTE: the 2.3MB rows JSON is imported directly into this component's
+// client script (Vite imports JSON natively). This makes the /budgets page's
+// first dev-compile slower than the other four pages; if the dev server
+// chokes on it, the documented fallback is `fetch(withBase('/…'))` against a
+// public/ copy of the same JSON instead of a static import — do NOT truncate
+// rows either way (all 3,240 must be carried).
+import EsaButton from '@esa/ecology/esa-button.astro';
+import {
+  TOTAL_FINANCIAL_RECORDS, financialsRowCountText, CLEAR_FILTERS_LABEL, DOWNLOAD_TABLE_LABEL,
+} from '../../data/pages/ongoing-programs';
+import 'ag-grid-community/styles/ag-grid.css';
+import 'ag-grid-community/styles/ag-theme-alpine.css';
+import '../../styles/psinfo-ag-grid.css';
+---
+<div class="ogpfingrid">
+  <div class="ogpfingrid__bar">
+    <p class="ogpfingrid__count">
+      <span id="psinfo-ogp-financials-grid-count" aria-live="polite">{financialsRowCountText(TOTAL_FINANCIAL_RECORDS, TOTAL_FINANCIAL_RECORDS)}</span>
+      <span id="psinfo-ogp-financials-grid-clear-wrap" hidden>
+        <EsaButton size="sm" color="ghost" appearance="soft" id="psinfo-ogp-financials-grid-clear">{CLEAR_FILTERS_LABEL}</EsaButton>
+      </span>
+    </p>
+    <EsaButton size="sm" color="primary" appearance="outline" id="psinfo-ogp-financials-grid-download">{DOWNLOAD_TABLE_LABEL}</EsaButton>
+  </div>
+  <div id="psinfo-ogp-financials-grid" class="ag-theme-alpine psinfo-agrid"></div>
+</div>
+
+<script>
+  import { createGrid, ModuleRegistry, AllCommunityModule } from 'ag-grid-community';
+  import type { GridOptions, ICellRendererParams } from 'ag-grid-community';
+  import rows from '../../data/pages/ongoing-programs-financial-rows.json';
+  import {
+    SITE_ORIGIN, FINANCIALS_GRID_COLUMNS, TOTAL_FINANCIAL_RECORDS,
+    financialsRowCountText, FINANCIALS_EXPORT_FILE_NAME,
+  } from '../../data/pages/ongoing-programs';
+  import type { OgpFinancialRow } from '../../data/pages/ongoing-programs';
+
+  ModuleRegistry.registerModules([AllCommunityModule]);
+
+  function makeLink(text: string, href: string): HTMLAnchorElement {
+    const a = document.createElement('a');
+    a.className = 'ogpfingrid__link';
+    a.textContent = text;
+    a.href = href;
+    return a;
+  }
+
+  const colWidth = (colId: string): number => FINANCIALS_GRID_COLUMNS.find((c) => c.colId === colId)?.width ?? 200;
+  const colHeader = (colId: string): string => FINANCIALS_GRID_COLUMNS.find((c) => c.colId === colId)?.header ?? colId;
+  const money = (p: ICellRendererParams<OgpFinancialRow>, field: 'statewideTotal' | 'pugetSoundTotal') => {
+    const v = p.data?.[field];
+    return v == null ? '' : Number(v).toLocaleString('en-US');
+  };
+
+  const columnDefs = [
+    {
+      colId: 'programName', headerName: colHeader('programName'), initialWidth: colWidth('programName'),
+      valueGetter: (p: ICellRendererParams<OgpFinancialRow>) => p.data?.programName,
+      cellRenderer: (p: ICellRendererParams<OgpFinancialRow>) => makeLink(p.data!.programName, SITE_ORIGIN + p.data!.programLink),
+    },
+    { colId: 'programOwnerOrganization', headerName: colHeader('programOwnerOrganization'), initialWidth: colWidth('programOwnerOrganization'),
+      valueGetter: (p: ICellRendererParams<OgpFinancialRow>) => p.data?.programOwnerOrganization },
+    { colId: 'programId', headerName: colHeader('programId'), initialWidth: colWidth('programId'),
+      valueGetter: (p: ICellRendererParams<OgpFinancialRow>) => p.data?.programId },
+    { colId: 'fiscalYear', headerName: colHeader('fiscalYear'), initialWidth: colWidth('fiscalYear'),
+      valueGetter: (p: ICellRendererParams<OgpFinancialRow>) => p.data?.fiscalYear },
+    { colId: 'biennium', headerName: colHeader('biennium'), initialWidth: colWidth('biennium'),
+      valueGetter: (p: ICellRendererParams<OgpFinancialRow>) => p.data?.biennium },
+    { colId: 'budgetType', headerName: colHeader('budgetType'), initialWidth: colWidth('budgetType'),
+      valueGetter: (p: ICellRendererParams<OgpFinancialRow>) => p.data?.budgetType },
+    { colId: 'stateAccount', headerName: colHeader('stateAccount'), initialWidth: colWidth('stateAccount'),
+      valueGetter: (p: ICellRendererParams<OgpFinancialRow>) => p.data?.stateAccount },
+    { colId: 'fundingAuthority', headerName: colHeader('fundingAuthority'), initialWidth: colWidth('fundingAuthority'),
+      valueGetter: (p: ICellRendererParams<OgpFinancialRow>) => p.data?.fundingAuthority },
+    { colId: 'fundSource', headerName: colHeader('fundSource'), initialWidth: colWidth('fundSource'),
+      valueGetter: (p: ICellRendererParams<OgpFinancialRow>) => p.data?.fundSource },
+    { colId: 'fundingSubjectToAgreement', headerName: colHeader('fundingSubjectToAgreement'), initialWidth: colWidth('fundingSubjectToAgreement'),
+      valueGetter: (p: ICellRendererParams<OgpFinancialRow>) => p.data?.fundingSubjectToAgreement },
+    { colId: 'partnerAgency', headerName: colHeader('partnerAgency'), initialWidth: colWidth('partnerAgency'),
+      valueGetter: (p: ICellRendererParams<OgpFinancialRow>) => p.data?.partnerAgency },
+    {
+      colId: 'statewideTotal', headerName: colHeader('statewideTotal'), initialWidth: colWidth('statewideTotal'),
+      filter: 'agNumberColumnFilter', cellClass: 'ag-right-aligned-cell',
+      valueGetter: (p: ICellRendererParams<OgpFinancialRow>) => p.data?.statewideTotal,
+      valueFormatter: (p: ICellRendererParams<OgpFinancialRow>) => money(p, 'statewideTotal'),
+    },
+    {
+      colId: 'pugetSoundTotal', headerName: colHeader('pugetSoundTotal'), initialWidth: colWidth('pugetSoundTotal'),
+      filter: 'agNumberColumnFilter', cellClass: 'ag-right-aligned-cell',
+      valueGetter: (p: ICellRendererParams<OgpFinancialRow>) => p.data?.pugetSoundTotal,
+      valueFormatter: (p: ICellRendererParams<OgpFinancialRow>) => money(p, 'pugetSoundTotal'),
+    },
+    { colId: 'methodologyType', headerName: colHeader('methodologyType'), initialWidth: colWidth('methodologyType'),
+      valueGetter: (p: ICellRendererParams<OgpFinancialRow>) => p.data?.methodologyType },
+    { colId: 'methodologyComment', headerName: colHeader('methodologyComment'), initialWidth: colWidth('methodologyComment'),
+      valueGetter: (p: ICellRendererParams<OgpFinancialRow>) => p.data?.methodologyComment },
+    { colId: 'generalComment', headerName: colHeader('generalComment'), initialWidth: colWidth('generalComment'),
+      valueGetter: (p: ICellRendererParams<OgpFinancialRow>) => p.data?.generalComment },
+  ];
+
+  const host = document.getElementById('psinfo-ogp-financials-grid') as HTMLDivElement;
+  const countEl = document.getElementById('psinfo-ogp-financials-grid-count')!;
+  const clearWrap = document.getElementById('psinfo-ogp-financials-grid-clear-wrap')!;
+  const clearBtn = document.getElementById('psinfo-ogp-financials-grid-clear');
+  const downloadBtn = document.getElementById('psinfo-ogp-financials-grid-download');
+
+  const gridOptions: GridOptions<OgpFinancialRow> = {
+    theme: 'legacy',
+    columnDefs,
+    rowData: rows as OgpFinancialRow[],
+    defaultColDef: {
+      sortable: true,
+      filter: 'agTextColumnFilter',
+      floatingFilter: true,
+      resizable: true,
+      wrapHeaderText: true,
+      autoHeaderHeight: true,
+    },
+    ensureDomOrder: true,
+    suppressCellFocus: false,
+    onCellFocused: (event) => {
+      if (event.rowIndex == null || typeof event.column !== 'object' || event.column === null) return;
+      const colId = (event.column as { getColId: () => string }).getColId();
+      const cell = host.querySelector(`[row-index="${event.rowIndex}"] [col-id="${colId}"]`);
+      cell?.querySelector('a')?.focus();
+    },
+    onFilterChanged: () => {
+      const shown = api.getDisplayedRowCount();
+      countEl.textContent = financialsRowCountText(shown, TOTAL_FINANCIAL_RECORDS);
+      const hasFilters = Object.keys(api.getFilterModel()).length !== 0;
+      clearWrap.hidden = !hasFilters;
+    },
+  };
+
+  const api = createGrid(host, gridOptions);
+
+  host.querySelector('[role="grid"]')?.setAttribute('aria-label', 'Program Financial Information');
+  host.querySelectorAll('.ag-center-cols-container[role="rowgroup"]').forEach((el) => {
+    el.setAttribute('tabindex', '0');
+    el.setAttribute('aria-label', 'Program financial rows');
+  });
+
+  clearBtn?.addEventListener('click', () => {
+    api.setFilterModel(null);
+    clearWrap.hidden = true;
+  });
+  downloadBtn?.addEventListener('click', () => {
+    api.exportDataAsCsv({
+      fileName: FINANCIALS_EXPORT_FILE_NAME,
+      columnKeys: FINANCIALS_GRID_COLUMNS.map((c) => c.colId),
+    });
+  });
+</script>
+
+<style>
+  /* bcn-lego-checked: see frontmatter comment. */
+  .ogpfingrid { display: flex; flex-direction: column; gap: var(--spacing-300); }
+
+  .ogpfingrid__bar {
+    display: flex; align-items: center; justify-content: space-between;
+    flex-wrap: wrap; gap: var(--spacing-400);
+  }
+  .ogpfingrid__count {
+    margin: 0; font-size: var(--ps-info-text-body); color: var(--color-text-secondary);
+    display: inline-flex; align-items: center; gap: var(--spacing-200);
+  }
+
+  :global(#psinfo-ogp-financials-grid-clear),
+  :global(#psinfo-ogp-financials-grid-download) {
+    font-size: var(--ps-info-text-body);
+  }
+
+  #psinfo-ogp-financials-grid {
+    block-size: 31.25rem;
+  }
+  /* Dark header + grid type sizes come from the shared .psinfo-agrid skin
+     (src/styles/psinfo-ag-grid.css); only per-grid concerns live here. */
+  #psinfo-ogp-financials-grid {
+    --ag-font-family: var(--font-sans);
+    --ag-foreground-color: var(--color-text-primary);
+    --ag-data-color: var(--color-text-primary);
+    --ag-secondary-foreground-color: var(--color-text-secondary);
+    --ag-background-color: var(--color-surface);
+    --ag-odd-row-background-color: var(--color-surface);
+    --ag-row-hover-color: var(--color-surface-sunken);
+    --ag-border-color: var(--color-border);
+    --ag-secondary-border-color: var(--color-border-light);
+    --ag-row-border-color: var(--color-border-light);
+    --ag-alpine-active-color: var(--color-primary);
+    --ag-input-focus-border-color: var(--focus-ring-color);
+    --ag-border-radius: var(--radius-100);
+  }
+  #psinfo-ogp-financials-grid :global(.ogpfingrid__link) { color: var(--color-text-link); }
+  #psinfo-ogp-financials-grid :global(.ogpfingrid__link:hover) { color: var(--color-text-link-hover); }
+  #psinfo-ogp-financials-grid :global(.ogpfingrid__link:focus-visible) {
+    outline: 2px solid var(--focus-ring-color); outline-offset: 1px;
+  }
+</style>

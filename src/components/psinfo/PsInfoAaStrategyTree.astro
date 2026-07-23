@@ -1,0 +1,218 @@
+---
+// PsInfoAaStrategyTree — the Action Agenda Explorer's Strategies-and-Actions
+// Fancytree, reproduced with the same interaction contract as
+// PsInfoVsFancyTree (Expand/Collapse-all buttons, a labeled search filter
+// with a match-count status and a reset button, real toggle buttons with
+// aria-expanded/aria-controls). Two levels only (Strategy > Action, prod's
+// own shape here — no third Indicator level); strategies start collapsed
+// (prod's own `expanded: false`).
+//
+// bcn-lego-checked: checked esa-collapsible (single disclosure block, no
+// tree/level semantics, no expand-all contract) and esa-tab-layout /
+// esa-filter-container (unrelated shapes); the Fancytree table convention is
+// the source site's own UI, reproduced here (same lookup outcome as
+// PsInfoVsFancyTree, a different lane's file). PsInfoAaStrategyTree is the
+// reusable home for the AA Topic strategy/action tree.
+import EsaIcon from '@esa/ecology/esa-icon.astro';
+import type { AaTopicStrategy } from '../../data/pages/action-agenda';
+
+interface Props {
+  strategies: AaTopicStrategy[];
+}
+const { strategies } = Astro.props;
+
+const PLUS = '<path d="M5 12h14"/><path d="M12 5v14"/>';
+const MINUS = '<path d="M5 12h14"/>';
+const panelId = (code: string) => `aatree-panel-${code.replace(/\./g, '')}`;
+---
+<div class="aatree" data-aa-strategytree>
+  <div class="aatree__toolbar">
+    <button type="button" class="aatree__lvlbtn" data-tree-expand>Expand Levels</button>
+    <button type="button" class="aatree__lvlbtn" data-tree-collapse>Collapse Levels</button>
+    <label class="aatree__searchwrap">
+      <span class="sr-only">Search strategies and actions</span>
+      <input class="aatree__search" type="search" placeholder="Search..." data-tree-search />
+    </label>
+    <button type="button" class="aatree__reset" data-tree-clear aria-label="Reset search">×</button>
+    <span class="aatree__status" role="status" data-tree-status></span>
+  </div>
+
+  <div class="aatree__head" aria-hidden="true">
+    <span>Strategy</span>
+    <EsaIcon name="chevron-right" size="xs" />
+    <span>Action</span>
+  </div>
+
+  <ul class="aatree__l0" role="list">
+    {strategies.map((strategy) => (
+      <li class="aatree__strategy" data-tree-row data-level="0" data-text={(strategy.code + ' ' + strategy.text).toLowerCase()}>
+        <div class="aatree__row">
+          <button
+            type="button"
+            class="aatree__toggle"
+            data-tree-toggle
+            aria-expanded="false"
+            aria-controls={panelId(strategy.code)}
+            aria-label={`Toggle ${strategy.code} ${strategy.text}`}
+          >
+            <EsaIcon name="tree-toggle" size="sm" paths={PLUS} />
+          </button>
+          <span class="aatree__code">{strategy.code}</span>
+          <span class="aatree__text">{strategy.text}</span>
+        </div>
+        <ul class="aatree__l1" role="list" id={panelId(strategy.code)} hidden>
+          {strategy.actions.map((action) => (
+            <li data-tree-row data-level="1" data-text={(action.code + ' ' + action.text).toLowerCase()}>
+              <div class="aatree__row aatree__row--action">
+                <span class="aatree__code">{action.code}</span>
+                <span class="aatree__text">{action.text}</span>
+              </div>
+            </li>
+          ))}
+        </ul>
+      </li>
+    ))}
+  </ul>
+</div>
+
+<script>
+  const MINUS_D = 'M5 12h14';
+  const PLUS_D2 = 'M12 5v14';
+
+  document.querySelectorAll<HTMLElement>('[data-aa-strategytree]').forEach((tree) => {
+    const toggles = [...tree.querySelectorAll<HTMLButtonElement>('[data-tree-toggle]')];
+
+    const setToggle = (btn: HTMLButtonElement, open: boolean) => {
+      btn.setAttribute('aria-expanded', String(open));
+      const target = document.getElementById(btn.getAttribute('aria-controls') || '');
+      if (target) target.hidden = !open;
+      const svg = btn.querySelector('svg');
+      if (svg) svg.innerHTML = open ? `<path d="${MINUS_D}"/>` : `<path d="${MINUS_D}"/><path d="${PLUS_D2}"/>`;
+    };
+
+    toggles.forEach((btn) => {
+      btn.addEventListener('click', () => setToggle(btn, btn.getAttribute('aria-expanded') !== 'true'));
+    });
+
+    tree.querySelector('[data-tree-expand]')?.addEventListener('click', () => {
+      toggles.forEach((b) => setToggle(b, true));
+    });
+    tree.querySelector('[data-tree-collapse]')?.addEventListener('click', () => {
+      toggles.forEach((b) => setToggle(b, false));
+    });
+
+    const rows = [...tree.querySelectorAll<HTMLElement>('[data-tree-row]')];
+    const search = tree.querySelector<HTMLInputElement>('[data-tree-search]');
+    const status = tree.querySelector<HTMLElement>('[data-tree-status]');
+
+    const applyFilter = (q: string) => {
+      const query = q.trim().toLowerCase();
+      if (!query) {
+        rows.forEach((r) => { r.style.display = ''; });
+        if (status) status.textContent = '';
+        return;
+      }
+      rows.forEach((r) => { r.style.display = 'none'; });
+      let matches = 0;
+      rows.forEach((r) => {
+        if (!(r.dataset.text || '').includes(query)) return;
+        matches += 1;
+        let node: HTMLElement | null = r;
+        while (node && node !== tree) {
+          if (node.matches('[data-tree-row]')) node.style.display = '';
+          const list = node.parentElement?.closest<HTMLElement>('ul[hidden]');
+          node = node.parentElement?.closest<HTMLElement>('[data-tree-row]') ?? null;
+          if (list) list.hidden = false;
+        }
+      });
+      tree.querySelectorAll<HTMLButtonElement>('[data-tree-toggle]').forEach((b) => {
+        const target = document.getElementById(b.getAttribute('aria-controls') || '');
+        if (target && !target.hidden) {
+          b.setAttribute('aria-expanded', 'true');
+          const svg = b.querySelector('svg');
+          if (svg) svg.innerHTML = `<path d="${MINUS_D}"/>`;
+        }
+      });
+      if (status) status.textContent = `${matches} match${matches === 1 ? '' : 'es'}`;
+    };
+
+    search?.addEventListener('input', () => applyFilter(search.value));
+    tree.querySelector('[data-tree-clear]')?.addEventListener('click', () => {
+      if (search) { search.value = ''; applyFilter(''); search.focus(); }
+    });
+  });
+</script>
+
+<style>
+  .aatree { display: flex; flex-direction: column; gap: var(--spacing-200); }
+  .sr-only {
+    position: absolute; width: 1px; height: 1px; margin: -1px;
+    overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap;
+  }
+
+  .aatree__toolbar { display: flex; align-items: center; gap: var(--spacing-200); flex-wrap: wrap; }
+  .aatree__lvlbtn {
+    padding: var(--spacing-200) var(--spacing-300);
+    background: var(--ps-info-blue-800); color: #ffffff;
+    border-radius: var(--radius-100);
+    font-size: var(--ps-info-text-meta-lg); font-weight: var(--font-weight-semibold);
+  }
+  .aatree__lvlbtn:hover { background: var(--ps-info-blue-900); }
+  .aatree__lvlbtn:focus-visible { outline: 2px solid var(--focus-ring-color); outline-offset: 2px; }
+  .aatree__searchwrap { display: inline-flex; }
+  .aatree__search {
+    height: 36px; width: 220px; padding: 0 var(--spacing-300);
+    border: 1px solid var(--color-border-strong); border-radius: var(--radius-100);
+    background: var(--color-surface); color: var(--color-text-primary);
+    font-size: var(--ps-info-text-meta-lg); font-family: inherit;
+  }
+  .aatree__search:focus-visible { outline: 2px solid var(--focus-ring-color); outline-offset: 1px; }
+  .aatree__reset {
+    width: 28px; height: 28px; border-radius: var(--radius-100);
+    background: var(--color-surface-sunken); color: var(--color-text-secondary);
+    font-size: 1rem; line-height: 1;
+  }
+  .aatree__reset:hover { background: var(--color-border); }
+  .aatree__reset:focus-visible { outline: 2px solid var(--focus-ring-color); outline-offset: 2px; }
+  .aatree__status { font-size: var(--ps-info-text-meta-lg); color: var(--color-text-secondary); }
+
+  .aatree__head {
+    display: flex; align-items: center; gap: var(--spacing-150);
+    padding: var(--spacing-300) var(--spacing-400);
+    background: var(--ps-info-blue-800); color: #ffffff;
+    border-radius: var(--radius-100) var(--radius-100) 0 0;
+    font-size: var(--ps-info-text-meta-lg); font-weight: var(--font-weight-semibold);
+  }
+  .aatree__head :global(.esa-icon) { color: #ffffff; }
+
+  .aatree__l0 {
+    list-style: none; margin: 0; padding: 0;
+    border: 1px solid var(--color-border); border-top: 0;
+    border-radius: 0 0 var(--radius-100) var(--radius-100);
+    background: var(--color-surface);
+  }
+  .aatree__l1 { list-style: none; margin: 0; padding: 0; }
+
+  .aatree__row {
+    display: flex; align-items: flex-start; gap: var(--spacing-250);
+    padding: var(--spacing-300) var(--spacing-400);
+    border-top: 1px solid var(--color-border-light);
+  }
+  .aatree__strategy:first-child > .aatree__row { border-top: 0; }
+  .aatree__row--action { padding-left: calc(var(--spacing-400) + 2.25rem + var(--spacing-600)); background: var(--ps-info-gray-50); }
+
+  .aatree__toggle {
+    flex: none; display: inline-flex; align-items: center; justify-content: center;
+    width: 28px; height: 28px; margin-top: -2px; border-radius: var(--radius-100);
+    color: var(--color-text-primary); background: transparent;
+  }
+  .aatree__toggle:hover { background: rgba(16, 42, 67, 0.08); }
+  .aatree__toggle:focus-visible { outline: 2px solid var(--focus-ring-color); outline-offset: 1px; }
+
+  .aatree__code { flex: none; font-weight: var(--font-weight-semibold); color: var(--color-text-primary); font-size: 1rem; }
+  .aatree__text { font-size: 1rem; color: var(--color-text-secondary); line-height: 1.5; }
+
+  @media (max-width: 720px) {
+    .aatree__row--action { padding-left: calc(var(--spacing-500) + var(--spacing-500)); }
+  }
+</style>

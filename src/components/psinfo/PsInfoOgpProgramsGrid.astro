@@ -1,0 +1,275 @@
+---
+// PsInfoOgpProgramsGrid — the Program List page's "All Programs" grid, prod's
+// own #allProgramsGridDivID: 270 rows, 19 columns, with prod's toolbar (row
+// count + clear filters + Download Table + Download Full Program Database).
+// Modeled directly on PsInfoIndicatorsGrid (structure, v36 theming CSS block,
+// post-init a11y patches) — see that component for the hard-won traps this
+// one inherits.
+//
+// bcn-lego-checked: no esa- data-grid lego exists (walked the catalog);
+// ag-grid-community is the engine prod itself uses on this very page;
+// toolbar controls are esa-button; CSS is the established token mapping from
+// PsInfoIndicatorsGrid.
+//
+// Contract-recorded simplifications: prod's custom DropdownFilterComponent
+// (Program Status/Start Year/Primary Contact/Geographic Scope) and
+// agDateColumnFilter → community agTextColumnFilter; prod's header help-icon
+// FieldDefinition popovers (server-backed dialogs) not reproduced.
+import EsaButton from '@esa/ecology/esa-button.astro';
+import {
+  TOTAL_PROGRAMS, programsRowCountText, CLEAR_FILTERS_LABEL,
+  DOWNLOAD_TABLE_LABEL, DOWNLOAD_DB_LABEL, DOWNLOAD_DB_HREF, DOWNLOAD_DB_TITLE,
+} from '../../data/pages/ongoing-programs';
+import 'ag-grid-community/styles/ag-grid.css';
+import 'ag-grid-community/styles/ag-theme-alpine.css';
+import '../../styles/psinfo-ag-grid.css';
+---
+<div class="ogpgrid">
+  <div class="ogpgrid__bar">
+    <p class="ogpgrid__count">
+      <span id="psinfo-ogp-programs-grid-count" aria-live="polite">{programsRowCountText(TOTAL_PROGRAMS, TOTAL_PROGRAMS)}</span>
+      <span id="psinfo-ogp-programs-grid-clear-wrap" hidden>
+        <EsaButton size="sm" color="ghost" appearance="soft" id="psinfo-ogp-programs-grid-clear">{CLEAR_FILTERS_LABEL}</EsaButton>
+      </span>
+    </p>
+    <div class="ogpgrid__actions">
+      <a class="ogpgrid__dblink" href={DOWNLOAD_DB_HREF} title={DOWNLOAD_DB_TITLE}>{DOWNLOAD_DB_LABEL}</a>
+      <EsaButton size="sm" color="primary" appearance="outline" id="psinfo-ogp-programs-grid-download">{DOWNLOAD_TABLE_LABEL}</EsaButton>
+    </div>
+  </div>
+  <div id="psinfo-ogp-programs-grid" class="ag-theme-alpine psinfo-agrid"></div>
+</div>
+
+<script>
+  import { createGrid, ModuleRegistry, AllCommunityModule } from 'ag-grid-community';
+  import type { GridOptions, ICellRendererParams } from 'ag-grid-community';
+  import rows from '../../data/pages/ongoing-programs-program-rows.json';
+  import {
+    SITE_ORIGIN, PROGRAM_GRID_COLUMNS, TOTAL_PROGRAMS,
+    programsRowCountText, PROGRAMS_EXPORT_FILE_NAME,
+  } from '../../data/pages/ongoing-programs';
+  import type { OgpProgramRow, OgpLinkRef } from '../../data/pages/ongoing-programs';
+  import { isExternalHref, EXTERNAL_LINK_ICON_PATHS } from '../../lib/psinfoExternalLink';
+
+  ModuleRegistry.registerModules([AllCommunityModule]);
+
+  function makeLink(text: string, href: string): HTMLAnchorElement {
+    const a = document.createElement('a');
+    a.className = 'ogpgrid__link';
+    a.textContent = text;
+    a.href = href;
+    return a;
+  }
+
+  function linkRefList(refs: OgpLinkRef[]): HTMLSpanElement {
+    const span = document.createElement('span');
+    refs.forEach((r, i) => {
+      if (i > 0) span.appendChild(document.createTextNode(', '));
+      span.appendChild(makeLink(r.text, SITE_ORIGIN + r.link));
+    });
+    return span;
+  }
+
+  function externalWebsiteCell(url: string): HTMLSpanElement {
+    const wrap = document.createElement('span');
+    const a = document.createElement('a');
+    a.className = 'ogpgrid__link ogpgrid__link--ext';
+    a.textContent = url;
+    a.href = url;
+    if (isExternalHref(url)) { a.target = '_blank'; a.rel = 'noopener'; }
+    if (isExternalHref(url)) {
+      const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      svg.setAttribute('viewBox', '0 0 24 24');
+      svg.setAttribute('width', '14');
+      svg.setAttribute('height', '14');
+      svg.setAttribute('fill', 'none');
+      svg.setAttribute('stroke', 'currentColor');
+      svg.setAttribute('stroke-width', '2');
+      svg.setAttribute('stroke-linecap', 'round');
+      svg.setAttribute('stroke-linejoin', 'round');
+      svg.setAttribute('aria-hidden', 'true');
+      svg.innerHTML = '<path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>';
+      svg.classList.add('ogpgrid__exticon');
+      a.appendChild(svg);
+      const sr = document.createElement('span');
+      sr.className = 'sr-only';
+      sr.textContent = '(external)';
+      a.appendChild(sr);
+    }
+    wrap.appendChild(a);
+    return wrap;
+  }
+
+  const colWidth = (colId: string): number => PROGRAM_GRID_COLUMNS.find((c) => c.colId === colId)?.width ?? 200;
+  const colHeader = (colId: string): string => PROGRAM_GRID_COLUMNS.find((c) => c.colId === colId)?.header ?? colId;
+
+  const columnDefs = [
+    {
+      colId: 'programName', headerName: colHeader('programName'), initialWidth: colWidth('programName'),
+      valueGetter: (p: ICellRendererParams<OgpProgramRow>) => p.data?.programName,
+      cellRenderer: (p: ICellRendererParams<OgpProgramRow>) => makeLink(p.data!.programName, SITE_ORIGIN + p.data!.programLink),
+    },
+    { colId: 'programId', headerName: colHeader('programId'), initialWidth: colWidth('programId'),
+      valueGetter: (p: ICellRendererParams<OgpProgramRow>) => p.data?.programId },
+    { colId: 'description', headerName: colHeader('description'), initialWidth: colWidth('description'),
+      valueGetter: (p: ICellRendererParams<OgpProgramRow>) => p.data?.description },
+    { colId: 'programStatus', headerName: colHeader('programStatus'), initialWidth: colWidth('programStatus'),
+      valueGetter: (p: ICellRendererParams<OgpProgramRow>) => p.data?.programStatus },
+    { colId: 'fundAdministered', headerName: colHeader('fundAdministered'), initialWidth: colWidth('fundAdministered'),
+      valueGetter: (p: ICellRendererParams<OgpProgramRow>) => p.data?.fundAdministered },
+    { colId: 'startYear', headerName: colHeader('startYear'), initialWidth: colWidth('startYear'),
+      valueGetter: (p: ICellRendererParams<OgpProgramRow>) => p.data?.startYear },
+    {
+      colId: 'ownerOrganizations', headerName: colHeader('ownerOrganizations'), initialWidth: colWidth('ownerOrganizations'),
+      valueGetter: (p: ICellRendererParams<OgpProgramRow>) => (p.data?.ownerOrganizations ?? []).map((r) => r.text).join(', '),
+      cellRenderer: (p: ICellRendererParams<OgpProgramRow>) => linkRefList(p.data!.ownerOrganizations),
+    },
+    { colId: 'primaryContact', headerName: colHeader('primaryContact'), initialWidth: colWidth('primaryContact'),
+      valueGetter: (p: ICellRendererParams<OgpProgramRow>) => p.data?.primaryContact },
+    {
+      colId: 'partnerOrganizations', headerName: colHeader('partnerOrganizations'), initialWidth: colWidth('partnerOrganizations'),
+      valueGetter: (p: ICellRendererParams<OgpProgramRow>) => (p.data?.partnerOrganizations ?? []).map((r) => r.text).join(', '),
+      cellRenderer: (p: ICellRendererParams<OgpProgramRow>) => linkRefList(p.data!.partnerOrganizations),
+    },
+    { colId: 'geographicScope', headerName: colHeader('geographicScope'), initialWidth: colWidth('geographicScope'),
+      valueGetter: (p: ICellRendererParams<OgpProgramRow>) => p.data?.geographicScope },
+    { colId: 'includedInActionAgenda', headerName: colHeader('includedInActionAgenda'), initialWidth: colWidth('includedInActionAgenda'),
+      valueGetter: (p: ICellRendererParams<OgpProgramRow>) => p.data?.includedInActionAgenda },
+    { colId: 'activityType', headerName: colHeader('activityType'), initialWidth: colWidth('activityType'),
+      valueGetter: (p: ICellRendererParams<OgpProgramRow>) => p.data?.activityType },
+    { colId: 'vitalSign', headerName: colHeader('vitalSign'), initialWidth: colWidth('vitalSign'),
+      valueGetter: (p: ICellRendererParams<OgpProgramRow>) => p.data?.vitalSign },
+    { colId: 'aaStrategy2022', headerName: colHeader('aaStrategy2022'), initialWidth: colWidth('aaStrategy2022'),
+      valueGetter: (p: ICellRendererParams<OgpProgramRow>) => p.data?.aaStrategy2022 },
+    { colId: 'aaDesiredOutcome2022', headerName: colHeader('aaDesiredOutcome2022'), initialWidth: colWidth('aaDesiredOutcome2022'),
+      valueGetter: (p: ICellRendererParams<OgpProgramRow>) => p.data?.aaDesiredOutcome2022 },
+    { colId: 'relatedNepActivities', headerName: colHeader('relatedNepActivities'), initialWidth: colWidth('relatedNepActivities'),
+      valueGetter: (p: ICellRendererParams<OgpProgramRow>) => p.data?.relatedNepActivities },
+    {
+      colId: 'programWebsite', headerName: colHeader('programWebsite'), initialWidth: colWidth('programWebsite'),
+      valueGetter: (p: ICellRendererParams<OgpProgramRow>) => p.data?.programWebsite ?? '',
+      cellRenderer: (p: ICellRendererParams<OgpProgramRow>) => {
+        const url = p.data?.programWebsite ?? '';
+        if (!url) { const span = document.createElement('span'); return span; }
+        return externalWebsiteCell(url);
+      },
+    },
+    { colId: 'lastUpdated', headerName: colHeader('lastUpdated'), initialWidth: colWidth('lastUpdated'),
+      valueGetter: (p: ICellRendererParams<OgpProgramRow>) => p.data?.lastUpdated, cellClass: 'ag-right-aligned-cell' },
+    { colId: 'financialsLastUpdated', headerName: colHeader('financialsLastUpdated'), initialWidth: colWidth('financialsLastUpdated'),
+      valueGetter: (p: ICellRendererParams<OgpProgramRow>) => p.data?.financialsLastUpdated, cellClass: 'ag-right-aligned-cell' },
+  ];
+
+  const host = document.getElementById('psinfo-ogp-programs-grid') as HTMLDivElement;
+  const countEl = document.getElementById('psinfo-ogp-programs-grid-count')!;
+  const clearWrap = document.getElementById('psinfo-ogp-programs-grid-clear-wrap')!;
+  const clearBtn = document.getElementById('psinfo-ogp-programs-grid-clear');
+  const downloadBtn = document.getElementById('psinfo-ogp-programs-grid-download');
+
+  const gridOptions: GridOptions<OgpProgramRow> = {
+    theme: 'legacy',
+    columnDefs,
+    rowData: rows as OgpProgramRow[],
+    defaultColDef: {
+      sortable: true,
+      filter: 'agTextColumnFilter',
+      floatingFilter: true,
+      resizable: true,
+      wrapHeaderText: true,
+      autoHeaderHeight: true,
+    },
+    ensureDomOrder: true,
+    suppressCellFocus: false,
+    onCellFocused: (event) => {
+      if (event.rowIndex == null || typeof event.column !== 'object' || event.column === null) return;
+      const colId = (event.column as { getColId: () => string }).getColId();
+      const cell = host.querySelector(`[row-index="${event.rowIndex}"] [col-id="${colId}"]`);
+      cell?.querySelector('a')?.focus();
+    },
+    onFilterChanged: () => {
+      const shown = api.getDisplayedRowCount();
+      countEl.textContent = programsRowCountText(shown, TOTAL_PROGRAMS);
+      const hasFilters = Object.keys(api.getFilterModel()).length !== 0;
+      clearWrap.hidden = !hasFilters;
+    },
+  };
+
+  const api = createGrid(host, gridOptions);
+
+  // Post-init a11y patches (mirrors PsInfoIndicatorsGrid's own WCAG fix).
+  host.querySelector('[role="grid"]')?.setAttribute('aria-label', 'All Programs');
+  host.querySelectorAll('.ag-center-cols-container[role="rowgroup"]').forEach((el) => {
+    el.setAttribute('tabindex', '0');
+    el.setAttribute('aria-label', 'Program rows');
+  });
+
+  clearBtn?.addEventListener('click', () => {
+    api.setFilterModel(null);
+    clearWrap.hidden = true;
+  });
+  downloadBtn?.addEventListener('click', () => {
+    api.exportDataAsCsv({
+      fileName: PROGRAMS_EXPORT_FILE_NAME,
+      columnKeys: PROGRAM_GRID_COLUMNS.map((c) => c.colId),
+    });
+  });
+</script>
+
+<style>
+  /* bcn-lego-checked: see frontmatter comment. */
+  .sr-only {
+    position: absolute; width: 1px; height: 1px; margin: -1px;
+    overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap;
+  }
+
+  .ogpgrid { display: flex; flex-direction: column; gap: var(--spacing-300); }
+
+  .ogpgrid__bar {
+    display: flex; align-items: center; justify-content: space-between;
+    flex-wrap: wrap; gap: var(--spacing-400);
+  }
+  .ogpgrid__count {
+    margin: 0; font-size: var(--ps-info-text-body); color: var(--color-text-secondary);
+    display: inline-flex; align-items: center; gap: var(--spacing-200);
+  }
+  .ogpgrid__actions { display: flex; align-items: center; gap: var(--spacing-400); flex-wrap: wrap; }
+  .ogpgrid__dblink {
+    font-size: var(--ps-info-text-body); font-weight: var(--font-weight-semibold);
+    color: var(--color-text-link); text-decoration: underline; text-underline-offset: 3px;
+  }
+  .ogpgrid__dblink:hover { color: var(--color-text-link-hover); }
+  .ogpgrid__dblink:focus-visible { outline: 2px solid var(--focus-ring-color); outline-offset: 2px; }
+
+  :global(#psinfo-ogp-programs-grid-clear),
+  :global(#psinfo-ogp-programs-grid-download) {
+    font-size: var(--ps-info-text-body);
+  }
+
+  #psinfo-ogp-programs-grid {
+    block-size: 31.25rem; /* mirrors prod's 500px grid viewport; no spacing token exists at viewport scale */
+  }
+  /* Dark header + grid type sizes come from the shared .psinfo-agrid skin
+     (src/styles/psinfo-ag-grid.css); only per-grid concerns live here. */
+  #psinfo-ogp-programs-grid {
+    --ag-font-family: var(--font-sans);
+    --ag-foreground-color: var(--color-text-primary);
+    --ag-data-color: var(--color-text-primary);
+    --ag-secondary-foreground-color: var(--color-text-secondary);
+    --ag-background-color: var(--color-surface);
+    --ag-odd-row-background-color: var(--color-surface);
+    --ag-row-hover-color: var(--color-surface-sunken);
+    --ag-border-color: var(--color-border);
+    --ag-secondary-border-color: var(--color-border-light);
+    --ag-row-border-color: var(--color-border-light);
+    --ag-alpine-active-color: var(--color-primary);
+    --ag-input-focus-border-color: var(--focus-ring-color);
+    --ag-border-radius: var(--radius-100);
+  }
+  #psinfo-ogp-programs-grid :global(.ogpgrid__link) { color: var(--color-text-link); }
+  #psinfo-ogp-programs-grid :global(.ogpgrid__link:hover) { color: var(--color-text-link-hover); }
+  #psinfo-ogp-programs-grid :global(.ogpgrid__link:focus-visible) {
+    outline: 2px solid var(--focus-ring-color); outline-offset: 1px;
+  }
+  #psinfo-ogp-programs-grid :global(.ogpgrid__link--ext) { display: inline-flex; align-items: center; gap: var(--spacing-100); }
+  #psinfo-ogp-programs-grid :global(.ogpgrid__exticon) { flex: none; color: var(--color-text-muted); }
+</style>

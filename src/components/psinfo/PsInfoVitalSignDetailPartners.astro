@@ -1,0 +1,67 @@
+---
+// PsInfoVitalSignDetailPartners — the Vital Sign Detail page's "Contributing
+// Partners" body section (its own h4 section on the source, after Other
+// Resources): an optional verbatim intro sentence, then the partner
+// organizations as a link list, on the same outlined card surface as every
+// sibling section on this page. Partner sites are genuinely external hosts,
+// so they carry the external-link mark per this repo's link policy.
+//
+// bcn-lego-checked: esa-card is the surface (variant="outlined", matching
+// the page's other sections); the org link-list inside has no lego.
+// psinfo-vital-sign-detail-partners is the reusable home for this unit's
+// two pages.
+import EsaCard from '@esa/ecology/esa-card.astro';
+import EsaIcon from '@esa/ecology/esa-icon.astro';
+import type { VitalSignPartner } from '../../data/pages/vital-sign-details';
+import { isExternalHref, EXTERNAL_LINK_ICON_PATHS } from '../../lib/psinfoExternalLink';
+
+interface Props {
+  intro?: string;
+  partners: VitalSignPartner[];
+}
+const { intro, partners } = Astro.props;
+---
+<EsaCard variant="outlined">
+  <div class="vsdpartners">
+    {intro && <p class="vsdpartners__intro">{intro}</p>}
+    <ul class="vsdpartners__list" role="list">
+      {partners.map((partner) => (
+        <li>
+          {partner.href ? (
+            isExternalHref(partner.href) ? (
+              <a class="vsdpartners__link vsdpartners__link--ext" href={partner.href} target="_blank" rel="noopener">
+                <span>{partner.name}</span>
+                <EsaIcon name="external-link" size="xs" paths={EXTERNAL_LINK_ICON_PATHS} label="(external)" />
+              </a>
+            ) : (
+              <a class="vsdpartners__link" href={partner.href}>{partner.name}</a>
+            )
+          ) : (
+            <span class="vsdpartners__name">{partner.name}</span>
+          )}
+        </li>
+      ))}
+    </ul>
+  </div>
+</EsaCard>
+
+<style>
+  .vsdpartners { display: flex; flex-direction: column; gap: var(--spacing-300); }
+  .vsdpartners__intro {
+    margin: 0; font-size: var(--ps-info-text-body);
+    color: var(--color-text-primary); line-height: 1.6;
+  }
+  .vsdpartners__list {
+    list-style: disc; margin: 0; padding-left: var(--spacing-500);
+    display: flex; flex-direction: column; gap: var(--spacing-150);
+  }
+  .vsdpartners__link {
+    display: inline-flex; align-items: center; gap: var(--spacing-100);
+    font-size: var(--ps-info-text-body); color: var(--color-text-link);
+    text-decoration: underline; text-underline-offset: 3px; line-height: 1.4;
+  }
+  .vsdpartners__link:hover { color: var(--color-text-link-hover); }
+  .vsdpartners__link:focus-visible { outline: 2px solid var(--focus-ring-color); outline-offset: 2px; }
+  .vsdpartners__link--ext :global(.esa-icon) { color: var(--color-text-muted); flex: none; }
+  .vsdpartners__name { font-size: var(--ps-info-text-body); color: var(--color-text-primary); }
+</style>

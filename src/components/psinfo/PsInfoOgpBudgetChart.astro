@@ -1,0 +1,327 @@
+---
+// PsInfoOgpBudgetChart — the Data Dashboard's "State Agency Ongoing Program
+// Estimated Puget Sound Budget" chart: 5 stacked biennium columns
+// (State / Other fund source — prod's own displayed series). Prod renders
+// this with Google Charts (ColumnChart, stacked); rebuilt as token-styled
+// DOM columns with real-text total/biennium labels and an sr-only data table
+// carrying every exact dollar value (the chart bars themselves are
+// aria-hidden).
+//
+// Revision 2026-07-23 — prod format + content match: esa-card container;
+// the stack is prod's own displayed series — State/Other fund source,
+// verbatim values from the chart's XLSX export — in prod's sampled palette;
+// dollar-tick y-axis with gridlines at $600M steps ($0 … $2,400,000,000,
+// prod's own ticks), rotated "Estimated Puget Sound Budget" y-axis title,
+// centered "State Biennium" x-axis title, legend on the right in prod's
+// order. The filter is an esa-filter-dropdown over the displayed series
+// (Fund Source); prod's "Filter by Budget Type" control needs the
+// record-level biennium × budgetType × fundSource cross that was never
+// captured — recorded in the contract, not faked.
+//
+// bcn-lego-checked: surface is esa-card; filter composes esa-filter-container
+// + esa-filter-dropdown + esa-filter-clear-button (the ui-filter lego set);
+// no esa- chart lego exists — columns are token-styled DOM driven by the
+// data module; psinfo-ogp-budget-chart is the reusable home.
+import EsaCard from '@esa/ecology/esa-card.astro';
+import EsaFilterContainer from '@esa/ecology/esa-filter-container.astro';
+import EsaFilterClearButton from '@esa/ecology/esa-filter-clear-button.astro';
+import type { OgpBudgetSourceRow } from '../../data/pages/ongoing-programs';
+
+interface Props {
+  chartId: string;
+  title: string;
+  rows: OgpBudgetSourceRow[];
+  /** Stack series, bottom-up (State first — prod's stack order). */
+  series: string[];
+  seriesColors: Record<string, string>;
+  /** Plural noun for the status line ("fund sources"). */
+  seriesNoun: string;
+  /** x-axis title ("State Biennium"). */
+  axisLabel: string;
+  /** Rotated y-axis title ("Estimated Puget Sound Budget"). */
+  valueAxisLabel: string;
+  filterLabel: string;
+}
+const { chartId, title, rows, series, seriesColors, seriesNoun, axisLabel, valueAxisLabel, filterLabel } = Astro.props;
+
+const totalOf = (row: OgpBudgetSourceRow) => series.reduce((sum, t) => sum + (row.bySource[t] ?? 0), 0);
+// Prod's y-axis ticks step $600M ($0 … $2,400,000,000 for this data).
+const TICK_STEP = 600_000_000;
+const niceMax = Math.ceil(Math.max(...rows.map(totalOf), 1) / TICK_STEP) * TICK_STEP;
+const ticks = Array.from({ length: niceMax / TICK_STEP + 1 }, (_, i) => i * TICK_STEP);
+const pctOfMax = (v: number) => (v <= 0 ? 0 : (v / niceMax) * 100);
+const formatMillions = (v: number) => `$${Math.round(v / 1_000_000).toLocaleString('en-US')}M`;
+const formatDollars = (v: number) => `$${v.toLocaleString('en-US')}`;
+---
+<div class="ogpbudget-host">
+  <EsaCard variant="outlined">
+    <figure class="ogpbudget" data-chart-id={chartId} data-nice-max={niceMax}>
+      <figcaption class="ogpbudget__title">{title}</figcaption>
+
+      <div class="ogpbudget__filters">
+        <EsaFilterContainer>
+          <esa-filter-dropdown multiple size="sm" label={filterLabel} id={`${chartId}-filter`}></esa-filter-dropdown>
+          <EsaFilterClearButton label="Clear all" />
+        </EsaFilterContainer>
+        <p class="ogpbudget__status" aria-live="polite" data-status>
+          {series.length} of {series.length} {seriesNoun}
+        </p>
+      </div>
+      <script type="application/json" id={`${chartId}-types`} set:html={JSON.stringify(series)} />
+      <script type="application/json" id={`${chartId}-noun`} set:html={JSON.stringify(seriesNoun)} />
+
+      <div class="ogpbudget__body">
+        <span class="ogpbudget__vaxis" aria-hidden="true">{valueAxisLabel}</span>
+        <div class="ogpbudget__yaxis" aria-hidden="true">
+          {ticks.map((t) => (
+            <span class="ogpbudget__ytick" style={`inset-block-end: ${(t / niceMax) * 100}%`}>{formatDollars(t)}</span>
+          ))}
+        </div>
+        <div class="ogpbudget__plot">
+          <div class="ogpbudget__grid" aria-hidden="true">
+            {ticks.map((t) => (
+              <span class="ogpbudget__gridline" style={`inset-block-end: ${(t / niceMax) * 100}%`}></span>
+            ))}
+          </div>
+          <div class="ogpbudget__chart">
+            {rows.map((row) => {
+              const total = totalOf(row);
+              return (
+                <div class="ogpbudget__col" data-col data-total={total} data-values={JSON.stringify(row.bySource)}>
+                  <span class="ogpbudget__total" data-total-label>{formatMillions(total)}</span>
+                  <div class="ogpbudget__barwrap">
+                    <div class="ogpbudget__stack" data-stack style={`block-size: ${pctOfMax(total)}%`}>
+                      {series.map((t) => (
+                        <span
+                          class="ogpbudget__segment" data-segment data-type={t}
+                          style={`block-size: ${total > 0 ? ((row.bySource[t] ?? 0) / total) * 100 : 0}%; background: ${seriesColors[t]}`}
+                        ></span>
+                      ))}
+                    </div>
+                  </div>
+                  <span class="ogpbudget__biennium">{row.biennium}</span>
+                </div>
+              );
+            })}
+          </div>
+          <p class="ogpbudget__axis">{axisLabel}</p>
+        </div>
+        <ul class="ogpbudget__legend" role="list">
+          {[...series].reverse().map((t) => (
+            <li class="ogpbudget__legenditem" data-legend-type={t}>
+              <span class="ogpbudget__swatch" style={`background: ${seriesColors[t]}`} aria-hidden="true"></span>
+              {t}
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      <table class="sr-only">
+        <caption>State Agency Ongoing Program Estimated Puget Sound Budget by biennium and fund source, dollars</caption>
+        <thead>
+          <tr>
+            <th scope="col">Biennium</th>
+            {series.map((t) => <th scope="col">{t}</th>)}
+            <th scope="col">Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((row) => (
+            <tr>
+              <th scope="row">{row.biennium}</th>
+              {series.map((t) => <td>{formatDollars(row.bySource[t] ?? 0)}</td>)}
+              <td>{formatDollars(totalOf(row))}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </figure>
+  </EsaCard>
+</div>
+
+<script>
+  import '@esa/ecology/esa-filter-dropdown';
+
+  type FilterDropdownEl = HTMLElement & {
+    options: { label: string; value: string; color?: string }[];
+    _selected: string[];
+  };
+
+  const formatMillions = (v: number) => `$${Math.round(v / 1_000_000).toLocaleString('en-US')}M`;
+
+  document.querySelectorAll<HTMLElement>('.ogpbudget').forEach((chart) => {
+    const chartId = chart.dataset.chartId;
+    if (!chartId) return;
+    const dd = document.getElementById(`${chartId}-filter`) as FilterDropdownEl | null;
+    const typesEl = document.getElementById(`${chartId}-types`);
+    if (!dd || !typesEl?.textContent) return;
+    const seriesKeys = JSON.parse(typesEl.textContent) as string[];
+    const noun = JSON.parse(document.getElementById(`${chartId}-noun`)?.textContent ?? '"series"') as string;
+    // Option dots reuse the chart's own legend swatch colors.
+    const swatchColor = (t: string) =>
+      chart.querySelector<HTMLElement>(`[data-legend-type="${CSS.escape(t)}"] .ogpbudget__swatch`)?.style.background;
+    dd.options = seriesKeys.map((t) => ({ label: t, value: t, color: swatchColor(t) }));
+
+    const niceMax = Number(chart.dataset.niceMax ?? '1');
+    const columns = [...chart.querySelectorAll<HTMLElement>('[data-col]')];
+    const legendItems = [...chart.querySelectorAll<HTMLElement>('[data-legend-type]')];
+    const status = chart.querySelector<HTMLElement>('[data-status]');
+
+    let selected: string[] = [];
+
+    const recompute = () => {
+      const active = selected.length ? selected : seriesKeys;
+      columns.forEach((col) => {
+        const values = JSON.parse(col.dataset.values ?? '{}') as Record<string, number>;
+        const shown = active.reduce((sum, t) => sum + (values[t] ?? 0), 0);
+
+        const stack = col.querySelector<HTMLElement>('[data-stack]');
+        if (stack) stack.style.blockSize = `${shown <= 0 ? 0 : (shown / niceMax) * 100}%`;
+
+        const totalLabel = col.querySelector<HTMLElement>('[data-total-label]');
+        if (totalLabel) totalLabel.textContent = formatMillions(shown);
+
+        col.querySelectorAll<HTMLElement>('[data-segment]').forEach((seg) => {
+          const t = seg.dataset.type ?? '';
+          const on = active.includes(t) && shown > 0;
+          seg.style.display = on ? '' : 'none';
+          if (on) seg.style.blockSize = `${((values[t] ?? 0) / shown) * 100}%`;
+        });
+      });
+      legendItems.forEach((li) => {
+        li.hidden = !active.includes(li.dataset.legendType ?? '');
+      });
+      if (status) status.textContent = `${active.length} of ${seriesKeys.length} ${noun}`;
+    };
+
+    dd.addEventListener('selection-change', (e) => {
+      selected = ((e as CustomEvent).detail.value as string[] | undefined) ?? [];
+      recompute();
+    });
+    chart.addEventListener('esa-filter-clear', () => {
+      selected = [];
+      dd._selected = [];
+      recompute();
+    });
+  });
+</script>
+
+<style>
+  .sr-only {
+    position: absolute; width: 1px; height: 1px; margin: -1px;
+    overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap;
+  }
+
+  /* esa-card clips overflow for its corner radius — re-point so the
+     esa-filter-dropdown panel isn't severed (PsInfoAaFilterPanel precedent). */
+  .ogpbudget-host :global(.esa-card) { overflow: visible; }
+
+  .ogpbudget { margin: 0; display: flex; flex-direction: column; gap: var(--spacing-400); }
+  .ogpbudget__title {
+    font-size: 1.0625rem; font-weight: var(--font-weight-semibold);
+    color: var(--color-text-primary);
+  }
+  .ogpbudget__filters {
+    display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
+    gap: var(--spacing-300);
+    padding-block-end: var(--spacing-300);
+    border-bottom: 1px solid var(--color-border-light);
+  }
+  .ogpbudget__status {
+    margin: 0; font-size: var(--ps-info-text-meta-lg); color: var(--color-text-muted);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .ogpbudget__body {
+    display: grid;
+    grid-template-columns: auto auto minmax(0, 1fr) auto;
+    align-items: stretch;
+    gap: var(--spacing-300);
+    /* Shared vertical insets so the y-tick rail and the gridlines both map
+       exactly onto the columns' bar area: top = total-label row (0.875rem ×
+       1.4 line-height) + column gap; bottom adds the biennium row + the plot
+       gap + the axis-label row. */
+    --ogpb-top: calc(0.875rem * 1.4 + var(--spacing-200));
+    --ogpb-bottom: calc((0.875rem * 1.4 + var(--spacing-200)) * 2);
+  }
+  .ogpbudget__vaxis {
+    writing-mode: vertical-rl; transform: rotate(180deg);
+    font-size: var(--ps-info-text-meta-lg); color: var(--color-text-secondary);
+    text-align: center; align-self: center;
+  }
+  /* The y-tick rail and the plot's gridlines share the same vertical scale:
+     both position against the column area's height (the chart block minus the
+     total-label row above and biennium row below). */
+  .ogpbudget__yaxis {
+    position: relative; inline-size: 8.5em;
+    margin-block-start: var(--ogpb-top); margin-block-end: var(--ogpb-bottom);
+  }
+  .ogpbudget__ytick {
+    position: absolute; inset-inline-end: 0; transform: translateY(50%);
+    font-size: var(--ps-info-text-meta); color: var(--color-text-secondary);
+    font-variant-numeric: tabular-nums; white-space: nowrap;
+  }
+  .ogpbudget__plot { display: flex; flex-direction: column; gap: var(--spacing-200); position: relative; }
+  .ogpbudget__grid {
+    position: absolute; inset-inline: 0;
+    inset-block-start: var(--ogpb-top); inset-block-end: var(--ogpb-bottom);
+    pointer-events: none;
+  }
+  .ogpbudget__gridline {
+    position: absolute; inset-inline: 0; block-size: 1px;
+    background: var(--color-border-light);
+  }
+  .ogpbudget__gridline:first-child { background: var(--color-border); }
+
+  .ogpbudget__chart {
+    display: flex; align-items: flex-end; justify-content: center;
+    gap: var(--spacing-500); block-size: 20rem;
+    position: relative;
+  }
+  .ogpbudget__col {
+    display: flex; flex-direction: column; align-items: center; gap: var(--spacing-200);
+    flex: 1 1 0; max-inline-size: 7.5rem; block-size: 100%;
+  }
+  .ogpbudget__total {
+    font-size: var(--ps-info-text-meta-lg); font-weight: var(--font-weight-semibold);
+    color: var(--color-text-primary); font-variant-numeric: tabular-nums;
+    line-height: 1.4;
+  }
+  .ogpbudget__barwrap {
+    flex: 1 1 auto; inline-size: 100%; display: flex; align-items: flex-end;
+  }
+  .ogpbudget__stack {
+    inline-size: 100%; display: flex; flex-direction: column-reverse; gap: 1px;
+  }
+  .ogpbudget__segment { display: block; inline-size: 100%; }
+  .ogpbudget__biennium { font-size: var(--ps-info-text-meta-lg); color: var(--color-text-secondary); text-align: center; line-height: 1.4; }
+
+  .ogpbudget__axis {
+    margin: 0; font-size: var(--ps-info-text-meta-lg); color: var(--color-text-secondary);
+    text-align: center; line-height: 1.4;
+  }
+
+  /* Legend on the right, prod's position. */
+  .ogpbudget__legend {
+    list-style: none; margin: 0; padding: 0;
+    display: flex; flex-direction: column; gap: var(--spacing-200);
+    align-self: start; padding-block-start: 2rem;
+  }
+  .ogpbudget__legenditem {
+    display: inline-flex; align-items: center; gap: var(--spacing-200);
+    font-size: var(--ps-info-text-meta-lg); color: var(--color-text-primary);
+    white-space: nowrap;
+  }
+  .ogpbudget__legenditem[hidden] { display: none; }
+  .ogpbudget__swatch { display: inline-block; width: 14px; height: 14px; border-radius: var(--radius-100); flex: none; }
+
+  @media (max-width: 860px) {
+    .ogpbudget__body { grid-template-columns: minmax(0, 1fr); }
+    .ogpbudget__vaxis { writing-mode: horizontal-tb; transform: none; }
+    .ogpbudget__yaxis { display: none; }
+    .ogpbudget__grid { display: none; }
+    .ogpbudget__legend { flex-direction: row; flex-wrap: wrap; padding-block-start: 0; }
+    .ogpbudget__chart { gap: var(--spacing-300); }
+    .ogpbudget__col { max-inline-size: none; }
+  }
+</style>

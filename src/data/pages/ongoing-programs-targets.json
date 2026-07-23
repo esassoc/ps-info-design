@@ -1,0 +1,477 @@
+[
+ {
+  "title": "2026-2030",
+  "programs": [
+   {
+    "name": "Aquatic Lands Habitat Restoration Program",
+    "link": "/OngoingProgram/Detail/16/Overview",
+    "targets": [
+     {
+      "title": "Acres of aquatic resources habitat restored or protected: 35 acres restored over four years",
+      "owner": "Washington State Department of Natural Resources",
+      "ownerLink": "/Organization/Detail/12",
+      "trend": "Data Pending",
+      "trendIcon": "/Content/img/OngoingProgramTargetIcons/trend-datapending.png",
+      "status": "Data Pending",
+      "statusIcon": "/Content/img/OngoingProgramTargetIcons/status-datapending.png"
+     },
+     {
+      "title": "Volume of marine debris removed: 700 tons removed over four years",
+      "owner": "Washington State Department of Natural Resources",
+      "ownerLink": "/Organization/Detail/12",
+      "trend": "Data Pending",
+      "trendIcon": "/Content/img/OngoingProgramTargetIcons/trend-datapending.png",
+      "status": "Data Pending",
+      "statusIcon": "/Content/img/OngoingProgramTargetIcons/status-datapending.png"
+     },
+     {
+      "title": "Number of tires removed: 35,000 tires removed over four years",
+      "owner": "Washington State Department of Natural Resources",
+      "ownerLink": "/Organization/Detail/12",
+      "trend": "Data Pending",
+      "trendIcon": "/Content/img/OngoingProgramTargetIcons/trend-datapending.png",
+      "status": "Data Pending",
+      "statusIcon": "/Content/img/OngoingProgramTargetIcons/status-datapending.png"
+     }
+    ]
+   },
+   {
+    "name": "Derelict Vessel Removal Program",
+    "link": "/OngoingProgram/Detail/19/Overview",
+    "targets": [
+     {
+      "title": "Number of derelict vessels removed: Remove 650 or more vessels between 2026-2030",
+      "owner": "Washington State Department of Natural Resources",
+      "ownerLink": "/Organization/Detail/12",
+      "trend": "Data Pending",
+      "trendIcon": "/Content/img/OngoingProgramTargetIcons/trend-datapending.png",
+      "status": "Data Pending",
+      "statusIcon": "/Content/img/OngoingProgramTargetIcons/status-datapending.png"
+     }
+    ]
+   },
+   {
+    "name": "Forest Health and Community Wildfire Resiliency",
+    "link": "/OngoingProgram/Detail/266/Overview",
+    "targets": [
+     {
+      "title": "Number of landowners, land managers, or residents educated about forest health and/or community wildfire resilience through a site visit: 10 percent increase (from baseline level) in site visits, by 2030",
+      "owner": "Washington State Conservation Commission",
+      "ownerLink": "/Organization/Detail/114",
+      "trend": "Data Pending",
+      "trendIcon": "/Content/img/OngoingProgramTargetIcons/trend-datapending.png",
+      "status": "Data Pending",
+      "statusIcon": "/Content/img/OngoingProgramTargetIcons/status-datapending.png"
+     },
+     {
+      "title": "Number of site visits that resulted in landowners adopting stewardship practices: 12% increase (from baseline level) in site visits that resulted in landowners adopting stewardship practices, by 2030",
+      "owner": "Washington State Conservation Commission",
+      "ownerLink": "/Organization/Detail/114",
+      "trend": "Data Pending",
+      "trendIcon": "/Content/img/OngoingProgramTargetIcons/trend-datapending.png",
+      "status": "Data Pending",
+      "statusIcon": "/Content/img/OngoingProgramTargetIcons/status-datapending.png"
+     }
+    ]
+   },
+   {
+    "name": "Hazardous Waste and Toxics Reduction - Toxics Reduction Technical Assistance Program, Product Replacement Program",
+    "link": "/OngoingProgram/Detail/243/Overview",
+    "targets": [
+     {
+      "title": "Number of automotive repair shops that switch from solvent-based degreasers to water-based degreasers: 160 automotive repair shops switch, over four years",
+      "owner": "Washington State Department of Ecology",
+      "ownerLink": "/Organization/Detail/10",
+      "trend": "Data Pending",
+      "trendIcon": "/Content/img/OngoingProgramTargetIcons/trend-datapending.png",
+      "status": "Data Pending",
+      "statusIcon": "/Content/img/OngoingProgramTargetIcons/status-datapending.png"
+     }
+    ]
+   },
+   {
+    "name": "Mobilizing funding",
+    "link": "/OngoingProgram/Detail/118/Overview",
+    "targets": [
+     {
+      "title": "Number of funding applications supported, through application writing and editing, funding opportunity review, project funding strategies, and funding opportunity matching: 160 funding applications supported by 2029",
+      "owner": "Puget Sound Partnership",
+      "ownerLink": "/Organization/Detail/2",
+      "trend": "Data Pending",
+      "trendIcon": "/Content/img/OngoingProgramTargetIcons/trend-datapending.png",
+      "status": "Data Pending",
+      "statusIcon": "/Content/img/OngoingProgramTargetIcons/status-datapending.png"
+     }
+    ]
+   },
+   {
+    "name": "Puget Sound Acquisition and Restoration",
+    "link": "/OngoingProgram/Detail/115/Overview",
+    "targets": [
+     {
+      "title": "Acres of habitat protection and restoration projects funded by PSAR: Cumulatively fund 6,000 acres over 2027-29 and 2029-31 biennia",
+      "owner": "Puget Sound Partnership",
+      "ownerLink": "/Organization/Detail/2",
+      "trend": "Data Pending",
+      "trendIcon": "/Content/img/OngoingProgramTargetIcons/trend-datapending.png",
+      "status": "Data Pending",
+      "statusIcon": "/Content/img/OngoingProgramTargetIcons/status-datapending.png"
+     }
+    ]
+   },
+   {
+    "name": "Puget Sound Ecosystem Monitoring Program",
+    "link": "/OngoingProgram/Detail/109/Overview",
+    "targets": [
+     {
+      "title": "Number of annual cross-work group meetings: At least 8 total cross-work group meetings across PSEMP by 2030",
+      "owner": "Puget Sound Partnership",
+      "ownerLink": "/Organization/Detail/2",
+      "trend": "Data Pending",
+      "trendIcon": "/Content/img/OngoingProgramTargetIcons/trend-datapending.png",
+      "status": "Data Pending",
+      "statusIcon": "/Content/img/OngoingProgramTargetIcons/status-datapending.png"
+     },
+     {
+      "title": "Number of annual presentations in PSEMP Work Groups and Steering Committee: At least 456 presentations given across all work groups and Steering Committee meetings by 2030",
+      "owner": "Puget Sound Partnership",
+      "ownerLink": "/Organization/Detail/2",
+      "trend": "Data Pending",
+      "trendIcon": "/Content/img/OngoingProgramTargetIcons/trend-datapending.png",
+      "status": "Data Pending",
+      "statusIcon": "/Content/img/OngoingProgramTargetIcons/status-datapending.png"
+     },
+     {
+      "title": "Number of meeting attendees: At least 3,096 participants attend Work Groups and Steering Committee meetings by 2030",
+      "owner": "Puget Sound Partnership",
+      "ownerLink": "/Organization/Detail/2",
+      "trend": "Data Pending",
+      "trendIcon": "/Content/img/OngoingProgramTargetIcons/trend-datapending.png",
+      "status": "Data Pending",
+      "statusIcon": "/Content/img/OngoingProgramTargetIcons/status-datapending.png"
+     }
+    ]
+   },
+   {
+    "name": "Puget Sound Nearshore Ecosystem Restoration Project",
+    "link": "/OngoingProgram/Detail/150/Overview",
+    "targets": [
+     {
+      "title": "Funded acres of process-based habitat restoration of PSNERP-identified projects implemented in partnership with the U.S. Army Corps of Engineers (USACE): By 2030, secure the full funding needed to start the process-based restoration of 2,414 acres of process-based habitat restoration",
+      "owner": "Washington Department of Fish and Wildlife",
+      "ownerLink": "/Organization/Detail/7",
+      "trend": "Data Pending",
+      "trendIcon": "/Content/img/OngoingProgramTargetIcons/trend-datapending.png",
+      "status": "Data Pending",
+      "statusIcon": "/Content/img/OngoingProgramTargetIcons/status-datapending.png"
+     }
+    ]
+   },
+   {
+    "name": "Quiet Sound Program",
+    "link": "/OngoingProgram/Detail/264/Overview",
+    "targets": [
+     {
+      "title": "Percent of piloted ships that attempt to slow down to recommended speed levels during the fall season in the central Puget Sound slowdown zone: 70 percent of piloted ships attempt to slow down between the 2026-27 and 2029-30 slowdown seasons",
+      "owner": "Puget Sound Partnership",
+      "ownerLink": "/Organization/Detail/2",
+      "trend": "Data Pending",
+      "trendIcon": "/Content/img/OngoingProgramTargetIcons/trend-datapending.png",
+      "status": "Data Pending",
+      "statusIcon": "/Content/img/OngoingProgramTargetIcons/status-datapending.png"
+     }
+    ]
+   },
+   {
+    "name": "Riparian Grant Program (RGP)",
+    "link": "/OngoingProgram/Detail/261/Overview",
+    "targets": [
+     {
+      "title": "Acres of new riparian area planted: Restore 664 cumulative acres (2025-27 and 2027-29 biennia)",
+      "owner": "Washington State Conservation Commission",
+      "ownerLink": "/Organization/Detail/114",
+      "trend": "Data Pending",
+      "trendIcon": "/Content/img/OngoingProgramTargetIcons/trend-datapending.png",
+      "status": "Data Pending",
+      "statusIcon": "/Content/img/OngoingProgramTargetIcons/status-datapending.png"
+     },
+     {
+      "title": "Acres of riparian area maintained (treatments such as herbaceous weed control/watering/replanting applied): Maintain 3,788 cumulative acres (2025-27 and 2027-29 biennia)",
+      "owner": "Washington State Conservation Commission",
+      "ownerLink": "/Organization/Detail/114",
+      "trend": "Data Pending",
+      "trendIcon": "/Content/img/OngoingProgramTargetIcons/trend-datapending.png",
+      "status": "Data Pending",
+      "statusIcon": "/Content/img/OngoingProgramTargetIcons/status-datapending.png"
+     }
+    ]
+   },
+   {
+    "name": "Shore Friendly",
+    "link": "/OngoingProgram/Detail/231/Overview",
+    "targets": [
+     {
+      "title": "Number of initial site visits to private Puget Sound shoreline landowners: Collectively complete 1,332 initial site visits between 2026-2031",
+      "owner": "Washington Department of Fish and Wildlife",
+      "ownerLink": "/Organization/Detail/7",
+      "trend": "Data Pending",
+      "trendIcon": "/Content/img/OngoingProgramTargetIcons/trend-datapending.png",
+      "status": "Data Pending",
+      "statusIcon": "/Content/img/OngoingProgramTargetIcons/status-datapending.png"
+     },
+     {
+      "title": "Number of follow-up technical site visits: Collectively complete 442 follow-up technical site visits between 2026-2031",
+      "owner": "Washington Department of Fish and Wildlife",
+      "ownerLink": "/Organization/Detail/7",
+      "trend": "Data Pending",
+      "trendIcon": "/Content/img/OngoingProgramTargetIcons/trend-datapending.png",
+      "status": "Data Pending",
+      "statusIcon": "/Content/img/OngoingProgramTargetIcons/status-datapending.png"
+     }
+    ]
+   },
+   {
+    "name": "Stormwater Branch",
+    "link": "/OngoingProgram/Detail/274/Overview",
+    "targets": [
+     {
+      "title": "Acres of stormwater treated on WSDOT right of way (I5 north of Ship Canal bridge, and I5 Ship Canal Bridge deck): 42 acres treated by 2030",
+      "owner": "Washington State Department of Transportation",
+      "ownerLink": "/Organization/Detail/352",
+      "trend": "Data Pending",
+      "trendIcon": "/Content/img/OngoingProgramTargetIcons/trend-datapending.png",
+      "status": "Data Pending",
+      "statusIcon": "/Content/img/OngoingProgramTargetIcons/status-datapending.png"
+     },
+     {
+      "title": "Acres of other municipal stormwater treated (I5 Ship Canal Bridge): 38 acres treated by 2030",
+      "owner": "Washington State Department of Transportation",
+      "ownerLink": "/Organization/Detail/352",
+      "trend": "Data Pending",
+      "trendIcon": "/Content/img/OngoingProgramTargetIcons/trend-datapending.png",
+      "status": "Data Pending",
+      "statusIcon": "/Content/img/OngoingProgramTargetIcons/status-datapending.png"
+     },
+     {
+      "title": "Acres of stormwater mitigated (opportunistic retrofits): 18 acres mitigated by 2030",
+      "owner": "Washington State Department of Transportation",
+      "ownerLink": "/Organization/Detail/352",
+      "trend": "Data Pending",
+      "trendIcon": "/Content/img/OngoingProgramTargetIcons/trend-datapending.png",
+      "status": "Data Pending",
+      "statusIcon": "/Content/img/OngoingProgramTargetIcons/status-datapending.png"
+     }
+    ]
+   },
+   {
+    "name": "Water Quality - Provide Financial Assistance",
+    "link": "/OngoingProgram/Detail/63/Overview",
+    "targets": [
+     {
+      "title": "Acres of new riparian buffer planted in Puget Sound: Plant 400 cumulative acres over four years",
+      "owner": "Washington State Department of Ecology",
+      "ownerLink": "/Organization/Detail/10",
+      "trend": "Data Pending",
+      "trendIcon": "/Content/img/OngoingProgramTargetIcons/trend-datapending.png",
+      "status": "Data Pending",
+      "statusIcon": "/Content/img/OngoingProgramTargetIcons/status-datapending.png"
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "title": "2022-2026",
+  "programs": [
+   {
+    "name": "Conservation Reserve Enhancement Program (CREP)",
+    "link": "/OngoingProgram/Detail/160/Overview",
+    "targets": [
+     {
+      "title": "Acres of riparian forest buffer installed on agricultural lands: Cumulative value above upper quartile of 674.8 acres",
+      "owner": "Washington State Conservation Commission",
+      "ownerLink": "/Organization/Detail/114",
+      "trend": "Off Track",
+      "trendIcon": "/Content/img/OngoingProgramTargetIcons/trend-offtrack.png",
+      "status": "Below Target",
+      "statusIcon": "/Content/img/OngoingProgramTargetIcons/status-belowtarget.png"
+     }
+    ]
+   },
+   {
+    "name": "Derelict Vessel Removal Program",
+    "link": "/OngoingProgram/Detail/19/Overview",
+    "targets": [
+     {
+      "title": "Number of derelict vessels removed: Remove 180 or more vessels between 2022-2025",
+      "owner": "Washington State Department of Natural Resources",
+      "ownerLink": "/Organization/Detail/12",
+      "trend": "On Track",
+      "trendIcon": "/Content/img/OngoingProgramTargetIcons/trend-ontrack.png",
+      "status": "Met Target",
+      "statusIcon": "/Content/img/OngoingProgramTargetIcons/status-targetmet.png"
+     }
+    ]
+   },
+   {
+    "name": "Hazardous Waste and Toxics Reduction - Reducing Toxic Threats, Toxics Reduction Technical visits and special projects",
+    "link": "/OngoingProgram/Detail/32/Overview",
+    "targets": [
+     {
+      "title": "Pounds of toxic chemicals and hazardous waste reduced: Between 2022 and 2025, reduce toxic chemicals or generated hazardous waste by an additional 8,000 pounds or more",
+      "owner": "Washington State Department of Ecology",
+      "ownerLink": "/Organization/Detail/10",
+      "trend": "On Track",
+      "trendIcon": "/Content/img/OngoingProgramTargetIcons/trend-ontrack.png",
+      "status": "Met Target",
+      "statusIcon": "/Content/img/OngoingProgramTargetIcons/status-targetmet.png"
+     },
+     {
+      "title": "Dollars saved by working with businesses to implement technical assistance projects: Between 2022 and 2025, generate extra cost savings of $20,000 or more",
+      "owner": "Washington State Department of Ecology",
+      "ownerLink": "/Organization/Detail/10",
+      "trend": "On Track",
+      "trendIcon": "/Content/img/OngoingProgramTargetIcons/trend-ontrack.png",
+      "status": "Met Target",
+      "statusIcon": "/Content/img/OngoingProgramTargetIcons/status-targetmet.png"
+     }
+    ]
+   },
+   {
+    "name": "Partnership Nearshore Credits Program",
+    "link": "/OngoingProgram/Detail/183/Overview",
+    "targets": [
+     {
+      "title": "Tons of creosote debris removed from the Puget Sound as a result of the sale of conservation credits: 937.5 cumulative tons of creosote removed",
+      "owner": "Puget Sound Partnership",
+      "ownerLink": "/Organization/Detail/2",
+      "trend": "On Track",
+      "trendIcon": "/Content/img/OngoingProgramTargetIcons/trend-ontrack.png",
+      "status": "Met Target",
+      "statusIcon": "/Content/img/OngoingProgramTargetIcons/status-targetmet.png"
+     }
+    ]
+   },
+   {
+    "name": "Puget Sound Acquisition and Restoration",
+    "link": "/OngoingProgram/Detail/115/Overview",
+    "targets": [
+     {
+      "title": "Acres of habitat protection and restoration projects funded by PSAR: Cumulatively fund 6,000 acres over 2023-25 and 2025-27 biennia",
+      "owner": "Puget Sound Partnership",
+      "ownerLink": "/Organization/Detail/2",
+      "trend": "On Track",
+      "trendIcon": "/Content/img/OngoingProgramTargetIcons/trend-ontrack.png",
+      "status": "Met Target",
+      "statusIcon": "/Content/img/OngoingProgramTargetIcons/status-targetmet.png"
+     }
+    ]
+   },
+   {
+    "name": "Puget Sound Nearshore Ecosystem Restoration Project",
+    "link": "/OngoingProgram/Detail/150/Overview",
+    "targets": [
+     {
+      "title": "Funded acres of process-based habitat restoration: Secure the full funding needed to start the process-based restoration of 2,414 or more cumulative acres of PSNERP-identified nearshore habitat in Puget Sound by 2025",
+      "owner": "Washington Department of Fish and Wildlife",
+      "ownerLink": "/Organization/Detail/7",
+      "trend": "Off Track",
+      "trendIcon": "/Content/img/OngoingProgramTargetIcons/trend-offtrack.png",
+      "status": "Below Target",
+      "statusIcon": "/Content/img/OngoingProgramTargetIcons/status-belowtarget.png"
+     }
+    ]
+   },
+   {
+    "name": "Shellfish Program",
+    "link": "/OngoingProgram/Detail/157/Overview",
+    "targets": [
+     {
+      "title": "Effectiveness Index for all BMPs installed with Shellfish Program funding: Cumulative Effectiveness Index score of 680 for BMPs measured in acres",
+      "owner": "Washington State Conservation Commission",
+      "ownerLink": "/Organization/Detail/114",
+      "trend": "On Track",
+      "trendIcon": "/Content/img/OngoingProgramTargetIcons/trend-ontrack.png",
+      "status": "Met Target",
+      "statusIcon": "/Content/img/OngoingProgramTargetIcons/status-targetmet.png"
+     },
+     {
+      "title": "Effectiveness Index for all BMPs installed with Shellfish Program funding: Cumulative Effectiveness Index score of 99,512 for BMPs measured in feet",
+      "owner": "Washington State Conservation Commission",
+      "ownerLink": "/Organization/Detail/114",
+      "trend": "On Track",
+      "trendIcon": "/Content/img/OngoingProgramTargetIcons/trend-ontrack.png",
+      "status": "Met Target",
+      "statusIcon": "/Content/img/OngoingProgramTargetIcons/status-targetmet.png"
+     },
+     {
+      "title": "Effectiveness Index for all BMPs installed with Shellfish Program funding: Cumulative Effectiveness Index score of 2,748 for BMPs measured in number",
+      "owner": "Washington State Conservation Commission",
+      "ownerLink": "/Organization/Detail/114",
+      "trend": "On Track",
+      "trendIcon": "/Content/img/OngoingProgramTargetIcons/trend-ontrack.png",
+      "status": "Met Target",
+      "statusIcon": "/Content/img/OngoingProgramTargetIcons/status-targetmet.png"
+     }
+    ]
+   },
+   {
+    "name": "Shore Friendly",
+    "link": "/OngoingProgram/Detail/231/Overview",
+    "targets": [
+     {
+      "title": "Number of initial site visits to private Puget Sound shoreline landowners: Collectively complete 914 initial site visits between 2022-2026",
+      "owner": "Washington Department of Fish and Wildlife",
+      "ownerLink": "/Organization/Detail/7",
+      "trend": "On Track",
+      "trendIcon": "/Content/img/OngoingProgramTargetIcons/trend-ontrack.png",
+      "status": "Met Target",
+      "statusIcon": "/Content/img/OngoingProgramTargetIcons/status-targetmet.png"
+     },
+     {
+      "title": "Number of follow up technical site visits: Collectively complete 331 follow-up technical site visits between 2022-2026",
+      "owner": "Washington Department of Fish and Wildlife",
+      "ownerLink": "/Organization/Detail/7",
+      "trend": "Off Track",
+      "trendIcon": "/Content/img/OngoingProgramTargetIcons/trend-offtrack.png",
+      "status": "Below Target",
+      "statusIcon": "/Content/img/OngoingProgramTargetIcons/status-belowtarget.png"
+     }
+    ]
+   },
+   {
+    "name": "Shorelands - Floodplains by Design",
+    "link": "/OngoingProgram/Detail/40/Overview",
+    "targets": [
+     {
+      "title": "Acres of estuary or floodplain restored or reconnected: Between 2022 and 2025, restore or reconnect an additional 4,554 acres of floodplain or estuary habitat",
+      "owner": "Washington State Department of Ecology",
+      "ownerLink": "/Organization/Detail/10",
+      "trend": "Off Track",
+      "trendIcon": "/Content/img/OngoingProgramTargetIcons/trend-offtrack.png",
+      "status": "Below Target",
+      "statusIcon": "/Content/img/OngoingProgramTargetIcons/status-belowtarget.png"
+     },
+     {
+      "title": "Acres of working lands protected or improved: Between 2022 and 2025, protect or improve an additional 4,141 acres of working lands",
+      "owner": "Washington State Department of Ecology",
+      "ownerLink": "/Organization/Detail/10",
+      "trend": "On Track",
+      "trendIcon": "/Content/img/OngoingProgramTargetIcons/trend-ontrack.png",
+      "status": "Met Target",
+      "statusIcon": "/Content/img/OngoingProgramTargetIcons/status-targetmet.png"
+     },
+     {
+      "title": "Number of homes or structures with reduced flood or climate risk: Between 2022 and 2025, reduce flood or climate risk for an additional 1341 homes or structures",
+      "owner": "Washington State Department of Ecology",
+      "ownerLink": "/Organization/Detail/10",
+      "trend": "On Track",
+      "trendIcon": "/Content/img/OngoingProgramTargetIcons/trend-ontrack.png",
+      "status": "Met Target",
+      "statusIcon": "/Content/img/OngoingProgramTargetIcons/status-targetmet.png"
+     }
+    ]
+   }
+  ]
+ }
+]

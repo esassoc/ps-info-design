@@ -1,0 +1,53 @@
+---
+// Ongoing Programs — Program List. Prod's #allProgramsGridDivID page: the
+// inventory intro, the "Ongoing Programs by Activity Type" donut breakdown
+// (prod ships this as an alt="" raster; rebuilt natively with a text
+// alternative — see PsInfoOgpActivityDonut), and the 270-row All Programs
+// grid with prod's own toolbar (row count, clear filters, Download Table,
+// Download Full Program Database). See src/data/contracts/ongoing-programs.md
+// for the full per-section inventory and honest simplification notes.
+import PsInfoAppShell from '../../../layouts/PsInfoAppShell.astro';
+import PsInfoPhotoHeader from '../../../components/psinfo/PsInfoPhotoHeader.astro';
+import PsInfoOgpSubnav from '../../../components/psinfo/PsInfoOgpSubnav.astro';
+import PsInfoOgpIntroProse from '../../../components/psinfo/PsInfoOgpIntroProse.astro';
+import PsInfoOgpActivityDonut from '../../../components/psinfo/PsInfoOgpActivityDonut.astro';
+import PsInfoOgpProgramsGrid from '../../../components/psinfo/PsInfoOgpProgramsGrid.astro';
+import PsInfoSectionTitle from '../../../components/psinfo/PsInfoSectionTitle.astro';
+import {
+  HERO_IMAGE, PROGRAMS_TITLE, PROGRAMS_INTRO,
+  ACTIVITY_TYPE_HEADING, ACTIVITY_TYPE_INTRO, ACTIVITY_TYPE_BREAKDOWN, ACTIVITY_DONUT,
+  ALL_PROGRAMS_HEADING,
+} from '../../../data/pages/ongoing-programs';
+---
+<!-- manifest:
+  layout: PsInfoAppShell (active Implementation and Funding > Ongoing Programs Portal) > center+stack spine
+  sections:
+    - page header       -> psinfo-photo-header (photo band) with psinfo-ogp-subnav (current: programs) in the band slot
+    - intro + breakdown -> psinfo-ogp-intro-prose (intro paragraph + activity-type heading/breakdown in the default slot, donut in the aside slot -> psinfo-ogp-activity-donut)
+    - all programs      -> psinfo-section-title + psinfo-ogp-programs-grid (ag-grid, 270 rows)
+-->
+<PsInfoAppShell title={`${PROGRAMS_TITLE} — Puget Sound Info`} active={{ moduleId: 'implementation', leafId: 'ongoing-programs' }}>
+  <div class="center stack" data-gap="xl">
+    <PsInfoPhotoHeader size="band" image={HERO_IMAGE.src} focus={HERO_IMAGE.focus} title={PROGRAMS_TITLE}>
+      <PsInfoOgpSubnav slot="band" current="programs" />
+    </PsInfoPhotoHeader>
+
+    <PsInfoOgpIntroProse paragraphs={[[{ text: PROGRAMS_INTRO }]]}>
+      <Fragment slot="aside">
+        <PsInfoOgpActivityDonut slices={ACTIVITY_DONUT} />
+      </Fragment>
+      <PsInfoSectionTitle title={ACTIVITY_TYPE_HEADING} />
+      <p>{ACTIVITY_TYPE_INTRO}</p>
+      <ul>
+        {ACTIVITY_TYPE_BREAKDOWN.map((item) => (
+          <li>{item.before}<strong>{item.emphasis}</strong>{item.after}</li>
+        ))}
+      </ul>
+    </PsInfoOgpIntroProse>
+
+    <div class="stack" data-gap="md">
+      <PsInfoSectionTitle title={ALL_PROGRAMS_HEADING} />
+      <PsInfoOgpProgramsGrid />
+    </div>
+  </div>
+</PsInfoAppShell>

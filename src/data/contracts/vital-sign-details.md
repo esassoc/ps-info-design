@@ -363,3 +363,37 @@ everything else in it is structurally sound:
   plain embedded JSON blob in the static HTML (only its *rendering* into a visual tree happens
   client-side), so every value was extractable directly via `curl -sL`. No content gaps beyond the
   four items above.
+
+## Revision 2026-07-22 — structure realigned to contract + standard hero/band
+
+The rendered page had drifted from this contract in two places, both now fixed
+(per Andrew's direct audit: "You've made up stuff at the end (related
+strategies) and missed contributing partners as its own section"):
+
+(a) **"Related Strategies" is sidebar content, not a body section** (contract
+item 9). The invented end-of-page body section is removed; the links render in
+`PsInfoVitalSignDetailSidebar`, the reproduction of the source's right column
+(col-md-3): Print To PDF button, Related Strategies, Vital Sign Reporter (with
+the source's own help-definition popup — `FieldDefinition/21`, verbatim, shown
+in an `esa-dialog`), and Last Updated. Sidebar headings carry the goal
+ThemeColor exactly as the source's `sectionHeader`s do. The split is the
+source's own full-height col-md-9/col-md-3 layout: every body section flows
+in the narrower left column with the sidebar as the right rail beside it.
+
+(b) **"Contributing Partners" is its own body section** (contract item 8),
+rendered via `PsInfoVitalSignDetailPartners` after Other Resources — no longer
+merged into an invented "Partners & Reporting" footer (that footer and the
+flat indicators list component are deleted).
+
+(c) **The indicators render as the source's own grid** (contract item 4's
+convention): `PsInfoVsFancyTree` in a new vital-sign-rooted mode
+(VITAL SIGN > INDICATOR head path, root row self-linking, one-step indicator
+indent), framed in the goal ThemeColor, with no section heading — the source
+puts no h4 above its grid.
+
+(d) **Standard hero/h1 + band sub-nav** (same deliberate divergence as the
+goal pages): the source photo is the photo hero (its caption/credit is not
+displayed — accepted trade-off recorded here), the H1 is the hero title, and
+`PsInfoGoalsNav` rides the band slot with the parent goal marked current
+(`aria-current="true"` — ancestor, not page). The prior `PsInfoVsSubnav`
+chrome and plain `esa-page-header` are gone from this page.

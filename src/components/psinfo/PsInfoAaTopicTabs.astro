@@ -1,0 +1,85 @@
+---
+// PsInfoAaTopicTabs — skins esa-tab-layout (the tab LEGO) to the AA module's
+// look: a periwinkle segmented strip with a solid navy active tab. Wraps the
+// page's three slotted panels; hydration wiring (labels JSON -> el.tabs) now
+// lives here instead of the page.
+//
+// Deviation from the spec's literal `<slot />`: Astro's own component-slot
+// system resolves a child's `slot="panel-N"` attribute against THIS
+// component's template at BUILD time, before it ever reaches
+// `<esa-tab-layout>`'s real (Lit shadow-DOM) slot — and it STRIPS the `slot`
+// attribute from the rendered child once it's matched a `<slot name="...">`
+// here (verified: with 3 named slots, all 3 panels rendered in the SSR'd
+// HTML, but none carried `slot` anymore, so esa-tab-layout's own runtime
+// slot re-projection had nothing to distribute — every panel would show at
+// once in the browser). Fix: the page passes each panel with
+// `data-aa-panel="N"` instead of `slot="panel-N"` (an ordinary attribute
+// Astro's slot system never touches) through a single default `<slot />`;
+// this script sets the real `slot` DOM property client-side once the
+// elements exist, which is enough to trigger the browser's live shadow-DOM
+// slot (re)assignment — content is identical either way for curl/grep.
+//
+// bcn-lego-checked: this IS the lego (esa-tab-layout, appearance="segmented"),
+// skinned via its public inherited custom-prop hooks + ::part(tabs) — no
+// bespoke tablist markup.
+interface Props {
+  id: string;
+  labels: readonly string[];
+}
+const { id, labels } = Astro.props;
+const labelsId = `${id}-labels`;
+---
+<div class="aatabs-scope" data-aa-topic-tabs={id}>
+  <esa-tab-layout id={id} class="aatabs" size="sm" appearance="segmented">
+    <slot />
+  </esa-tab-layout>
+</div>
+
+<script type="application/json" id={labelsId} set:html={JSON.stringify(labels.map((label) => ({ label })))}></script>
+
+<script>
+  import '@esa/ecology/esa-tab-layout';
+
+  type TabEl = HTMLElement & { tabs: { label: string }[] };
+
+  document.querySelectorAll<HTMLElement>('[data-aa-topic-tabs]').forEach((scope) => {
+    const id = scope.dataset.aaTopicTabs;
+    if (!id) return;
+    const el = document.getElementById(id) as TabEl | null;
+    const data = document.getElementById(`${id}-labels`);
+    if (el && data?.textContent) el.tabs = JSON.parse(data.textContent);
+
+    // Restore real light-DOM slot assignment for esa-tab-layout's shadow-DOM
+    // `<slot name="panel-${activeIndex}">` re-projection (see comment above).
+    el?.querySelectorAll<HTMLElement>('[data-aa-panel]').forEach((panel) => {
+      panel.slot = `panel-${panel.dataset.aaPanel}`;
+    });
+  });
+</script>
+
+<style>
+  .aatabs-scope {
+    --aatabs-restore-surface: var(--color-surface);
+    --aatabs-restore-sunken: var(--color-surface-sunken);
+  }
+  .aatabs-scope :global(esa-tab-layout.aatabs) {
+    --color-surface: var(--ps-info-blue-800);        /* segmented ACTIVE tab fill = navy */
+    --color-surface-sunken: var(--ps-info-blue-200); /* hover bg step on the strip */
+    --tab-layout-color: var(--ps-info-blue-800);     /* inactive tab text = navy (9.6:1 on strip) */
+    --tab-layout-color-active: #ffffff;              /* active tab text = white (11.7:1) */
+    --font-weight-medium: var(--font-weight-semibold); /* active label reads semibold */
+  }
+  /* Dense strip — the topic header bar above stays the dominant element. */
+  .aatabs-scope :global(esa-tab-layout.aatabs)::part(tabs) {
+    background: var(--ps-info-blue-100);             /* periwinkle strip */
+    border: 1px solid var(--ps-info-blue-200);
+    border-radius: var(--radius-100);
+    padding: var(--spacing-050, 2px);
+  }
+  /* restore inherited surfaces inside the slotted panels so cards/tables stay white */
+  .aatabs-scope :global(esa-tab-layout.aatabs > [data-aa-panel]) {
+    --color-surface: var(--aatabs-restore-surface);
+    --color-surface-sunken: var(--aatabs-restore-sunken);
+    --font-weight-medium: 500;
+  }
+</style>

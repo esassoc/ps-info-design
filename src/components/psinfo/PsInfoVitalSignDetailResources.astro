@@ -19,6 +19,7 @@
 // reusable home.
 import EsaCard from '@esa/ecology/esa-card.astro';
 import EsaIcon from '@esa/ecology/esa-icon.astro';
+import { isExternalHref, EXTERNAL_LINK_ICON_PATHS } from '../../lib/psinfoExternalLink';
 import type { VitalSignResourceSection, VitalSignResourceEntry } from '../../data/pages/vital-sign-details';
 
 interface Props {
@@ -28,8 +29,6 @@ interface Props {
   entries?: VitalSignResourceEntry[];
 }
 const { sections, entries } = Astro.props;
-
-const ARROW = '<path d="M7 7h10v10"/><path d="M7 17 17 7"/>';
 ---
 {sections ? (
   <EsaCard variant="outlined">
@@ -47,22 +46,28 @@ const ARROW = '<path d="M7 7h10v10"/><path d="M7 17 17 7"/>';
     <ul class="resources__list" role="list">
       {entries.map((entry) => (
         <li class="resources__entry">
-          {entry.href ? (
+          {entry.href && isExternalHref(entry.href) ? (
             <a href={entry.href} target="_blank" rel="noopener">
               {entry.text}
-              <EsaIcon name="arrow-up-right" size="xs" paths={ARROW} />
+              <EsaIcon name="external-link" size="xs" paths={EXTERNAL_LINK_ICON_PATHS} label="(external)" />
             </a>
+          ) : entry.href ? (
+            <a href={entry.href}>{entry.text}</a>
           ) : (
             <span class="resources__label">{entry.text}</span>
           )}
           {entry.inlineLinks && entry.inlineLinks.length > 0 && (
             <div class="resources__inline-links">
-              {entry.inlineLinks.map((l) => (
-                <a href={l.href} target="_blank" rel="noopener">
-                  {l.text}
-                  <EsaIcon name="arrow-up-right" size="xs" paths={ARROW} />
-                </a>
-              ))}
+              {entry.inlineLinks.map((l) =>
+                isExternalHref(l.href) ? (
+                  <a href={l.href} target="_blank" rel="noopener">
+                    {l.text}
+                    <EsaIcon name="external-link" size="xs" paths={EXTERNAL_LINK_ICON_PATHS} label="(external)" />
+                  </a>
+                ) : (
+                  <a href={l.href}>{l.text}</a>
+                )
+              )}
             </div>
           )}
           {entry.children && entry.children.length > 0 && <Astro.self entries={entry.children} />}
@@ -81,9 +86,8 @@ const ARROW = '<path d="M7 7h10v10"/><path d="M7 17 17 7"/>';
   .resources__entry { display: flex; flex-direction: column; gap: var(--spacing-150); }
   .resources__entry > a {
     display: inline-flex; align-items: flex-start; gap: var(--spacing-100); align-self: flex-start;
-    font-size: var(--ps-info-text-body); color: var(--color-text-link); text-decoration: none; line-height: 1.5;
+    font-size: var(--ps-info-text-body); color: var(--color-text-link); text-decoration: underline; text-underline-offset: 3px;  line-height: 1.5;
   }
-  .resources__entry > a:hover { text-decoration: underline; }
   .resources__entry > a:focus-visible { outline: 2px solid var(--focus-ring-color); outline-offset: 2px; }
   .resources__entry > a :global(.esa-icon) { flex: none; margin-top: 3px; }
   .resources__label { font-size: var(--ps-info-text-body); font-weight: var(--font-weight-medium); color: var(--color-text-primary); line-height: 1.5; }
@@ -91,9 +95,8 @@ const ARROW = '<path d="M7 7h10v10"/><path d="M7 17 17 7"/>';
   .resources__inline-links { display: flex; flex-wrap: wrap; gap: var(--spacing-300); }
   .resources__inline-links a {
     display: inline-flex; align-items: center; gap: var(--spacing-100);
-    font-size: var(--ps-info-text-meta-lg); color: var(--color-text-link); text-decoration: none;
+    font-size: var(--ps-info-text-meta-lg); color: var(--color-text-link); text-decoration: underline; text-underline-offset: 3px; 
   }
-  .resources__inline-links a:hover { text-decoration: underline; }
   .resources__inline-links a:focus-visible { outline: 2px solid var(--focus-ring-color); outline-offset: 2px; }
 
   .resources__entry > .resources__list {

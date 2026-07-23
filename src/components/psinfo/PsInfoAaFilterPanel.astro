@@ -1,0 +1,46 @@
+---
+// PsInfoAaFilterPanel — the Action Agenda Explorer's keyword + Vital Sign
+// filter controls, moved into a proper esa-card panel (Revision 2: the
+// controls were loose before). Purely a composition of existing legos —
+// filtering behavior is wired by the parent page (it owns the field/select
+// ids and the topic-grid data hooks).
+//
+// bcn-lego-checked: pure composition — esa-card (outlined) wraps
+// esa-filter-container laying out esa-text-field + esa-select +
+// esa-filter-clear-button; local CSS is layout-only (flex-basis of slotted
+// controls).
+import EsaCard from '@esa/ecology/esa-card.astro';
+import EsaFilterContainer from '@esa/ecology/esa-filter-container.astro';
+import EsaFilterClearButton from '@esa/ecology/esa-filter-clear-button.astro';
+import type { ActionAgendaVitalSignOption } from '../../data/pages/action-agenda';
+
+interface Props {
+  filters: { keywordLabel: string; vitalSignLabel: string; clearLabel: string };
+  vitalSignOptions: ActionAgendaVitalSignOption[];
+}
+const { filters, vitalSignOptions } = Astro.props;
+---
+<div class="aafilters-host">
+  <EsaCard variant="outlined">
+    <div class="aafilters">
+      <EsaFilterContainer>
+        <esa-text-field id="aa-keyword-field" label={filters.keywordLabel} size="md"></esa-text-field>
+        <esa-select id="aa-vitalsign-select" label={filters.vitalSignLabel} size="md"></esa-select>
+        <EsaFilterClearButton label={filters.clearLabel} />
+      </EsaFilterContainer>
+    </div>
+  </EsaCard>
+</div>
+<script type="application/json" id="aa-vitalsign-options" set:html={JSON.stringify(vitalSignOptions)}></script>
+
+<style>
+  /* esa-card clips overflow for its corner radius, which severs the
+     esa-select options popup at the card's bottom edge. This card holds only
+     the filter row — nothing else can bleed — so re-point overflow here (the
+     card's own background still honors its radius without the clip). */
+  .aafilters-host :global(.esa-card) { overflow: visible; }
+
+  .aafilters :global(.esa-filter-container) { align-items: flex-end; }
+  .aafilters :global(esa-text-field), .aafilters :global(esa-select) { flex: 1 1 260px; min-width: 220px; }
+  .aafilters :global(.esa-filter-clear-button) { margin-bottom: var(--spacing-100); }
+</style>

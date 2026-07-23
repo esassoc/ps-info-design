@@ -1,0 +1,82 @@
+---
+// PsInfoIndicatorsPortals — the source page's two psiButtonCards: a program
+// logo (Vital Signs / Progress Indicators) heading a title + blurb, each card
+// one block link out to that program's own site. Replaces PsInfoToolLinks ON
+// THIS PAGE ONLY — PsInfoToolLinks stays shared with home.astro untouched.
+//
+// QA pairing re-verified 2026-07-22 — each card is logo + title + blurb only
+// (definitions live in the intro prose, not in the cards); links now route
+// internally to the built prototype module pages.
+//
+// bcn-lego-checked: card face is the esa-card lego; no esa- lego renders a
+// logo media-object block link (esa-icon-link is inline text scale) — frame
+// mirrors the established PsInfoToolLinks shape; checked Beacon (no
+// portal-card equivalent).
+import EsaCard from '@esa/ecology/esa-card.astro';
+import { withBase } from '../../lib/base';
+import type { PortalCard } from '../../data/pages/indicators';
+
+interface Props {
+  portals: PortalCard[];
+}
+const { portals } = Astro.props;
+---
+<div class="portals">
+  {portals.map((p) => (
+    <a class="portal" href={withBase(p.href)}>
+      <EsaCard variant="outlined" padding="none">
+        <div class="portal__row">
+          <img class="portal__logo" src={withBase(p.image)} alt={p.imageAlt} width="96" height="96" />
+          <span class="portal__body">
+            <h2 class="portal__title">{p.title}</h2>
+            <span class="portal__blurb">{p.blurb}</span>
+          </span>
+        </div>
+      </EsaCard>
+    </a>
+  ))}
+</div>
+
+<style>
+  /* bcn-lego-checked: see frontmatter comment. */
+  .portals {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: var(--spacing-400);
+  }
+  .portal {
+    display: block;
+    text-decoration: none;
+    border-radius: var(--radius-100);
+    transition: transform 150ms ease, box-shadow 150ms ease;
+  }
+  .portal:hover { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(16, 42, 67, 0.12); }
+  .portal:focus-visible { outline: 2px solid var(--focus-ring-color); outline-offset: 2px; }
+  .portal :global(.esa-card) { height: 100%; }
+
+  .portal__row {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-400);
+    padding: var(--spacing-400);
+  }
+  .portal__logo {
+    flex: none;
+    inline-size: var(--spacing-900);
+    block-size: var(--spacing-900);
+    object-fit: contain;
+  }
+  .portal__body { display: flex; flex-direction: column; gap: var(--spacing-100); min-width: 0; }
+  .portal__title {
+    margin: 0;
+    font-size: 1.0625rem;
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text-primary);
+  }
+  .portal:hover .portal__title { color: var(--color-primary); }
+  .portal__blurb {
+    font-size: var(--ps-info-text-body);
+    color: var(--color-text-secondary);
+    line-height: 1.5;
+  }
+</style>

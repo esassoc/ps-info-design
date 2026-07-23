@@ -1,26 +1,32 @@
 ---
-// Ongoing Programs — the Ongoing Programs Portal's Index page. Content is
-// exact: the source's own title ("Ongoing Programs", no lede — the two intro
-// paragraphs below are the page's own body copy, not a separate tagline),
-// its inline regional map image, and its two verbatim intro paragraphs.
-// Nothing else lives on this route in the source (see
-// src/data/contracts/ongoing-programs.md): no headline stats, no program
-// table, no cross-link band — those belong to a different route
-// (/OngoingProgram/Programs) and endpoint, out of this contract's scope.
+// Ongoing Programs — the Ongoing Programs Portal's Index page, now the front
+// door of a five-page portal buildout (Index/Programs/Budgets/Targets/
+// Dashboard). Directed rebuild: all five pages share the standard photo-hero
+// + band pattern (never reproduced before on this route, since the prior
+// contract scoped only the Index page's plain title). The hero photo is a
+// NEW asset for this prototype — the Billy Frank Jr. Nisqually National
+// Wildlife Refuge aerial (credit George Dodd), an Action Agenda carousel
+// alternate, not used anywhere else. Body content is unchanged from the
+// prior directed rebuild: the source's inline regional map image and its two
+// verbatim intro paragraphs — nothing else lives on the Index route itself
+// (see src/data/contracts/ongoing-programs.md).
 import PsInfoAppShell from '../../layouts/PsInfoAppShell.astro';
-import EsaPageHeader from '@esa/ecology/esa-page-header.astro';
+import PsInfoPhotoHeader from '../../components/psinfo/PsInfoPhotoHeader.astro';
+import PsInfoOgpSubnav from '../../components/psinfo/PsInfoOgpSubnav.astro';
 import PsInfoOngoingProgramsIntro from '../../components/psinfo/PsInfoOngoingProgramsIntro.astro';
-import { PAGE_TITLE, INTRO_PARAGRAPHS, MAP_IMAGE } from '../../data/pages/ongoing-programs';
+import { PAGE_TITLE, INTRO_PARAGRAPHS, MAP_IMAGE, HERO_IMAGE } from '../../data/pages/ongoing-programs';
 ---
 <!-- manifest:
   layout: PsInfoAppShell (active Implementation and Funding > Ongoing Programs Portal) > center+stack spine
   sections:
-    - page header -> esa-page-header (plain, title only, no lede)
+    - page header -> psinfo-photo-header (photo band, its esa-page-header renders the h1) with psinfo-ogp-subnav in the band slot (no current section — this is the portal home)
     - intro (map image + 2 paragraphs) -> psinfo-ongoing-programs-intro (composes esa-card)
 -->
 <PsInfoAppShell title={`${PAGE_TITLE} — Puget Sound Info`} active={{ moduleId: 'implementation', leafId: 'ongoing-programs' }}>
   <div class="center stack" data-gap="xl">
-    <EsaPageHeader title={PAGE_TITLE} />
+    <PsInfoPhotoHeader size="band" image={HERO_IMAGE.src} focus={HERO_IMAGE.focus} title={PAGE_TITLE}>
+      <PsInfoOgpSubnav slot="band" />
+    </PsInfoPhotoHeader>
 
     <PsInfoOngoingProgramsIntro paragraphs={INTRO_PARAGRAPHS} image={MAP_IMAGE} />
   </div>

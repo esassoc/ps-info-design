@@ -1,0 +1,101 @@
+---
+// PsInfoPiTopicCards — the Progress Indicators home page's 5-card Topic
+// grid. Each card is one whole-card link (title = the link's accessible
+// name) to the topic's live detail page, plus this page's own "Action Agenda
+// Topics" sub-block (a quiet code badge + label per related AA topic).
+//
+// bcn-lego-checked: composes esa-card + esa-badge, same photo-card family as
+// psinfo-action-agenda-topic-grid, with this page's AA-topic sub-block in
+// place of that sibling's single eyebrow badge. Checked Beacon (no matching
+// card-grid-with-topic-code-list pattern); this component is the reusable
+// home. Unlike psinfo-action-agenda-topic-grid, cards here link to
+// *.pugetsoundinfo.wa.gov (internal-class on this prototype) — links stay
+// in the same tab, no arrow icon.
+// Cards with an in-prototype exemplar (route set — Agricultural Land
+// Protection) link internally; the rest keep their live
+// *.pugetsoundinfo.wa.gov hrefs (internal-class: same tab, no mark).
+//
+// Card title is a styled <span>, not a heading — same choice
+// psinfo-action-agenda-topic-grid already made for this identical
+// whole-card-link shape (the anchor's own text content is the accessible
+// name; a heading adds nothing screen readers don't already get). Prod's
+// source page renders these as bare <h3>s with no h1/h2 anywhere above them
+// on the whole page, so there is no real heading hierarchy to mirror; adding
+// an h3 here would create an h1 -> h3 skip past this page's own h2 (the grid
+// section below), which the house a11y rules ban ("no skipping levels for
+// looks"). Documented as a deviation in progress-indicators.md.
+
+import EsaCard from '@esa/ecology/esa-card.astro';
+import EsaBadge from '@esa/ecology/esa-badge.astro';
+import { withBase } from '../../lib/base';
+import type { PiTopicCard } from '../../data/pages/progress-indicators';
+
+interface Props {
+  topics: PiTopicCard[];
+  label: string;
+}
+const { topics, label } = Astro.props;
+---
+<ul class="pitopics" role="list">
+  {topics.map((t) => (
+    <li>
+      <a class="pitopic" href={t.route ? withBase(t.route) : t.href}>
+        <EsaCard variant="outlined" padding="none">
+          <img class="pitopic__img" src={withBase(t.image)} alt="" loading="lazy" decoding="async" />
+          <div class="pitopic__body">
+            <span class="pitopic__title">{t.title}</span>
+            <div class="pitopic__aa">
+              <p class="pitopic__aalabel">{label}</p>
+              {t.aaTopics.map((a) => (
+                <span class="pitopic__aatopic">
+                  <EsaBadge value={a.code} variant="primary" size="xs" />
+                  {a.label}
+                </span>
+              ))}
+            </div>
+          </div>
+        </EsaCard>
+      </a>
+    </li>
+  ))}
+</ul>
+
+<style>
+  .pitopics {
+    list-style: none; margin: 0; padding: 0;
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: var(--spacing-400);
+  }
+  @media (max-width: 900px) { .pitopics { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 560px) { .pitopics { grid-template-columns: 1fr; } }
+  .pitopic {
+    display: block; height: 100%; text-decoration: none; border-radius: var(--radius-100);
+    transition: transform 150ms ease, box-shadow 150ms ease;
+  }
+  .pitopic:hover { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(16, 42, 67, 0.12); }
+  .pitopic:focus-visible { outline: 2px solid var(--focus-ring-color); outline-offset: 2px; }
+  .pitopic :global(.esa-card) { height: 100%; overflow: hidden; }
+
+  .pitopic__img {
+    display: block; width: 100%; aspect-ratio: 4 / 3; object-fit: cover;
+    border-bottom: 1px solid var(--color-border-light);
+  }
+  .pitopic__body {
+    display: flex; flex-direction: column; align-items: flex-start; gap: var(--spacing-250);
+    padding: var(--spacing-300);
+  }
+  .pitopic__title {
+    margin: 0; font-size: 1.125rem; font-weight: var(--font-weight-semibold);
+    color: var(--color-text-primary); line-height: 1.35;
+  }
+  .pitopic:hover .pitopic__title { color: var(--color-primary); }
+
+  .pitopic__aa { display: flex; flex-direction: column; gap: var(--spacing-150); }
+  .pitopic__aalabel {
+    margin: 0; font-size: var(--ps-info-text-meta-lg); color: var(--color-text-secondary);
+  }
+  .pitopic__aatopic {
+    display: flex; align-items: center; gap: var(--spacing-100);
+    font-size: var(--ps-info-text-body); color: var(--color-text-primary);
+  }
+</style>

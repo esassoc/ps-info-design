@@ -8,6 +8,7 @@
 // (src/data/pages/vital-signs.ts, src/data/pages/vital-signs-module.ts).
 import PsInfoAppShell from '../../layouts/PsInfoAppShell.astro';
 import PsInfoPhotoHeader from '../../components/psinfo/PsInfoPhotoHeader.astro';
+import PsInfoGoalsNav from '../../components/psinfo/PsInfoGoalsNav.astro';
 import PsInfoVsWheel from '../../components/psinfo/PsInfoVsWheel.astro';
 import PsInfoVitalSignsIntro from '../../components/psinfo/PsInfoVitalSignsIntro.astro';
 import PsInfoVsPartners from '../../components/psinfo/PsInfoVsPartners.astro';
@@ -16,7 +17,9 @@ import { PAGE_TITLE, HERO, ESPANOL_LINK, INTRO_PARAGRAPHS } from '../../data/pag
 <!-- manifest:
   layout: PsInfoAppShell (active Goals) > center+stack spine
   sections:
-    - page header            -> psinfo-photo-header (photo band)
+    - page header            -> psinfo-photo-header (photo band) with psinfo-goals-nav
+                                in its band slot (goal-tinted links + Vital Signs dropdowns —
+                                the standard hero + band sub-nav pattern)
     - vital signs wheel      -> psinfo-vs-wheel (native rebuild of the source graphic)
     - intro text (un-headed) -> psinfo-vital-signs-intro
     - contributing partners  -> psinfo-vs-partners (real logo files)
@@ -28,7 +31,9 @@ import { PAGE_TITLE, HERO, ESPANOL_LINK, INTRO_PARAGRAPHS } from '../../data/pag
       image={HERO.image}
       focus={HERO.focus}
       title={PAGE_TITLE}
-    />
+    >
+      <PsInfoGoalsNav slot="band" />
+    </PsInfoPhotoHeader>
 
     <PsInfoVsWheel />
 

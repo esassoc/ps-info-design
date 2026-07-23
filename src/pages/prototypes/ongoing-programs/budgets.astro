@@ -1,0 +1,38 @@
+---
+// Ongoing Programs — State Program Budgets. Prod's budget-reporting intro
+// (verbatim, including the source's own "four... five" biennia count error —
+// see contract), its 3 methodology bullets, its own floated photo (extracted
+// from a 12MB base64 embed to a real downscaled asset), and the 3,240-row
+// Program Financial Information grid. See
+// src/data/contracts/ongoing-programs.md for the full inventory.
+import PsInfoAppShell from '../../../layouts/PsInfoAppShell.astro';
+import PsInfoPhotoHeader from '../../../components/psinfo/PsInfoPhotoHeader.astro';
+import PsInfoOgpSubnav from '../../../components/psinfo/PsInfoOgpSubnav.astro';
+import PsInfoOgpIntroProse from '../../../components/psinfo/PsInfoOgpIntroProse.astro';
+import PsInfoOgpFinancialsGrid from '../../../components/psinfo/PsInfoOgpFinancialsGrid.astro';
+import PsInfoSectionTitle from '../../../components/psinfo/PsInfoSectionTitle.astro';
+import {
+  HERO_IMAGE, BUDGETS_TITLE, BUDGETS_INTRO, BUDGETS_NOTES, BUDGETS_PHOTO, FINANCIALS_HEADING,
+} from '../../../data/pages/ongoing-programs';
+---
+<!-- manifest:
+  layout: PsInfoAppShell (active Implementation and Funding > Ongoing Programs Portal) > center+stack spine
+  sections:
+    - page header    -> psinfo-photo-header (photo band) with psinfo-ogp-subnav (current: budgets) in the band slot
+    - intro + notes  -> psinfo-ogp-intro-prose (floated photo + intro paragraph + 3 methodology bullets)
+    - financials     -> psinfo-section-title + psinfo-ogp-financials-grid (ag-grid, 3,240 rows)
+-->
+<PsInfoAppShell title={`${BUDGETS_TITLE} — Puget Sound Info`} active={{ moduleId: 'implementation', leafId: 'ongoing-programs' }}>
+  <div class="center stack" data-gap="xl">
+    <PsInfoPhotoHeader size="band" image={HERO_IMAGE.src} focus={HERO_IMAGE.focus} title={BUDGETS_TITLE}>
+      <PsInfoOgpSubnav slot="band" current="budgets" />
+    </PsInfoPhotoHeader>
+
+    <PsInfoOgpIntroProse image={BUDGETS_PHOTO} paragraphs={[[{ text: BUDGETS_INTRO }]]} bullets={BUDGETS_NOTES} />
+
+    <div class="stack" data-gap="md">
+      <PsInfoSectionTitle title={FINANCIALS_HEADING} />
+      <PsInfoOgpFinancialsGrid />
+    </div>
+  </div>
+</PsInfoAppShell>

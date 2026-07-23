@@ -8,7 +8,7 @@ Use `import EsaPageHeader from '@esa/ecology/esa-page-header.astro';` with `titl
 
 ## Sections (source order, exhaustive)
 
-The source is a single flat section: an intro paragraph followed by 28 web-service entries in a fixed order (alphabetical by title, not an authored grouping — no category sub-headings exist on the page). Each entry has: a bold ~20px title, a one-line description, an "Example Urls:" label with two links (CSV, JSON), a "Parameters:" line, and — for 17 of the 28 — a "Last Updated Date:" line and a "Change Notes:" line (which may stack multiple dated notes via `<br/>`). A `<hr>` visually separates every entry, including after the last one (chrome, not content).
+The source is a single flat section: an intro paragraph followed by 28 web-service entries in a fixed order (alphabetical by title, not an authored grouping — no category sub-headings exist on the page). Each entry has: a bold ~20px title, a one-line description, an "Example Urls:" label with two links (CSV, JSON), a "Parameters:" line, and — for 18 of the 28 — a "Last Updated Date:" line and a "Change Notes:" line (which may stack multiple dated notes via `<br/>`). A `<hr>` visually separates every entry, including after the last one (chrome, not content).
 
 1. **Intro copy** — verbatim: "Web Services are functions that can be accessed over the web (using the http protocol), typically consumed by software or programs rather than humans. The services we provide here allow programmatic access to PS Info data. The intent of these web services is to facilitate coordination and information sharing between agencies, interested parties, and the public within and outside of the Puget Sound."
 
@@ -43,7 +43,7 @@ The source is a single flat section: an intro paragraph followed by 28 web-servi
    27. **Vital Sign Indicators by Vital Sign ID** — "Returns a list of all Vital Sign Indicators records for a given VitalSignID" — URLs: `/WebServices/GetVitalSignIndicatorByVitalSignID/CSV/2`, `/WebServices/GetVitalSignIndicatorByVitalSignID/JSON/2` — Parameters: Return Type, Vital SignID — Last Updated: 05/19/2022 — Change Notes: same terminology note (verbatim)
    28. **Vital Signs** — "Returns a list of all Vital Signs" — URLs: `/WebServices/GetVitalSigns/CSV`, `/WebServices/GetVitalSigns/JSON` — Parameters: Return Type — (no Last Updated / Change Notes)
 
-   All URLs are relative to `https://www.pugetsoundinfo.wa.gov` (e.g. `/WebServices/GetOutcomeByID/CSV/1` → `https://www.pugetsoundinfo.wa.gov/WebServices/GetOutcomeByID/CSV/1`). Each is a real, live download endpoint on the source domain (internal-to-that-site but external relative to this spoke) — treat per the a11y external-link convention (target, rel, arrow-up-right mark) since it navigates off pugetsoundinfo.wa.gov's normal page shell to a raw CSV/JSON response, same as the current implementation already does.
+   All URLs are relative to `https://www.pugetsoundinfo.wa.gov` (e.g. `/WebServices/GetOutcomeByID/CSV/1` → `https://www.pugetsoundinfo.wa.gov/WebServices/GetOutcomeByID/CSV/1`). Each is a real, live download endpoint on the source domain. Per this prototype's link convention, `*.pugetsoundinfo.wa.gov` destinations are INTERNAL — rendered same-tab with no external-link mark (`isExternalHref` classifies them internal); the visible link text is prod's verbatim relative path, the href the absolute endpoint URL.
 
 ## Existing prototype/data file assessment
 
@@ -61,3 +61,14 @@ The source is a single flat section: an intro paragraph followed by 28 web-servi
 ## Gaps
 
 None. The entire page is static server-rendered HTML (no JS-rendered content observed) and every section, label, link, and note was extracted directly from the fetched source with no missing or inaccessible content.
+
+## Fidelity audit — 2026-07-22
+
+Structure + content re-audit against the saved prod DOM (scratchpad/prod/webservices.html):
+
+- **Data verified byte-for-byte**: all 28 entries programmatically diffed (title, description, both example URLs, parameters, last-updated, change notes) — zero mismatches. Entry data untouched.
+- **Removed (invented, not on prod)**: the "Available services" h2 + "28 services" count badge (prod runs entries directly after the intro with no heading), and the CSV/JSON label chips on URL rows (prod's anchors show only the relative path). `TOTAL_SERVICES` export deleted with the badge.
+- **Restored (prod labels, verbatim)**: "Example Urls:" line above each entry's URL rows (×28); "Last Updated Date: {date}" (was rephrased "Last updated {date}"); "Change Notes:" label ahead of the note lines (×18).
+- **Aligned**: visible endpoint link text is now prod's site-relative path (href stays absolute). Endpoint links remain same-tab/no-mark — `*.pugetsoundinfo.wa.gov` is internal per the repo-wide link convention (supersedes this contract's earlier external-mark note).
+- **Corrected count**: 18 of 28 entries (not 17) carry both "Last Updated Date:" and "Change Notes:" on prod — the 10 without are listed under Explicit exclusions.
+- **Kept as established chrome/composition** (not prod-visual): EsaPageHeader h1 with the intro paragraph as lede (prod: breadcrumb title + intro as first body text — same reading order); one collapsed-by-default esa-collapsible per entry (prod: flat expanded list with `<hr>` separators — content parity preserved, native `<details>` keyboard semantics). Heading tree is a single h1, matching prod's heading-less main.

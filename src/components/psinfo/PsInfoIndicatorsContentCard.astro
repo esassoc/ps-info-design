@@ -22,6 +22,7 @@
 // reusable home.
 import EsaCard from '@esa/ecology/esa-card.astro';
 import EsaIcon from '@esa/ecology/esa-icon.astro';
+import { isExternalHref, EXTERNAL_LINK_ICON_PATHS } from '../../lib/psinfoExternalLink';
 
 export interface ContentCardField {
   label: string;
@@ -63,8 +64,6 @@ interface Props {
   references?: ContentCardReference[];
 }
 const { paragraphs, fields, bulletGroups, quote, subsections, links, references } = Astro.props;
-
-const ARROW = '<path d="M7 7h10v10"/><path d="M7 17 17 7"/>';
 ---
 <EsaCard variant="outlined">
   <div class="cc">
@@ -77,10 +76,14 @@ const ARROW = '<path d="M7 7h10v10"/><path d="M7 17 17 7"/>';
             <dt>{f.label}</dt>
             <dd>
               {f.text}{' '}
-              <a href={f.href} target="_blank" rel="noopener">
-                {f.linkText}
-                <EsaIcon name="arrow-up-right" size="xs" paths={ARROW} />
-              </a>
+              {isExternalHref(f.href) ? (
+                <a href={f.href} target="_blank" rel="noopener">
+                  {f.linkText}
+                  <EsaIcon name="external-link" size="xs" paths={EXTERNAL_LINK_ICON_PATHS} label="(external)" />
+                </a>
+              ) : (
+                <a href={f.href}>{f.linkText}</a>
+              )}
             </dd>
           </div>
         ))}
@@ -100,11 +103,13 @@ const ARROW = '<path d="M7 7h10v10"/><path d="M7 17 17 7"/>';
       <figure class="cc__quote">
         <blockquote class="cc__quotetext">{quote.text}</blockquote>
         <figcaption class="cc__quotecite">
-          {quote.leadInHref ? (
+          {quote.leadInHref && isExternalHref(quote.leadInHref) ? (
             <a href={quote.leadInHref} target="_blank" rel="noopener">
               {quote.leadIn}
-              <EsaIcon name="arrow-up-right" size="xs" paths={ARROW} />
+              <EsaIcon name="external-link" size="xs" paths={EXTERNAL_LINK_ICON_PATHS} label="(external)" />
             </a>
+          ) : quote.leadInHref ? (
+            <a href={quote.leadInHref}>{quote.leadIn}</a>
           ) : quote.leadIn}
         </figcaption>
       </figure>
@@ -116,12 +121,16 @@ const ARROW = '<path d="M7 7h10v10"/><path d="M7 17 17 7"/>';
         <p class="cc__p">{s.paragraph}</p>
         {s.links && s.links.length > 0 && (
           <div class="cc__links">
-            {s.links.map((l) => (
-              <a href={l.href} target="_blank" rel="noopener">
-                {l.text}
-                <EsaIcon name="arrow-up-right" size="xs" paths={ARROW} />
-              </a>
-            ))}
+            {s.links.map((l) =>
+              isExternalHref(l.href) ? (
+                <a href={l.href} target="_blank" rel="noopener">
+                  {l.text}
+                  <EsaIcon name="external-link" size="xs" paths={EXTERNAL_LINK_ICON_PATHS} label="(external)" />
+                </a>
+              ) : (
+                <a href={l.href}>{l.text}</a>
+              )
+            )}
           </div>
         )}
       </div>
@@ -129,12 +138,16 @@ const ARROW = '<path d="M7 7h10v10"/><path d="M7 17 17 7"/>';
 
     {links && links.length > 0 && (
       <div class="cc__links">
-        {links.map((l) => (
-          <a href={l.href} target="_blank" rel="noopener">
-            {l.text}
-            <EsaIcon name="arrow-up-right" size="xs" paths={ARROW} />
-          </a>
-        ))}
+        {links.map((l) =>
+          isExternalHref(l.href) ? (
+            <a href={l.href} target="_blank" rel="noopener">
+              {l.text}
+              <EsaIcon name="external-link" size="xs" paths={EXTERNAL_LINK_ICON_PATHS} label="(external)" />
+            </a>
+          ) : (
+            <a href={l.href}>{l.text}</a>
+          )
+        )}
       </div>
     )}
 
@@ -143,10 +156,14 @@ const ARROW = '<path d="M7 7h10v10"/><path d="M7 17 17 7"/>';
         {references.map((r) => (
           <li class="cc__ref">
             <p class="cc__refcite">{r.citation}</p>
-            <a href={r.href} target="_blank" rel="noopener">
-              {r.linkText}
-              <EsaIcon name="arrow-up-right" size="xs" paths={ARROW} />
-            </a>
+            {isExternalHref(r.href) ? (
+              <a href={r.href} target="_blank" rel="noopener">
+                {r.linkText}
+                <EsaIcon name="external-link" size="xs" paths={EXTERNAL_LINK_ICON_PATHS} label="(external)" />
+              </a>
+            ) : (
+              <a href={r.href}>{r.linkText}</a>
+            )}
           </li>
         ))}
       </ol>
@@ -156,26 +173,25 @@ const ARROW = '<path d="M7 7h10v10"/><path d="M7 17 17 7"/>';
 
 <style>
   .cc { display: flex; flex-direction: column; gap: var(--spacing-400); }
-  .cc__p { margin: 0; font-size: var(--ps-info-text-body); color: var(--color-text-primary); line-height: 1.65; max-width: 74ch; }
+  .cc__p { margin: 0; font-size: var(--ps-info-text-body); color: var(--color-text-primary); line-height: 1.65; }
 
   .cc__fields { margin: 0; display: flex; flex-direction: column; gap: var(--spacing-300); }
   .cc__field dt { font-size: var(--ps-info-text-meta); color: var(--color-text-muted); }
-  .cc__field dd { margin: 2px 0 0; font-size: var(--ps-info-text-body); color: var(--color-text-primary); line-height: 1.6; max-width: 74ch; }
-  .cc__field dd a { color: var(--color-text-link); text-decoration: none; }
-  .cc__field dd a:hover { text-decoration: underline; }
+  .cc__field dd { margin: 2px 0 0; font-size: var(--ps-info-text-body); color: var(--color-text-primary); line-height: 1.6; }
+  .cc__field dd a { color: var(--color-text-link); text-decoration: underline; text-underline-offset: 3px;  }
   .cc__field dd a:focus-visible { outline: 2px solid var(--focus-ring-color); outline-offset: 2px; }
   .cc__field dd :global(.esa-icon) { color: var(--color-text-muted); margin-left: 2px; vertical-align: -1px; }
 
   .cc__group { display: flex; flex-direction: column; gap: var(--spacing-200); }
   .cc__grouplabel { margin: 0; font-size: 1rem; font-weight: var(--font-weight-semibold); color: var(--color-text-primary); }
   .cc__bullets { margin: 0; padding-left: 1.25em; display: flex; flex-direction: column; gap: var(--spacing-200); }
-  .cc__bullets li { font-size: var(--ps-info-text-body); color: var(--color-text-primary); line-height: 1.6; max-width: 74ch; }
+  .cc__bullets li { font-size: var(--ps-info-text-body); color: var(--color-text-primary); line-height: 1.6; }
 
   .cc__quote {
     margin: 0; display: flex; flex-direction: column; gap: var(--spacing-200);
     padding: var(--spacing-400); background: var(--color-surface-sunken); border-radius: var(--radius-100);
   }
-  .cc__quotetext { margin: 0; font-size: var(--ps-info-text-body); font-style: italic; color: var(--color-text-primary); line-height: 1.65; max-width: 72ch; }
+  .cc__quotetext { margin: 0; font-size: var(--ps-info-text-body); font-style: italic; color: var(--color-text-primary); line-height: 1.65; }
   .cc__quotecite { font-size: var(--ps-info-text-meta-lg); color: var(--color-text-muted); }
   .cc__quotecite a { color: var(--color-text-muted); text-decoration: none; }
   .cc__quotecite a:hover { color: var(--color-primary); }
@@ -188,9 +204,8 @@ const ARROW = '<path d="M7 7h10v10"/><path d="M7 17 17 7"/>';
   .cc__links { display: flex; flex-wrap: wrap; gap: var(--spacing-300); }
   .cc__links a {
     display: inline-flex; align-items: center; gap: var(--spacing-100);
-    font-size: var(--ps-info-text-meta-lg); color: var(--color-text-link); text-decoration: none;
+    font-size: var(--ps-info-text-meta-lg); color: var(--color-text-link); text-decoration: underline; text-underline-offset: 3px; 
   }
-  .cc__links a:hover { text-decoration: underline; }
   .cc__links a:focus-visible { outline: 2px solid var(--focus-ring-color); outline-offset: 2px; }
 
   .cc__refs { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: var(--spacing-300); }
@@ -199,8 +214,7 @@ const ARROW = '<path d="M7 7h10v10"/><path d="M7 17 17 7"/>';
   .cc__refcite { margin: 0; font-size: var(--ps-info-text-meta-lg); color: var(--color-text-secondary); line-height: 1.55; }
   .cc__ref > a {
     display: inline-flex; align-items: center; gap: var(--spacing-100); align-self: flex-start;
-    font-size: var(--ps-info-text-meta-lg); color: var(--color-text-link); text-decoration: none;
+    font-size: var(--ps-info-text-meta-lg); color: var(--color-text-link); text-decoration: underline; text-underline-offset: 3px; 
   }
-  .cc__ref > a:hover { text-decoration: underline; }
   .cc__ref > a:focus-visible { outline: 2px solid var(--focus-ring-color); outline-offset: 2px; }
 </style>

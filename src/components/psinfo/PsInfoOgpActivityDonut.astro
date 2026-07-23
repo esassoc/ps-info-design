@@ -1,0 +1,89 @@
+---
+// PsInfoOgpActivityDonut — the Program List page's "Ongoing Programs by
+// Activity Type" chart, rebuilt as a native inline SVG donut (prod ships this
+// as a raster image with alt="" — no text alternative at all). Percentages
+// and colors are sampled from the decoded prod PNG (see ongoing-programs.ts
+// ACTIVITY_DONUT). The SVG carries no data itself (aria-hidden); the real
+// text alternative is the adjacent legend + an sr-only figcaption summary.
+//
+// bcn-lego-checked: no esa- chart lego exists (walked the catalog; esa-stat/
+// esa-progress-bar are not donuts); native SVG driven by the data module
+// replaces prod's alt="" raster chart; psinfo-ogp-activity-donut is the
+// reusable home.
+import type { DonutSlice } from '../../data/pages/ongoing-programs';
+
+interface Props {
+  slices: DonutSlice[];
+}
+const { slices } = Astro.props;
+
+const R = 70;
+const CIRCUMFERENCE = 2 * Math.PI * R;
+
+let cumulative = 0;
+const arcs = slices.map((s) => {
+  const segLen = (s.pct / 100) * CIRCUMFERENCE;
+  const dashoffset = -cumulative;
+  cumulative += segLen;
+  return { ...s, segLen, dashoffset };
+});
+
+const captionSummary = slices.map((s) => `${s.label} ${s.pct}%`).join(', ');
+---
+<figure class="ogpdonut">
+  <div class="ogpdonut__chart">
+    <svg class="ogpdonut__svg" viewBox="0 0 200 200" aria-hidden="true">
+      <g transform="rotate(-90 100 100)">
+        {arcs.map((arc) => (
+          <circle
+            cx="100" cy="100" r={R}
+            fill="none"
+            stroke={arc.color}
+            stroke-width="44"
+            stroke-dasharray={`${arc.segLen} ${CIRCUMFERENCE - arc.segLen}`}
+            stroke-dashoffset={arc.dashoffset}
+          />
+        ))}
+      </g>
+    </svg>
+  </div>
+  <ul class="ogpdonut__legend" role="list">
+    {slices.map((s) => (
+      <li class="ogpdonut__item">
+        <span class="ogpdonut__swatch" style={`background: ${s.color}`} aria-hidden="true"></span>
+        <span><strong>{s.pct}%</strong> {s.label}</span>
+      </li>
+    ))}
+  </ul>
+  <figcaption class="sr-only">
+    Share of ongoing programs by primary activity type: {captionSummary}.
+  </figcaption>
+</figure>
+
+<style>
+  /* bcn-lego-checked: see frontmatter comment. */
+  .sr-only {
+    position: absolute; width: 1px; height: 1px; margin: -1px;
+    overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap;
+  }
+
+  .ogpdonut {
+    margin: 0; display: flex; flex-direction: column; align-items: center;
+    gap: var(--spacing-500);
+  }
+  .ogpdonut__chart { width: 200px; max-width: 100%; }
+  .ogpdonut__svg { width: 100%; height: auto; display: block; }
+
+  .ogpdonut__legend {
+    list-style: none; margin: 0; padding: 0;
+    display: flex; flex-direction: column; gap: var(--spacing-250);
+    width: 100%;
+  }
+  .ogpdonut__item {
+    display: flex; align-items: center; gap: var(--spacing-250);
+    font-size: var(--ps-info-text-body); color: var(--color-text-primary);
+  }
+  .ogpdonut__swatch {
+    flex: none; width: 14px; height: 14px; border-radius: var(--radius-100);
+  }
+</style>

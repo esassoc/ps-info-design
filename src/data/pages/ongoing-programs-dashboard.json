@@ -1,0 +1,786 @@
+{
+ "organizationTypes": [
+  "City",
+  "County",
+  "Federal",
+  "Lead Entity",
+  "Local Integrating Organization",
+  "Not for Profit / Nonprofit",
+  "Other",
+  "Private",
+  "Special District",
+  "State",
+  "State Institute of Higher Learning",
+  "Tribal"
+ ],
+ "budgetTypes": [
+  "Capital",
+  "Operating",
+  "Transportation"
+ ],
+ "bienniums": [
+  "2015-2017",
+  "2017-2019",
+  "2019-2021",
+  "2021-2023",
+  "2023-2025"
+ ],
+ "programsByVitalSign": [
+  {
+   "label": "Air Quality",
+   "byOrgType": {
+    "City": 0,
+    "County": 0,
+    "Federal": 6,
+    "Lead Entity": 0,
+    "Local Integrating Organization": 0,
+    "Not for Profit / Nonprofit": 0,
+    "Other": 0,
+    "Private": 0,
+    "Special District": 0,
+    "State": 4,
+    "State Institute of Higher Learning": 0,
+    "Tribal": 0
+   },
+   "total": 10
+  },
+  {
+   "label": "Beaches and Marine Vegetation",
+   "byOrgType": {
+    "City": 0,
+    "County": 0,
+    "Federal": 6,
+    "Lead Entity": 0,
+    "Local Integrating Organization": 0,
+    "Not for Profit / Nonprofit": 0,
+    "Other": 0,
+    "Private": 0,
+    "Special District": 0,
+    "State": 20,
+    "State Institute of Higher Learning": 1,
+    "Tribal": 0
+   },
+   "total": 27
+  },
+  {
+   "label": "Birds",
+   "byOrgType": {
+    "City": 0,
+    "County": 0,
+    "Federal": 1,
+    "Lead Entity": 0,
+    "Local Integrating Organization": 0,
+    "Not for Profit / Nonprofit": 0,
+    "Other": 0,
+    "Private": 0,
+    "Special District": 0,
+    "State": 0,
+    "State Institute of Higher Learning": 0,
+    "Tribal": 0
+   },
+   "total": 1
+  },
+  {
+   "label": "Cultural Wellbeing",
+   "byOrgType": {
+    "City": 0,
+    "County": 0,
+    "Federal": 1,
+    "Lead Entity": 0,
+    "Local Integrating Organization": 0,
+    "Not for Profit / Nonprofit": 0,
+    "Other": 0,
+    "Private": 0,
+    "Special District": 0,
+    "State": 3,
+    "State Institute of Higher Learning": 1,
+    "Tribal": 0
+   },
+   "total": 5
+  },
+  {
+   "label": "Drinking Water",
+   "byOrgType": {
+    "City": 0,
+    "County": 0,
+    "Federal": 3,
+    "Lead Entity": 0,
+    "Local Integrating Organization": 0,
+    "Not for Profit / Nonprofit": 0,
+    "Other": 0,
+    "Private": 0,
+    "Special District": 0,
+    "State": 1,
+    "State Institute of Higher Learning": 0,
+    "Tribal": 0
+   },
+   "total": 4
+  },
+  {
+   "label": "Economic Vitality",
+   "byOrgType": {
+    "City": 0,
+    "County": 0,
+    "Federal": 8,
+    "Lead Entity": 0,
+    "Local Integrating Organization": 0,
+    "Not for Profit / Nonprofit": 0,
+    "Other": 0,
+    "Private": 0,
+    "Special District": 0,
+    "State": 15,
+    "State Institute of Higher Learning": 1,
+    "Tribal": 0
+   },
+   "total": 24
+  },
+  {
+   "label": "Estuaries",
+   "byOrgType": {
+    "City": 0,
+    "County": 0,
+    "Federal": 24,
+    "Lead Entity": 0,
+    "Local Integrating Organization": 0,
+    "Not for Profit / Nonprofit": 0,
+    "Other": 0,
+    "Private": 0,
+    "Special District": 0,
+    "State": 29,
+    "State Institute of Higher Learning": 3,
+    "Tribal": 0
+   },
+   "total": 56
+  },
+  {
+   "label": "Forage Fish",
+   "byOrgType": {
+    "City": 0,
+    "County": 0,
+    "Federal": 0,
+    "Lead Entity": 0,
+    "Local Integrating Organization": 0,
+    "Not for Profit / Nonprofit": 0,
+    "Other": 0,
+    "Private": 0,
+    "Special District": 0,
+    "State": 1,
+    "State Institute of Higher Learning": 0,
+    "Tribal": 0
+   },
+   "total": 1
+  },
+  {
+   "label": "Forests and Wetlands",
+   "byOrgType": {
+    "City": 0,
+    "County": 0,
+    "Federal": 32,
+    "Lead Entity": 0,
+    "Local Integrating Organization": 0,
+    "Not for Profit / Nonprofit": 0,
+    "Other": 0,
+    "Private": 0,
+    "Special District": 0,
+    "State": 32,
+    "State Institute of Higher Learning": 0,
+    "Tribal": 0
+   },
+   "total": 64
+  },
+  {
+   "label": "Freshwater",
+   "byOrgType": {
+    "City": 0,
+    "County": 0,
+    "Federal": 31,
+    "Lead Entity": 0,
+    "Local Integrating Organization": 0,
+    "Not for Profit / Nonprofit": 0,
+    "Other": 0,
+    "Private": 0,
+    "Special District": 0,
+    "State": 19,
+    "State Institute of Higher Learning": 0,
+    "Tribal": 0
+   },
+   "total": 50
+  },
+  {
+   "label": "Good Governance",
+   "byOrgType": {
+    "City": 0,
+    "County": 0,
+    "Federal": 0,
+    "Lead Entity": 0,
+    "Local Integrating Organization": 0,
+    "Not for Profit / Nonprofit": 0,
+    "Other": 0,
+    "Private": 1,
+    "Special District": 0,
+    "State": 2,
+    "State Institute of Higher Learning": 0,
+    "Tribal": 0
+   },
+   "total": 3
+  },
+  {
+   "label": "Local Foods",
+   "byOrgType": {
+    "City": 0,
+    "County": 0,
+    "Federal": 1,
+    "Lead Entity": 0,
+    "Local Integrating Organization": 0,
+    "Not for Profit / Nonprofit": 0,
+    "Other": 0,
+    "Private": 0,
+    "Special District": 0,
+    "State": 3,
+    "State Institute of Higher Learning": 3,
+    "Tribal": 0
+   },
+   "total": 7
+  },
+  {
+   "label": "Marine Water",
+   "byOrgType": {
+    "City": 0,
+    "County": 0,
+    "Federal": 18,
+    "Lead Entity": 0,
+    "Local Integrating Organization": 0,
+    "Not for Profit / Nonprofit": 0,
+    "Other": 0,
+    "Private": 0,
+    "Special District": 0,
+    "State": 42,
+    "State Institute of Higher Learning": 1,
+    "Tribal": 0
+   },
+   "total": 61
+  },
+  {
+   "label": "Orcas",
+   "byOrgType": {
+    "City": 0,
+    "County": 0,
+    "Federal": 1,
+    "Lead Entity": 0,
+    "Local Integrating Organization": 0,
+    "Not for Profit / Nonprofit": 0,
+    "Other": 0,
+    "Private": 0,
+    "Special District": 0,
+    "State": 1,
+    "State Institute of Higher Learning": 0,
+    "Tribal": 0
+   },
+   "total": 2
+  },
+  {
+   "label": "Outdoor Activity",
+   "byOrgType": {
+    "City": 0,
+    "County": 0,
+    "Federal": 1,
+    "Lead Entity": 0,
+    "Local Integrating Organization": 0,
+    "Not for Profit / Nonprofit": 0,
+    "Other": 0,
+    "Private": 0,
+    "Special District": 0,
+    "State": 7,
+    "State Institute of Higher Learning": 0,
+    "Tribal": 0
+   },
+   "total": 8
+  },
+  {
+   "label": "Salmon",
+   "byOrgType": {
+    "City": 0,
+    "County": 0,
+    "Federal": 38,
+    "Lead Entity": 0,
+    "Local Integrating Organization": 0,
+    "Not for Profit / Nonprofit": 0,
+    "Other": 0,
+    "Private": 0,
+    "Special District": 0,
+    "State": 26,
+    "State Institute of Higher Learning": 0,
+    "Tribal": 0
+   },
+   "total": 64
+  },
+  {
+   "label": "Sense of Place",
+   "byOrgType": {
+    "City": 0,
+    "County": 0,
+    "Federal": 0,
+    "Lead Entity": 0,
+    "Local Integrating Organization": 0,
+    "Not for Profit / Nonprofit": 0,
+    "Other": 0,
+    "Private": 0,
+    "Special District": 0,
+    "State": 5,
+    "State Institute of Higher Learning": 0,
+    "Tribal": 0
+   },
+   "total": 5
+  },
+  {
+   "label": "Shellfish Beds",
+   "byOrgType": {
+    "City": 0,
+    "County": 0,
+    "Federal": 14,
+    "Lead Entity": 0,
+    "Local Integrating Organization": 0,
+    "Not for Profit / Nonprofit": 0,
+    "Other": 0,
+    "Private": 0,
+    "Special District": 0,
+    "State": 19,
+    "State Institute of Higher Learning": 8,
+    "Tribal": 0
+   },
+   "total": 41
+  },
+  {
+   "label": "Sound Stewardship",
+   "byOrgType": {
+    "City": 0,
+    "County": 0,
+    "Federal": 0,
+    "Lead Entity": 0,
+    "Local Integrating Organization": 0,
+    "Not for Profit / Nonprofit": 0,
+    "Other": 0,
+    "Private": 0,
+    "Special District": 0,
+    "State": 5,
+    "State Institute of Higher Learning": 8,
+    "Tribal": 0
+   },
+   "total": 13
+  },
+  {
+   "label": "Streams and Floodplains",
+   "byOrgType": {
+    "City": 0,
+    "County": 0,
+    "Federal": 29,
+    "Lead Entity": 0,
+    "Local Integrating Organization": 0,
+    "Not for Profit / Nonprofit": 0,
+    "Other": 0,
+    "Private": 0,
+    "Special District": 0,
+    "State": 46,
+    "State Institute of Higher Learning": 0,
+    "Tribal": 0
+   },
+   "total": 75
+  },
+  {
+   "label": "Toxics in Aquatic Life",
+   "byOrgType": {
+    "City": 0,
+    "County": 0,
+    "Federal": 26,
+    "Lead Entity": 0,
+    "Local Integrating Organization": 0,
+    "Not for Profit / Nonprofit": 0,
+    "Other": 0,
+    "Private": 0,
+    "Special District": 0,
+    "State": 37,
+    "State Institute of Higher Learning": 1,
+    "Tribal": 0
+   },
+   "total": 64
+  }
+ ],
+ "programsByActivityType": [
+  {
+   "label": "Acquisition and Easements",
+   "byOrgType": {
+    "City": 0,
+    "County": 0,
+    "Federal": 12,
+    "Lead Entity": 0,
+    "Local Integrating Organization": 0,
+    "Not for Profit / Nonprofit": 0,
+    "Other": 0,
+    "Private": 0,
+    "Special District": 0,
+    "State": 19,
+    "State Institute of Higher Learning": 0,
+    "Tribal": 0
+   },
+   "total": 31
+  },
+  {
+   "label": "Capacity Building and Coordination",
+   "byOrgType": {
+    "City": 0,
+    "County": 0,
+    "Federal": 19,
+    "Lead Entity": 0,
+    "Local Integrating Organization": 0,
+    "Not for Profit / Nonprofit": 0,
+    "Other": 0,
+    "Private": 1,
+    "Special District": 0,
+    "State": 34,
+    "State Institute of Higher Learning": 2,
+    "Tribal": 0
+   },
+   "total": 56
+  },
+  {
+   "label": "Compliance and Enforcement",
+   "byOrgType": {
+    "City": 0,
+    "County": 0,
+    "Federal": 12,
+    "Lead Entity": 0,
+    "Local Integrating Organization": 0,
+    "Not for Profit / Nonprofit": 0,
+    "Other": 0,
+    "Private": 0,
+    "Special District": 0,
+    "State": 25,
+    "State Institute of Higher Learning": 0,
+    "Tribal": 0
+   },
+   "total": 37
+  },
+  {
+   "label": "Ecosystem Recovery Planning",
+   "byOrgType": {
+    "City": 0,
+    "County": 0,
+    "Federal": 13,
+    "Lead Entity": 0,
+    "Local Integrating Organization": 0,
+    "Not for Profit / Nonprofit": 0,
+    "Other": 0,
+    "Private": 0,
+    "Special District": 0,
+    "State": 16,
+    "State Institute of Higher Learning": 0,
+    "Tribal": 0
+   },
+   "total": 29
+  },
+  {
+   "label": "Ecosystem Restoration Implementation",
+   "byOrgType": {
+    "City": 0,
+    "County": 0,
+    "Federal": 35,
+    "Lead Entity": 0,
+    "Local Integrating Organization": 0,
+    "Not for Profit / Nonprofit": 0,
+    "Other": 0,
+    "Private": 0,
+    "Special District": 0,
+    "State": 52,
+    "State Institute of Higher Learning": 0,
+    "Tribal": 0
+   },
+   "total": 87
+  },
+  {
+   "label": "Education and Awareness",
+   "byOrgType": {
+    "City": 0,
+    "County": 0,
+    "Federal": 5,
+    "Lead Entity": 0,
+    "Local Integrating Organization": 0,
+    "Not for Profit / Nonprofit": 0,
+    "Other": 0,
+    "Private": 0,
+    "Special District": 0,
+    "State": 20,
+    "State Institute of Higher Learning": 6,
+    "Tribal": 0
+   },
+   "total": 31
+  },
+  {
+   "label": "Effectiveness Evaluation",
+   "byOrgType": {
+    "City": 0,
+    "County": 0,
+    "Federal": 2,
+    "Lead Entity": 0,
+    "Local Integrating Organization": 0,
+    "Not for Profit / Nonprofit": 0,
+    "Other": 0,
+    "Private": 0,
+    "Special District": 0,
+    "State": 4,
+    "State Institute of Higher Learning": 0,
+    "Tribal": 0
+   },
+   "total": 6
+  },
+  {
+   "label": "Implementation Monitoring",
+   "byOrgType": {
+    "City": 0,
+    "County": 0,
+    "Federal": 0,
+    "Lead Entity": 0,
+    "Local Integrating Organization": 0,
+    "Not for Profit / Nonprofit": 0,
+    "Other": 0,
+    "Private": 0,
+    "Special District": 0,
+    "State": 1,
+    "State Institute of Higher Learning": 0,
+    "Tribal": 0
+   },
+   "total": 1
+  },
+  {
+   "label": "Incentives",
+   "byOrgType": {
+    "City": 0,
+    "County": 0,
+    "Federal": 11,
+    "Lead Entity": 0,
+    "Local Integrating Organization": 0,
+    "Not for Profit / Nonprofit": 0,
+    "Other": 0,
+    "Private": 0,
+    "Special District": 0,
+    "State": 21,
+    "State Institute of Higher Learning": 0,
+    "Tribal": 0
+   },
+   "total": 32
+  },
+  {
+   "label": "Mobilizing Funding",
+   "byOrgType": {
+    "City": 0,
+    "County": 0,
+    "Federal": 45,
+    "Lead Entity": 0,
+    "Local Integrating Organization": 0,
+    "Not for Profit / Nonprofit": 0,
+    "Other": 0,
+    "Private": 0,
+    "Special District": 0,
+    "State": 36,
+    "State Institute of Higher Learning": 0,
+    "Tribal": 0
+   },
+   "total": 81
+  },
+  {
+   "label": "Policy and Regulation Development",
+   "byOrgType": {
+    "City": 0,
+    "County": 0,
+    "Federal": 1,
+    "Lead Entity": 0,
+    "Local Integrating Organization": 0,
+    "Not for Profit / Nonprofit": 0,
+    "Other": 0,
+    "Private": 0,
+    "Special District": 0,
+    "State": 1,
+    "State Institute of Higher Learning": 0,
+    "Tribal": 0
+   },
+   "total": 2
+  },
+  {
+   "label": "Project Planning and Design",
+   "byOrgType": {
+    "City": 0,
+    "County": 0,
+    "Federal": 0,
+    "Lead Entity": 0,
+    "Local Integrating Organization": 0,
+    "Not for Profit / Nonprofit": 0,
+    "Other": 0,
+    "Private": 0,
+    "Special District": 0,
+    "State": 0,
+    "State Institute of Higher Learning": 0,
+    "Tribal": 0
+   },
+   "total": 0
+  },
+  {
+   "label": "Research",
+   "byOrgType": {
+    "City": 0,
+    "County": 0,
+    "Federal": 14,
+    "Lead Entity": 0,
+    "Local Integrating Organization": 0,
+    "Not for Profit / Nonprofit": 0,
+    "Other": 0,
+    "Private": 0,
+    "Special District": 0,
+    "State": 15,
+    "State Institute of Higher Learning": 7,
+    "Tribal": 0
+   },
+   "total": 36
+  },
+  {
+   "label": "Species Management",
+   "byOrgType": {
+    "City": 0,
+    "County": 0,
+    "Federal": 12,
+    "Lead Entity": 0,
+    "Local Integrating Organization": 0,
+    "Not for Profit / Nonprofit": 0,
+    "Other": 0,
+    "Private": 0,
+    "Special District": 0,
+    "State": 9,
+    "State Institute of Higher Learning": 2,
+    "Tribal": 0
+   },
+   "total": 23
+  },
+  {
+   "label": "Status and Trends Monitoring",
+   "byOrgType": {
+    "City": 0,
+    "County": 0,
+    "Federal": 5,
+    "Lead Entity": 0,
+    "Local Integrating Organization": 0,
+    "Not for Profit / Nonprofit": 0,
+    "Other": 0,
+    "Private": 0,
+    "Special District": 0,
+    "State": 26,
+    "State Institute of Higher Learning": 4,
+    "Tribal": 0
+   },
+   "total": 35
+  },
+  {
+   "label": "Technical Assistance and Training",
+   "byOrgType": {
+    "City": 0,
+    "County": 0,
+    "Federal": 23,
+    "Lead Entity": 0,
+    "Local Integrating Organization": 0,
+    "Not for Profit / Nonprofit": 0,
+    "Other": 0,
+    "Private": 0,
+    "Special District": 0,
+    "State": 37,
+    "State Institute of Higher Learning": 9,
+    "Tribal": 0
+   },
+   "total": 69
+  }
+ ],
+ "budgetByBiennium": [
+  {
+   "biennium": "2015-2017",
+   "byBudgetType": {
+    "Capital": 404079000,
+    "Operating": 329752000,
+    "Transportation": 54648000
+   }
+  },
+  {
+   "biennium": "2017-2019",
+   "byBudgetType": {
+    "Capital": 518567000,
+    "Operating": 344110000,
+    "Transportation": 71251000
+   }
+  },
+  {
+   "biennium": "2019-2021",
+   "byBudgetType": {
+    "Capital": 516389000,
+    "Operating": 394214000,
+    "Transportation": 177870000
+   }
+  },
+  {
+   "biennium": "2021-2023",
+   "byBudgetType": {
+    "Capital": 823430000,
+    "Operating": 567134000,
+    "Transportation": 456494000
+   }
+  },
+  {
+   "biennium": "2023-2025",
+   "byBudgetType": {
+    "Capital": 966759000,
+    "Operating": 644889000,
+    "Transportation": 777950000
+   }
+  }
+ ],
+ "counts": {
+  "programsWithVitalSigns": 245,
+  "programsWithActivityTypes": 268,
+  "financialRecords": 3240
+ },
+ "fundSources": [
+  "State",
+  "Other"
+ ],
+ "budgetBySource": [
+  {
+   "biennium": "2015-2017",
+   "bySource": {
+    "State": 585008000,
+    "Other": 203471000
+   }
+  },
+  {
+   "biennium": "2017-2019",
+   "bySource": {
+    "State": 659310000,
+    "Other": 274618000
+   }
+  },
+  {
+   "biennium": "2019-2021",
+   "bySource": {
+    "State": 878312000,
+    "Other": 210161000
+   }
+  },
+  {
+   "biennium": "2021-2023",
+   "bySource": {
+    "State": 1460087000,
+    "Other": 386971000
+   }
+  },
+  {
+   "biennium": "2023-2025",
+   "bySource": {
+    "State": 1871170000,
+    "Other": 518428000
+   }
+  }
+ ]
+}

@@ -4,18 +4,28 @@
 // an <area> image map; this reproduces the same graphic in real HTML/CSS —
 // a 7×7 tile ring (each tile a live Vital Sign link, positioned exactly per
 // the source image map), goal-name bands on the four edges, and a center
-// medallion (five-arc donut + two-tone disc wordmark). Colors sampled from
-// the source PNG (see src/data/pages/vital-signs-module.ts).
+// that is the source's own circle logo (segmented arc ring + two-tone disc
+// wordmark, "v.3" tag included), cropped directly from vitalsigns_wheel.png
+// so the ring art isn't duplicated by hand-built CSS. Tile colors sampled
+// from the source PNG (see src/data/pages/vital-signs-module.ts).
+//
+// Each goal's edge band + tiles render inside a .wheel__group wrapper:
+// display:contents on desktop (every piece still places itself in the ring
+// grid), a real block on mobile — where the wheel UNROLLS into the center
+// logo followed by five goal sections, each its band as a header over a
+// two-column tile grid. Same DOM, same links, two geometries.
 //
 // bcn-lego-checked: no esa-* lego renders a tiled infographic (checked
 // esa-card / esa-stat / layout primitives — a grid primitive can't carry the
 // banded ring or donut); this is a faithful one-off reproduction of the
 // site's own graphic, kept reusable behind the WHEEL_TILES data. Tile fills
 // use the goals' theme tokens (the quality orange darkened 12% so white
-// labels hold ≥4.5:1); band/donut hues are the source PNG's own values,
-// decorative only.
+// labels hold ≥4.5:1); band hues are the source PNG's own values, decorative
+// only.
 import { WHEEL_TILES, WHEEL_COLORS } from '../../data/pages/vital-signs-module';
+import { WHEEL_CENTER_LOGO } from '../../data/pages/vital-signs';
 import { withBase } from '../../lib/base';
+import { isExternalHref } from '../../lib/psinfoExternalLink';
 
 const TILE_FILL: Record<string, string> = {
   population: 'var(--ps-info-goal-population)',
@@ -24,39 +34,48 @@ const TILE_FILL: Record<string, string> = {
   habitat: 'var(--ps-info-goal-habitat)',
   water: 'var(--ps-info-goal-water)',
 };
+
+// One entry per goal: its edge-band placement class on the ring, its band hue,
+// and (via filter) its tiles. Array order is the mobile stacking order.
+const GROUPS = [
+  { goal: 'population', label: 'Healthy Human Population', edge: 'top', band: WHEEL_COLORS.band.population },
+  { goal: 'quality', label: 'Vibrant Human Quality of Life', edge: 'right', band: WHEEL_COLORS.band.quality },
+  { goal: 'species', label: 'Thriving Species & Food Web', edge: 'bottom', band: WHEEL_COLORS.band.species },
+  { goal: 'habitat', label: 'Functioning Habitat', edge: 'left-bottom', band: WHEEL_COLORS.band.habitat },
+  { goal: 'water', label: 'Healthy Water Quality', edge: 'left-top', band: WHEEL_COLORS.band.water },
+];
 ---
 <div class="wheel" role="group" aria-label="Puget Sound Vital Signs by recovery goal">
-  <span class="wheel__band wheel__band--top" style={`background:${WHEEL_COLORS.band.population}`}>Healthy Human Population</span>
-  <span class="wheel__band wheel__band--right" style={`background:${WHEEL_COLORS.band.quality}`}>Vibrant Human Quality of Life</span>
-  <span class="wheel__band wheel__band--bottom" style={`background:${WHEEL_COLORS.band.species}`}>Thriving Species &amp; Food Web</span>
-  <span class="wheel__band wheel__band--left-top" style={`background:${WHEEL_COLORS.band.water}`}>Healthy Water Quality</span>
-  <span class="wheel__band wheel__band--left-bottom" style={`background:${WHEEL_COLORS.band.habitat}`}>Functioning Habitat</span>
   <span class="wheel__cornerband" style={`background:${WHEEL_COLORS.corner}`} aria-hidden="true"></span>
   <span class="wheel__corner" aria-hidden="true">
     <img src={withBase('/psp-mark.png')} alt="" width="44" height="44" />
   </span>
 
-  {WHEEL_TILES.map((t) => {
-    const style = `grid-row:${t.row + 1};grid-column:${t.col + 1};background:${TILE_FILL[t.goal]}`;
-    return t.link.route ? (
-      <a class="wheel__tile" style={style} href={withBase(t.link.route)}>{t.link.label}</a>
-    ) : (
-      <a class="wheel__tile" style={style} href={t.link.externalHref} target="_blank" rel="noopener">{t.link.label}</a>
-    );
-  })}
-
   <div class="wheel__center">
-    <div class="wheel__donut" aria-hidden="true"></div>
-    <div class="wheel__disc">
-      <span class="wheel__word wheel__word--1">Puget Sound</span>
-      <span class="wheel__divider" aria-hidden="true">
-        <svg class="wheel__pulse" viewBox="0 0 90 40"><polyline points="0,24 18,24 24,10 32,34 38,4 46,30 50,24 90,24" fill="none" stroke="#ffffff" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/></svg>
-        <span class="wheel__rule"></span>
-      </span>
-      <span class="wheel__word wheel__word--2">Vital Signs</span>
-      <span class="wheel__tag">Reporting Ecosystem Health <i>v.3</i></span>
-    </div>
+    <img
+      class="wheel__logo"
+      src={withBase(WHEEL_CENTER_LOGO.src)}
+      alt={WHEEL_CENTER_LOGO.alt}
+      width={WHEEL_CENTER_LOGO.width}
+      height={WHEEL_CENTER_LOGO.height}
+    />
   </div>
+
+  {GROUPS.map((g) => (
+    <div class="wheel__group">
+      <span class:list={['wheel__band', `wheel__band--${g.edge}`]} style={`background:${g.band}`}>{g.label}</span>
+      {WHEEL_TILES.filter((t) => t.goal === g.goal).map((t) => {
+        const style = `grid-row:${t.row + 1};grid-column:${t.col + 1};background:${TILE_FILL[t.goal]}`;
+        return t.link.route ? (
+          <a class="wheel__tile" style={style} href={withBase(t.link.route)}>{t.link.label}</a>
+        ) : isExternalHref(t.link.externalHref) ? (
+          <a class="wheel__tile" style={style} href={t.link.externalHref} target="_blank" rel="noopener">{t.link.label}</a>
+        ) : (
+          <a class="wheel__tile" style={style} href={t.link.externalHref}>{t.link.label}</a>
+        );
+      })}
+    </div>
+  ))}
 </div>
 
 <style>
@@ -71,6 +90,9 @@ const TILE_FILL: Record<string, string> = {
     margin-inline: auto;
     width: 100%;
   }
+
+  /* Desktop: the wrapper dissolves — band + tiles are direct ring-grid items. */
+  .wheel__group { display: contents; }
 
   .wheel__band {
     display: flex; align-items: center; justify-content: center;
@@ -108,51 +130,44 @@ const TILE_FILL: Record<string, string> = {
     position: relative;
     display: flex; align-items: center; justify-content: center;
   }
-  .wheel__donut {
-    position: absolute; inset: 5%;
-    border-radius: 50%;
-    background: conic-gradient(
-      #ffffff 0deg 10deg,
-      #71b749 10deg 96deg,
-      #ffffff 96deg 104deg,
-      #e96f31 104deg 168deg,
-      #ffffff 168deg 176deg,
-      #ea237c 176deg 258deg,
-      #ffffff 258deg 266deg,
-      #854d9f 266deg 312deg,
-      #ffffff 312deg 320deg,
-      #00b7ab 320deg 352deg,
-      #ffffff 352deg 360deg
-    );
-  }
-  .wheel__disc {
-    position: relative;
-    width: 76%; aspect-ratio: 1 / 1;
-    border-radius: 50%;
-    background: linear-gradient(180deg, #0f5da5 0 52%, #253774 52% 100%);
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-    gap: 2px;
-    padding: 10%;
-    text-align: center;
-  }
-  .wheel__divider { display: flex; align-items: center; gap: 4px; width: 74%; margin: 3% 0; }
-  .wheel__pulse { width: 38%; flex: none; }
-  .wheel__divider .wheel__rule { flex: 1; margin: 0; width: auto; }
-  .wheel__word {
-    color: #ffffff; font-weight: var(--font-weight-bold); font-style: italic;
-    text-transform: uppercase; letter-spacing: 0.03em; line-height: 1.05;
-    font-size: clamp(1.125rem, 3.4vw, 2rem);
-  }
-  .wheel__rule { width: 62%; height: 2px; background: #ffffff; margin: 3% 0; }
-  .wheel__tag {
-    color: rgba(255, 255, 255, 0.92);
-    font-size: clamp(0.8125rem, 1.3vw, 0.9375rem);
-    text-transform: uppercase; letter-spacing: 0.08em;
-  }
-  .wheel__tag i { font-style: italic; text-transform: none; }
+  .wheel__logo { width: 84%; height: auto; border-radius: 50%; }
 
+  /* Mobile: the wheel unrolls. Center logo first, then each goal as its band
+     header over a two-column tile grid — same pieces, same links, readable at
+     phone widths instead of a shrunken ring. */
   @media (max-width: 640px) {
-    .wheel { grid-template-columns: 36px repeat(7, 1fr) 36px; grid-template-rows: 36px repeat(7, 1fr) 36px; --gap: 3px; }
-    .wheel__band { letter-spacing: 0.06em; }
+    .wheel {
+      display: flex; flex-direction: column;
+      gap: var(--spacing-400);
+      aspect-ratio: auto;
+      max-width: 480px;
+    }
+    .wheel__cornerband, .wheel__corner { display: none; }
+
+    .wheel__center { padding: var(--spacing-200) 0 var(--spacing-100); }
+    .wheel__logo { width: min(58%, 220px); }
+
+    .wheel__group {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 3px;
+    }
+    .wheel__band {
+      /* The edge-placement classes (--top/--right/…) still set ring rows;
+         pin the band to its group's first row. */
+      grid-row: 1; grid-column: 1 / -1;
+      writing-mode: horizontal-tb; transform: none;
+      padding: var(--spacing-250) var(--spacing-300);
+      font-size: 1rem; letter-spacing: 0.08em;
+    }
+    /* The ring placements are inline styles on each tile — flatten them back
+       into flow for the stacked grid (!important is the only way past inline). */
+    .wheel__group .wheel__tile {
+      grid-area: auto !important;
+      min-height: 56px;
+    }
+    /* Odd tile count: the orphan last tile spans the full row. (Band is child
+       1, so an even :nth-child means an odd tile count.) */
+    .wheel__group .wheel__tile:last-child:nth-child(even) { grid-column: 1 / -1 !important; }
   }
 </style>

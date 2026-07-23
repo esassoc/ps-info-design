@@ -1,0 +1,24 @@
+---
+// PsInfoHeaderLede — a multi-paragraph page-header lede. esa-page-header's
+// lede prop renders exactly one <p>; pages whose source intro is more than one
+// paragraph (LIOs: two) compose this directly below a title-only
+// esa-page-header. Type and color mirror the lego's own lede (the
+// type-body-large role — the same --type-size-300/relaxed pair the lego
+// reads — in secondary text), at full measure (no 70ch cap, revision
+// direction 2026-07-23).
+//
+// bcn-lego-checked: esa-page-header's lede is a single-string prop with no
+// slot, so a multi-paragraph lede can't live inside the lego; no other esa-
+// lego renders header-lede prose. psinfo-header-lede is the reusable home.
+interface Props {
+  paragraphs: string[];
+}
+const { paragraphs } = Astro.props;
+---
+<div class="headerlede stack" data-gap="sm">
+  {paragraphs.map((p) => <p class="headerlede__p type-body-large">{p}</p>)}
+</div>
+
+<style>
+  .headerlede__p { margin: 0; color: var(--color-text-secondary); }
+</style>

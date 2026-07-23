@@ -18,6 +18,7 @@
 import EsaIcon from '@esa/ecology/esa-icon.astro';
 import EsaPill from '@esa/ecology/esa-pill.astro';
 import { withBase } from '../../lib/base';
+import { isExternalHref, EXTERNAL_LINK_ICON_PATHS } from '../../lib/psinfoExternalLink';
 import type { IndicatorRow, IndicatorTag } from '../../data/pages/indicators';
 
 export interface IndicatorBoardSection {
@@ -33,7 +34,6 @@ interface Props {
 }
 const { sections, exemplarId, exemplarRoute } = Astro.props;
 
-const ARROW = '<path d="M7 7h10v10"/><path d="M7 17 17 7"/>';
 const BUILDING = '<rect width="16" height="20" x="4" y="2" rx="2"/><path d="M9 22v-4h6v4"/><path d="M8 6h.01"/><path d="M16 6h.01"/><path d="M12 6h.01"/><path d="M12 10h.01"/><path d="M8 10h.01"/><path d="M16 10h.01"/>';
 
 // Source duplicates a strategy tag within a single row (e.g. the same 2022
@@ -65,17 +65,24 @@ function dedupe(tags: IndicatorTag[]): IndicatorTag[] {
               <div class="row__head">
                 {isExemplar ? (
                   <a class="row__name" href={withBase(exemplarRoute)}>{row.name}</a>
-                ) : (
+                ) : isExternalHref(row.detailUrl) ? (
                   <a class="row__name" href={row.detailUrl} target="_blank" rel="noopener">
                     {row.name}
-                    <EsaIcon name="arrow-up-right" size="xs" paths={ARROW} />
+                    <EsaIcon name="external-link" size="xs" paths={EXTERNAL_LINK_ICON_PATHS} label="(external)" />
                   </a>
+                ) : (
+                  <a class="row__name" href={row.detailUrl}>{row.name}</a>
                 )}
-                {row.org && row.orgHref ? (
+                {row.org && row.orgHref && isExternalHref(row.orgHref) ? (
                   <a class="row__org" href={row.orgHref} target="_blank" rel="noopener">
                     <EsaIcon name="building" size="xs" paths={BUILDING} />
                     {row.org}
-                    <EsaIcon name="arrow-up-right" size="xs" paths={ARROW} />
+                    <EsaIcon name="external-link" size="xs" paths={EXTERNAL_LINK_ICON_PATHS} label="(external)" />
+                  </a>
+                ) : row.org && row.orgHref ? (
+                  <a class="row__org" href={row.orgHref}>
+                    <EsaIcon name="building" size="xs" paths={BUILDING} />
+                    {row.org}
                   </a>
                 ) : row.org ? (
                   <span class="row__org row__org--plain">

@@ -21,6 +21,7 @@ import EsaIcon from '@esa/ecology/esa-icon.astro';
 import EsaBreadcrumbs from '@esa/ecology/esa-breadcrumbs.astro';
 import { navFor, MODULES, SEARCH_INDEX, ICONS, type ActiveNav } from '../data/psinfo-nav';
 import { withBase } from '../lib/base';
+import { isExternalHref, EXTERNAL_LINK_ICON_PATHS } from '../lib/psinfoExternalLink';
 
 interface Props {
   title?: string;
@@ -54,8 +55,6 @@ const searchEntities = SEARCH_INDEX.map((e, i) => ({
   url: e.route ? withBase(e.route) : '#',
 }));
 const searchPayload = JSON.stringify({ entities: searchEntities, scopes: searchScopes });
-
-const ARROW = '<path d="M7 7h10v10"/><path d="M7 17 17 7"/>';
 ---
 
 <BaseLayout title={title}>
@@ -103,10 +102,10 @@ const ARROW = '<path d="M7 7h10v10"/><path d="M7 17 17 7"/>';
               <ul class="navsec__items">
                 {section.children.map((leaf) => (
                   <li>
-                    {leaf.href && leaf.external ? (
+                    {leaf.href && isExternalHref(leaf.href) ? (
                       <a href={leaf.href} class="leaf leaf--external" target="_blank" rel="noopener">
                         <span>{leaf.label}</span>
-                        <EsaIcon name="arrow-up-right" size="xs" paths={ARROW} />
+                        <EsaIcon name="external-link" size="xs" paths={EXTERNAL_LINK_ICON_PATHS} label="(external)" />
                       </a>
                     ) : leaf.href ? (
                       <a href={leaf.href} class:list={['leaf', { 'leaf--active': leaf.active }]} aria-current={leaf.active ? 'page' : undefined}>
@@ -126,10 +125,10 @@ const ARROW = '<path d="M7 7h10v10"/><path d="M7 17 17 7"/>';
                 <ul class="flyout__items">
                   {section.children.map((leaf) => (
                     <li>
-                      {leaf.href && leaf.external ? (
+                      {leaf.href && isExternalHref(leaf.href) ? (
                         <a href={leaf.href} class="flyout__link flyout__link--external" target="_blank" rel="noopener">
                           <span>{leaf.label}</span>
-                          <EsaIcon name="arrow-up-right" size="xs" paths={ARROW} />
+                          <EsaIcon name="external-link" size="xs" paths={EXTERNAL_LINK_ICON_PATHS} label="(external)" />
                         </a>
                       ) : leaf.href ? (
                         <a href={leaf.href} class:list={['flyout__link', { 'flyout__link--active': leaf.active }]}>{leaf.label}</a>
@@ -446,5 +445,9 @@ const ARROW = '<path d="M7 7h10v10"/><path d="M7 17 17 7"/>';
     .omnibox__label, .omnibox__kbd { display: none; }
     .omnibox { width: 44px; padding: 0; justify-content: center; }
     .rail { position: fixed; z-index: 1050; box-shadow: 0 8px 32px rgba(0,0,0,0.16); }
+    /* Collapsed on mobile = gone. The 72px icon strip is a desktop affordance;
+       fixed over a phone viewport it just occludes content. The topbar toggle
+       stays available to reopen it. */
+    .rail--collapsed { width: 0; border-right: 0; box-shadow: none; }
   }
 </style>

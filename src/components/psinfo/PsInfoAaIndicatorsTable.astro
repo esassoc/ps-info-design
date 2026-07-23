@@ -1,0 +1,77 @@
+---
+// PsInfoAaIndicatorsTable — the Progress tab's Indicator | Trend | Target
+// Status table (same 10 Topic 05 indicators as PsInfoAaIndicatorExplorer,
+// prod's own second rendering of this dataset as a plain table rather than a
+// carousel).
+//
+// bcn-lego-checked: data table — no esa- table lego; checked Beacon (Angular
+// grid, not portable to this static table).
+import { withBase } from '../../lib/base';
+import { isExternalHref } from '../../lib/psinfoExternalLink';
+import { AA_TREND_ICON, AA_TARGET_STATUS_ICON } from '../../lib/psinfoAaIcons';
+import type { AaTopicIndicator } from '../../data/pages/action-agenda';
+
+interface Props {
+  indicators: AaTopicIndicator[];
+}
+const { indicators } = Astro.props;
+---
+<div class="aaindt__scroller">
+  <table class="aaindt">
+    <caption class="sr-only">Indicators</caption>
+    <thead>
+      <tr>
+        <th scope="col">Indicator</th>
+        <th scope="col" class="aaindt__statuscol">Trend</th>
+        <th scope="col" class="aaindt__statuscol">Target Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      {indicators.map((ind) => (
+        <tr>
+          <td>
+            <a
+              class="aaindt__link"
+              href={ind.href}
+              {...(isExternalHref(ind.href) ? { target: '_blank', rel: 'noopener' } : {})}
+            >{ind.name}</a>
+            <div class="aaindt__desc">{ind.description}</div>
+          </td>
+          <td class="aaindt__statuscol">
+            <img src={withBase(AA_TREND_ICON[ind.trend])} alt={`Trend: ${ind.trend}`} width="64" height="64" loading="lazy" />
+          </td>
+          <td class="aaindt__statuscol">
+            {ind.targetStatus && (
+              <img src={withBase(AA_TARGET_STATUS_ICON[ind.targetStatus])} alt={`Target Status: ${ind.targetStatus}`} width="64" height="64" loading="lazy" />
+            )}
+          </td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+</div>
+
+<style>
+  .sr-only {
+    position: absolute; width: 1px; height: 1px; margin: -1px;
+    overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap;
+  }
+  .aaindt__scroller { overflow-x: auto; border: 1px solid var(--color-border); border-radius: var(--radius-100); }
+  .aaindt { width: 100%; border-collapse: collapse; min-width: 640px; }
+  .aaindt th {
+    text-align: left; padding: var(--spacing-300) var(--spacing-400);
+    background: var(--ps-info-blue-800); color: #ffffff;
+    font-size: var(--ps-info-text-meta-lg); font-weight: var(--font-weight-semibold);
+    border-bottom: 1px solid var(--color-border);
+  }
+  .aaindt td {
+    padding: var(--spacing-300) var(--spacing-400); vertical-align: top;
+    border-bottom: 1px solid var(--color-border-light);
+  }
+  .aaindt__statuscol { min-width: 8.5rem; text-align: center; white-space: nowrap; }
+  .aaindt tbody tr:nth-child(even) td { background: var(--ps-info-gray-50); }
+  .aaindt tbody tr:last-child td { border-bottom: 0; }
+  .aaindt__link { font-size: 1rem; font-weight: var(--font-weight-semibold); color: var(--color-text-link); text-decoration: underline; text-underline-offset: 3px;  }
+  .aaindt__link:focus-visible { outline: 2px solid var(--focus-ring-color); outline-offset: 2px; }
+  .aaindt__desc { margin-top: var(--spacing-100); font-size: 1rem; color: var(--color-text-secondary); line-height: 1.5; }
+</style>

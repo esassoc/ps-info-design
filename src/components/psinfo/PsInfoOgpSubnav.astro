@@ -1,0 +1,63 @@
+---
+// PsInfoOgpSubnav — the Ongoing Programs Portal's shared band nav, riding the
+// PhotoHeader's `band` slot on all five portal pages. Prod's own
+// #ogpNavbarSupportedContent tab strip (Program List / State Program Budgets
+// / Program Targets / Data Dashboard), re-pointed at this prototype's
+// internal routes. Plain links only — prod's strip has no dropdowns.
+//
+// bcn-lego-checked: checked esa-header-nav/esa-nav-dropdown (site-level nav
+// chrome) and esa-button-group (form control grouping); nothing fits an
+// on-photo section band. Same band pattern as PsInfoAnchorNav adapted to 4
+// internal routes with aria-current; psinfo-ogp-subnav is the reusable home.
+import { OGP_SECTIONS, type OgpSectionId } from '../../data/pages/ongoing-programs';
+import { withBase } from '../../lib/base';
+
+interface Props {
+  /** The section currently being viewed; omitted on the portal home (no item marked current). */
+  current?: OgpSectionId;
+}
+const { current } = Astro.props;
+---
+<nav class="ogpnav" aria-label="Ongoing Programs sections">
+  {OGP_SECTIONS.map((section) => (
+    <a
+      class:list={['ogpnav__link', { 'ogpnav__link--current': section.id === current }]}
+      href={withBase(section.route)}
+      aria-current={section.id === current ? 'page' : undefined}
+    >
+      {section.label}
+    </a>
+  ))}
+</nav>
+
+<style>
+  /* Same container-driven row policy as the module band navs (PsInfoAnchorNav
+     / PsInfoGoalsNav / PsInfoAaTopicsNav), adapted to FOUR items: 4-across,
+     2-over-2, or the mobile stack — never an orphan wrap. */
+  .ogpnav {
+    container-type: inline-size;
+    display: grid; grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+  .ogpnav__link {
+    text-align: center;
+    padding: var(--spacing-300) var(--spacing-400);
+    font-size: 0.9375rem; font-weight: var(--font-weight-medium);
+    color: #ffffff; text-decoration: none; white-space: nowrap;
+    transition: background 150ms ease;
+  }
+  .ogpnav__link:hover { background: rgba(255, 255, 255, 0.12); }
+  .ogpnav__link:focus-visible { outline: 2px solid var(--focus-ring-color); outline-offset: -2px; }
+  .ogpnav__link--current {
+    text-decoration: underline; text-underline-offset: 4px; font-weight: var(--font-weight-semibold);
+  }
+
+  @container (max-width: 720px) {
+    .ogpnav { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .ogpnav__link { white-space: normal; }
+  }
+
+  @media (max-width: 860px) {
+    .ogpnav { display: flex; flex-direction: column; }
+    .ogpnav__link { text-align: left; padding-left: var(--spacing-400); }
+  }
+</style>

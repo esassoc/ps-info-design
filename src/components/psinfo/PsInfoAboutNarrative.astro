@@ -2,7 +2,7 @@
 // PsInfoAboutNarrative — renders one About section's content blocks: ordered
 // paragraphs with inline text/link segments in their original sentence
 // position (internal links resolve via withBase(), external links open in a
-// new tab with the arrow-up-right mark, mailto links stay plain), plus an
+// new tab with the external-link mark, mailto links stay plain), plus an
 // optional partner-organization list. Shared by all three About Q&A sections
 // (source: pugetsoundinfo.wa.gov/About).
 //
@@ -13,14 +13,13 @@
 import EsaCard from '@esa/ecology/esa-card.astro';
 import EsaIcon from '@esa/ecology/esa-icon.astro';
 import { withBase } from '../../lib/base';
+import { EXTERNAL_LINK_ICON_PATHS } from '../../lib/psinfoExternalLink';
 import type { AboutBlock, AboutLink } from '../../data/pages/about';
 
 interface Props {
   blocks: AboutBlock[];
 }
 const { blocks } = Astro.props;
-
-const ARROW = '<path d="M7 7h10v10"/><path d="M7 17 17 7"/>';
 
 const mailtoHref = (email: string, subject?: string) =>
   `mailto:${email}${subject ? `?subject=${encodeURIComponent(subject)}` : ''}`;
@@ -41,7 +40,7 @@ const linkAttrs = (link: AboutLink) => {
               <li>
                 <a href={org.href} target="_blank" rel="noopener" class="narrative__partner">
                   {org.name}
-                  <EsaIcon name="arrow-up-right" size="xs" paths={ARROW} />
+                  <EsaIcon name="external-link" size="xs" paths={EXTERNAL_LINK_ICON_PATHS} label="(external)" />
                 </a>
               </li>
             ))}
@@ -50,12 +49,12 @@ const linkAttrs = (link: AboutLink) => {
       }
       const { paragraph } = block;
       const content = paragraph.segments.map((seg) => {
-        if (seg.type === 'text') return seg.text;
+        if (seg.type === 'text') return seg.strong ? <strong>{seg.text}</strong> : seg.text;
         const { link } = seg;
         return (
           <a {...linkAttrs(link)} class="narrative__link">
             {link.text}
-            {link.kind === 'external' && <EsaIcon name="arrow-up-right" size="xs" paths={ARROW} />}
+            {link.kind === 'external' && <EsaIcon name="external-link" size="xs" paths={EXTERNAL_LINK_ICON_PATHS} label="(external)" />}
           </a>
         );
       });
@@ -72,7 +71,7 @@ const linkAttrs = (link: AboutLink) => {
   .narrative { display: flex; flex-direction: column; gap: var(--spacing-400); }
   .narrative__p {
     margin: 0; font-size: var(--ps-info-text-body); line-height: 1.65;
-    color: var(--color-text-primary); max-width: 74ch;
+    color: var(--color-text-primary);
   }
   .narrative__p em { font-style: italic; color: var(--color-text-secondary); }
   .narrative__link {

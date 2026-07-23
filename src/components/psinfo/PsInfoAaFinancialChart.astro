@@ -1,0 +1,215 @@
+---
+// PsInfoAaFinancialChart — the Progress tab's Financial Investments chart:
+// prod ships an interactive Google stacked-column chart; this renders the
+// SAME embedded data (verbatim from prod's own dataTable, see the action-
+// agenda contract addendum) as an SSR inline SVG figure, with a <details>
+// accessible data table underneath (the 1.4.1/complex-alt escape hatch, and
+// an honest replacement for prod's "download chart data" affordance).
+//
+// bcn-lego-checked: no esa- lego renders a chart; this SVG is content (a
+// figure), not a UI control, so no interactive-primitive lego applies.
+// Checked Beacon (Angular chart components, not portable outside Angular).
+// dataviz skill loaded before authoring: thin marks, a 2px surface gap
+// between stacked segments, selective direct labels, legend + accessible
+// table (never color-alone identity), recessive gridlines.
+import EsaCard from '@esa/ecology/esa-card.astro';
+import PsInfoAaTopicProse from './PsInfoAaTopicProse.astro';
+import type { AaFinancialBiennium, TopicProseParagraph } from '../../data/pages/action-agenda';
+
+interface Props {
+  note: string;
+  series: { label: string; color: string }[];
+  data: AaFinancialBiennium[];
+  footnotes: TopicProseParagraph[];
+}
+const { note, series, data, footnotes } = Astro.props;
+
+// ── Chart geometry ──────────────────────────────────────────────────────
+const W = 800;
+const H = 400;
+const MARGIN = { top: 20, right: 20, bottom: 56, left: 56 };
+const innerW = W - MARGIN.left - MARGIN.right;
+const innerH = H - MARGIN.top - MARGIN.bottom;
+const Y_MAX = 100; // prod's own fixed viewWindow (0–100 $M), not derived from the data max
+const pxPerMillion = innerH / Y_MAX;
+const GRID_STEPS = [0, 25, 50, 75, 100];
+const GAP = 2; // 2px surface gap between stacked segments (dataviz mark spec)
+const LABEL_MIN_HEIGHT = 18;
+
+const yFor = (value: number) => MARGIN.top + innerH - value * pxPerMillion;
+
+const groupWidth = innerW / data.length;
+const barWidth = Math.min(72, groupWidth * 0.5);
+
+interface Segment {
+  x: number; y: number; width: number; height: number; color: string;
+  label: string; showLabel: boolean; labelAbove: boolean;
+}
+
+const groups = data.map((biennium, i) => {
+  const cx = MARGIN.left + groupWidth * i + groupWidth / 2;
+  const x = cx - barWidth / 2;
+  let cursorValue = 0;
+  const segments: Segment[] = [];
+  const values: [number | null, string, string][] = [
+    [biennium.state, biennium.stateLabel, series[0].color],
+    [biennium.federal, biennium.federalLabel, series[1].color],
+    [biennium.privateLocal, biennium.privateLocalLabel, series[2].color],
+  ];
+  values.forEach(([value, label, color], si) => {
+    const v = value ?? 0;
+    const yTop = yFor(cursorValue + v);
+    const yBottom = yFor(cursorValue);
+    const height = Math.max(0, yBottom - yTop - (v > 0 ? GAP : 0));
+    if (v > 0) {
+      segments.push({
+        x, y: yTop, width: barWidth, height,
+        color, label,
+        showLabel: height >= LABEL_MIN_HEIGHT,
+        labelAbove: si === 2, // Private/Local: dark text above the stack when shown, never white-on-orange
+      });
+    }
+    cursorValue += v;
+  });
+  const stackTopY = yFor(cursorValue);
+  return { cx, x, label: biennium.label, segments, stackTopY };
+});
+---
+<div class="aafin">
+  <EsaCard variant="outlined">
+  <div class="aafin__chartbox">
+  <div class="repel aafin__toprow" data-gap="sm">
+    <p class="aafin__note">{note}</p>
+    <div class="aafin__legend">
+      <strong>Source:</strong>
+      {series.map((s) => (
+        <span class="aafin__legenditem">
+          <span class="aafin__dot" style={`background: ${s.color}`} aria-hidden="true"></span>
+          {s.label}
+        </span>
+      ))}
+    </div>
+  </div>
+
+  <svg
+    class="aafin__svg"
+    viewBox={`0 0 ${W} ${H}`}
+    role="img"
+    aria-label="Stacked column chart: state agency ongoing-program investments in Smart Growth by biennium — State, Federal, and Private/Local funding, 2015–2017 through 2023–2025 biennia"
+  >
+    {GRID_STEPS.map((step) => (
+      <g>
+        <line
+          x1={MARGIN.left} x2={W - MARGIN.right}
+          y1={yFor(step)} y2={yFor(step)}
+          class="aafin__gridline"
+        />
+        <text x={MARGIN.left - 10} y={yFor(step)} class="aafin__axislabel" text-anchor="end" dominant-baseline="middle">
+          {`$${step}M`}
+        </text>
+      </g>
+    ))}
+
+    {groups.map((g) => (
+      <g>
+        {g.segments.map((seg) => (
+          <g>
+            <rect x={seg.x} y={seg.y} width={seg.width} height={seg.height} fill={seg.color} rx="2" />
+            {seg.showLabel && !seg.labelAbove && (
+              <text
+                x={seg.x + seg.width / 2}
+                y={seg.y + seg.height / 2}
+                class="aafin__seglabel aafin__seglabel--onfill"
+                text-anchor="middle"
+                dominant-baseline="middle"
+              >
+                {seg.label}
+              </text>
+            )}
+            {seg.showLabel && seg.labelAbove && (
+              <text
+                x={seg.x + seg.width / 2}
+                y={g.stackTopY - 8}
+                class="aafin__seglabel aafin__seglabel--above"
+                text-anchor="middle"
+              >
+                {seg.label}
+              </text>
+            )}
+          </g>
+        ))}
+        <text x={g.cx} y={MARGIN.top + innerH + 20} class="aafin__axislabel" text-anchor="middle">{g.label}</text>
+      </g>
+    ))}
+
+    <text x={MARGIN.left + innerW / 2} y={MARGIN.top + innerH + 42} class="aafin__axistitle" text-anchor="middle">Biennium</text>
+  </svg>
+
+  <details class="aafin__details">
+    <summary>Chart data</summary>
+    <div class="aafin__scroller">
+      <table class="aafin__table">
+        <caption class="sr-only">Financial Investments — state agency ongoing-program funding by biennium</caption>
+        <thead>
+          <tr>
+            <th scope="col">Biennium</th>
+            <th scope="col">State</th>
+            <th scope="col">Federal</th>
+            <th scope="col">Private/Local</th>
+          </tr>
+        </thead>
+        <tbody>
+          {data.map((d) => (
+            <tr>
+              <td>{d.label}</td>
+              <td>{d.stateLabel}</td>
+              <td>{d.federalLabel}</td>
+              <td>{d.privateLocalLabel}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </details>
+  </div>
+  </EsaCard>
+
+  <PsInfoAaTopicProse paragraphs={footnotes} />
+</div>
+
+<style>
+  .aafin { display: flex; flex-direction: column; gap: var(--spacing-400); }
+  /* White chart container (esa-card supplies surface/border/padding); this
+     inner wrapper restores the vertical rhythm the root previously gave the
+     legend/svg/details trio. */
+  .aafin__chartbox { display: flex; flex-direction: column; gap: var(--spacing-400); }
+  .sr-only {
+    position: absolute; width: 1px; height: 1px; margin: -1px;
+    overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap;
+  }
+
+  .aafin__toprow { align-items: baseline; }
+  .aafin__note { margin: 0; font-style: italic; font-size: var(--ps-info-text-meta-lg); color: var(--color-text-secondary); }
+  .aafin__legend { display: flex; align-items: center; gap: var(--spacing-300); flex-wrap: wrap; font-size: var(--ps-info-text-meta-lg); color: var(--color-text-secondary); }
+  .aafin__legenditem { display: inline-flex; align-items: center; gap: var(--spacing-100); }
+  .aafin__dot { width: 10px; height: 10px; border-radius: var(--radius-full); flex: none; }
+
+  .aafin__svg { display: block; width: 100%; height: auto; max-width: 100%; }
+  .aafin__gridline { stroke: var(--color-border-light); stroke-width: 1; }
+  .aafin__axislabel { font-size: 13px; fill: var(--ps-info-gray-600); font-family: var(--font-sans); }
+  .aafin__axistitle { font-size: 13px; fill: var(--color-text-secondary); font-family: var(--font-sans); font-weight: 600; }
+  .aafin__seglabel { font-size: 13px; font-family: var(--font-sans); font-weight: 600; }
+  .aafin__seglabel--onfill { fill: #ffffff; }
+  .aafin__seglabel--above { fill: var(--ps-info-gray-900); }
+
+  .aafin__details { border: 1px solid var(--color-border); border-radius: var(--radius-100); padding: var(--spacing-300) var(--spacing-400); }
+  .aafin__details summary {
+    cursor: pointer; font-size: 1rem; font-weight: var(--font-weight-semibold); color: var(--color-text-primary);
+  }
+  .aafin__details summary:focus-visible { outline: 2px solid var(--focus-ring-color); outline-offset: 2px; }
+  .aafin__scroller { overflow-x: auto; margin-top: var(--spacing-300); }
+  .aafin__table { width: 100%; border-collapse: collapse; min-width: 420px; }
+  .aafin__table th, .aafin__table td { padding: var(--spacing-250) var(--spacing-300); text-align: left; font-size: 1rem; border-bottom: 1px solid var(--color-border-light); }
+  .aafin__table th { background: var(--color-surface-sunken); color: var(--color-text-secondary); font-weight: var(--font-weight-semibold); font-size: var(--ps-info-text-meta-lg); }
+  .aafin__table tr:last-child td { border-bottom: 0; }
+</style>

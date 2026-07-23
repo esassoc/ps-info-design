@@ -1,0 +1,128 @@
+---
+// PsInfoOgpIntroProse — the photo-floated prose block used on the Budgets and
+// Targets pages' intros, and (via the `aside` slot) the Program List page's
+// two-column intro+donut section. Modeled on PsInfoOngoingProgramsIntro
+// (image floated right beside paragraphs) but generalized for inline
+// text/link segments (ProseSegment[][]) and an optional bullet list, since
+// both the Budgets and Targets intros carry links prod bolds inline. A
+// default slot renders additional body content after the paragraphs (the
+// Program List page uses it for the Activity Type heading + breakdown list,
+// itself composed from psinfo-section-title + the source's own strong
+// placements — never bespoke page markup outside a component).
+//
+// bcn-lego-checked: no esa- lego renders prose paragraphs with inline links +
+// a floated image (esa-card's body is a slot, not a prose renderer); esa-card
+// is the reused surface, matching PsInfoOngoingProgramsIntro/
+// PsInfoAboutNarrative precedent; psinfo-ogp-intro-prose is the reusable home.
+import EsaCard from '@esa/ecology/esa-card.astro';
+import EsaIcon from '@esa/ecology/esa-icon.astro';
+import { isExternalHref, EXTERNAL_LINK_ICON_PATHS } from '../../lib/psinfoExternalLink';
+import { withBase } from '../../lib/base';
+import type { ProseSegment } from '../../data/pages/ongoing-programs';
+
+interface Props {
+  image?: { src: string; alt: string; width: number; height: number };
+  paragraphs: ProseSegment[][];
+  bullets?: string[];
+}
+const { image, paragraphs, bullets } = Astro.props;
+const hasAside = Astro.slots.has('aside');
+---
+<EsaCard variant="outlined">
+  <div class:list={['ogpintro', { 'ogpintro--aside': hasAside }]}>
+    <div class="ogpintro__body">
+      {image && (
+        <img
+          class="ogpintro__image"
+          src={withBase(image.src)}
+          alt={image.alt}
+          width={image.width}
+          height={image.height}
+          loading="lazy"
+        />
+      )}
+      {paragraphs.map((segments) => (
+        <p class="ogpintro__p">
+          {segments.map((seg) =>
+            'link' in seg ? (
+              isExternalHref(seg.link.href) ? (
+                <strong>
+                  <a class="ogpintro__link" href={seg.link.href} target="_blank" rel="noopener">
+                    {seg.link.label}
+                    <EsaIcon name="external-link" size="xs" paths={EXTERNAL_LINK_ICON_PATHS} label="(external)" />
+                  </a>
+                </strong>
+              ) : (
+                <strong><a class="ogpintro__link" href={seg.link.href}>{seg.link.label}</a></strong>
+              )
+            ) : (
+              seg.text
+            )
+          )}
+        </p>
+      ))}
+      {bullets && bullets.length > 0 && (
+        <ul class="ogpintro__list">
+          {bullets.map((b) => <li>{b}</li>)}
+        </ul>
+      )}
+      {Astro.slots.has('default') && (
+        <div class="ogpintro__extra">
+          <slot />
+        </div>
+      )}
+    </div>
+    {hasAside && (
+      <div class="ogpintro__aside">
+        <slot name="aside" />
+      </div>
+    )}
+  </div>
+</EsaCard>
+
+<style>
+  /* bcn-lego-checked: see frontmatter comment. */
+  .ogpintro__body::after { content: ''; display: table; clear: both; }
+
+  .ogpintro__image {
+    float: right;
+    width: 320px; height: auto; max-width: 100%;
+    margin: 0 0 var(--spacing-300) var(--spacing-400);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-100);
+  }
+
+  .ogpintro__p {
+    margin: 0 0 var(--spacing-400) 0; font-size: var(--ps-info-text-body); line-height: 1.65;
+    color: var(--color-text-primary);
+  }
+  .ogpintro__p:last-of-type { margin-bottom: 0; }
+  .ogpintro__list { margin: var(--spacing-400) 0 0; padding-left: var(--spacing-500); }
+  .ogpintro__list li {
+    font-size: var(--ps-info-text-body); line-height: 1.6; color: var(--color-text-primary);
+    margin-bottom: var(--spacing-300);
+  }
+  .ogpintro__list li:last-child { margin-bottom: 0; }
+  .ogpintro__extra { margin-top: var(--spacing-400); display: flex; flex-direction: column; gap: var(--spacing-300); }
+  .ogpintro__extra :global(p) { margin: 0; font-size: var(--ps-info-text-body); line-height: 1.65; color: var(--color-text-primary); }
+  .ogpintro__extra :global(ul) { margin: 0; padding-left: var(--spacing-500); display: flex; flex-direction: column; gap: var(--spacing-300); }
+  .ogpintro__extra :global(li) { font-size: var(--ps-info-text-body); line-height: 1.6; color: var(--color-text-primary); }
+
+  .ogpintro__link { color: var(--color-text-link); text-decoration: underline; text-underline-offset: 3px; }
+  .ogpintro__link:hover { color: var(--color-text-link-hover); }
+  .ogpintro__link:focus-visible { outline: 2px solid var(--focus-ring-color); outline-offset: 2px; }
+  .ogpintro__link :global(.esa-icon) { color: var(--color-text-muted); margin-left: var(--spacing-100); }
+
+  .ogpintro--aside {
+    display: grid; grid-template-columns: minmax(0, 1fr) 420px; gap: var(--spacing-600);
+    align-items: start;
+  }
+
+  @media (max-width: 860px) {
+    .ogpintro--aside { grid-template-columns: 1fr; }
+  }
+
+  @media (max-width: 560px) {
+    .ogpintro__image { float: none; display: block; width: 100%; max-width: 320px; margin: 0 auto var(--spacing-300); }
+  }
+</style>

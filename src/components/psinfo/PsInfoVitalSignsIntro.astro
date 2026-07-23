@@ -12,6 +12,7 @@
 // doesn't fit whole; that one shape is authored here instead. esa-icon
 // renders the external-link mark; nothing heavier is reused.
 import EsaIcon from '@esa/ecology/esa-icon.astro';
+import { isExternalHref, EXTERNAL_LINK_ICON_PATHS } from '../../lib/psinfoExternalLink';
 import type { IntroLink, IntroParagraph } from '../../data/pages/vital-signs';
 
 interface Props {
@@ -19,26 +20,30 @@ interface Props {
   paragraphs: IntroParagraph[];
 }
 const { espanolLink, paragraphs } = Astro.props;
-
-const ARROW = '<path d="M7 7h10v10"/><path d="M7 17 17 7"/>';
 ---
 <div class="intro">
   <p class="intro__espanol">
-    <a href={espanolLink.href} target="_blank" rel="noopener">
-      {espanolLink.text}
-      <EsaIcon name="arrow-up-right" size="sm" paths={ARROW} />
-    </a>
+    {isExternalHref(espanolLink.href) ? (
+      <a href={espanolLink.href} target="_blank" rel="noopener">
+        {espanolLink.text}
+        <EsaIcon name="external-link" size="sm" paths={EXTERNAL_LINK_ICON_PATHS} label="(external)" />
+      </a>
+    ) : (
+      <a href={espanolLink.href}>{espanolLink.text}</a>
+    )}
   </p>
   {paragraphs.map((p) => (
     <p class="intro__p">
       {p.segments.map((seg) =>
         seg.type === 'text' ? (
           seg.text
-        ) : (
+        ) : isExternalHref(seg.link.href) ? (
           <a class="intro__link" href={seg.link.href} target="_blank" rel="noopener">
             {seg.link.text}
-            <EsaIcon name="arrow-up-right" size="xs" paths={ARROW} />
+            <EsaIcon name="external-link" size="xs" paths={EXTERNAL_LINK_ICON_PATHS} label="(external)" />
           </a>
+        ) : (
+          <a class="intro__link" href={seg.link.href}>{seg.link.text}</a>
         ),
       )}
     </p>
@@ -46,7 +51,7 @@ const ARROW = '<path d="M7 7h10v10"/><path d="M7 17 17 7"/>';
 </div>
 
 <style>
-  .intro { display: flex; flex-direction: column; gap: var(--spacing-400); max-width: 74ch; }
+  .intro { display: flex; flex-direction: column; gap: var(--spacing-400); }
 
   .intro__espanol { margin: 0; }
   .intro__espanol a {

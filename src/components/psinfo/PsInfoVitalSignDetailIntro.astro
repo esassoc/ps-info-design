@@ -1,59 +1,31 @@
 ---
-// PsInfoVitalSignDetailIntro — the Vital Sign Detail page's intro block: the
-// source page's own prose-beside-photo split that sits directly under its
-// title (a 7-column narrative / 5-column photo+caption layout on the live
-// site), stacking to one column on mobile.
+// PsInfoVitalSignDetailIntro — the Vital Sign Detail page's overview block:
+// the source's single intro paragraph on an outlined card. The source sets
+// this prose beside the page's photograph; in the prototype's standard
+// hero/h1 pattern that photograph IS the photo hero, so this block carries
+// the prose alone, sitting beside the reference sidebar in the page's
+// two-column top region.
 //
 // bcn-lego-checked: esa-card is the surface (variant="outlined", matching
-// every other content card on this page); no esa- lego renders a two-column
-// prose/photo split — esa-card's own header/body slots don't support a
-// side-by-side body layout. Checked Beacon: no matching prose+photo pattern.
+// every other content card on this page); the paragraph is plain prose.
 // psinfo-vital-sign-detail-intro is the reusable home for this unit's two
 // pages (Salmon, Orcas).
 import EsaCard from '@esa/ecology/esa-card.astro';
-import { withBase } from '../../lib/base';
-import type { VitalSignPhoto } from '../../data/pages/vital-sign-details';
 
 interface Props {
   intro: string;
-  photo: VitalSignPhoto;
 }
-const { intro, photo } = Astro.props;
+const { intro } = Astro.props;
 ---
 <EsaCard variant="outlined">
-  <div class="intro">
-    <p class="intro__p">{intro}</p>
-    <figure class="intro__figure">
-      <img class="intro__img" src={withBase(photo.image)} alt={photo.alt} loading="lazy" decoding="async" />
-      <figcaption class="intro__caption">{photo.caption}</figcaption>
-    </figure>
-  </div>
+  <p class="intro__p">{intro}</p>
 </EsaCard>
 
 <style>
-  .intro {
-    display: grid;
-    grid-template-columns: 7fr 5fr;
-    gap: var(--spacing-500);
-    align-items: start;
-  }
   .intro__p {
     margin: 0;
     font-size: var(--ps-info-text-body);
     color: var(--color-text-primary);
     line-height: 1.65;
-  }
-  .intro__figure { margin: 0; display: flex; flex-direction: column; gap: var(--spacing-200); }
-  .intro__img {
-    width: 100%;
-    aspect-ratio: 3 / 2;
-    object-fit: cover;
-    border-radius: var(--radius-100);
-    background: var(--color-surface-sunken);
-  }
-  .intro__caption { margin: 0; font-size: var(--ps-info-text-meta); color: var(--color-text-muted); line-height: 1.4; }
-
-  @media (max-width: 720px) {
-    .intro { grid-template-columns: 1fr; }
   }
 </style>

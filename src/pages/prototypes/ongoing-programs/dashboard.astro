@@ -1,0 +1,86 @@
+---
+// Ongoing Programs — Data Dashboard. Prod is AngularJS + Google Charts (NOT
+// an iframe, despite the brief's expectation) — its own inline
+// AngularViewData feeds a horizontal bar chart by Vital Sign, a horizontal
+// bar chart by Activity Type, and a stacked column chart of estimated Puget
+// Sound budget by biennium (State/Other fund source), each behind a filter
+// dropdown. Rebuilt as native token-styled DOM charts in esa-card containers
+// (bars/columns are aria-hidden; real text carries every label/value) with
+// multi-select filters, prod's gridline/tick/axis-title format, and prod's
+// own row order + values (re-verified 2026-07-23 against the charts' own
+// XLSX exports) — see src/data/contracts/ongoing-programs.md for aggregation
+// notes and the excluded prod features (Options dropdowns, collapsible
+// program tables, the budget chart's budget-type filter dimension).
+import PsInfoAppShell from '../../../layouts/PsInfoAppShell.astro';
+import PsInfoPhotoHeader from '../../../components/psinfo/PsInfoPhotoHeader.astro';
+import PsInfoOgpSubnav from '../../../components/psinfo/PsInfoOgpSubnav.astro';
+import PsInfoOgpIntroProse from '../../../components/psinfo/PsInfoOgpIntroProse.astro';
+import PsInfoOgpBarChart from '../../../components/psinfo/PsInfoOgpBarChart.astro';
+import PsInfoOgpBudgetChart from '../../../components/psinfo/PsInfoOgpBudgetChart.astro';
+import {
+  HERO_IMAGE, DASHBOARD_TITLE, DASHBOARD_INTRO,
+  CHART_VITALSIGN_TITLE, CHART_ACTIVITY_TITLE, CHART_BUDGET_TITLE,
+  CHART_COUNT_AXIS_LABEL, CHART_BUDGET_AXIS_LABEL,
+  CHART_VS_CATEGORY_AXIS, CHART_AT_CATEGORY_AXIS, CHART_BUDGET_VALUE_AXIS,
+  FILTER_ORG_LABEL, FILTER_SOURCE_LABEL, viewSelectedProgramsLabel,
+  DASHBOARD_DATA, BUDGET_SOURCE_COLORS,
+} from '../../../data/pages/ongoing-programs';
+---
+<!-- manifest:
+  layout: PsInfoAppShell (active Implementation and Funding > Ongoing Programs Portal) > center+stack spine
+  sections:
+    - page header       -> psinfo-photo-header (photo band) with psinfo-ogp-subnav (current: dashboard) in the band slot
+    - intro             -> psinfo-ogp-intro-prose (single intro paragraph, no image/bullets)
+    - vital sign chart  -> psinfo-ogp-bar-chart (esa-card container; title inside; org-type filter; view-programs band)
+    - activity chart    -> psinfo-ogp-bar-chart (same container/filter shape)
+    - budget chart      -> psinfo-ogp-budget-chart (esa-card container; prod's State/Other series; fund-source filter)
+-->
+<PsInfoAppShell title={`${DASHBOARD_TITLE} — Puget Sound Info`} active={{ moduleId: 'implementation', leafId: 'ongoing-programs' }}>
+  <div class="center stack" data-gap="xl">
+    <PsInfoPhotoHeader size="band" image={HERO_IMAGE.src} focus={HERO_IMAGE.focus} title={DASHBOARD_TITLE}>
+      <PsInfoOgpSubnav slot="band" current="dashboard" />
+    </PsInfoPhotoHeader>
+
+    <PsInfoOgpIntroProse paragraphs={[[{ text: DASHBOARD_INTRO }]]} />
+
+    <PsInfoOgpBarChart
+      chartId="ogp-vs-chart"
+      title={CHART_VITALSIGN_TITLE}
+      rows={DASHBOARD_DATA.programsByVitalSign}
+      orgTypes={DASHBOARD_DATA.organizationTypes}
+      axisLabel={CHART_COUNT_AXIS_LABEL}
+      categoryAxisLabel={CHART_VS_CATEGORY_AXIS}
+      filterLabel={FILTER_ORG_LABEL}
+      viewPrograms={{
+        label: viewSelectedProgramsLabel(DASHBOARD_DATA.counts.programsWithVitalSigns),
+        route: '/prototypes/ongoing-programs/programs',
+      }}
+    />
+
+    <PsInfoOgpBarChart
+      chartId="ogp-at-chart"
+      title={CHART_ACTIVITY_TITLE}
+      rows={DASHBOARD_DATA.programsByActivityType}
+      orgTypes={DASHBOARD_DATA.organizationTypes}
+      axisLabel={CHART_COUNT_AXIS_LABEL}
+      categoryAxisLabel={CHART_AT_CATEGORY_AXIS}
+      filterLabel={FILTER_ORG_LABEL}
+      viewPrograms={{
+        label: viewSelectedProgramsLabel(DASHBOARD_DATA.counts.programsWithActivityTypes),
+        route: '/prototypes/ongoing-programs/programs',
+      }}
+    />
+
+    <PsInfoOgpBudgetChart
+      chartId="ogp-budget-chart"
+      title={CHART_BUDGET_TITLE}
+      rows={DASHBOARD_DATA.budgetBySource}
+      series={DASHBOARD_DATA.fundSources}
+      seriesColors={BUDGET_SOURCE_COLORS}
+      seriesNoun="fund sources"
+      axisLabel={CHART_BUDGET_AXIS_LABEL}
+      valueAxisLabel={CHART_BUDGET_VALUE_AXIS}
+      filterLabel={FILTER_SOURCE_LABEL}
+    />
+  </div>
+</PsInfoAppShell>

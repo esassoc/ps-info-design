@@ -1,0 +1,169 @@
+---
+// Action Agenda — Topic 05 "Smart Growth" exemplar. Directed reproduction of
+// the three saved tab DOMs (Overview / Implementation / Progress) — same
+// content, source order, tables and imagery, elevated onto THE STANDARD PAGE
+// PATTERN: PsInfoPhotoHeader hero (topic cover photo only — no title/eyebrow)
+// with PsInfoAaTopicsNav riding the header's band slot, and prod's own
+// aa2026TopicHeader recreated directly below as PsInfoAaTopicHeaderBar (the
+// page's only H1). Prod's routed tab URLs become client-state tabs on this
+// one route (PsInfoAaTopicTabs skinning esa-tab-layout, size="lg") — all
+// three panels are SSR'd, so curl/grep verification sees every tab's content
+// regardless of which is active. See src/data/contracts/action-agenda.md,
+// Addendum 2026-07-22 + the 2026-07-22 revision block, for full sourcing
+// notes, the complete data inventory, and every honest downgrade.
+import PsInfoAppShell from '../../../layouts/PsInfoAppShell.astro';
+import PsInfoPhotoHeader from '../../../components/psinfo/PsInfoPhotoHeader.astro';
+import PsInfoAaTopicsNav from '../../../components/psinfo/PsInfoAaTopicsNav.astro';
+import PsInfoAaTopicHeaderBar from '../../../components/psinfo/PsInfoAaTopicHeaderBar.astro';
+import PsInfoAaTopicTabs from '../../../components/psinfo/PsInfoAaTopicTabs.astro';
+import PsInfoAaSectionHeader from '../../../components/psinfo/PsInfoAaSectionHeader.astro';
+import PsInfoAaInfoCallout from '../../../components/psinfo/PsInfoAaInfoCallout.astro';
+import PsInfoAaOverviewBody from '../../../components/psinfo/PsInfoAaOverviewBody.astro';
+import PsInfoAaTopicContents from '../../../components/psinfo/PsInfoAaTopicContents.astro';
+import PsInfoAaTopicProse from '../../../components/psinfo/PsInfoAaTopicProse.astro';
+import PsInfoAaStrategyTree from '../../../components/psinfo/PsInfoAaStrategyTree.astro';
+import PsInfoAaCommitmentsTable from '../../../components/psinfo/PsInfoAaCommitmentsTable.astro';
+import PsInfoAaIndicatorExplorer from '../../../components/psinfo/PsInfoAaIndicatorExplorer.astro';
+import PsInfoAaImplementationLists from '../../../components/psinfo/PsInfoAaImplementationLists.astro';
+import PsInfoAaFinancialChart from '../../../components/psinfo/PsInfoAaFinancialChart.astro';
+import PsInfoAaIndicatorsTable from '../../../components/psinfo/PsInfoAaIndicatorsTable.astro';
+import {
+  HEADER_TITLE,
+  AA_TOPIC05_HEADER, AA_TOPIC05_TABS,
+  AA_TOPIC05_OVERVIEW_CONTENTS, AA_TOPIC05_PROGRESS_CONTENTS,
+  AA_TOPIC05_VITAL_SIGNS_LABEL, AA_TOPIC05_VITAL_SIGNS,
+  AA_TOPIC05_OVERVIEW_PARAGRAPHS, AA_TOPIC05_OVERVIEW_PHOTO, AA_TOPIC05_STRATEGIES,
+  AA_TOPIC05_TRACKING_INTRO, AA_TOPIC05_COMMITMENTS_INTRO, AA_TOPIC05_INDICATORS_INTRO,
+  AA_TOPIC05_COMMITMENTS, AA_TOPIC05_INDICATORS, AA_TOPIC05_COMMITMENTS_CALLOUT,
+  AA_TOPIC05_IMPLEMENTATION_INTRO, AA_TOPIC05_PROGRAMS, AA_TOPIC05_ACTIVITIES, AA_TOPIC05_BILLS,
+  AA_TOPIC05_PROGRESS_INTRO, AA_TOPIC05_FINANCIAL_INTRO, AA_TOPIC05_FINANCIAL_QUESTION,
+  AA_TOPIC05_FINANCIAL_NOTE, AA_TOPIC05_FINANCIAL_SERIES, AA_TOPIC05_FINANCIAL_DATA, AA_TOPIC05_FINANCIAL_FOOTNOTES,
+  AA_TOPIC05_PROGRESS_INDICATORS_INTRO, AA_TOPIC05_PROGRESS_COMMITMENTS_INTRO, AA_TOPIC05_INDICATORS_LEGEND,
+} from '../../../data/pages/action-agenda';
+---
+<!-- manifest:
+  layout: PsInfoAppShell (active Plans > Action Agenda Explorer) > center+stack spine
+  sections:
+    - page hero        -> psinfo-photo-header (module H1 "2026-2030 Action Agenda Explorer"
+                          over the topic cover photo) with psinfo-aa-topics-nav in its band slot
+    - topic header bar -> psinfo-aa-topic-header-bar (TOPIC 5 chip + H2 "Smart Growth" + category pill + About link)
+    - tab bar          -> psinfo-aa-topic-tabs (esa-tab-layout skin, size lg, 3 slotted panels, all SSR'd)
+    - overview contents -> psinfo-aa-topic-contents
+    - overview body     -> psinfo-aa-overview-body (prose + photo + Vital Signs ribbon)
+    - strategies/actions -> psinfo-aa-strategy-tree
+    - what we're tracking -> psinfo-aa-topic-prose
+    - commitments (overview) -> psinfo-aa-topic-prose + psinfo-aa-commitments-table (5-row cap + callout)
+    - indicators (overview)  -> psinfo-aa-topic-prose + psinfo-aa-indicator-explorer (carousel)
+    - implementation intro   -> psinfo-aa-section-header + psinfo-aa-topic-prose
+    - implementation lists   -> psinfo-aa-implementation-lists
+    - progress contents -> psinfo-aa-topic-contents
+    - progress overview -> psinfo-aa-section-header + psinfo-aa-topic-prose
+    - financial investments -> psinfo-aa-topic-prose + psinfo-aa-financial-chart
+    - progress indicators   -> psinfo-aa-topic-prose + psinfo-aa-indicators-table + psinfo-aa-info-callout
+    - progress commitments  -> psinfo-aa-topic-prose + psinfo-aa-commitments-table (5-row cap + callout)
+-->
+<PsInfoAppShell title="Smart Growth — Action Agenda — Puget Sound Info" active={{ moduleId: 'plans', leafId: 'aa-explorer' }}>
+  <div class="center stack" data-gap="xl">
+    <div class="stack" data-gap="sm">
+      <PsInfoPhotoHeader size="band" image={AA_TOPIC05_HEADER.coverImage} title={HEADER_TITLE}>
+        <PsInfoAaTopicsNav slot="band" />
+      </PsInfoPhotoHeader>
+
+      <PsInfoAaTopicHeaderBar
+        badge={AA_TOPIC05_HEADER.badge}
+        title={AA_TOPIC05_HEADER.title}
+        category={AA_TOPIC05_HEADER.category}
+        aboutLabel={AA_TOPIC05_HEADER.aboutLabel}
+        aboutHref={AA_TOPIC05_HEADER.aboutHref}
+      />
+    </div>
+
+    <PsInfoAaTopicTabs id="aa-topic-tabs" labels={AA_TOPIC05_TABS}>
+      <section data-aa-panel="0" aria-label="Overview">
+        <div class="sidebar" data-gap="lg" style="--sidebar-width: 11rem">
+          <PsInfoAaTopicContents items={AA_TOPIC05_OVERVIEW_CONTENTS} navLabel="Contents" />
+          <div class="stack" data-gap="2xl">
+            <section id="overview">
+              <PsInfoAaSectionHeader title="Overview" />
+              <PsInfoAaOverviewBody
+                paragraphs={AA_TOPIC05_OVERVIEW_PARAGRAPHS}
+                photo={AA_TOPIC05_OVERVIEW_PHOTO}
+                vitalSignsLabel={AA_TOPIC05_VITAL_SIGNS_LABEL}
+                vitalSigns={AA_TOPIC05_VITAL_SIGNS}
+              />
+            </section>
+
+            <section id="strategies">
+              <PsInfoAaSectionHeader title="Strategies and Actions" />
+              <PsInfoAaStrategyTree strategies={AA_TOPIC05_STRATEGIES} />
+            </section>
+
+            <section id="whatWereTracking" class="stack" data-gap="xl">
+              <PsInfoAaSectionHeader title="What We're Tracking" />
+              <PsInfoAaTopicProse paragraphs={[AA_TOPIC05_TRACKING_INTRO]} />
+
+              <section id="commitments" class="stack" data-gap="md">
+                <PsInfoAaSectionHeader as="h3" title="2026-2030 Commitments" />
+                <PsInfoAaTopicProse paragraphs={[AA_TOPIC05_COMMITMENTS_INTRO]} />
+                <PsInfoAaCommitmentsTable rows={AA_TOPIC05_COMMITMENTS} instanceId="ov" callout={AA_TOPIC05_COMMITMENTS_CALLOUT} />
+              </section>
+
+              <section id="indicators" class="stack" data-gap="md">
+                <PsInfoAaSectionHeader as="h3" title="Indicators" />
+                <PsInfoAaTopicProse paragraphs={[AA_TOPIC05_INDICATORS_INTRO]} />
+                <PsInfoAaIndicatorExplorer indicators={AA_TOPIC05_INDICATORS} />
+              </section>
+            </section>
+          </div>
+        </div>
+      </section>
+
+      <section data-aa-panel="1" aria-label="Implementation" class="stack" data-gap="xl">
+        <PsInfoAaSectionHeader title="Implementation" />
+        <PsInfoAaTopicProse paragraphs={[[{ text: AA_TOPIC05_IMPLEMENTATION_INTRO }]]} />
+        <PsInfoAaImplementationLists programs={AA_TOPIC05_PROGRAMS} activities={AA_TOPIC05_ACTIVITIES} bills={AA_TOPIC05_BILLS} />
+      </section>
+
+      <section data-aa-panel="2" aria-label="Progress">
+        <div class="sidebar" data-gap="lg" style="--sidebar-width: 11rem">
+          <PsInfoAaTopicContents items={AA_TOPIC05_PROGRESS_CONTENTS} navLabel="Progress contents" />
+          <div class="stack" data-gap="2xl">
+            <section id="progressOverview">
+              <PsInfoAaSectionHeader title="Progress Overview" />
+              <PsInfoAaTopicProse paragraphs={[[{ text: AA_TOPIC05_PROGRESS_INTRO }]]} />
+            </section>
+
+            <section id="financialInvestments" class="stack" data-gap="md">
+              <PsInfoAaSectionHeader title="Financial Investments" />
+              <PsInfoAaTopicProse
+                paragraphs={[
+                  [{ text: AA_TOPIC05_FINANCIAL_INTRO }],
+                  [{ text: AA_TOPIC05_FINANCIAL_QUESTION, bold: true }],
+                ]}
+              />
+              <PsInfoAaFinancialChart
+                note={AA_TOPIC05_FINANCIAL_NOTE}
+                series={AA_TOPIC05_FINANCIAL_SERIES}
+                data={AA_TOPIC05_FINANCIAL_DATA}
+                footnotes={AA_TOPIC05_FINANCIAL_FOOTNOTES}
+              />
+            </section>
+
+            <section id="pugetSoundIndicators" class="stack" data-gap="md">
+              <PsInfoAaSectionHeader title="Indicators" />
+              <PsInfoAaTopicProse paragraphs={[[{ text: AA_TOPIC05_PROGRESS_INDICATORS_INTRO }]]} />
+              <PsInfoAaIndicatorsTable indicators={AA_TOPIC05_INDICATORS} />
+              <PsInfoAaInfoCallout paragraphs={AA_TOPIC05_INDICATORS_LEGEND} />
+            </section>
+
+            <section id="progress-commitments" class="stack" data-gap="md">
+              <PsInfoAaSectionHeader title="Commitments" />
+              <PsInfoAaTopicProse paragraphs={[AA_TOPIC05_PROGRESS_COMMITMENTS_INTRO]} />
+              <PsInfoAaCommitmentsTable rows={AA_TOPIC05_COMMITMENTS} instanceId="pr" callout={AA_TOPIC05_COMMITMENTS_CALLOUT} />
+            </section>
+          </div>
+        </div>
+      </section>
+    </PsInfoAaTopicTabs>
+  </div>
+</PsInfoAppShell>

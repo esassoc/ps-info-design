@@ -1,0 +1,281 @@
+---
+// PsInfoOgpTargetsTree — the Program Targets page's Fancytree reproduction:
+// ACTION AGENDA CYCLE > ONGOING PROGRAM > TARGET, with a shared toolbar
+// (Expand Level / Collapse Level / search), one framed tree table per cycle.
+// Mechanics modeled on PsInfoVsFancyTree (toggle buttons with
+// aria-expanded/aria-controls, level-wise expand/collapse, force-expanding
+// search filter, glyph sync) adapted to OGP's own 3-level shape and its own
+// trend/status icon pair (prod's own /Content/img/OngoingProgramTargetIcons/
+// PNGs, downloaded to public/photos/ongoing-programs/icons/).
+//
+// bcn-lego-checked: checked esa-collapsible (single disclosure, no
+// tree/column semantics) and esa-tab-layout/esa-filter-container; the
+// Fancytree table is the source site's own UI, reproduced with the
+// PsInfoVsFancyTree mechanics; psinfo-ogp-targets-tree is the reusable home.
+import EsaIcon from '@esa/ecology/esa-icon.astro';
+import { withBase } from '../../lib/base';
+import {
+  SITE_ORIGIN, TREE_EXPAND_LABEL, TREE_COLLAPSE_LABEL, TREE_SEARCH_PLACEHOLDER,
+  TREND_ICON, STATUS_ICON, trendAlt, statusAlt,
+  type OgpTargetCycle,
+} from '../../data/pages/ongoing-programs';
+
+interface Props {
+  cycles: OgpTargetCycle[];
+  treeId?: string;
+}
+const { cycles, treeId = 'ogptree' } = Astro.props;
+
+const CHEVRON = '<path d="m9 18 6-6-6-6"/>';
+const PLUS = '<path d="M5 12h14"/><path d="M12 5v14"/>';
+const MINUS = '<path d="M5 12h14"/>';
+const uid = (...parts: (string | number)[]) =>
+  [treeId, ...parts].join('-').toLowerCase().replace(/[^a-z0-9-]+/g, '');
+---
+<div class="ogptree" id={treeId}>
+  <div class="ogptree__toolbar">
+    <button type="button" class="ogptree__lvlbtn" data-tree-expand>{TREE_EXPAND_LABEL}</button>
+    <button type="button" class="ogptree__lvlbtn" data-tree-collapse>{TREE_COLLAPSE_LABEL}</button>
+    <label class="ogptree__searchwrap">
+      <span class="sr-only">Search the Program Targets tree</span>
+      <input class="ogptree__search" type="search" placeholder={TREE_SEARCH_PLACEHOLDER} data-tree-search />
+    </label>
+    <button type="button" class="ogptree__clear" data-tree-clear aria-label="Reset search">×</button>
+    <span class="ogptree__matches" aria-live="polite" data-tree-matches></span>
+  </div>
+
+  {cycles.map((cycle, ci) => (
+    <div class="ogptree__frame">
+      <div class="ogptree__head" aria-hidden="true">
+        <span class="ogptree__head-path">
+          Action Agenda <EsaIcon name="chevron-right" size="xs" paths={CHEVRON} /> Ongoing Program <EsaIcon name="chevron-right" size="xs" paths={CHEVRON} /> Target
+        </span>
+        <span class="ogptree__head-col">Owner Organization</span>
+        <span class="ogptree__head-col">Trend</span>
+        <span class="ogptree__head-col">Target Status</span>
+      </div>
+
+      <ul class="ogptree__l0" role="list">
+        <li data-tree-row data-level="0" data-text={cycle.title.toLowerCase()}>
+          <div class="ogptree__row ogptree__row--cycle">
+            <button
+              type="button" class="ogptree__toggle" data-tree-toggle
+              aria-expanded="true" aria-controls={uid(ci)} aria-label={`Toggle ${cycle.title}`}
+            >
+              <EsaIcon name="tree-toggle" size="sm" paths={MINUS} />
+            </button>
+            <strong class="ogptree__cycle-title">{cycle.title}</strong>
+          </div>
+          <ul class="ogptree__l1" role="list" id={uid(ci)}>
+            {cycle.programs.map((program, pi) => (
+              <li data-tree-row data-level="1" data-text={program.name.toLowerCase()}>
+                <div class="ogptree__row ogptree__row--program">
+                  <button
+                    type="button" class="ogptree__toggle" data-tree-toggle
+                    aria-expanded="true" aria-controls={uid(ci, pi)} aria-label={`Toggle ${program.name}`}
+                  >
+                    <EsaIcon name="tree-toggle" size="sm" paths={MINUS} />
+                  </button>
+                  <a class="ogptree__link ogptree__link--program" href={SITE_ORIGIN + program.link}>{program.name}</a>
+                </div>
+                <ul class="ogptree__l2" role="list" id={uid(ci, pi)}>
+                  {program.targets.map((t) => (
+                    <li data-tree-row data-level="2" data-text={`${t.title} ${t.owner}`.toLowerCase()}>
+                      <div class="ogptree__row ogptree__row--target">
+                        <span class="ogptree__title">{t.title}</span>
+                        <a class="ogptree__link" href={SITE_ORIGIN + t.ownerLink}>{t.owner}</a>
+                        <span class="ogptree__cell">
+                          <img src={withBase(`/photos/ongoing-programs/icons/${TREND_ICON[t.trend]}`)} alt={trendAlt(t.trend)} width="48" height="48" loading="lazy" />
+                        </span>
+                        <span class="ogptree__cell">
+                          <img src={withBase(`/photos/ongoing-programs/icons/${STATUS_ICON[t.status]}`)} alt={statusAlt(t.status)} width="48" height="48" loading="lazy" />
+                        </span>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              </li>
+            ))}
+          </ul>
+        </li>
+      </ul>
+    </div>
+  ))}
+</div>
+
+<script>
+  const MINUS_D = 'M5 12h14';
+  const PLUS_D2 = 'M12 5v14';
+
+  document.querySelectorAll<HTMLElement>('.ogptree').forEach((tree) => {
+    const toggles = [...tree.querySelectorAll<HTMLButtonElement>('[data-tree-toggle]')];
+
+    const setToggle = (btn: HTMLButtonElement, open: boolean) => {
+      btn.setAttribute('aria-expanded', String(open));
+      const target = document.getElementById(btn.getAttribute('aria-controls') || '');
+      if (target) target.hidden = !open;
+      const svg = btn.querySelector('svg');
+      if (svg) {
+        svg.innerHTML = open ? `<path d="${MINUS_D}"/>` : `<path d="${MINUS_D}"/><path d="${PLUS_D2}"/>`;
+      }
+    };
+
+    toggles.forEach((btn) => {
+      btn.addEventListener('click', () => setToggle(btn, btn.getAttribute('aria-expanded') !== 'true'));
+    });
+
+    const levelOf = (btn: HTMLButtonElement) =>
+      Number(btn.closest<HTMLElement>('[data-tree-row]')?.dataset.level ?? 0);
+
+    tree.querySelector('[data-tree-expand]')?.addEventListener('click', () => {
+      const closed = toggles.filter((b) => b.getAttribute('aria-expanded') !== 'true');
+      if (!closed.length) return;
+      const min = Math.min(...closed.map(levelOf));
+      closed.filter((b) => levelOf(b) === min).forEach((b) => setToggle(b, true));
+    });
+
+    tree.querySelector('[data-tree-collapse]')?.addEventListener('click', () => {
+      const open = toggles.filter((b) => b.getAttribute('aria-expanded') === 'true');
+      if (!open.length) return;
+      const max = Math.max(...open.map(levelOf));
+      open.filter((b) => levelOf(b) === max).forEach((b) => setToggle(b, false));
+    });
+
+    const rows = [...tree.querySelectorAll<HTMLElement>('[data-tree-row]')];
+    const search = tree.querySelector<HTMLInputElement>('[data-tree-search]');
+    const matchesEl = tree.querySelector<HTMLElement>('[data-tree-matches]');
+
+    const applyFilter = (q: string) => {
+      const query = q.trim().toLowerCase();
+      if (!query) {
+        rows.forEach((r) => { r.style.display = ''; });
+        if (matchesEl) matchesEl.textContent = '';
+        return;
+      }
+      rows.forEach((r) => { r.style.display = 'none'; });
+      let matchCount = 0;
+      rows.forEach((r) => {
+        if (!(r.dataset.text || '').includes(query)) return;
+        matchCount += 1;
+        let node: HTMLElement | null = r;
+        while (node && node !== tree) {
+          if (node.matches('[data-tree-row]')) node.style.display = '';
+          const list = node.parentElement?.closest<HTMLElement>('ul[hidden]');
+          node = node.parentElement?.closest<HTMLElement>('[data-tree-row]') ?? null;
+          if (list) list.hidden = false;
+        }
+        r.querySelectorAll<HTMLElement>('[data-tree-row]').forEach((child) => { child.style.display = ''; });
+        r.querySelectorAll<HTMLElement>('ul[hidden]').forEach((ul) => { ul.hidden = false; });
+      });
+      // sync toggle glyphs after force-expanding
+      tree.querySelectorAll<HTMLButtonElement>('[data-tree-toggle]').forEach((b) => {
+        const target = document.getElementById(b.getAttribute('aria-controls') || '');
+        if (target && !target.hidden) {
+          b.setAttribute('aria-expanded', 'true');
+          const svg = b.querySelector('svg');
+          if (svg) svg.innerHTML = `<path d="${MINUS_D}"/>`;
+        }
+      });
+      if (matchesEl) matchesEl.textContent = `${matchCount} result${matchCount === 1 ? '' : 's'}`;
+    };
+    search?.addEventListener('input', () => applyFilter(search.value));
+    tree.querySelector('[data-tree-clear]')?.addEventListener('click', () => {
+      if (search) { search.value = ''; applyFilter(''); search.focus(); }
+    });
+  });
+</script>
+
+<style>
+  .sr-only {
+    position: absolute; width: 1px; height: 1px; margin: -1px;
+    overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap;
+  }
+
+  .ogptree { display: flex; flex-direction: column; gap: var(--spacing-500); }
+
+  .ogptree__toolbar { display: flex; align-items: center; gap: var(--spacing-200); flex-wrap: wrap; }
+  .ogptree__lvlbtn {
+    padding: var(--spacing-200) var(--spacing-300);
+    background: var(--ps-info-blue-800); color: #ffffff;
+    border-radius: var(--radius-100);
+    font-size: var(--ps-info-text-meta-lg); font-weight: var(--font-weight-semibold);
+  }
+  .ogptree__lvlbtn:hover { background: var(--ps-info-blue-900); }
+  .ogptree__lvlbtn:focus-visible { outline: 2px solid var(--focus-ring-color); outline-offset: 2px; }
+  .ogptree__searchwrap { display: inline-flex; }
+  .ogptree__search {
+    height: 36px; width: 220px; padding: 0 var(--spacing-300);
+    border: 1px solid var(--color-border-strong); border-radius: var(--radius-100);
+    background: var(--color-surface); color: var(--color-text-primary);
+    font-size: var(--ps-info-text-meta-lg); font-family: inherit;
+  }
+  .ogptree__search:focus-visible { outline: 2px solid var(--focus-ring-color); outline-offset: 1px; }
+  .ogptree__clear {
+    width: 28px; height: 28px; border-radius: var(--radius-100);
+    background: var(--color-surface-sunken); color: var(--color-text-secondary);
+    font-size: 1rem; line-height: 1;
+  }
+  .ogptree__clear:hover { background: var(--color-border); }
+  .ogptree__clear:focus-visible { outline: 2px solid var(--focus-ring-color); outline-offset: 2px; }
+  .ogptree__matches { font-size: var(--ps-info-text-meta-lg); color: var(--color-text-secondary); }
+
+  .ogptree__frame { display: flex; flex-direction: column; gap: var(--spacing-200); }
+
+  .ogptree__head {
+    display: grid; grid-template-columns: 1fr 200px 110px 110px; gap: var(--spacing-300);
+    align-items: end;
+    padding: var(--spacing-300) var(--spacing-400);
+    background: var(--color-surface-sunken);
+    border-radius: var(--radius-100) var(--radius-100) 0 0;
+    font-size: var(--ps-info-text-meta-lg); font-weight: var(--font-weight-semibold);
+    color: var(--color-text-secondary); text-transform: uppercase; letter-spacing: 0.03em;
+  }
+  .ogptree__head-path { display: inline-flex; align-items: center; gap: var(--spacing-100); }
+  .ogptree__head-path :global(.esa-icon) { color: var(--color-text-muted); }
+  .ogptree__head-col { text-align: center; }
+
+  .ogptree__l0 {
+    list-style: none; margin: 0; padding: 0;
+    border: 2px solid var(--ps-info-blue-800); border-radius: 0 0 var(--radius-100) var(--radius-100);
+    background: var(--color-surface);
+  }
+  .ogptree__l1, .ogptree__l2 { list-style: none; margin: 0; padding: 0; }
+
+  .ogptree__row {
+    display: flex; align-items: center; gap: var(--spacing-250);
+    padding: var(--spacing-250) var(--spacing-400);
+    background: #eef4fa;
+    border-top: 1px solid var(--color-border-light);
+  }
+  .ogptree__l0 > li:first-child > .ogptree__row { border-top: 0; }
+  .ogptree__row--program { padding-left: calc(var(--spacing-400) + 2.25rem); background: #f5f9fd; }
+  .ogptree__row--target {
+    display: grid; grid-template-columns: 1fr 200px 110px 110px; gap: var(--spacing-300);
+    align-items: center;
+    padding-left: calc(var(--spacing-400) + 4.5rem);
+    background: var(--color-surface);
+  }
+
+  .ogptree__toggle {
+    flex: none; display: inline-flex; align-items: center; justify-content: center;
+    width: 28px; height: 28px; border-radius: var(--radius-100);
+    color: var(--color-text-primary); background: transparent;
+  }
+  .ogptree__toggle:hover { background: rgba(16, 42, 67, 0.08); }
+  .ogptree__toggle:focus-visible { outline: 2px solid var(--focus-ring-color); outline-offset: 1px; }
+
+  .ogptree__cycle-title { font-size: var(--ps-info-text-body); color: var(--color-text-primary); }
+  .ogptree__title { font-size: var(--ps-info-text-body); color: var(--color-text-primary); }
+  .ogptree__link { font-size: var(--ps-info-text-body); color: var(--color-text-link); text-decoration: underline; text-underline-offset: 3px; }
+  .ogptree__link:hover { color: var(--color-text-link-hover); }
+  .ogptree__link:focus-visible { outline: 2px solid var(--focus-ring-color); outline-offset: 2px; }
+  .ogptree__link--program { font-weight: var(--font-weight-semibold); }
+  .ogptree__cell { display: flex; justify-content: center; }
+  .ogptree__cell img { width: 48px; height: 48px; }
+
+  @media (max-width: 720px) {
+    .ogptree__head { grid-template-columns: 1fr 120px 72px 72px; }
+    .ogptree__row--target { grid-template-columns: 1fr 120px 72px 72px; padding-left: var(--spacing-500); }
+    .ogptree__cell img { width: 40px; height: 40px; }
+  }
+</style>

@@ -17,6 +17,7 @@
 // lego gap. Checked Beacon: no matching plain-narrative pattern either.
 // psinfo-ongoing-programs-intro is the reusable home for this page.
 import EsaCard from '@esa/ecology/esa-card.astro';
+import { withBase } from '../../lib/base';
 
 interface Props {
   paragraphs: string[];
@@ -29,7 +30,7 @@ const { paragraphs, image } = Astro.props;
     {image && (
       <img
         class="intro__image"
-        src={image.src}
+        src={withBase(image.src)}
         alt={image.alt}
         width={image.width}
         height={image.height}
@@ -53,7 +54,7 @@ const { paragraphs, image } = Astro.props;
 
   .intro__p {
     margin: 0 0 var(--spacing-400) 0; font-size: var(--ps-info-text-body); line-height: 1.65;
-    color: var(--color-text-primary); max-width: 74ch;
+    color: var(--color-text-primary);
   }
   .intro__p:last-child { margin-bottom: 0; }
 

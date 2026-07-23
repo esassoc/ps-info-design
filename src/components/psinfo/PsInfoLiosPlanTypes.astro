@@ -1,61 +1,64 @@
 ---
-// PsInfoLiosPlanTypes — "Each LIO develops:" — a lead sentence, then each
-// plan type (a bold label, optionally itself linked — the Ecosystem Recovery
-// Plan's shared Box folder — plus body text and, for Topical LIO Action
-// Plans, two named PowerBI-dashboard sub-links), then a closing paragraph.
+// PsInfoLiosPlanTypes — "Each LIO develops:" — a lead sentence, then the two
+// plan types as a bulleted list (bold "label - " lead-in including the hyphen,
+// exactly as the www source bolds it; the first label carries prod's own inline
+// Box-folder link inside the bold), an optional sub-list of linked plan
+// dashboards nested one bullet level under a plan type (prod: the two PowerBI
+// action-plan dashboards under Topical LIO Action Plans), then a closing
+// paragraph indented to the list's alignment (prod's own padding-left: 40px,
+// rendered at the list's token step). External hrefs follow the repo's
+// external-link convention: lucide mark + new tab (the substitution the
+// contract records for the source's bitmap glyph).
 //
-// bcn-lego-checked: no esa- lego renders a bold linked lead-in mixed with a
-// nested link sub-list inside prose; checked Beacon (no matching pattern).
-// Modeled on PsInfoAboutNarrative's inline-link-segment approach and its
-// esa-card (outlined) surface — same card treatment as this page's other
-// prose sections.
+// bcn-lego-checked: no esa- lego renders a bold-lead-in bulleted prose block
+// with inline links; checked Beacon (no matching pattern). Surface is the
+// esa-card lego (outlined) — same card treatment as this page's other prose
+// sections; link rendering follows PsInfoOgpIntroProse precedent.
 import EsaCard from '@esa/ecology/esa-card.astro';
 import EsaIcon from '@esa/ecology/esa-icon.astro';
+import { isExternalHref, EXTERNAL_LINK_ICON_PATHS } from '../../lib/psinfoExternalLink';
+import type { LioPlanType } from '../../data/pages/lios';
 
-export interface LiosPlanLink {
-  label: string;
-  href: string;
-}
-export interface LiosPlanType {
-  label: string;
-  href?: string;
-  body: string;
-  links?: LiosPlanLink[];
-}
 interface Props {
   lead: string;
-  planTypes: LiosPlanType[];
+  planTypes: LioPlanType[];
   closing: string;
 }
 const { lead, planTypes, closing } = Astro.props;
-
-const ARROW = '<path d="M7 7h10v10"/><path d="M7 17 17 7"/>';
 ---
 <EsaCard variant="outlined">
   <div class="plantypes">
     <p class="plantypes__lead">{lead}</p>
-    <ul class="plantypes__list" role="list">
+    <ul class="plantypes__list">
       {planTypes.map((pt) => (
         <li class="plantypes__item">
-          <p class="plantypes__row">
-            {pt.href ? (
-              <a href={pt.href} target="_blank" rel="noopener" class="plantypes__link">
-                <strong>{pt.label}</strong>
-                <EsaIcon name="arrow-up-right" size="xs" paths={ARROW} />
-              </a>
-            ) : (
-              <strong>{pt.label}</strong>
-            )}
-            {' – '}{pt.body}
-          </p>
-          {pt.links && pt.links.length > 0 && (
-            <ul class="plantypes__sublinks" role="list">
-              {pt.links.map((l) => (
-                <li>
-                  <a href={l.href} target="_blank" rel="noopener" class="plantypes__link">
-                    {l.label}
-                    <EsaIcon name="arrow-up-right" size="xs" paths={ARROW} />
+          <strong>
+            {pt.label.map((seg) =>
+              'link' in seg ? (
+                isExternalHref(seg.link.href) ? (
+                  <a class="plantypes__link" href={seg.link.href} target="_blank" rel="noopener">
+                    {seg.link.label}
+                    <EsaIcon name="external-link" size="xs" paths={EXTERNAL_LINK_ICON_PATHS} label="(external)" />
                   </a>
+                ) : (
+                  <a class="plantypes__link" href={seg.link.href}>{seg.link.label}</a>
+                )
+              ) : (
+                seg.text
+              )
+            )} - </strong>{pt.body}
+          {pt.subLinks && (
+            <ul class="plantypes__sublist">
+              {pt.subLinks.map((sl) => (
+                <li class="plantypes__subitem">
+                  {isExternalHref(sl.href) ? (
+                    <a class="plantypes__link" href={sl.href} target="_blank" rel="noopener">
+                      {sl.label}
+                      <EsaIcon name="external-link" size="xs" paths={EXTERNAL_LINK_ICON_PATHS} label="(external)" />
+                    </a>
+                  ) : (
+                    <a class="plantypes__link" href={sl.href}>{sl.label}</a>
+                  )}
                 </li>
               ))}
             </ul>
@@ -72,25 +75,25 @@ const ARROW = '<path d="M7 7h10v10"/><path d="M7 17 17 7"/>';
   .plantypes__lead,
   .plantypes__closing {
     margin: 0; font-size: var(--ps-info-text-body); line-height: 1.65;
-    color: var(--color-text-primary); max-width: 74ch;
+    color: var(--color-text-primary);
   }
-  .plantypes__list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--spacing-300); }
-  .plantypes__item { display: flex; flex-direction: column; gap: var(--spacing-200); }
-  .plantypes__row {
-    margin: 0; font-size: var(--ps-info-text-body); line-height: 1.65;
-    color: var(--color-text-primary); max-width: 74ch;
+  /* Prod indents the closing paragraph under the list (source padding-left:
+     40px); the list's own padding step keeps it aligned with the bullet text. */
+  .plantypes__closing { padding-left: var(--spacing-500); }
+  .plantypes__list { margin: 0; padding-left: var(--spacing-500); }
+  .plantypes__item {
+    font-size: var(--ps-info-text-body); line-height: 1.65;
+    color: var(--color-text-primary);
+    margin-block-end: var(--spacing-300);
   }
-  .plantypes__link {
-    color: var(--color-text-link); text-decoration: underline;
-    text-decoration-color: color-mix(in srgb, currentColor 35%, transparent);
+  .plantypes__item:last-child { margin-block-end: 0; }
+  .plantypes__sublist {
+    margin: var(--spacing-200) 0 0; padding-left: var(--spacing-500);
+    display: flex; flex-direction: column; gap: var(--spacing-100);
   }
-  .plantypes__link:hover { text-decoration-color: currentColor; }
+  .plantypes__subitem { font-size: var(--ps-info-text-body); line-height: 1.65; }
+  .plantypes__link { color: var(--color-text-link); text-decoration: underline; text-underline-offset: 3px; }
+  .plantypes__link:hover { color: var(--color-text-link-hover); }
   .plantypes__link:focus-visible { outline: 2px solid var(--focus-ring-color); outline-offset: 2px; }
-  .plantypes__link :global(.esa-icon) { color: var(--color-text-muted); margin-left: 2px; vertical-align: -2px; }
-
-  .plantypes__sublinks {
-    list-style: none; margin: 0; padding: 0;
-    display: flex; flex-direction: column; gap: var(--spacing-150);
-    padding-left: var(--spacing-500);
-  }
+  .plantypes__link :global(.esa-icon) { color: var(--color-text-muted); margin-left: var(--spacing-100); }
 </style>

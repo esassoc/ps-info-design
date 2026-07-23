@@ -1,0 +1,47 @@
+---
+// Progress Indicators — a directed reproduction of a SINGLE URL:
+// https://progressindicators.pugetsoundinfo.wa.gov/ (home page only, fetched
+// 2026-07-22). The AG Grid's 16 rows are populated by prod's own client-side
+// fetch to /Home/IndexGridJsonData — captured separately on 2026-07-22 and
+// embedded verbatim in the data module. See
+// src/data/contracts/progress-indicators.md for full sourcing notes.
+import PsInfoAppShell from '../../layouts/PsInfoAppShell.astro';
+import PsInfoPiHero from '../../components/psinfo/PsInfoPiHero.astro';
+import PsInfoPiIntro from '../../components/psinfo/PsInfoPiIntro.astro';
+import PsInfoPiTopicCards from '../../components/psinfo/PsInfoPiTopicCards.astro';
+import PsInfoSectionTitle from '../../components/psinfo/PsInfoSectionTitle.astro';
+import PsInfoPiIndicatorsGrid from '../../components/psinfo/PsInfoPiIndicatorsGrid.astro';
+import {
+  PAGE_TITLE,
+  LOGO,
+  TAGLINE,
+  INTRO_PARAGRAPHS,
+  TOPIC_CARDS,
+  TOPIC_CARDS_LABEL,
+  GRID_HEADING,
+  GRID_COLUMNS,
+  INDICATOR_ROWS,
+} from '../../data/pages/progress-indicators';
+---
+<!-- manifest:
+  layout: PsInfoAppShell (active Progress > Progress Indicators) > center+stack spine
+    (2xl between the two regions: hero/intro/cards stack, then the grid stack)
+  sections:
+    - logo hero          -> psinfo-pi-hero (prod's centered PI logo + siteTitle tagline)
+    - intro (verbatim)   -> psinfo-pi-intro
+    - topic cards        -> psinfo-pi-topic-cards (5 cards, 3-col, esa-card + esa-badge)
+    - indicator grid     -> psinfo-section-title (no count) + psinfo-pi-indicators-grid (AG Grid, 16 rows)
+-->
+<PsInfoAppShell title={`${PAGE_TITLE} — Puget Sound Info`} active={{ moduleId: 'progress', leafId: 'progress-indicators' }}>
+  <div class="center stack" data-gap="2xl">
+    <div class="stack" data-gap="xl">
+      <PsInfoPiHero logo={LOGO} tagline={TAGLINE} />
+      <PsInfoPiIntro paragraphs={INTRO_PARAGRAPHS} />
+      <PsInfoPiTopicCards topics={TOPIC_CARDS} label={TOPIC_CARDS_LABEL} />
+    </div>
+    <div class="stack" data-gap="md">
+      <PsInfoSectionTitle title={GRID_HEADING} />
+      <PsInfoPiIndicatorsGrid rows={INDICATOR_ROWS} columns={GRID_COLUMNS} />
+    </div>
+  </div>
+</PsInfoAppShell>

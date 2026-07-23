@@ -156,6 +156,12 @@ export interface VitalSignDetail {
   sourceUrl: string;
 }
 
+// ── Field definition — the source's own "Vital Sign Reporter" help popup ────
+// (/FieldDefinition/FieldDefinitionDetails/21, fetched 2026-07-22). Verbatim,
+// including the source's own grammar ("they not responsible").
+export const VITAL_SIGN_REPORTER_DEFINITION =
+  "The Reporting Leads produce the key messages for Vital Signs. Reporting Leads are either topic-based work groups in the Puget Sound Ecosystem Monitoring Program (PSEMP) or individuals. In the case of work groups, they not responsible for collecting and managing data for indicators or Vital Signs. Instead, participants in a work group work together to integrate information across indicators and other factors to develop key messages for Vital Signs that relate to their work group's topic. Work groups provide review of the key messages provided by individuals.";
+
 // ── Presentation mapping (verbatim labels -> esa-badge variant) ────────────
 // The source's own progress/status vocabulary, not an invented enum. Kept
 // here so the build stage doesn't have to invent this mapping per page.

@@ -1,0 +1,215 @@
+---
+// PsInfoAaCommitmentsTable — the Topic page's 2026-2030 Commitments table
+// (rendered twice on Topic 05: Overview and Progress panels render the SAME
+// 73-row table, verified byte-identical in prod — `instanceId` prefixes every
+// id so both instances coexist on one page). SSR's all rows, caps the initial
+// view at 5 with a "Show more (N)" toggle, and (while a search query is
+// active) ignores the cap to filter across every row.
+//
+// bcn-lego-checked: esa-text-field renders a label-above field with
+// text-only aria-hidden affixes — it cannot produce prod's fused icon-addon +
+// placeholder-only + appended-Clear input-group; ported the prod/Beacon
+// Bootstrap `.input-group` structure faithfully with ps-info tokens.
+// PsInfoAaCommitmentsTable is the reusable home. The table itself has no
+// esa- table lego; checked Beacon (Angular grid, not portable to a static
+// table like this one).
+import EsaIcon from '@esa/ecology/esa-icon.astro';
+import { withBase } from '../../lib/base';
+import PsInfoAaInfoCallout from './PsInfoAaInfoCallout.astro';
+import type { AaTopicCommitment, TopicProseParagraph } from '../../data/pages/action-agenda';
+
+interface Props {
+  rows: AaTopicCommitment[];
+  instanceId: string;
+  callout?: TopicProseParagraph;
+}
+const { rows, instanceId, callout } = Astro.props;
+const CAP = 5;
+const remaining = Math.max(rows.length - CAP, 0);
+const bodyId = `${instanceId}-commitments-body`;
+---
+<div class="aacommit" data-aa-commitments={instanceId}>
+  <div class="aacommit__group" role="search">
+    <span class="aacommit__addon" aria-hidden="true"><EsaIcon name="search" size="sm" /></span>
+    <input
+      class="aacommit__input"
+      type="search"
+      placeholder="Search commitments and targets"
+      aria-label="Search commitments and targets"
+      data-aa-commit-input
+    />
+    <button type="button" class="aacommit__clear" data-aa-commit-clear hidden>Clear</button>
+  </div>
+  <p class="aacommit__status" role="status" data-aa-commit-status hidden>No matches.</p>
+
+  <div class="aacommit__scroller">
+    <table class="aacommit__table">
+      <caption class="sr-only">2026-2030 Commitments</caption>
+      <thead>
+        <tr>
+          <th scope="col">Organization</th>
+          <th scope="col">Description</th>
+          <th scope="col">Status</th>
+        </tr>
+      </thead>
+      <tbody id={bodyId}>
+        {rows.map((row, i) => (
+          <tr
+            data-aa-commit-row
+            data-aa-commit-text={(row.organization + ' ' + row.text).toLowerCase()}
+            {...(i >= CAP ? { 'data-aa-commit-extra': '', hidden: true } : {})}
+          >
+            <td><strong>{row.organization}</strong></td>
+            <td><strong>Commitment:</strong> {row.text}</td>
+            <td>
+              <img
+                src={withBase('/photos/action-agenda/icons/status-notreported.png')}
+                alt="Not reported"
+                width="64"
+                height="64"
+                loading="lazy"
+              />
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+
+  {remaining > 0 && (
+    <button
+      type="button"
+      class="aacommit__more"
+      aria-expanded="false"
+      aria-controls={bodyId}
+      data-aa-commit-more
+      data-remaining={remaining}
+    >
+      {`Show more (${remaining})`}
+    </button>
+  )}
+
+  {callout && <PsInfoAaInfoCallout paragraphs={callout} />}
+</div>
+
+<script>
+  document.querySelectorAll<HTMLElement>('[data-aa-commitments]').forEach((root) => {
+    const input = root.querySelector<HTMLInputElement>('[data-aa-commit-input]');
+    const clearBtn = root.querySelector<HTMLButtonElement>('[data-aa-commit-clear]');
+    const status = root.querySelector<HTMLElement>('[data-aa-commit-status]');
+    const moreBtn = root.querySelector<HTMLButtonElement>('[data-aa-commit-more]');
+    const rows = [...root.querySelectorAll<HTMLTableRowElement>('[data-aa-commit-row]')];
+    const extraRows = rows.filter((r) => r.hasAttribute('data-aa-commit-extra'));
+
+    let expanded = false;
+
+    function applyCapState(): void {
+      extraRows.forEach((row) => { row.hidden = !expanded; });
+      if (moreBtn) {
+        moreBtn.setAttribute('aria-expanded', String(expanded));
+        moreBtn.textContent = expanded ? 'Show less' : `Show more (${moreBtn.dataset.remaining ?? ''})`;
+      }
+    }
+
+    function applyFilter(): void {
+      const q = (input?.value ?? '').trim().toLowerCase();
+      if (clearBtn) clearBtn.hidden = q === '';
+
+      if (!q) {
+        if (moreBtn) moreBtn.hidden = false;
+        applyCapState();
+        if (status) status.hidden = true;
+        return;
+      }
+
+      if (moreBtn) moreBtn.hidden = true;
+      let visible = 0;
+      rows.forEach((row) => {
+        const show = (row.dataset.aaCommitText ?? '').includes(q);
+        row.hidden = !show;
+        if (show) visible += 1;
+      });
+      if (status) status.hidden = visible > 0;
+    }
+
+    input?.addEventListener('input', applyFilter);
+    clearBtn?.addEventListener('click', () => {
+      if (input) { input.value = ''; input.focus(); }
+      applyFilter();
+    });
+    moreBtn?.addEventListener('click', () => {
+      expanded = !expanded;
+      applyCapState();
+    });
+
+    applyCapState();
+  });
+</script>
+
+<style>
+  .aacommit { display: flex; flex-direction: column; gap: var(--spacing-300); }
+  .sr-only {
+    position: absolute; width: 1px; height: 1px; margin: -1px;
+    overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap;
+  }
+
+  .aacommit__group {
+    display: flex; align-items: stretch; max-width: 28rem;
+    border: 1px solid var(--color-border-strong); border-radius: var(--radius-100);
+    background: var(--color-surface);
+  }
+  .aacommit__group:focus-within { outline: 2px solid var(--focus-ring-color); outline-offset: 2px; }
+  .aacommit__addon {
+    display: flex; align-items: center; flex: none;
+    padding-inline: var(--spacing-300);
+    background: var(--color-surface-sunken);
+    border-right: 1px solid var(--color-border);
+    border-radius: var(--radius-100) 0 0 var(--radius-100);
+    color: var(--color-text-secondary);
+  }
+  .aacommit__input {
+    flex: 1; min-width: 0; border: 0; background: transparent;
+    height: 40px; padding-inline: var(--spacing-300);
+    font: inherit; font-size: 1rem; color: var(--color-text-primary);
+  }
+  .aacommit__input:focus { outline: none; }
+  .aacommit__input::-webkit-search-cancel-button { -webkit-appearance: none; }
+  .aacommit__clear {
+    flex: none; margin: var(--spacing-100); padding: 0 var(--spacing-300);
+    background: var(--color-surface-sunken); color: var(--color-text-secondary);
+    border-radius: var(--radius-100); font-size: var(--ps-info-text-meta-lg); font-weight: var(--font-weight-medium);
+  }
+  .aacommit__clear:hover { background: var(--color-border); }
+  .aacommit__clear:focus-visible { outline: 2px solid var(--focus-ring-color); outline-offset: 2px; }
+
+  .aacommit__status { margin: 0; font-size: 1rem; color: var(--color-text-secondary); }
+
+  .aacommit__scroller { overflow-x: auto; border: 1px solid var(--color-border); border-radius: var(--radius-100); }
+  .aacommit__table { width: 100%; border-collapse: collapse; min-width: 640px; }
+  .aacommit__table th {
+    text-align: left; padding: var(--spacing-300) var(--spacing-400);
+    background: var(--ps-info-blue-800); color: #ffffff;
+    font-size: var(--ps-info-text-meta-lg); font-weight: var(--font-weight-semibold);
+  }
+  .aacommit__table td {
+    padding: var(--spacing-300) var(--spacing-400); vertical-align: top;
+    font-size: 1rem; color: var(--color-text-primary); line-height: 1.55;
+    border-bottom: 1px solid var(--color-border-light);
+  }
+  .aacommit__table tr:last-child td { border-bottom: 0; }
+  /* Status column: wide enough for the round badge at natural proportions. */
+  .aacommit__table th:last-child, .aacommit__table td:last-child {
+    width: 120px; min-width: 120px; text-align: center;
+  }
+  .aacommit__table td:last-child img { width: 72px; height: auto; }
+
+  .aacommit__more {
+    align-self: flex-start;
+    background: var(--ps-info-blue-800); color: #ffffff;
+    font-weight: var(--font-weight-semibold);
+    border-radius: var(--radius-100);
+    padding: var(--spacing-200) var(--spacing-400);
+  }
+  .aacommit__more:hover { background: var(--ps-info-blue-900); }
+  .aacommit__more:focus-visible { outline: 2px solid var(--focus-ring-color); outline-offset: 2px; }
+</style>

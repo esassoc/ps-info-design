@@ -1,0 +1,40 @@
+---
+// PsInfoLiosEmbed — a live third-party widget embedded with the source
+// page's own public iframe src (ArcGIS Experience Builder map+list, PowerBI
+// calendar). Fixed pixel height carried from the source iframe (these are
+// height-fixed dashboard apps — an aspect-ratio box would squash them on
+// narrow screens), capped to the viewport so the embed never traps the page.
+//
+// bcn-lego-checked: no esa- lego wraps a third-party iframe embed (checked
+// the full catalog — no esa-embed/esa-iframe exists); checked Beacon (no
+// iframe shell component); PsInfoLiosEmbed is the reusable home for titled
+// full-width live embeds.
+interface Props {
+  /** Accessible name — the source iframe's own title attribute, verbatim. */
+  title: string;
+  src: string;
+  /** Source iframe's pixel height. */
+  height: number;
+}
+const { title, src, height } = Astro.props;
+---
+<div class="liosembed" style={`--liosembed-h: ${height}px`}>
+  <iframe title={title} src={src} loading="lazy" allowfullscreen></iframe>
+</div>
+
+<style>
+  .liosembed {
+    inline-size: 100%;
+    block-size: min(var(--liosembed-h), 90vh);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-100);
+    overflow: hidden;
+  }
+  .liosembed iframe {
+    display: block;
+    inline-size: 100%;
+    block-size: 100%;
+    border: 0;
+  }
+</style>
