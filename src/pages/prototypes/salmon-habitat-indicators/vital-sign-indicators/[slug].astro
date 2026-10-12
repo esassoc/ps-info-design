@@ -83,7 +83,6 @@ const activeGoal = vs.goalId === 7 ? 'functioning-habitat' : 'healthy-water-qual
         reporter={detail.reporter}
         completeReportHref={completeReportHref(vsi.id)}
         shiReport={shiReportHref ? { href: shiReportHref } : undefined}
-        lastUpdated={detail.lastUpdated}
       />
       <div class="stack" data-gap="xl">
         <PsInfoVsiOverview description={detail.description} chart={detail.chart} />

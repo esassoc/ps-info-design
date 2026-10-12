@@ -2,7 +2,7 @@
 // PsInfoVsiSidebar — the reference rail of prod's VitalSignIndicator/Detail
 // page: Indicator Trend (prod's own progress icon), Target, Data Source,
 // Vital Sign Indicator Reporter, Indicator Details with the Complete Indicator
-// Report link, and Last Updated. When the indicator has its own Salmon Habitat
+// Report link. When the indicator has its own Salmon Habitat
 // Indicator report (SHI = VSI+), a Salmon Habitat Indicator entry links to it,
 // in the same place the Complete Indicator Report link lives.
 //
@@ -25,9 +25,8 @@ interface Props {
   completeReportHref: string;
   /** Present when a Salmon Habitat Indicator report exists for this indicator. */
   shiReport?: { href: string };
-  lastUpdated: string;
 }
-const { hueVar, progress, progressIcon, target, dataSource, reporter, completeReportHref, shiReport, lastUpdated } = Astro.props;
+const { hueVar, progress, progressIcon, target, dataSource, reporter, completeReportHref, shiReport } = Astro.props;
 ---
 <aside class="vsiside" aria-label="Indicator reference" style={`--hue: var(${hueVar})`}>
   <section>
@@ -60,10 +59,6 @@ const { hueVar, progress, progressIcon, target, dataSource, reporter, completeRe
       <p><a href={withBase(shiReport.href)}>Salmon Habitat Indicator Report</a></p>
     </section>
   )}
-  <section>
-    <h2 class="vsiside__h">Last Updated</h2>
-    <p>{lastUpdated}</p>
-  </section>
 </aside>
 
 <style>
