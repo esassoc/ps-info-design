@@ -49,13 +49,17 @@ Reproduced from the live site at 1440 and 390 widths:
    deck's `#002060`.
 2. SHI logo (`/photos/shi/shi-logo.png`, decorative: the wordmark repeats the h1).
 3. About paragraphs. Placeholder copy of similar length; PSP's text is not used.
-4. Life-cycle graphic with the six buttons: three purple on the left (Beaches &
-   Marine Vegetation, Estuaries, Marine Water), Freshwater and Streams &
-   Floodplains in green and Stream Structure in blue on the right (deck slide 7
-   order). The graphic is drawn for the prototype: a watershed-to-sea transect
-   in six clickable habitat zones with the four life-cycle stages (1 Fry
-   Migration, 2 Ocean Entry, 3 River Entry, 4 Spawning). A button or zone
-   filters the table; selecting it again, or "(clear filters)", resets.
+4. Habitat diorama with the six buttons. The deck's watercolor life-cycle
+   graphic is replaced by an original, museum-style cross-section from the
+   open Sound to a headwater stream (`shi-diorama-art.svg`, geometry in
+   `src/data/shi-diorama.ts`). The deck's four life-cycle stages are dropped.
+   All 16 indicators appear as labelled landmarks in the scene, each linking
+   where its table row links. Each habitat is a traced region. Hover outlines
+   it; selecting it outlines and tints it and labels it with its indicator
+   count, and the rest of the scene is not dimmed. The buttons sit under the
+   scene in landscape order (Marine Water → Stream Structure), not the deck's
+   order. A button or region filters the table; selecting it again, or
+   "(clear filters)", resets.
 5. "Explore all Salmon Habitat Indicators": the Progress Indicators grid pattern
    the deck pastes in (count line, clear filters, Download Table). Columns:
    Salmon Habitat Indicator · Description · Habitat · Vital Sign · Type.

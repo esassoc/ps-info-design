@@ -1,152 +1,166 @@
 ---
-// PsInfoShiHabitatExplorer — the SHI landing page's habitat picker, per the
-// deck: the salmon life-cycle graphic flanked by the six habitat category
-// buttons. A button or a habitat zone in the graphic filters the indicator
-// table (psinfo-shi-indicators-grid) to that category; selecting it again
-// clears the filter.
+// PsInfoShiHabitatExplorer — the SHI landing page's habitat picker: a museum
+// diorama of salmon habitat from the open Sound to the headwaters, with the
+// 16 Salmon Habitat Indicators drawn into the scene as landmarks, and the six
+// habitat category buttons beneath it. A button or a habitat's region in the
+// scene filters the indicator table (psinfo-shi-indicators-grid) to that
+// category; selecting it again clears the filter. Each landmark is a link to
+// its indicator's page (the same href the table row carries).
 //
-// The graphic is drawn here, not the deck's watercolor (third-party art):
-// a watershed-to-sea transect split into the six habitat zones, with the four
-// life-cycle stages as arrows. Zones are pointer targets only; the buttons are
-// the keyboard and screen-reader controls (same action, so nothing is
-// mouse-only), and the svg is a single described image.
+// The scene is generated art (shi-diorama-art.svg, written by
+// docs/private/shi/specimens/e1r3-gen.py along with data/shi-diorama.ts, which
+// holds each habitat's traced region and the landmark positions). The art
+// keeps its own painted palette; the exhibit chrome (frame, ivory plaques,
+// category rings and outlines) comes from theme-shi tokens.
 //
 // bcn-lego-checked: checked esa-button-toggle / esa-chip-group (segmented
 // toggles on the house surface, no per-option category fill) and esa-button
 // (no category color hook); the buttons are native <button aria-pressed>
 // carrying the --shi-category-* tokens, with a check mark so the pressed
-// state is not color alone. No lego renders an image map. Filter state
-// travels as a `shi:filter` document event so the table needs no import.
-// psinfo-shi-habitat-explorer is the reusable home.
+// state is not color alone. No lego renders an illustrated image map; the
+// scene is illustration art, so raw hex lives inside the generated SVG only.
+// Filter state travels as a `shi:filter` document event so the table needs
+// no import. psinfo-shi-habitat-explorer is the reusable home.
 import EsaIcon from '@esa/ecology/esa-icon.astro';
-import type { HabitatCategory } from '../../data/shi-domain';
+import type { HabitatCategory, HabitatCategorySlug } from '../../data/shi-domain';
 import { SHI_CATEGORY_FILL, SHI_CATEGORY_ON_FILL } from '../../lib/shiCategoryColor';
+import { SHI_GRID_ROWS } from '../../data/pages/salmon-habitat-indicators';
+import { withBase } from '../../lib/base';
+import {
+  SHI_DIORAMA_HEIGHT,
+  SHI_DIORAMA_LANDMARKS,
+  SHI_DIORAMA_REGIONS,
+  SHI_DIORAMA_WIDTH,
+} from '../../data/shi-diorama';
+import art from './shi-diorama-art.svg?raw';
 
 interface Props {
   categories: HabitatCategory[];
 }
 const { categories } = Astro.props;
 
-const left = categories.slice(0, 3);
-const right = categories.slice(3);
-const bySlug = Object.fromEntries(categories.map((c) => [c.slug, c]));
-
+const bySlug = Object.fromEntries(categories.map((c) => [c.slug, c])) as Record<string, HabitatCategory>;
 const CHECK = '<path d="M20 6 9 17l-5-5"/>';
 
-// Transect zones, left (open water) to right (headwaters). Polygons share
-// edges; the top edge is the water surface or the land profile.
-const ZONES: { slug: string; d: string }[] = [
-  { slug: 'marine-water', d: 'M0 200 L250 200 L250 440 L0 440 Z' },
-  { slug: 'beaches-marine-vegetation', d: 'M250 200 L330 200 L370 192 L370 440 L250 440 Z' },
-  { slug: 'estuaries', d: 'M370 192 L490 186 L490 440 L370 440 Z' },
-  { slug: 'streams-floodplains', d: 'M490 186 L570 178 L650 160 L650 440 L490 440 Z' },
-  { slug: 'freshwater', d: 'M650 160 L720 142 L790 120 L790 440 L650 440 Z' },
-  { slug: 'stream-structure', d: 'M790 120 L860 96 L900 80 L960 70 L960 440 L790 440 Z' },
-];
+const catStyle = (slug: HabitatCategorySlug) =>
+  `--cat: ${SHI_CATEGORY_FILL[bySlug[slug].colorGroup]}; --cat-on: ${SHI_CATEGORY_ON_FILL[bySlug[slug].colorGroup]}`;
 
-const button = (c: HabitatCategory) => ({
-  slug: c.slug,
-  label: c.label,
-  style: `--cat: ${SHI_CATEGORY_FILL[c.colorGroup]}; --cat-on: ${SHI_CATEGORY_ON_FILL[c.colorGroup]}`,
-});
+// Buttons sit under the scene in its own order, open Sound to headwaters.
+const buttons = SHI_DIORAMA_REGIONS.map((r) => bySlug[r.slug]).filter(Boolean);
+
+const rowBySlug = Object.fromEntries(SHI_GRID_ROWS.map((r) => [r.slug, r]));
+const indicatorHref = (h: string) => (/^https?:/.test(h) ? h : withBase(h));
+const landmarks = SHI_DIORAMA_LANDMARKS.map((l) => ({ ...l, href: indicatorHref(rowBySlug[l.slug].href) }));
+const countFor = (slug: HabitatCategorySlug) => SHI_GRID_ROWS.filter((r) => r.category === slug).length;
 ---
 <div class="shix" data-shi-explorer>
-  <ul class="shix__col shix__col--left" role="list">
-    {left.map(button).map((b) => (
+  <ul class="shix__buttons" role="list">
+    {buttons.map((c) => (
       <li>
-        <button type="button" class="shix__btn" style={b.style} aria-pressed="false" data-shi-cat-btn={b.slug}>
+        <button type="button" class="shix__btn" style={catStyle(c.slug)} aria-pressed="false" data-shi-cat-btn={c.slug}>
           <span class="shix__check"><EsaIcon name="check" size="sm" paths={CHECK} /></span>
-          <span>{b.label}</span>
+          <span>{c.label}</span>
         </button>
       </li>
     ))}
   </ul>
 
-  <figure class="shix__figure">
-    <svg class="shix__art" viewBox="0 0 960 440" role="img" aria-labelledby="shix-title shix-desc">
-      <title id="shix-title">Salmon habitat use throughout the life cycle</title>
-      <desc id="shix-desc">
-        A transect from open marine water to mountain headwaters, divided into six habitat zones: marine water,
-        beaches and marine vegetation, estuaries, streams and floodplains, freshwater, and stream structure.
-        Arrows trace the life cycle: 1, fry migrate downstream; 2, juveniles enter the ocean through estuaries
-        and nearshore waters; 3, adults return and enter rivers; 4, adults spawn in the headwaters.
-      </desc>
-      <defs>
-        <marker id="shix-arrow" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
-          <path d="M0 0 L10 5 L0 10 Z" class="shix__arrowhead" />
-        </marker>
-      </defs>
+  <div class="shix__strip" role="region" aria-label="Salmon habitat diorama" data-shi-strip>
+    <div class="shix__pan">
+      <div class="shix__frame">
+        <svg class="shix__art" viewBox={`0 0 ${SHI_DIORAMA_WIDTH} ${SHI_DIORAMA_HEIGHT}`} width={SHI_DIORAMA_WIDTH} height={SHI_DIORAMA_HEIGHT}>
+          <g role="img" aria-labelledby="shix-title shix-desc">
+            <title id="shix-title">Salmon habitats from the headwaters to Puget Sound</title>
+            <desc id="shix-desc">
+              A diorama cross-section from the open Sound on the left to a headwater stream below the Cascades on
+              the right, cut away beneath the waterline. Adult chinook, coho and chum spawn over gravel in the
+              headwaters among log jams, below a road culvert. Fry with parr marks migrate downstream through
+              streams and floodplains and freshwater pools, smolt in the estuary, and enter the Sound past beaches
+              with eelgrass meadows and bull kelp. After years in marine water the adults return through the
+              estuary and up the river to spawn.
+            </desc>
+            <Fragment set:html={art} />
+          </g>
 
-      <g class="shix__scene" aria-hidden="true">
-        <path class="shix__mountain" d="M630 164 L720 66 L770 104 L850 34 L920 70 L960 52 L960 72 L900 80 L860 96 L790 120 L720 142 L650 160 Z" />
-        <path class="shix__ground" d="M0 420 C120 404 220 352 300 262 L330 200 L370 192 L490 186 L570 178 L650 160 L720 142 L790 120 L860 96 L900 80 L960 70 L960 440 L0 440 Z" />
-        <path class="shix__waves" d="M0 200 q20 -7 40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0" />
-        <path class="shix__river" d="M952 76 C910 86 880 98 840 106 S760 130 720 146 S660 164 620 168 C590 172 566 168 544 180 C520 192 470 186 440 192 C410 197 392 196 372 196" />
-        <ellipse class="shix__lake" cx="716" cy="150" rx="34" ry="5" />
-        <g class="shix__wood">
-          <rect x="866" y="84" width="34" height="6" rx="3" transform="rotate(-18 883 87)" />
-          <rect x="818" y="100" width="30" height="6" rx="3" transform="rotate(12 833 103)" />
-        </g>
-        <g class="shix__veg">
-          <path d="M268 306 q-6 -18 2 -38 M282 290 q-6 -18 2 -38 M296 274 q-6 -18 2 -38 M310 256 q-6 -18 2 -36 M324 236 q-5 -14 2 -28" />
-          <path d="M392 190 l4 -12 l4 12 M424 188 l4 -12 l4 12 M456 187 l4 -12 l4 12" />
-          <path d="M392 204 C410 214 430 214 446 226 M418 212 C426 222 424 232 432 240" class="shix__channel" />
-          <path d="M520 182 l8 -22 l8 22 Z M600 172 l8 -22 l8 22 Z M676 154 l8 -22 l8 22 Z" class="shix__tree" />
-        </g>
-        <g class="shix__fish">
-          <path d="M110 312 c12 -8 28 -8 40 0 c-12 8 -28 8 -40 0 Z M150 312 l10 -7 v14 Z" />
-          <path d="M190 262 c9 -6 21 -6 30 0 c-9 6 -21 6 -30 0 Z M220 262 l8 -5 v10 Z" />
-        </g>
-      </g>
+          <g class="shix__zones">
+            {SHI_DIORAMA_REGIONS.map((r) => (
+              <g class="zone" data-shi-cat-zone={r.slug} style={catStyle(r.slug)}>
+                <path class="zone__halo" d={r.d} />
+                <path class="zone__line" d={r.d}><title>{bySlug[r.slug].label}</title></path>
+              </g>
+            ))}
+          </g>
 
-      <g class="shix__zones">
-        {ZONES.map((z) => (
-          <path
-            class="shix__zone"
-            d={z.d}
-            data-shi-cat-zone={z.slug}
-            style={`--cat: ${SHI_CATEGORY_FILL[bySlug[z.slug].colorGroup]}`}
-          >
-            <title>{bySlug[z.slug].label}</title>
-          </path>
-        ))}
-      </g>
+          <g class="shix__exhibits" aria-hidden="true">
+            {SHI_DIORAMA_REGIONS.map((r) => (
+              <g class="exhibit" data-shi-exhibit={r.slug} style={catStyle(r.slug)}>
+                <line class="exhibit__lead" x1={r.pin.x} y1={r.pin.y} x2={r.label.x} y2={r.label.y} />
+                <circle class="exhibit__pin" cx={r.pin.x} cy={r.pin.y} r="3" />
+                <g transform={`translate(${r.label.x} ${r.label.y})`}>
+                  <rect class="exhibit__plaque" rx="2" />
+                  <text class="exhibit__text" text-anchor="middle" y="6">
+                    <tspan class="exhibit__name">{bySlug[r.slug].label}</tspan>
+                    <tspan class="exhibit__count" dx="8">{countFor(r.slug)} indicators</tspan>
+                  </text>
+                </g>
+              </g>
+            ))}
+          </g>
 
-      <g class="shix__cycle" aria-hidden="true">
-        <path d="M140 190 C220 30 600 10 868 62" marker-end="url(#shix-arrow)" />
-        <path d="M832 140 C760 196 640 220 520 226" marker-end="url(#shix-arrow)" />
-        <path d="M468 252 C400 282 300 300 176 300" marker-end="url(#shix-arrow)" />
-        <text x="292" y="68">3. River Entry</text>
-        <text x="806" y="190">4. Spawning</text>
-        <text x="560" y="262">1. Fry Migration</text>
-        <text x="256" y="344">2. Ocean Entry</text>
-      </g>
-    </svg>
-  </figure>
-
-  <ul class="shix__col shix__col--right" role="list">
-    {right.map(button).map((b) => (
-      <li>
-        <button type="button" class="shix__btn" style={b.style} aria-pressed="false" data-shi-cat-btn={b.slug}>
-          <span class="shix__check"><EsaIcon name="check" size="sm" paths={CHECK} /></span>
-          <span>{b.label}</span>
-        </button>
-      </li>
-    ))}
-  </ul>
+          <g class="shix__landmarks">
+            {landmarks.map((l) => (
+              <a class="lm" data-shi-landmark={l.slug} data-shi-cat={l.category} href={l.href} style={catStyle(l.category)}>
+                <line class="lm__lead" x1={l.x} y1={l.y} x2={l.plaque.x} y2={l.plaque.y} />
+                <g class="lm__label" transform={`translate(${l.plaque.x} ${l.plaque.y})`}>
+                  <rect class="lm__plaque" rx="2" />
+                  <text class="lm__text" text-anchor="middle" y="5">{l.label}</text>
+                </g>
+                <g class="lm__mark" transform={`translate(${l.x} ${l.y})`}>
+                  <circle class="lm__focus lm__focus--halo" r="13" />
+                  <circle class="lm__focus" r="13" />
+                  <circle class="lm__hit" r="14" />
+                  <circle class="lm__ring" r="7" />
+                  <circle class="lm__dot" r="2.2" />
+                </g>
+              </a>
+            ))}
+          </g>
+        </svg>
+      </div>
+    </div>
+  </div>
 </div>
 
 <script>
   const root = document.querySelector<HTMLElement>('[data-shi-explorer]');
   if (root) {
     const buttons = [...root.querySelectorAll<HTMLButtonElement>('[data-shi-cat-btn]')];
-    const zones = [...root.querySelectorAll<SVGPathElement>('[data-shi-cat-zone]')];
+    const zones = [...root.querySelectorAll<SVGGElement>('[data-shi-cat-zone]')];
+    const marks = [...root.querySelectorAll<SVGAElement>('[data-shi-landmark]')];
+    const exhibits = [...root.querySelectorAll<SVGGElement>('[data-shi-exhibit]')];
+    const scroller = root.querySelector<HTMLElement>('[data-shi-strip]');
+    const sceneWidth = root.querySelector<SVGSVGElement>('.shix__art')?.viewBox.baseVal.width ?? 1110;
     let current: string | null = null;
+    let hot: string | null = null;
 
     const render = () => {
       root.toggleAttribute('data-filtered', current !== null);
-      buttons.forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.shiCatBtn === current)));
-      zones.forEach((z) => z.classList.toggle('is-selected', z.dataset.shiCatZone === current));
+      buttons.forEach((b) => {
+        b.setAttribute('aria-pressed', String(b.dataset.shiCatBtn === current));
+        b.classList.toggle('is-hover', hot !== null && b.dataset.shiCatBtn === hot);
+      });
+      zones.forEach((z) => {
+        const s = z.dataset.shiCatZone;
+        z.classList.toggle('is-selected', s === current);
+        z.classList.toggle('is-hover', hot !== null && s === hot && s !== current);
+      });
+      marks.forEach((m) => {
+        const s = m.dataset.shiCat;
+        m.classList.toggle('is-selected', s === current);
+        m.classList.toggle('is-hover', hot !== null && s === hot);
+        m.classList.toggle('is-muted', current !== null && s !== current);
+      });
+      exhibits.forEach((x) => x.classList.toggle('is-shown', x.dataset.shiExhibit === current));
     };
     const select = (slug: string | null) => {
       current = slug === current ? null : slug;
@@ -154,19 +168,31 @@ const button = (c: HabitatCategory) => ({
       document.dispatchEvent(new CustomEvent('shi:filter', { detail: { category: current, source: 'explorer' } }));
     };
     const hover = (slug: string | null) => {
-      buttons.forEach((b) => b.classList.toggle('is-hover', b.dataset.shiCatBtn === slug));
-      zones.forEach((z) => z.classList.toggle('is-hover', z.dataset.shiCatZone === slug));
+      if (hot === slug) return;
+      hot = slug;
+      render();
     };
 
     buttons.forEach((b) => {
-      b.addEventListener('click', () => select(b.dataset.shiCatBtn ?? null));
-      b.addEventListener('mouseenter', () => hover(b.dataset.shiCatBtn ?? null));
+      const slug = b.dataset.shiCatBtn ?? null;
+      b.addEventListener('click', () => select(slug));
+      b.addEventListener('mouseenter', () => hover(slug));
       b.addEventListener('mouseleave', () => hover(null));
+      b.addEventListener('focus', () => hover(slug));
+      b.addEventListener('blur', () => hover(null));
     });
     zones.forEach((z) => {
-      z.addEventListener('click', () => select(z.dataset.shiCatZone ?? null));
-      z.addEventListener('mouseenter', () => hover(z.dataset.shiCatZone ?? null));
+      const slug = z.dataset.shiCatZone ?? null;
+      z.addEventListener('click', () => select(slug));
+      z.addEventListener('mouseenter', () => hover(slug));
       z.addEventListener('mouseleave', () => hover(null));
+    });
+    marks.forEach((m) => {
+      const slug = m.dataset.shiCat ?? null;
+      m.addEventListener('mouseenter', () => hover(slug));
+      m.addEventListener('mouseleave', () => hover(null));
+      m.addEventListener('focus', () => hover(slug));
+      m.addEventListener('blur', () => hover(null));
     });
 
     // The table's own "clear filters" resets the picker.
@@ -176,32 +202,140 @@ const button = (c: HabitatCategory) => ({
       current = detail.category;
       render();
     });
+
+    // Plaques size to their text once the fonts are in; a plaque never leaves the frame.
+    const fit = (g: SVGGElement, rect: SVGRectElement, text: SVGTextElement, h: number, pad: number) => {
+      const w = text.getComputedTextLength() + pad * 2;
+      const tr = (g.getAttribute('transform') ?? '').match(/translate\(([-\d.]+) ([-\d.]+)\)/);
+      const cx = tr ? parseFloat(tr[1]) : 0;
+      const cy = tr ? parseFloat(tr[2]) : 0;
+      let shift = 0;
+      if (cx - w / 2 < 6) shift = 6 - (cx - w / 2);
+      if (cx + w / 2 > sceneWidth - 6) shift = sceneWidth - 6 - (cx + w / 2);
+      if (shift) g.setAttribute('transform', `translate(${cx + shift} ${cy})`);
+      rect.setAttribute('x', String(-w / 2));
+      rect.setAttribute('y', String(-h / 2));
+      rect.setAttribute('width', String(w));
+      rect.setAttribute('height', String(h));
+    };
+    const sizePlaques = () => {
+      marks.forEach((m) => {
+        const g = m.querySelector<SVGGElement>('.lm__label');
+        const rect = m.querySelector<SVGRectElement>('.lm__plaque');
+        const text = m.querySelector<SVGTextElement>('.lm__text');
+        if (g && rect && text) fit(g, rect, text, 24, 9);
+      });
+      exhibits.forEach((x) => {
+        const rect = x.querySelector<SVGRectElement>('.exhibit__plaque');
+        const text = x.querySelector<SVGTextElement>('.exhibit__text');
+        const g = rect?.parentNode as SVGGElement | null;
+        if (g && rect && text) fit(g, rect, text, 32, 12);
+      });
+    };
+    sizePlaques();
+    document.fonts?.ready.then(sizePlaques);
+
+    // Narrow viewports: the strip scrolls and opens at the headwaters, where the story starts.
+    if (scroller) {
+      const fitScroller = () => {
+        const scrolls = scroller.scrollWidth > scroller.clientWidth + 2;
+        if (scrolls) scroller.setAttribute('tabindex', '0');
+        else scroller.removeAttribute('tabindex');
+        return scrolls;
+      };
+      if (fitScroller()) scroller.scrollLeft = scroller.scrollWidth;
+      window.addEventListener('resize', fitScroller);
+    }
+    render();
   }
 </script>
 
 <style>
-  .shix {
-    display: grid;
-    grid-template-columns: minmax(9rem, 12rem) minmax(0, 1fr) minmax(9rem, 12rem);
-    grid-template-areas: 'left art right';
-    align-items: center;
-    gap: var(--spacing-500);
+  .shix { display: flex; flex-direction: column; gap: var(--spacing-400); }
+  .shix__buttons { order: 2; }
+  .shix__strip { order: 1; position: relative; }
+  .shix__strip:focus-visible { outline: 3px solid var(--focus-ring-color); outline-offset: 4px; }
+  .shix__pan { position: relative; width: 100%; }
+  .shix__frame {
+    position: relative; padding: 7px; border-radius: 3px;
+    background: var(--shi-art-frame);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25), 0 10px 28px rgba(5, 31, 51, 0.22);
   }
-  .shix__col--left { grid-area: left; }
-  .shix__col--right { grid-area: right; }
-  .shix__figure { grid-area: art; margin: 0; }
+  .shix__frame::after {
+    content: ''; position: absolute; inset: 7px; pointer-events: none;
+    border: 1px solid var(--shi-art-frame-line); opacity: 0.55;
+  }
+  .shix__art { display: block; width: 100%; height: auto; }
 
-  .shix__col {
-    list-style: none; margin: 0; padding: 0;
-    display: flex; flex-direction: column; gap: var(--spacing-400);
+  /* Habitat regions: the traced shape outlines on hover, outlines and tints when selected. */
+  .zone__halo {
+    fill: none; stroke: var(--shi-art-ivory); stroke-width: 6; stroke-linejoin: round;
+    opacity: 0; pointer-events: none; transition: opacity 160ms ease;
   }
+  .zone__line {
+    fill: var(--cat); fill-opacity: 0; stroke: var(--cat); stroke-width: 2.6; stroke-linejoin: round; stroke-opacity: 0;
+    cursor: pointer; transition: fill-opacity 160ms ease, stroke-opacity 160ms ease;
+  }
+  .zone.is-hover .zone__halo { opacity: 0.9; stroke-width: 4.5; }
+  .zone.is-hover .zone__line { stroke-opacity: 1; stroke-width: 1.8; }
+  .zone.is-selected .zone__halo { opacity: 1; stroke-width: 6.5; }
+  .zone.is-selected .zone__line { stroke-opacity: 1; stroke-width: 2.8; fill-opacity: 0.16; }
+
+  /* Exhibit label: the selected habitat's name and indicator count, pinned to its region. */
+  .exhibit { opacity: 0; pointer-events: none; transition: opacity 160ms ease; }
+  .exhibit.is-shown { opacity: 1; }
+  .exhibit__lead { stroke: var(--shi-art-ivory); stroke-width: 1.4; }
+  .exhibit__pin { fill: var(--cat); stroke: var(--shi-art-ivory); stroke-width: 1.5; }
+  .exhibit__plaque { fill: var(--shi-art-ivory); stroke: var(--cat); stroke-width: 2; }
+  .exhibit__text { fill: var(--shi-art-ivory-ink); }
+  .exhibit__name { font-family: var(--font-display); font-size: 16px; font-weight: var(--font-weight-semibold); }
+  .exhibit__count { font-family: var(--font-sans); font-size: 15px; font-weight: var(--font-weight-regular); }
+
+  /* Landmarks: a medallion ringed in the habitat's color, its name on an ivory plaque, a leader between.
+     a11y-checked: the keyboard focus ring is drawn, not suppressed. .lm:focus-visible lights the two
+     .lm__focus circles (an ivory halo under a navy ring) around the medallion, which reads on sky, water
+     and earth; the browser's default rectangle would wrap the whole link (plaque, leader and medallion)
+     and vanish against the dark water. The ring also grows and the plaque takes the category edge. */
+  .lm { transition: opacity 160ms ease; }
+  .lm:focus-visible { outline: none; }
+  .lm__lead { stroke: var(--shi-art-ivory); stroke-width: 1.2; opacity: 0.9; }
+  .lm__plaque { fill: var(--shi-art-ivory); stroke: var(--shi-art-ivory-ink); stroke-opacity: 0.45; stroke-width: 1; }
+  .lm__text { font-family: var(--font-display); font-size: 14px; font-weight: var(--font-weight-medium); fill: var(--shi-art-ivory-ink); }
+  .lm__hit { fill: transparent; }
+  .lm__ring { fill: var(--shi-art-ivory); stroke: var(--cat); stroke-width: 2.4; transition: r 160ms ease, stroke-width 160ms ease; }
+  .lm__dot { fill: var(--cat); }
+  .lm__focus { fill: none; stroke: var(--shi-art-ivory-ink); stroke-width: 2.5; opacity: 0; }
+  .lm__focus--halo { stroke: var(--shi-art-ivory); stroke-width: 6.5; }
+  .lm:focus-visible .lm__focus { opacity: 1; }
+  .lm:hover .lm__ring, .lm:focus-visible .lm__ring, .lm.is-selected .lm__ring { r: 9; stroke-width: 3; }
+  .lm:hover .lm__plaque, .lm:focus-visible .lm__plaque, .lm.is-selected .lm__plaque { stroke: var(--cat); stroke-opacity: 1; stroke-width: 2; }
+  .lm:hover .lm__text, .lm:focus-visible .lm__text, .lm.is-selected .lm__text { font-weight: var(--font-weight-semibold); }
+  /* Landmarks of the other habitats go quiet structurally while one is selected: a smaller, gray-ringed
+     medallion, a fainter leader and plaque edge. The ink and the ivory are untouched, so the link text
+     keeps its full contrast; nothing here fades the text. */
+  .lm.is-muted .lm__ring { r: 5.5; stroke: var(--shi-art-ivory-ink); stroke-opacity: 0.45; stroke-width: 1.6; }
+  .lm.is-muted .lm__dot { opacity: 0; }
+  .lm.is-muted .lm__lead { opacity: 0.55; }
+  .lm.is-muted .lm__plaque { stroke-opacity: 0.2; }
+  .lm.is-muted:hover .lm__ring, .lm.is-muted:focus-visible .lm__ring { r: 9; stroke: var(--cat); stroke-opacity: 1; stroke-width: 3; }
+  .lm.is-muted:hover .lm__dot, .lm.is-muted:focus-visible .lm__dot { opacity: 1; }
+  .lm.is-muted:hover .lm__lead, .lm.is-muted:focus-visible .lm__lead { opacity: 0.9; }
+  .lm.is-muted:hover .lm__plaque, .lm.is-muted:focus-visible .lm__plaque { stroke-opacity: 1; }
+
+  /* Habitat buttons, one per region in scene order. */
+  .shix__buttons {
+    list-style: none; margin: 0; padding: 0;
+    display: grid; grid-template-columns: repeat(6, 1fr); gap: var(--spacing-200);
+  }
+  .shix__buttons li { display: flex; }
   .shix__btn {
-    position: relative;
-    width: 100%; min-height: 5.5rem;
+    position: relative; flex: 1; min-height: 3.5rem;
     display: flex; align-items: center; justify-content: center;
-    padding: var(--spacing-300) var(--spacing-400);
+    /* Equal side padding reserves the pressed check's corner on both sides, so the label stays
+       centered and the check never sits over it, down to the two-column layout at 390px. */
+    padding: var(--spacing-200) 2.25rem;
     background: var(--cat); color: var(--cat-on);
-    font-size: 1.0625rem; font-weight: var(--font-weight-semibold); line-height: 1.3;
+    font-size: 1rem; font-weight: var(--font-weight-semibold); line-height: 1.25;
     text-align: center;
     border: 3px solid transparent;
     border-radius: var(--radius-100);
@@ -222,49 +356,17 @@ const button = (c: HabitatCategory) => ({
   }
   .shix__btn[aria-pressed='true'] .shix__check { display: inline-flex; }
 
-  .shix__art { display: block; width: 100%; height: auto; }
-
-  .shix__mountain { fill: var(--shi-art-mountain); }
-  .shix__ground { fill: var(--shi-art-ground); }
-  .shix__waves { fill: none; stroke: var(--shi-art-water); stroke-width: 3; }
-  .shix__river { fill: none; stroke: var(--shi-art-river); stroke-width: 6; stroke-linecap: round; }
-  .shix__lake { fill: var(--shi-art-river); }
-  .shix__wood rect { fill: var(--shi-art-wood); }
-  .shix__veg path { fill: none; stroke: var(--shi-art-vegetation); stroke-width: 3; stroke-linecap: round; }
-  .shix__veg .shix__channel { stroke: var(--shi-art-river); stroke-width: 3; }
-  .shix__veg .shix__tree { fill: var(--shi-art-vegetation); stroke: none; }
-  .shix__fish path { fill: var(--shi-art-fish); }
-
-  .shix__zone {
-    fill: var(--cat); fill-opacity: 0.2;
-    stroke: #ffffff; stroke-width: 2;
-    cursor: pointer;
-    transition: fill-opacity 120ms ease;
-  }
-  .shix__zone:hover, .shix__zone.is-hover { fill-opacity: 0.36; }
-  [data-filtered] .shix__zone { fill-opacity: 0.08; }
-  [data-filtered] .shix__zone:hover, [data-filtered] .shix__zone.is-hover { fill-opacity: 0.24; }
-  .shix__zone.is-selected, [data-filtered] .shix__zone.is-selected { fill-opacity: 0.48; }
-
-  .shix__cycle { pointer-events: none; }
-  .shix__cycle path { fill: none; stroke: var(--shi-art-arrow); stroke-width: 4; stroke-linecap: round; }
-  .shix__arrowhead { fill: var(--shi-art-arrow); }
-  .shix__cycle text {
-    font-family: var(--font-sans); font-size: 24px; font-weight: var(--font-weight-bold);
-    fill: var(--shi-art-arrow);
-    paint-order: stroke; stroke: #ffffff; stroke-width: 6px; stroke-linejoin: round;
-  }
-
-  @media (max-width: 860px) {
-    .shix {
-      grid-template-columns: 1fr 1fr;
-      grid-template-areas: 'art art' 'left right';
-      gap: var(--spacing-400);
+  /* Narrow: the scene keeps its size and scrolls sideways; buttons in two columns. */
+  @media (max-width: 760px) {
+    .shix__strip {
+      overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: thin;
+      margin: 0 calc(-1 * var(--spacing-400)); padding: var(--spacing-200) var(--spacing-400) var(--spacing-400);
     }
-    .shix__btn { min-height: 4rem; }
-    .shix__cycle text { font-size: 30px; }
+    .shix__pan { width: 1110px; }
+    .shix__buttons { grid-template-columns: 1fr 1fr; }
   }
   @media (prefers-reduced-motion: reduce) {
     .shix__btn:hover, .shix__btn.is-hover { transform: none; }
+    .zone__halo, .zone__line, .exhibit, .lm, .lm__ring { transition: none; }
   }
 </style>

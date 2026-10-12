@@ -30,15 +30,13 @@
   /* The deck's title band behind "Puget Sound Salmon Habitat Indicators". */
   --shi-title-band:         #002060;
 
-  /* Life-cycle graphic linework (psinfo-shi-habitat-explorer). */
-  --shi-art-ground:     #e4e1d8;
-  --shi-art-mountain:   #cfd5cf;
-  --shi-art-water:      var(--ps-info-blue-400);
-  --shi-art-river:      var(--ps-info-blue-500);
-  --shi-art-vegetation: #4f7d3a;
-  --shi-art-wood:       #7a4f2e;
-  --shi-art-arrow:      #5b3a22;   /* 9.8:1 on white: carries the stage labels */
-  --shi-art-fish:       #b4473a;
+  /* Habitat diorama exhibit chrome (psinfo-shi-habitat-explorer): the frame,
+     the ivory plaques and their ink. The painted scene itself keeps its own
+     palette inside the generated art (components/psinfo/shi-diorama-art.svg). */
+  --shi-art-frame:      #221c18;
+  --shi-art-frame-line: #a8895a;
+  --shi-art-ivory:      #f4ecd4;
+  --shi-art-ivory-ink:  var(--ps-info-blue-800);   /* 8.6:1 on the ivory */
 
   /* Summer low flow gauge grid (psinfo-shi-gauge-grid): prod's two cell
      classes, sampled from the Vital Sign chart image. */
