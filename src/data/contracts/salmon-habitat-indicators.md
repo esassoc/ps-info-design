@@ -44,10 +44,12 @@ Reproduced from the live site at 1440 and 390 widths:
 
 ## Landing
 
-1. Title band: "Puget Sound Salmon Habitat Indicators" (the h1) + "Measures of
-   ecosystem conditions in salmon habitats" (deck slide 6, verbatim), on the
-   deck's `#002060`.
-2. SHI logo (`/photos/shi/shi-logo.png`, decorative: the wordmark repeats the h1).
+1. Lockup: the SHI logo (`/photos/shi/shi-logo.png`, decorative because the
+   wordmark repeats the h1) beside "Puget Sound Salmon Habitat Indicators" (the
+   h1) and "Measures of ecosystem conditions in salmon habitats" (deck slide 6,
+   verbatim). The deck's navy title band is dropped.
+2. Type: Fira Sans throughout, the live Vital Signs site's only face, on every
+   SHI route.
 3. About paragraphs. Placeholder copy of similar length; PSP's text is not used.
 4. Habitat diorama with the six buttons. The deck's watercolor life-cycle
    graphic is replaced by an original, museum-style cross-section from the

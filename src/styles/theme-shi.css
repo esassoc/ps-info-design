@@ -27,8 +27,11 @@
   --color-content-brand:           var(--ps-info-blue-800);
   --color-content-on-brand:        #ffffff;
 
-  /* The deck's title band behind "Puget Sound Salmon Habitat Indicators". */
-  --shi-title-band:         #002060;
+  /* The live Vital Signs site's one face (loaded by PsInfoVsProdChrome). The
+     SHI pages ship inside that site, so its type replaces the prototype's
+     Source Sans 3 + Lora pairing here. */
+  --font-sans:    'Fira Sans', system-ui, -apple-system, sans-serif;
+  --font-display: 'Fira Sans', system-ui, -apple-system, sans-serif;
 
   /* Habitat diorama exhibit chrome (psinfo-shi-habitat-explorer): the frame,
      the ivory plaques and their ink. The painted scene itself keeps its own

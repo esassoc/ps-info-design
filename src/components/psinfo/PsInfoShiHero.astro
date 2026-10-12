@@ -1,14 +1,14 @@
 ---
-// PsInfoShiHero — the Salmon Habitat Indicators landing header, per the deck:
-// the program's title band (name + subtitle, the page h1), the SHI logo, then
-// the program's About paragraphs. Same identity-band idea as psinfo-pi-hero,
-// which has no title band and a fixed logo aspect.
+// PsInfoShiHero — the Salmon Habitat Indicators landing header: a two-column
+// lockup of the SHI logo beside the program name (the page h1) and its
+// subtitle, then the program's About paragraphs. Same identity-header idea as
+// psinfo-pi-hero, which has a fixed logo aspect and no text beside it.
 //
-// bcn-lego-checked: checked esa-page-header (transparent text container — no
-// filled band or logo slot) and psinfo-pi-hero (logo-as-h1, fixed 1152×464
-// image box, no band); no esa- lego renders a filled title band. The logo is
-// decorative here (alt="") because its wordmark repeats the h1 beside it.
-// psinfo-shi-hero is the reusable home.
+// bcn-lego-checked: checked esa-page-header (text container with no logo
+// slot) and psinfo-pi-hero (logo-as-h1, fixed 1152×464 image box); no esa-
+// lego pairs a logo with a heading. The logo is decorative here (alt="")
+// because its wordmark repeats the h1 beside it. psinfo-shi-hero is the
+// reusable home.
 import { withBase } from '../../lib/base';
 
 interface Props {
@@ -24,11 +24,13 @@ interface Props {
 const { name, subtitle, logo, aboutParagraphs } = Astro.props;
 ---
 <header class="shihero">
-  <div class="shihero__band">
-    <h1 class="shihero__title">{name}</h1>
-    <p class="shihero__subtitle">{subtitle}</p>
+  <div class="shihero__lockup">
+    <img class="shihero__logo" src={withBase(logo.src)} alt="" width={logo.width} height={logo.height} />
+    <div class="shihero__text">
+      <h1 class="shihero__title">{name}</h1>
+      <p class="shihero__subtitle">{subtitle}</p>
+    </div>
   </div>
-  <img class="shihero__logo" src={withBase(logo.src)} alt="" width={logo.width} height={logo.height} />
   <div class="shihero__about">
     {aboutParagraphs.map((p) => <p>{p}</p>)}
   </div>
@@ -36,31 +38,34 @@ const { name, subtitle, logo, aboutParagraphs } = Astro.props;
 
 <style>
   .shihero {
-    display: flex; flex-direction: column; align-items: center; gap: var(--spacing-500);
-    text-align: center;
+    display: flex; flex-direction: column; gap: var(--spacing-500);
   }
-  .shihero__band {
-    width: min(100%, 46rem);
-    display: flex; flex-direction: column; gap: var(--spacing-100);
-    padding: var(--spacing-400) var(--spacing-500);
-    background: var(--shi-title-band);
-    color: #ffffff;
+  .shihero__lockup {
+    display: grid; grid-template-columns: auto 1fr; align-items: center;
+    gap: var(--spacing-500);
   }
+  .shihero__logo { width: 10rem; height: auto; }
+  .shihero__text { display: flex; flex-direction: column; gap: var(--spacing-200); }
   .shihero__title {
     margin: 0;
-    font-size: 1.5rem; font-weight: var(--font-weight-semibold);
-    text-transform: uppercase; letter-spacing: 0.03em; line-height: 1.25;
+    font-size: 2.25rem; font-weight: var(--font-weight-semibold); line-height: 1.15;
+    color: var(--ps-info-blue-800);
   }
-  .shihero__subtitle { margin: 0; font-size: 1rem; }
-  .shihero__logo { width: min(100%, 15rem); height: auto; }
+  .shihero__subtitle {
+    margin: 0;
+    font-size: 1.25rem; line-height: 1.4; color: var(--color-text-secondary);
+  }
   .shihero__about {
-    max-width: 46rem;
+    max-width: 50rem;
     display: flex; flex-direction: column; gap: var(--spacing-300);
     font-size: var(--ps-info-text-body); line-height: 1.6; color: var(--color-text-primary);
   }
   .shihero__about p { margin: 0; }
 
   @media (max-width: 640px) {
-    .shihero__title { font-size: 1.25rem; }
+    .shihero__lockup { gap: var(--spacing-300); }
+    .shihero__logo { width: 5.5rem; }
+    .shihero__title { font-size: 1.5rem; }
+    .shihero__subtitle { font-size: 1rem; }
   }
 </style>

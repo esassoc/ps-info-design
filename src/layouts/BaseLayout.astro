@@ -29,6 +29,7 @@ const GOOGLE_FONTS =
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link rel="stylesheet" href={GOOGLE_FONTS} />
+    <slot name="head" />
     <title>{title}</title>
     <style is:global>
       *, *::before, *::after { box-sizing: border-box; }

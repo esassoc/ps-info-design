@@ -27,8 +27,14 @@ interface Props {
   hiddenHeading?: string;
 }
 const { title, headerImage, hueVar, activeGoal, trail, hiddenHeading } = Astro.props;
+
+// The live Vital Signs site sets every string in Fira Sans (vitalSigns.min.css
+// imports it from Google Fonts); theme-shi re-points --font-sans/--font-display.
+const PROD_FONTS =
+  'https://fonts.googleapis.com/css2?family=Fira+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap';
 ---
 <BaseLayout title={title}>
+  <link slot="head" rel="stylesheet" href={PROD_FONTS} />
   <a class="skip-link" href="#main-content">Skip to main content</a>
   <PsInfoVsProdHeader image={headerImage} {hueVar} {activeGoal} />
   <div class="vspage">

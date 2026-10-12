@@ -142,6 +142,7 @@ const countFor = (slug: HabitatCategorySlug) => SHI_GRID_ROWS.filter((r) => r.ca
     const sceneWidth = root.querySelector<SVGSVGElement>('.shix__art')?.viewBox.baseVal.width ?? 1110;
     let current: string | null = null;
     let hot: string | null = null;
+    let touchTap = false;
 
     const render = () => {
       root.toggleAttribute('data-filtered', current !== null);
@@ -168,7 +169,7 @@ const countFor = (slug: HabitatCategorySlug) => SHI_GRID_ROWS.filter((r) => r.ca
       document.dispatchEvent(new CustomEvent('shi:filter', { detail: { category: current, source: 'explorer' } }));
     };
     const hover = (slug: string | null) => {
-      if (hot === slug) return;
+      if (touchTap || hot === slug) return; // a tap is not a hover: no preview outline sticks to the last thing touched
       hot = slug;
       render();
     };
@@ -193,6 +194,22 @@ const countFor = (slug: HabitatCategorySlug) => SHI_GRID_ROWS.filter((r) => r.ca
       m.addEventListener('mouseleave', () => hover(null));
       m.addEventListener('focus', () => hover(slug));
       m.addEventListener('blur', () => hover(null));
+    });
+
+    // Touch has no hover: the first tap on a medallion opens its label, the second follows the link.
+    // A landmark whose habitat is selected already shows its label, so it navigates on the first tap.
+    const closeOpen = (except?: Element) => marks.forEach((m) => { if (m !== except) m.classList.remove('is-open'); });
+    root.addEventListener('pointerdown', (e) => {
+      touchTap = e.pointerType === 'touch';
+      if (!(e.target as Element).closest('.lm')) closeOpen();
+    }, true);
+    marks.forEach((m) => {
+      m.addEventListener('click', (e) => {
+        if (!touchTap || m.classList.contains('is-open') || m.classList.contains('is-selected')) return;
+        e.preventDefault();
+        closeOpen(m);
+        m.classList.add('is-open');
+      });
     });
 
     // The table's own "clear filters" resets the picker.
@@ -298,7 +315,13 @@ const countFor = (slug: HabitatCategorySlug) => SHI_GRID_ROWS.filter((r) => r.ca
      and vanish against the dark water. The ring also grows and the plaque takes the category edge. */
   .lm { transition: opacity 160ms ease; }
   .lm:focus-visible { outline: none; }
-  .lm__lead { stroke: var(--shi-art-ivory); stroke-width: 1.2; opacity: 0.9; }
+  .lm:focus:not(:focus-visible) { outline: none; } /* a11y-checked: pointer and touch focus only; keyboard focus keeps the drawn ring above */
+  /* Labels stay hidden at rest, so the scene reads as sixteen medallions. A plaque and its leader appear for
+     the landmark under the pointer or keyboard focus, for every landmark of the selected habitat, and for a
+     landmark opened by a first tap on touch. The text is hidden visually only, so each link keeps its name.
+     A hidden plaque or leader is not a hit target; only the medallion wakes it. */
+  .lm__lead { stroke: var(--shi-art-ivory); stroke-width: 1.2; opacity: 0; pointer-events: none; transition: opacity 160ms ease; }
+  .lm__label { opacity: 0; pointer-events: none; transition: opacity 160ms ease; }
   .lm__plaque { fill: var(--shi-art-ivory); stroke: var(--shi-art-ivory-ink); stroke-opacity: 0.45; stroke-width: 1; }
   .lm__text { font-family: var(--font-display); font-size: 14px; font-weight: var(--font-weight-medium); fill: var(--shi-art-ivory-ink); }
   .lm__hit { fill: transparent; }
@@ -307,20 +330,17 @@ const countFor = (slug: HabitatCategorySlug) => SHI_GRID_ROWS.filter((r) => r.ca
   .lm__focus { fill: none; stroke: var(--shi-art-ivory-ink); stroke-width: 2.5; opacity: 0; }
   .lm__focus--halo { stroke: var(--shi-art-ivory); stroke-width: 6.5; }
   .lm:focus-visible .lm__focus { opacity: 1; }
-  .lm:hover .lm__ring, .lm:focus-visible .lm__ring, .lm.is-selected .lm__ring { r: 9; stroke-width: 3; }
-  .lm:hover .lm__plaque, .lm:focus-visible .lm__plaque, .lm.is-selected .lm__plaque { stroke: var(--cat); stroke-opacity: 1; stroke-width: 2; }
-  .lm:hover .lm__text, .lm:focus-visible .lm__text, .lm.is-selected .lm__text { font-weight: var(--font-weight-semibold); }
+  .lm:hover .lm__lead, .lm:focus-visible .lm__lead, .lm.is-selected .lm__lead, .lm.is-open .lm__lead { opacity: 0.9; }
+  .lm:hover .lm__label, .lm:focus-visible .lm__label, .lm.is-selected .lm__label, .lm.is-open .lm__label { opacity: 1; pointer-events: auto; }
+  .lm:hover .lm__ring, .lm:focus-visible .lm__ring, .lm.is-selected .lm__ring, .lm.is-open .lm__ring { r: 9; stroke-width: 3; }
+  .lm:hover .lm__plaque, .lm:focus-visible .lm__plaque, .lm.is-selected .lm__plaque, .lm.is-open .lm__plaque { stroke: var(--cat); stroke-opacity: 1; stroke-width: 2; }
+  .lm:hover .lm__text, .lm:focus-visible .lm__text, .lm.is-selected .lm__text, .lm.is-open .lm__text { font-weight: var(--font-weight-semibold); }
   /* Landmarks of the other habitats go quiet structurally while one is selected: a smaller, gray-ringed
-     medallion, a fainter leader and plaque edge. The ink and the ivory are untouched, so the link text
-     keeps its full contrast; nothing here fades the text. */
+     medallion. The ink and the ivory are untouched, so an opened label keeps its full contrast. */
   .lm.is-muted .lm__ring { r: 5.5; stroke: var(--shi-art-ivory-ink); stroke-opacity: 0.45; stroke-width: 1.6; }
   .lm.is-muted .lm__dot { opacity: 0; }
-  .lm.is-muted .lm__lead { opacity: 0.55; }
-  .lm.is-muted .lm__plaque { stroke-opacity: 0.2; }
-  .lm.is-muted:hover .lm__ring, .lm.is-muted:focus-visible .lm__ring { r: 9; stroke: var(--cat); stroke-opacity: 1; stroke-width: 3; }
-  .lm.is-muted:hover .lm__dot, .lm.is-muted:focus-visible .lm__dot { opacity: 1; }
-  .lm.is-muted:hover .lm__lead, .lm.is-muted:focus-visible .lm__lead { opacity: 0.9; }
-  .lm.is-muted:hover .lm__plaque, .lm.is-muted:focus-visible .lm__plaque { stroke-opacity: 1; }
+  .lm.is-muted:hover .lm__ring, .lm.is-muted:focus-visible .lm__ring, .lm.is-muted.is-open .lm__ring { r: 9; stroke: var(--cat); stroke-opacity: 1; stroke-width: 3; }
+  .lm.is-muted:hover .lm__dot, .lm.is-muted:focus-visible .lm__dot, .lm.is-muted.is-open .lm__dot { opacity: 1; }
 
   /* Habitat buttons, one per region in scene order. */
   .shix__buttons {
