@@ -1,11 +1,11 @@
 ---
 // PsInfoShiReportFacts — the record line under a Salmon Habitat Indicator
-// report's title: habitat category (with its color swatch), SHI type, the
-// parent Vital Sign, and — for SHI = VSI+ — the Vital Sign Indicator this
+// report's title: habitat category (with its color swatch), type, the
+// parent Vital Sign, and — for VSI+ — the Vital Sign Indicator this
 // analysis extends, which links back.
 //
 // bcn-lego-checked: checked esa-stat (single value + label, not a definition
-// row) and esa-badge (the SHI type is a plain value here, not a status). A
+// row) and esa-badge (the type is a plain value here, not a status). A
 // description list on the house surface; psinfo-shi-report-facts is the
 // reusable home.
 import { withBase } from '../../lib/base';
@@ -27,7 +27,7 @@ const internal = (href: string) => (/^https?:/.test(href) ? href : withBase(href
     <dd><span class="shifacts__swatch" style={`background: ${SHI_CATEGORY_FILL[category.colorGroup]}`} aria-hidden="true"></span>{category.label}</dd>
   </div>
   <div>
-    <dt>SHI type</dt>
+    <dt>Type</dt>
     <dd>{relationship}</dd>
   </div>
   <div>

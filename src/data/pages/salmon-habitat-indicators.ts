@@ -4,7 +4,7 @@
 // Vital Sign and Vital Sign Indicator names, ids, progress labels, and the two
 // VSI detail pages (Eelgrass Area, Summer low flow) are public prod content
 // from vitalsigns.pugetsoundinfo.wa.gov (fetched 2026-10-12). Which VSIs are
-// SHIs, their relationship types, the two SHI ≠ VSI indicators, all salmon
+// SHIs, their relationship types, the two SHI indicators, all salmon
 // narrative, and every gauge value in the SHI chart are invented for the
 // prototype.
 
@@ -78,13 +78,13 @@ const switches = (...on: ShiSubfield[]): Record<ShiSubfield, boolean> => ({
   reportingGuidance: on.includes('reportingGuidance'),
 });
 
-/** SHI = VSI: the only subfield on is Importance to Salmon. */
+/** VSI: the only subfield on is Importance to Salmon. */
 const importanceOnly = (paragraphs: string[]): SalmonHabitatIndicatorField => ({
   enabled: switches('importanceToSalmon'),
   importanceToSalmon: paragraphs,
 });
 
-// ── Summer low flow: the SHI = VSI+ chart (30 gauges, 18 shared with the VSI) ─
+// ── Summer low flow: the VSI+ chart (30 gauges, 18 shared with the VSI) ─
 const FIRST_YEAR = 1999;
 const LAST_YEAR = 2023;
 
@@ -470,7 +470,7 @@ export const SHI_BY_SLUG = Object.fromEntries(
   SALMON_HABITAT_INDICATORS.map((i) => [i.slug, i]),
 ) as Record<string, SalmonHabitatIndicator>;
 
-// ── Link targets (per the deck: SHI = VSI goes to the VSI page, the other
+// ── Link targets (per the deck: VSI goes to the VSI page, the other
 //    two types go to the SHI report) ──────────────────────────────────────
 /** Indicators with an in-prototype Vital Sign Indicator page. */
 export const VSI_DETAIL_SLUGS = ['eelgrass-area', 'summer-low-flow'] as const;

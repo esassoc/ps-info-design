@@ -84,7 +84,7 @@ const swatches = Object.fromEntries(categories.map((c) => [c.slug, SHI_CATEGORY_
       cellRenderer: (p: ICellRendererParams<ShiGridRow>) => habitat(p.data!) },
     { headerName: 'Vital Sign', field: 'vitalSign', flex: 1.6, minWidth: 180,
       cellRenderer: (p: ICellRendererParams<ShiGridRow>) => link(p.data!.vitalSign, p.data!.vitalSignHref) },
-    { headerName: 'SHI Type', field: 'relationship', flex: 1, minWidth: 120 },
+    { headerName: 'Type', field: 'relationship', flex: 1, minWidth: 120 },
   ];
 
   const host = document.getElementById('shi-grid') as HTMLDivElement;

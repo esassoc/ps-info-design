@@ -10,7 +10,7 @@ so a move to its own subdomain is a one-line change):
 
 - `/prototypes/salmon-habitat-indicators` — landing
 - `/prototypes/salmon-habitat-indicators/vital-sign-indicators/{eelgrass-area|summer-low-flow}` — VSI detail
-- `/prototypes/salmon-habitat-indicators/reports/{slug}` — SHI report, one per SHI = VSI+ / SHI ≠ VSI indicator (5)
+- `/prototypes/salmon-habitat-indicators/reports/{slug}` — SHI report, one per VSI+ / SHI indicator (5)
 - `/prototypes/salmon-habitat-indicators/all-indicators` — All Indicators with the salmon column
 
 Layout: `PsInfoVsProdChrome` on every route. NOT `PsInfoAppShell`: these pages
@@ -21,8 +21,8 @@ proposal.
 
 - `PugetSoundIndicator` is the shared base. It carries a `vitalSignIndicator`
   facet, a `salmonHabitatIndicator` facet, or both.
-- `ShiRelationship`: `same` (SHI = VSI), `extended` (SHI = VSI+), `independent`
-  (SHI ≠ VSI). Every SHI has a parent `VitalSignRef`.
+- `ShiRelationship`: `same` (VSI), `extended` (VSI+), `independent`
+  (SHI). Every SHI has a parent `VitalSignRef`.
 - `HabitatCategorySlug`: the deck's six buttons. Each category stores a
   `colorGroup` (`purple` | `green` | `blue`) named for the color only; meaning
   is undefined, and fills come from `--shi-category-*` in `src/styles/theme-shi.css`.
@@ -58,9 +58,9 @@ Reproduced from the live site at 1440 and 390 widths:
    filters the table; selecting it again, or "(clear filters)", resets.
 5. "Explore all Salmon Habitat Indicators": the Progress Indicators grid pattern
    the deck pastes in (count line, clear filters, Download Table). Columns:
-   Salmon Habitat Indicator · Description · Habitat · Vital Sign · SHI Type.
-   Row links follow the deck's notes: SHI = VSI opens the VSI page, VSI+ and
-   ≠ open the SHI report.
+   Salmon Habitat Indicator · Description · Habitat · Vital Sign · Type.
+   Row links follow the deck's notes: VSI opens the VSI page, VSI+ and
+   SHI open the SHI report.
 
 ## Vital Sign Indicator detail
 
@@ -82,12 +82,12 @@ Other reports turn on fewer subfields, so the toggle shows.
 ## All Indicators
 
 Prod's ViewAll tree (`PsInfoVsFancyTree`) with a Salmon Habitat column: SHI mark
-+ the SHI type as a text link. Never the icon alone.
++ the type as a text link. Never the icon alone.
 
 ## Data provenance
 
 Public, from prod: Vital Sign and VSI names, ids, progress labels, both VSI
 pages' text, chart images and partner logos. Invented for the prototype: which
-VSIs are SHIs and their types, the two SHI ≠ VSI indicators (Large wood in
+VSIs are SHIs and their types, the two SHI indicators (Large wood in
 streams, Fish passage at road crossings), all salmon narrative, the About
 text, table descriptions, and every gauge value.

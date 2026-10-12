@@ -6,9 +6,9 @@
 // ProgressIndicator wrappers. Every SHI nests under an existing Vital Sign.
 //
 // Three relationship types (PSP's own vocabulary):
-//   SHI = VSI   same analysis; the VSI gains an "Importance to Salmon" subfield
-//   SHI = VSI+  extra salmon analysis; the SHI gets its own report page
-//   SHI ≠ VSI   no VSI analog yet; still sits under a Vital Sign
+//   VSI   same analysis; the VSI gains an "Importance to Salmon" subfield
+//   VSI+  extra salmon analysis; the SHI gets its own report page
+//   SHI   no VSI analog yet; still sits under a Vital Sign
 //
 // The Salmon Habitat Indicator field is ONE new section on the indicator
 // report (PSP's preferred option), made of subfields that are switched on or
@@ -20,9 +20,9 @@ import type { ProgressLabel } from './pages/goals';
 export type ShiRelationship = 'same' | 'extended' | 'independent';
 
 export const SHI_RELATIONSHIP_LABEL: Record<ShiRelationship, string> = {
-  same: 'SHI = VSI',
-  extended: 'SHI = VSI+',
-  independent: 'SHI ≠ VSI',
+  same: 'VSI',
+  extended: 'VSI+',
+  independent: 'SHI',
 };
 
 // ── Habitat categories (the six landing-page buttons) ──────────────────────
