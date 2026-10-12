@@ -1,0 +1,103 @@
+---
+// PsInfoVsProdHeader — the live Vital Signs site header, as it ships today
+// (vitalsigns.pugetsoundinfo.wa.gov, captured 2026-10-12): a full-bleed goal
+// photograph carrying the network bar (Puget Sound Info | Vital Signs, then
+// Request Support and Log In), the navy Vital Signs banner and the five goal
+// columns, closed by a rule in the current goal's color.
+//
+// bcn-lego-checked: the banner + goal columns ARE psinfo-vs-subnav (reused in
+// its live-link mode, trail off); checked esa-app-bar (neutral app chrome, no
+// photo band) and esa-header-nav (no photo ground). The photo band and network
+// bar are prod's own identity and get a faithful reproduction; the scrim keeps
+// the white bar text above 4.5:1 at the photo's lightest point.
+import PsInfoVsSubnav from './PsInfoVsSubnav.astro';
+import { withBase } from '../../lib/base';
+
+interface Props {
+  /** public/ path of the header photograph. */
+  image: string;
+  /** --ps-info-goal-* token for the closing rule; omit on goal-neutral pages. */
+  hueVar?: string;
+  /** Goal slug, marks that column current. */
+  activeGoal?: string;
+}
+const { image, hueVar, activeGoal } = Astro.props;
+
+const VS_SITE = 'https://vitalsigns.pugetsoundinfo.wa.gov';
+const PSINFO_SITE = 'https://www.pugetsoundinfo.wa.gov';
+---
+<header class="vsprod" style={hueVar ? `--vsprod-rule: var(${hueVar})` : undefined}>
+  <img class="vsprod__img" src={withBase(image)} alt="" decoding="async" />
+  <div class="vsprod__scrim" aria-hidden="true"></div>
+
+  <nav class="vsprod__bar" aria-label="Puget Sound Info">
+    <div class="vsprod__sites">
+      <a class="vsprod__link vsprod__link--site" href={PSINFO_SITE}>Puget Sound Info</a>
+      <span class="vsprod__divider" aria-hidden="true"></span>
+      <a class="vsprod__link vsprod__link--site" href={VS_SITE}>Vital Signs</a>
+    </div>
+    <div class="vsprod__account">
+      <a class="vsprod__link" href={`${VS_SITE}/Help/Support`}>Request Support</a>
+      <a class="vsprod__link" href={`${VS_SITE}/Account/Login`}>Log In</a>
+    </div>
+  </nav>
+
+  <div class="vsprod__band">
+    <PsInfoVsSubnav live showTrail={false} activeGoal={activeGoal} />
+  </div>
+</header>
+
+<style>
+  .vsprod {
+    position: relative;
+    display: flex; flex-direction: column;
+    background: var(--ps-info-blue-950);
+    border-bottom: 10px solid var(--vsprod-rule, var(--ps-info-blue-800));
+  }
+  .vsprod__img {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%; object-fit: cover;
+  }
+  .vsprod__scrim {
+    position: absolute; inset: 0;
+    background: linear-gradient(to bottom, rgba(5, 31, 51, 0.72) 0, rgba(5, 31, 51, 0.35) 96px, rgba(5, 31, 51, 0.15) 100%);
+  }
+
+  .vsprod__bar {
+    position: relative;
+    display: flex; align-items: center; justify-content: space-between;
+    flex-wrap: wrap; gap: var(--spacing-200) var(--spacing-600);
+    padding: var(--spacing-500) var(--spacing-600) var(--spacing-600);
+  }
+  .vsprod__sites, .vsprod__account {
+    display: flex; align-items: center; flex-wrap: wrap; gap: var(--spacing-500);
+  }
+  .vsprod__link {
+    color: #ffffff; text-decoration: none;
+    font-size: 1.125rem; font-weight: var(--font-weight-semibold);
+    text-transform: uppercase; letter-spacing: 0.02em;
+    min-height: 24px; display: inline-flex; align-items: center;
+  }
+  .vsprod__link--site { font-size: 1.375rem; }
+  .vsprod__link:hover { text-decoration: underline; text-underline-offset: 4px; }
+  .vsprod__link:focus-visible { outline: 2px solid #ffffff; outline-offset: 3px; }
+  .vsprod__divider { width: 3px; height: 2.25rem; background: #ffffff; }
+
+  .vsprod__band {
+    position: relative;
+    width: min(100% - 2 * var(--spacing-500), 1110px);
+    margin-inline: auto;
+  }
+  /* The subnav's banner rounds its top corners for in-content use; on the
+     photo band prod squares it. */
+  .vsprod__band :global(.vsnav__banner) { border-radius: 0; }
+
+  @media (max-width: 640px) {
+    .vsprod__bar { padding: var(--spacing-300) var(--spacing-400); }
+    .vsprod__link { font-size: 1rem; }
+    .vsprod__link--site { font-size: 1.125rem; }
+    .vsprod__sites, .vsprod__account { gap: var(--spacing-300); }
+    .vsprod__divider { height: 1.5rem; }
+    .vsprod__band { width: 100%; }
+  }
+</style>

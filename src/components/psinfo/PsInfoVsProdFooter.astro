@@ -1,0 +1,37 @@
+---
+// PsInfoVsProdFooter — the live Vital Signs site footer (captured 2026-10-12):
+// a gray band with the managed-by line, the Accessibility Policy link, and the
+// implementation credit. Prod sets it at 12px; here it sits on the 14px meta
+// floor, with links underlined at rest.
+//
+// bcn-lego-checked: checked esa-link-column (multi-column link groups, not a
+// centered credit band) and esa-container; no esa- footer lego exists. Text and
+// links only; psinfo-vs-prod-footer is the reusable home for prod-chrome pages.
+const VS_CONTACT = 'mailto:kenna.kuhn@psp.wa.gov?subject=Vital%20Sign%20website%20inquiry';
+---
+<footer class="vsfoot">
+  <p>
+    This site is managed and maintained by the Puget Sound Partnership. Please
+    <a href={VS_CONTACT}>contact us</a> with any questions or comments about the Vital Sign website.
+  </p>
+  <p><a href="https://www.psp.wa.gov/accessibility.php">Accessibility Policy</a></p>
+  <p>
+    Implementation &amp; Hosting by <a href="https://esassoc.com/services/technology/">Environmental Science Associates</a>.
+    Disclaimers and copyright are available <a href="https://www.pugetsoundinfo.wa.gov/Legal">here</a>.
+  </p>
+</footer>
+
+<style>
+  .vsfoot {
+    display: flex; flex-direction: column; align-items: center; gap: var(--spacing-300);
+    padding: var(--spacing-700) var(--spacing-500) var(--spacing-600);
+    background: var(--ps-info-gray-200);
+    text-align: center;
+    font-size: var(--ps-info-text-meta-lg);
+    color: var(--color-text-primary);
+  }
+  .vsfoot p { margin: 0; max-width: 60rem; line-height: 1.5; }
+  .vsfoot a { color: var(--color-text-link); text-decoration: underline; text-underline-offset: 2px; }
+  .vsfoot a:hover { color: var(--color-text-link-hover); }
+  .vsfoot a:focus-visible { outline: 2px solid var(--focus-ring-color); outline-offset: 2px; }
+</style>

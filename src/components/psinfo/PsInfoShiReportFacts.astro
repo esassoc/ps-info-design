@@ -1,0 +1,58 @@
+---
+// PsInfoShiReportFacts — the record line under a Salmon Habitat Indicator
+// report's title: habitat category (with its color swatch), SHI type, the
+// parent Vital Sign, and — for SHI = VSI+ — the Vital Sign Indicator this
+// analysis extends, which links back.
+//
+// bcn-lego-checked: checked esa-stat (single value + label, not a definition
+// row) and esa-badge (the SHI type is a plain value here, not a status). A
+// description list on the house surface; psinfo-shi-report-facts is the
+// reusable home.
+import { withBase } from '../../lib/base';
+import { SHI_CATEGORY_FILL } from '../../lib/shiCategoryColor';
+import type { HabitatColorGroup } from '../../data/shi-domain';
+
+interface Props {
+  category: { label: string; colorGroup: HabitatColorGroup };
+  relationship: string;
+  vitalSign: { name: string; href: string };
+  vitalSignIndicator?: { name: string; href: string };
+}
+const { category, relationship, vitalSign, vitalSignIndicator } = Astro.props;
+const internal = (href: string) => (/^https?:/.test(href) ? href : withBase(href));
+---
+<dl class="shifacts">
+  <div>
+    <dt>Habitat</dt>
+    <dd><span class="shifacts__swatch" style={`background: ${SHI_CATEGORY_FILL[category.colorGroup]}`} aria-hidden="true"></span>{category.label}</dd>
+  </div>
+  <div>
+    <dt>SHI type</dt>
+    <dd>{relationship}</dd>
+  </div>
+  <div>
+    <dt>Vital Sign</dt>
+    <dd><a href={vitalSign.href}>{vitalSign.name}</a></dd>
+  </div>
+  {vitalSignIndicator && (
+    <div>
+      <dt>Vital Sign Indicator</dt>
+      <dd><a href={internal(vitalSignIndicator.href)}>{vitalSignIndicator.name}</a></dd>
+    </div>
+  )}
+</dl>
+
+<style>
+  .shifacts {
+    margin: 0;
+    display: flex; flex-wrap: wrap; gap: var(--spacing-300) var(--spacing-700);
+    padding: var(--spacing-400) 0;
+    border-block: 1px solid var(--color-border-light);
+  }
+  .shifacts div { display: flex; flex-direction: column; gap: var(--spacing-100); }
+  .shifacts dt { font-size: var(--ps-info-text-meta-lg); color: var(--color-text-secondary); }
+  .shifacts dd { margin: 0; display: inline-flex; align-items: center; gap: var(--spacing-200); font-size: var(--ps-info-text-body); color: var(--color-text-primary); }
+  .shifacts__swatch { width: 0.875rem; height: 0.875rem; border-radius: var(--radius-sm); }
+  .shifacts a { color: var(--color-text-link); text-decoration: underline; text-underline-offset: 2px; }
+  .shifacts a:focus-visible { outline: 2px solid var(--focus-ring-color); outline-offset: 2px; }
+</style>

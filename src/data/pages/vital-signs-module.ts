@@ -34,12 +34,14 @@ export interface VsLink {
   route?: string;
   /** Live-site URL otherwise. */
   externalHref?: string;
+  /** Live-site URL, always — used by chrome that links to prod (the SHI pages). */
+  liveHref: string;
 }
 
-const vs = (id: number, label: string): VsLink =>
-  INTERNAL_VS[id]
-    ? { label, route: INTERNAL_VS[id] }
-    : { label, externalHref: `${VS_SITE}/VitalSign/Detail/${id}` };
+const vs = (id: number, label: string): VsLink => {
+  const liveHref = `${VS_SITE}/VitalSign/Detail/${id}`;
+  return INTERNAL_VS[id] ? { label, route: INTERNAL_VS[id], liveHref } : { label, externalHref: liveHref, liveHref };
+};
 
 // ── Sub-nav (the site header's goal navbar) ────────────────────────────────
 export interface SubnavGoal {
@@ -48,6 +50,8 @@ export interface SubnavGoal {
   /** --ps-info-goal-* token (equals the source's ThemeColor). */
   hueVar: string;
   route: string;
+  /** Live-site VitalSignGoal/Detail/{id}. */
+  liveHref: string;
   vitalSigns: VsLink[];
 }
 
@@ -57,6 +61,7 @@ export const SUBNAV_GOALS: SubnavGoal[] = [
     label: 'Healthy Human Population',
     hueVar: '--ps-info-goal-population',
     route: '/prototypes/goals/healthy-human-population',
+    liveHref: `${VS_SITE}/VitalSignGoal/Detail/1`,
     vitalSigns: [vs(2, 'Air Quality'), vs(3, 'Drinking Water'), vs(4, 'Local Foods'), vs(6, 'Outdoor Activity'), vs(7, 'Shellfish Beds')],
   },
   {
@@ -64,6 +69,7 @@ export const SUBNAV_GOALS: SubnavGoal[] = [
     label: 'Vibrant Human Quality of Life',
     hueVar: '--ps-info-goal-quality',
     route: '/prototypes/goals/vibrant-human-quality-of-life',
+    liveHref: `${VS_SITE}/VitalSignGoal/Detail/2`,
     vitalSigns: [vs(21, 'Cultural Wellbeing'), vs(22, 'Economic Vitality'), vs(23, 'Good Governance'), vs(24, 'Sense of Place'), vs(25, 'Sound Stewardship')],
   },
   {
@@ -71,6 +77,7 @@ export const SUBNAV_GOALS: SubnavGoal[] = [
     label: 'Thriving Species and Food Web',
     hueVar: '--ps-info-goal-species',
     route: '/prototypes/goals/thriving-species-and-food-web',
+    liveHref: `${VS_SITE}/VitalSignGoal/Detail/3`,
     vitalSigns: [vs(35, 'Zooplankton'), vs(32, 'Salmon'), vs(19, 'Orcas'), vs(34, 'Groundfish and Benthic Invertebrates'), vs(33, 'Forage Fish'), vs(17, 'Birds')],
   },
   {
@@ -78,6 +85,7 @@ export const SUBNAV_GOALS: SubnavGoal[] = [
     label: 'Functioning Habitat',
     hueVar: '--ps-info-goal-habitat',
     route: '/prototypes/goals/functioning-habitat',
+    liveHref: `${VS_SITE}/VitalSignGoal/Detail/7`,
     vitalSigns: [vs(29, 'Streams and Floodplains'), vs(30, 'Forests and Wetlands'), vs(13, 'Estuaries'), vs(31, 'Beaches and Marine Vegetation')],
   },
   {
@@ -85,6 +93,7 @@ export const SUBNAV_GOALS: SubnavGoal[] = [
     label: 'Healthy Water Quality',
     hueVar: '--ps-info-goal-water',
     route: '/prototypes/goals/healthy-water-quality',
+    liveHref: `${VS_SITE}/VitalSignGoal/Detail/6`,
     vitalSigns: [vs(27, 'Marine Water'), vs(26, 'Freshwater'), vs(28, 'Toxics in Aquatic Life')],
   },
 ];

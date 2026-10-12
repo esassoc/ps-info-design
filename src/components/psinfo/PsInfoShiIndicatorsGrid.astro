@@ -1,0 +1,194 @@
+---
+// PsInfoShiIndicatorsGrid — "Explore all Salmon Habitat Indicators": the deck
+// pastes the Progress Indicators table here, so this is that grid's pattern
+// (psinfo-pi-indicators-grid — same engine, toolbar, count line, and shared
+// .psinfo-agrid skin) with SHI columns, plus an external habitat filter driven
+// by psinfo-shi-habitat-explorer through the `shi:filter` document event.
+//
+// bcn-lego-checked: no esa- data-grid/table lego exists (checked the full
+// catalog); ag-grid-community is the repo's table engine; toolbar buttons are
+// the esa-button lego. The habitat cell pairs the category label with its
+// color swatch, so color never carries the value alone.
+import EsaButton from '@esa/ecology/esa-button.astro';
+import type { HabitatCategory } from '../../data/shi-domain';
+import type { ShiGridRow } from '../../data/pages/salmon-habitat-indicators';
+import { SHI_CATEGORY_FILL } from '../../lib/shiCategoryColor';
+import 'ag-grid-community/styles/ag-grid.css';
+import 'ag-grid-community/styles/ag-theme-alpine.css';
+import '../../styles/psinfo-ag-grid.css';
+
+interface Props {
+  rows: ShiGridRow[];
+  categories: HabitatCategory[];
+  /** Accessible name of the grid region. */
+  label: string;
+}
+const { rows, categories, label } = Astro.props;
+const swatches = Object.fromEntries(categories.map((c) => [c.slug, SHI_CATEGORY_FILL[c.colorGroup]]));
+---
+<div class="shigrid">
+  <div class="shigrid__bar">
+    <p class="shigrid__count">
+      <span id="shi-grid-count" aria-live="polite">Currently Viewing {rows.length} out of {rows.length} Indicators</span>
+      <span id="shi-grid-clear-wrap" hidden>
+        <EsaButton size="sm" variant="ghost" appearance="soft" id="shi-grid-clear">(clear filters)</EsaButton>
+      </span>
+    </p>
+    <EsaButton size="sm" variant="primary" appearance="outline" id="shi-grid-download">Download Table</EsaButton>
+  </div>
+  <div id="shi-grid" class="ag-theme-alpine psinfo-agrid" role="region" aria-label={label}></div>
+  <script type="application/json" id="shi-grid-data" set:html={JSON.stringify({ rows, swatches, label })}></script>
+</div>
+
+<script>
+  import { createGrid, ModuleRegistry, AllCommunityModule } from 'ag-grid-community';
+  import type { GridOptions, ICellRendererParams, ColDef } from 'ag-grid-community';
+  import type { ShiGridRow } from '../../data/pages/salmon-habitat-indicators';
+
+  ModuleRegistry.registerModules([AllCommunityModule]);
+
+  const payload = JSON.parse(document.getElementById('shi-grid-data')?.textContent ?? '{}') as {
+    rows: ShiGridRow[];
+    swatches: Record<string, string>;
+    label: string;
+  };
+  const { rows, swatches, label } = payload;
+  const isExternal = (href: string) => /^https?:/.test(href);
+
+  function link(text: string, href: string): HTMLAnchorElement {
+    const a = document.createElement('a');
+    a.className = 'shigrid__link';
+    a.textContent = text;
+    a.href = href;
+    return a;
+  }
+  function habitat(row: ShiGridRow): HTMLSpanElement {
+    const span = document.createElement('span');
+    span.className = 'shigrid__habitat';
+    const dot = document.createElement('span');
+    dot.className = 'shigrid__swatch';
+    dot.setAttribute('aria-hidden', 'true');
+    dot.style.background = swatches[row.category];
+    span.append(dot, document.createTextNode(row.categoryLabel));
+    return span;
+  }
+
+  const base = import.meta.env.BASE_URL;
+  const href = (h: string) => (isExternal(h) ? h : base + h.replace(/^\//, ''));
+
+  const columnDefs: ColDef<ShiGridRow>[] = [
+    { headerName: 'Salmon Habitat Indicator', field: 'indicator', flex: 2.2, minWidth: 220,
+      cellRenderer: (p: ICellRendererParams<ShiGridRow>) => link(p.data!.indicator, href(p.data!.href)) },
+    { headerName: 'Description', field: 'description', flex: 3, minWidth: 260 },
+    { headerName: 'Habitat', field: 'categoryLabel', flex: 1.5, minWidth: 170,
+      cellRenderer: (p: ICellRendererParams<ShiGridRow>) => habitat(p.data!) },
+    { headerName: 'Vital Sign', field: 'vitalSign', flex: 1.6, minWidth: 180,
+      cellRenderer: (p: ICellRendererParams<ShiGridRow>) => link(p.data!.vitalSign, p.data!.vitalSignHref) },
+    { headerName: 'SHI Type', field: 'relationship', flex: 1, minWidth: 120 },
+  ];
+
+  const host = document.getElementById('shi-grid') as HTMLDivElement;
+  const countEl = document.getElementById('shi-grid-count')!;
+  const clearWrap = document.getElementById('shi-grid-clear-wrap')!;
+  let category: string | null = null;
+
+  const refresh = () => {
+    const shown = api.getDisplayedRowCount();
+    countEl.textContent = `Currently Viewing ${shown} out of ${rows.length} Indicators`;
+    clearWrap.hidden = category === null && Object.keys(api.getFilterModel()).length === 0;
+  };
+
+  const gridOptions: GridOptions<ShiGridRow> = {
+    theme: 'legacy',
+    columnDefs,
+    rowData: rows,
+    defaultColDef: {
+      sortable: true,
+      filter: 'agTextColumnFilter',
+      floatingFilter: true,
+      resizable: true,
+      wrapText: true,
+      autoHeight: true,
+      wrapHeaderText: true,
+      autoHeaderHeight: true,
+    },
+    ensureDomOrder: true,
+    domLayout: 'autoHeight',
+    isExternalFilterPresent: () => category !== null,
+    doesExternalFilterPass: (node) => node.data?.category === category,
+    onFilterChanged: () => refresh(),
+    onCellFocused: (event) => {
+      if (event.rowIndex == null || typeof event.column !== 'object' || event.column === null) return;
+      const colId = (event.column as { getColId: () => string }).getColId();
+      host.querySelector(`[row-index="${event.rowIndex}"] [col-id="${colId}"] a`)?.focus();
+    },
+  };
+
+  const api = createGrid(host, gridOptions);
+
+  host.querySelector('[role="grid"]')?.setAttribute('aria-label', label);
+  host.querySelectorAll('.ag-center-cols-container[role="rowgroup"]').forEach((el) => {
+    el.setAttribute('tabindex', '0');
+    el.setAttribute('aria-label', 'Salmon Habitat Indicator rows');
+  });
+
+  document.addEventListener('shi:filter', (e) => {
+    const detail = (e as CustomEvent<{ category: string | null; source: string }>).detail;
+    if (detail.source === 'grid') return;
+    category = detail.category;
+    api.onFilterChanged();
+  });
+
+  document.getElementById('shi-grid-clear')?.addEventListener('click', () => {
+    category = null;
+    api.setFilterModel(null);
+    api.onFilterChanged();
+    document.dispatchEvent(new CustomEvent('shi:filter', { detail: { category: null, source: 'grid' } }));
+  });
+  document.getElementById('shi-grid-download')?.addEventListener('click', () => {
+    api.exportDataAsCsv({
+      fileName: 'salmon-habitat-indicators-export',
+      columnKeys: ['indicator', 'description', 'categoryLabel', 'vitalSign', 'relationship'],
+    });
+  });
+</script>
+
+<style>
+  .shigrid { display: flex; flex-direction: column; gap: var(--spacing-300); }
+  .shigrid__bar {
+    display: flex; align-items: center; justify-content: space-between;
+    flex-wrap: wrap; gap: var(--spacing-400);
+  }
+  .shigrid__count {
+    margin: 0; font-size: var(--ps-info-text-body); color: var(--color-text-secondary);
+    display: inline-flex; align-items: center; gap: var(--spacing-200);
+  }
+  /* Same 16px toolbar override as psinfo-pi-indicators-grid. */
+  :global(#shi-grid-clear), :global(#shi-grid-download) { font-size: var(--ps-info-text-body); }
+
+  #shi-grid {
+    --ag-font-family: var(--font-sans);
+    --ag-foreground-color: var(--color-text-primary);
+    --ag-data-color: var(--color-text-primary);
+    --ag-secondary-foreground-color: var(--color-text-secondary);
+    --ag-background-color: var(--color-surface);
+    --ag-odd-row-background-color: var(--color-surface);
+    --ag-row-hover-color: var(--ps-info-blue-50);
+    --ag-selected-row-background-color: var(--ps-info-blue-100);
+    --ag-border-color: var(--color-border);
+    --ag-secondary-border-color: var(--color-border-light);
+    --ag-row-border-color: var(--color-border-light);
+    --ag-alpine-active-color: var(--ps-info-blue-600);
+    --ag-input-focus-border-color: var(--ps-info-blue-600);
+    --ag-border-radius: var(--radius-100);
+  }
+  #shi-grid :global(.ag-root-wrapper) { min-height: 0; }
+  #shi-grid :global(.ag-cell) { line-height: 1.45; padding-block: var(--spacing-200); }
+  #shi-grid :global(.shigrid__link) { color: var(--color-text-link); text-decoration: underline; text-underline-offset: 2px; }
+  #shi-grid :global(.shigrid__link:hover) { color: var(--color-text-link-hover); }
+  #shi-grid :global(.shigrid__link:focus-visible) { outline: 2px solid var(--focus-ring-color); outline-offset: 1px; }
+  #shi-grid :global(.shigrid__habitat) { display: inline-flex; align-items: center; gap: var(--spacing-200); }
+  #shi-grid :global(.shigrid__swatch) {
+    flex: none; width: 0.875rem; height: 0.875rem; border-radius: var(--radius-sm);
+  }
+</style>

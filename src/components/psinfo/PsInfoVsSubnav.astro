@@ -14,7 +14,7 @@
 // reachable, no JS); goal-bar labels render ≥19px bold so white-on-goal-color
 // meets WCAG large-text contrast; dropdown panels darken the goal color 22%
 // so 16px items meet 4.5:1.
-import { SUBNAV_GOALS, SUBNAV_BANNER, SUBNAV_LINKS, type SubnavGoal } from '../../data/pages/vital-signs-module';
+import { SUBNAV_GOALS, SUBNAV_BANNER, SUBNAV_LINKS, VS_SITE, type SubnavGoal } from '../../data/pages/vital-signs-module';
 import EsaIcon from '@esa/ecology/esa-icon.astro';
 import { withBase } from '../../lib/base';
 import { isExternalHref, EXTERNAL_LINK_ICON_PATHS } from '../../lib/psinfoExternalLink';
@@ -28,14 +28,19 @@ interface Props {
   goalCrumb?: { label: string; route: string };
   /** Trailing current-page crumb on detail pages (e.g. the Vital Sign name). */
   currentLabel?: string;
+  /** Link the banner, goals, and Vital Signs to the live site (prod-chrome pages). */
+  live?: boolean;
+  /** Render the About / All Indicators trail (prod-chrome pages render their own). */
+  showTrail?: boolean;
 }
-const { activeGoal, activeAllIndicators = false, goalCrumb, currentLabel } = Astro.props;
+const { activeGoal, activeAllIndicators = false, goalCrumb, currentLabel, live = false, showTrail = true } = Astro.props;
 
-const goalHref = (g: SubnavGoal) => withBase(g.route);
+const goalHref = (g: SubnavGoal) => (live ? g.liveHref : withBase(g.route));
+const bannerHref = live ? VS_SITE : withBase(SUBNAV_BANNER.homeRoute);
 const currentGoal = SUBNAV_GOALS.find((g) => g.slug === activeGoal);
 ---
 <div class="vsnav">
-  <a class="vsnav__banner" href={withBase(SUBNAV_BANNER.homeRoute)}>
+  <a class="vsnav__banner" href={bannerHref}>
     <span class="vsnav__title">{SUBNAV_BANNER.title}</span>
     <span class="vsnav__subtitle">{SUBNAV_BANNER.subtitle}</span>
   </a>
@@ -54,7 +59,9 @@ const currentGoal = SUBNAV_GOALS.find((g) => g.slug === activeGoal);
           <ul class="vsnav__menu" role="list">
             {g.vitalSigns.map((v) => (
               <li>
-                {v.route ? (
+                {live ? (
+                  <a class="vsnav__item" href={v.liveHref}>{v.label}</a>
+                ) : v.route ? (
                   <a class="vsnav__item" href={withBase(v.route)}>{v.label}</a>
                 ) : isExternalHref(v.externalHref) ? (
                   <a class="vsnav__item vsnav__item--ext" href={v.externalHref} target="_blank" rel="noopener">
@@ -72,6 +79,7 @@ const currentGoal = SUBNAV_GOALS.find((g) => g.slug === activeGoal);
     </ul>
   </nav>
 
+  {showTrail && (
   <nav class="vsnav__trail" aria-label="Vital Signs section">
     {isExternalHref(SUBNAV_LINKS.about.externalHref) ? (
       <a class="vsnav__crumb vsnav__crumb--ext" href={SUBNAV_LINKS.about.externalHref} target="_blank" rel="noopener">
@@ -106,6 +114,7 @@ const currentGoal = SUBNAV_GOALS.find((g) => g.slug === activeGoal);
       </>
     )}
   </nav>
+  )}
 </div>
 
 <style>

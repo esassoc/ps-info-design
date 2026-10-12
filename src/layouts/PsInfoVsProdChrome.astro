@@ -1,0 +1,72 @@
+---
+// PsInfoVsProdChrome — pages that ship INSIDE today's Vital Signs site, framed
+// in its production chrome: the photo header with the network bar, Vital Signs
+// banner and goal columns; the location trail; the content column; the gray
+// footer. Deliberately NOT PsInfoAppShell — the unified-nav rail is a separate
+// proposal, and these pages show how a new module fits the site as it is.
+//
+// bcn-lego-checked: the trail is the esa-breadcrumbs lego; header and footer
+// are psinfo-vs-prod-header / psinfo-vs-prod-footer. The only layout CSS here
+// is the skip link (same treatment as PsInfoAppShell) and the content width.
+import BaseLayout from './BaseLayout.astro';
+import PsInfoVsProdHeader from '../components/psinfo/PsInfoVsProdHeader.astro';
+import PsInfoVsProdFooter from '../components/psinfo/PsInfoVsProdFooter.astro';
+import EsaBreadcrumbs, { type EsaBreadcrumbItem } from '@esa/ecology/esa-breadcrumbs.astro';
+import '../styles/theme-shi.css';
+
+interface Props {
+  title: string;
+  /** public/ path of the header photograph. */
+  headerImage: string;
+  /** --ps-info-goal-* token for the header's closing rule. */
+  hueVar?: string;
+  activeGoal?: string;
+  /** Location trail; the last item is the current page. */
+  trail: EsaBreadcrumbItem[];
+  /** Visually hidden h1, for pages whose prod layout shows no heading. */
+  hiddenHeading?: string;
+}
+const { title, headerImage, hueVar, activeGoal, trail, hiddenHeading } = Astro.props;
+---
+<BaseLayout title={title}>
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+  <PsInfoVsProdHeader image={headerImage} {hueVar} {activeGoal} />
+  <div class="vspage">
+    <EsaBreadcrumbs items={trail} size="md" />
+    <main id="main-content">
+      {hiddenHeading && <h1 class="vspage__hidden">{hiddenHeading}</h1>}
+      <slot />
+    </main>
+  </div>
+  <PsInfoVsProdFooter />
+</BaseLayout>
+
+<style>
+  .skip-link {
+    position: fixed; top: var(--spacing-200); left: var(--spacing-200); z-index: 2000;
+    padding: var(--spacing-250) var(--spacing-400);
+    background: var(--color-primary); color: #ffffff;
+    border-radius: var(--radius-100);
+    font-weight: var(--font-weight-semibold);
+    transform: translateY(calc(-100% - var(--spacing-400)));
+  }
+  .skip-link:focus-visible {
+    transform: none;
+    outline: 2px solid var(--focus-ring-color); outline-offset: 2px;
+  }
+
+  .vspage {
+    display: flex; flex-direction: column; gap: var(--spacing-600);
+    width: min(100% - 2 * var(--spacing-500), 1110px);
+    margin: var(--spacing-500) auto var(--spacing-900);
+  }
+
+  .vspage__hidden {
+    position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+    overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;
+  }
+
+  @media (max-width: 640px) {
+    .vspage { width: calc(100% - 2 * var(--spacing-400)); }
+  }
+</style>

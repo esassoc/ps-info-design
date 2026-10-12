@@ -50,6 +50,15 @@ export const prototypes: Prototype[] = [
     createdAt: '2026-07-15',
     status: 'in-progress',
   },
+  {
+    slug: 'salmon-habitat-indicators',
+    title: 'Salmon Habitat Indicators: inside today’s Vital Signs',
+    description:
+      'SHI landing page with the life-cycle habitat picker and indicator table, a Vital Sign Indicator with Importance to Salmon, an SHI = VSI+ report, and All Indicators marked for salmon. Framed in the live Vital Signs chrome, not the unified shell.',
+    route: '/prototypes/salmon-habitat-indicators',
+    createdAt: '2026-10-12',
+    status: 'in-progress',
+  },
 ];
 
 /** Newest first — the order the index table renders. */

@@ -1,0 +1,67 @@
+---
+// PsInfoShiReportField — the Salmon Habitat Indicator field as one report box
+// (deck slide 4, PSP's preferred option: a single new blue box where all
+// salmon information lives, beside the Complete Indicator Report's existing
+// boxes). Each subfield renders only when it is switched on for the indicator
+// AND has content, in the deck's order.
+//
+// bcn-lego-checked: checked esa-card (no filled title bar) and
+// esa-collapsible (prod's report boxes are always open). The navy bar is prod's
+// Complete Indicator Report section header; the chart is
+// psinfo-shi-gauge-grid. psinfo-shi-report-field is the reusable home.
+import PsInfoShiGaugeGrid from './PsInfoShiGaugeGrid.astro';
+import { SHI_SUBFIELDS, type SalmonHabitatIndicatorField, type ShiSubfield } from '../../data/shi-domain';
+
+interface Props {
+  field: SalmonHabitatIndicatorField;
+  indicatorName: string;
+}
+const { field, indicatorName } = Astro.props;
+
+const hasContent = (key: ShiSubfield): boolean => {
+  const value = field[key];
+  return Array.isArray(value) ? value.length > 0 : value !== undefined;
+};
+const shown = SHI_SUBFIELDS.filter((s) => field.enabled[s.key] && hasContent(s.key));
+const paragraphs = (key: ShiSubfield) => (field[key] as string[] | undefined) ?? [];
+---
+<section class="shifield" aria-labelledby="shifield-title">
+  <h2 class="shifield__bar" id="shifield-title">Salmon Habitat Indicator</h2>
+  <div class="shifield__body">
+    {shown.map((s) => (
+      <section class="shifield__sub" aria-labelledby={`shi-${s.key}`}>
+        <h3 class="shifield__h" id={`shi-${s.key}`}>{s.label}</h3>
+        {s.key === 'chart' && field.chart && (
+          <PsInfoShiGaugeGrid chart={field.chart} label={`${indicatorName}, salmon habitat analysis`} />
+        )}
+        {s.key === 'description' && <p>{field.description}</p>}
+        {s.key === 'keyResults' && <ul>{paragraphs('keyResults').map((r) => <li>{r}</li>)}</ul>}
+        {s.key === 'datasets' && (
+          <ul>{field.datasets!.map((d) => <li>{d.name} <span class="shifield__steward">({d.steward})</span></li>)}</ul>
+        )}
+        {!['chart', 'description', 'keyResults', 'datasets'].includes(s.key) && paragraphs(s.key).map((p) => <p>{p}</p>)}
+      </section>
+    ))}
+  </div>
+</section>
+
+<style>
+  .shifield { border: 1px solid var(--color-border); }
+  .shifield__bar {
+    margin: 0;
+    padding: var(--spacing-250) var(--spacing-400);
+    background: var(--ps-info-blue-800); color: #ffffff;
+    font-size: 1rem; font-weight: var(--font-weight-bold);
+    text-transform: uppercase; letter-spacing: 0.02em;
+  }
+  .shifield__body {
+    display: flex; flex-direction: column; gap: var(--spacing-600);
+    padding: var(--spacing-500);
+    font-size: var(--ps-info-text-body); line-height: 1.6; color: var(--color-text-primary);
+  }
+  .shifield__sub { display: flex; flex-direction: column; gap: var(--spacing-300); }
+  .shifield__h { margin: 0; font-size: 1.25rem; font-weight: var(--font-weight-semibold); color: var(--ps-info-blue-800); }
+  .shifield p { margin: 0; }
+  .shifield ul { margin: 0; padding-left: 1.25rem; display: flex; flex-direction: column; gap: var(--spacing-200); }
+  .shifield__steward { color: var(--color-text-secondary); }
+</style>

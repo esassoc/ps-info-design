@@ -1,0 +1,33 @@
+---
+// PsInfoVsiOverview — the opening of prod's VitalSignIndicator/Detail body:
+// the indicator description, then its chart image with the stored caption.
+//
+// bcn-lego-checked: checked esa-card (a surface; prod sets this unboxed) and
+// the repo's chart components (live-data charts — prod's VSI charts are
+// uploaded images with a caption field). Paragraph + figure only;
+// psinfo-vsi-overview is the reusable home.
+import { withBase } from '../../lib/base';
+import type { VsiChartImage } from '../../data/shi-domain';
+
+interface Props {
+  /** The indicator's stored Description field. */
+  description: string;
+  chart: VsiChartImage;
+}
+const { description, chart } = Astro.props;
+---
+<div class="vsiover">
+  <p class="vsiover__desc">{description}</p>
+  <figure class="vsiover__fig">
+    <img src={withBase(chart.src)} alt={chart.alt} width={chart.width} height={chart.height} loading="lazy" />
+    <figcaption>{chart.caption}</figcaption>
+  </figure>
+</div>
+
+<style>
+  .vsiover { display: flex; flex-direction: column; gap: var(--spacing-500); }
+  .vsiover__desc { margin: 0; font-size: var(--ps-info-text-body); line-height: 1.6; color: var(--color-text-primary); }
+  .vsiover__fig { margin: 0; display: flex; flex-direction: column; gap: var(--spacing-200); }
+  .vsiover__fig img { width: 100%; height: auto; }
+  .vsiover__fig figcaption { font-size: var(--ps-info-text-meta-lg); line-height: 1.5; color: var(--color-text-secondary); }
+</style>

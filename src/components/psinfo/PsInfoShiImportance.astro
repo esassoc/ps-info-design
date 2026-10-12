@@ -1,0 +1,29 @@
+---
+// PsInfoShiImportance — the "Importance to Salmon" subfield of the Salmon
+// Habitat Indicator field, as it appears on a Vital Sign Indicator page: the
+// SHI mark, the stored narrative, and the links out — to the indicator's own
+// SHI report when one exists (SHI = VSI+), and to all Salmon Habitat
+// Indicators.
+//
+// bcn-lego-checked: the section frame is psinfo-vsi-section (goal-hue h2 +
+// mark); the body is paragraphs and links, no lego applies.
+// psinfo-shi-importance is the reusable home.
+import PsInfoVsiSection from './PsInfoVsiSection.astro';
+import { withBase } from '../../lib/base';
+
+interface Props {
+  hueVar: string;
+  /** The Importance to Salmon subfield. */
+  paragraphs: string[];
+  shiReportHref?: string;
+  landingHref: string;
+  mark: { src: string; width: number; height: number };
+}
+const { hueVar, paragraphs, shiReportHref, landingHref, mark } = Astro.props;
+---
+<PsInfoVsiSection title="Importance to Salmon" {hueVar} {mark} id="importance-to-salmon">
+  {paragraphs.map((p) => <p>{p}</p>)}
+  {shiReportHref && <p><a href={withBase(shiReportHref)}>Salmon Habitat Indicator Report</a></p>}
+  <p><a href={withBase(landingHref)}>All Salmon Habitat Indicators</a></p>
+</PsInfoVsiSection>
+

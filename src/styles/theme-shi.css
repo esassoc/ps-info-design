@@ -1,0 +1,48 @@
+/* theme-shi.css — Salmon Habitat Indicator tokens, layered on theme-ps-info.
+ *
+ * The three category fills are the deck's own colors (SHI_PSInfo_MockUp v29,
+ * slide 7). What each color group means is not defined yet, so the tokens are
+ * named for the color, not a meaning; re-point a group here and every button,
+ * graphic region, and table chip follows.
+ *
+ * Text on each fill is chosen for WCAG 1.4.3: white clears 4.5:1 on the purple
+ * (#8228bf, 7.0:1) and the blue (#0e59aa, 6.9:1); on the green (#31b6a3) white
+ * measures 2.5:1, so it carries the deepest brand navy instead (6.7:1).
+ */
+[data-theme="ps-info"] {
+  --shi-category-purple:    #8228bf;
+  --shi-category-green:     #31b6a3;
+  --shi-category-blue:      #0e59aa;
+  --shi-category-purple-on: #ffffff;
+  --shi-category-green-on:  var(--ps-info-blue-950);
+  --shi-category-blue-on:   #ffffff;
+
+  /* theme-ps-info never re-points the hub's tier-2 brand roles, so esa-button
+     variant="primary" falls back to the hub's default green. Mapped to PSP
+     navy here for the SHI pages; the site-wide fix belongs in theme-ps-info. */
+  --color-background-brand:        var(--ps-info-blue-800);
+  --color-background-brand-hover:  var(--ps-info-blue-900);
+  --color-background-brand-active: var(--ps-info-blue-900);
+  --color-border-brand:            var(--ps-info-blue-800);
+  --color-content-brand:           var(--ps-info-blue-800);
+  --color-content-on-brand:        #ffffff;
+
+  /* The deck's title band behind "Puget Sound Salmon Habitat Indicators". */
+  --shi-title-band:         #002060;
+
+  /* Life-cycle graphic linework (psinfo-shi-habitat-explorer). */
+  --shi-art-ground:     #e4e1d8;
+  --shi-art-mountain:   #cfd5cf;
+  --shi-art-water:      var(--ps-info-blue-400);
+  --shi-art-river:      var(--ps-info-blue-500);
+  --shi-art-vegetation: #4f7d3a;
+  --shi-art-wood:       #7a4f2e;
+  --shi-art-arrow:      #5b3a22;   /* 9.8:1 on white: carries the stage labels */
+  --shi-art-fish:       #b4473a;
+
+  /* Summer low flow gauge grid (psinfo-shi-gauge-grid): prod's two cell
+     classes, sampled from the Vital Sign chart image. */
+  --shi-chart-below:  #6b1f6e;   /* 50% or more of days below normal */
+  --shi-chart-normal: #a9cbe9;   /* fewer than 50% */
+  --shi-chart-added:  var(--ps-info-orange-700);
+}

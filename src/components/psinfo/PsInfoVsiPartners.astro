@@ -1,0 +1,30 @@
+---
+// PsInfoVsiPartners — prod's Contributing Partners logos on an indicator page,
+// each linking to the organization's PS Info record.
+//
+// bcn-lego-checked: checked psinfo-vital-sign-detail-partners (text link list
+// in an outlined card — the Vital Sign page's form; indicator pages show
+// logos) and esa-link-column. Logo links only; psinfo-vsi-partners is the
+// reusable home.
+import { withBase } from '../../lib/base';
+import type { VsiPartner } from '../../data/shi-domain';
+
+interface Props {
+  partners: VsiPartner[];
+}
+const { partners } = Astro.props;
+---
+<ul class="vsipartners" role="list">
+  {partners.map((p) => (
+    <li>
+      <a href={p.href}><img src={withBase(p.logo)} alt={p.name} loading="lazy" /></a>
+    </li>
+  ))}
+</ul>
+
+<style>
+  .vsipartners { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: var(--spacing-600); }
+  .vsipartners a { display: block; }
+  .vsipartners a:focus-visible { outline: 2px solid var(--focus-ring-color); outline-offset: 4px; }
+  .vsipartners img { height: 5rem; width: auto; }
+</style>

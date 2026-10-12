@@ -1,0 +1,108 @@
+---
+// Vital Sign Indicator detail — prod's VitalSignIndicator/Detail page with the
+// Salmon Habitat Indicator field's "Importance to Salmon" subfield added after
+// Key Vital Sign Indicator Results (deck slide 5). Two built: Eelgrass Area
+// (SHI = VSI) and Summer low flow (SHI = VSI+, which also links to its SHI
+// report from the section and the reference rail).
+// Contract: src/data/contracts/salmon-habitat-indicators.md
+import PsInfoVsProdChrome from '../../../../layouts/PsInfoVsProdChrome.astro';
+import PsInfoVsiDetailHeader from '../../../../components/psinfo/PsInfoVsiDetailHeader.astro';
+import PsInfoVsiSidebar from '../../../../components/psinfo/PsInfoVsiSidebar.astro';
+import PsInfoVsiOverview from '../../../../components/psinfo/PsInfoVsiOverview.astro';
+import PsInfoVsiSection from '../../../../components/psinfo/PsInfoVsiSection.astro';
+import PsInfoShiImportance from '../../../../components/psinfo/PsInfoShiImportance.astro';
+import PsInfoVsiPartners from '../../../../components/psinfo/PsInfoVsiPartners.astro';
+import {
+  PROGRESS_ICON,
+  SHI_BY_SLUG,
+  SHI_LOGO,
+  VSI_DETAILS,
+  VS_SITE,
+  completeReportHref,
+  goalHref,
+  hasShiReport,
+  shiRoutes,
+  vitalSignHref,
+} from '../../../../data/pages/salmon-habitat-indicators';
+import { withBase } from '../../../../lib/base';
+import type { VsiDetail } from '../../../../data/shi-domain';
+
+export function getStaticPaths() {
+  return VSI_DETAILS.map((detail) => ({ params: { slug: detail.indicatorSlug }, props: { detail } }));
+}
+
+interface Props {
+  detail: VsiDetail;
+}
+const { detail } = Astro.props;
+const indicator = SHI_BY_SLUG[detail.indicatorSlug];
+const vs = indicator.vitalSign;
+const vsi = indicator.vitalSignIndicator!;
+const shi = indicator.salmonHabitatIndicator;
+const shiReportHref = hasShiReport(indicator) ? shiRoutes.report(indicator.slug) : undefined;
+const headerImage = `/photos/vital-signs/headers/vs-goal${vs.goalId}-header.jpg`;
+const activeGoal = vs.goalId === 7 ? 'functioning-habitat' : 'healthy-water-quality';
+---
+<!-- manifest:
+  layout: PsInfoVsProdChrome > stack(xl) spine > sidebar(end) split
+  sections:
+    - indicator header            -> ps-info-vsi-detail-header
+    - reference rail              -> ps-info-vsi-sidebar
+    - description + chart         -> ps-info-vsi-overview
+    - key results                 -> ps-info-vsi-section
+    - importance to salmon        -> ps-info-shi-importance
+    - contributing partners       -> ps-info-vsi-section > ps-info-vsi-partners
+-->
+<PsInfoVsProdChrome
+  title={`Vital Signs | ${indicator.name}`}
+  {headerImage}
+  hueVar={vs.goalHueVar}
+  {activeGoal}
+  trail={[
+    { label: 'About the Vital Signs', href: `${VS_SITE}/About` },
+    { label: 'All Indicators', href: withBase(shiRoutes.allIndicators) },
+    { label: vs.goalName, href: goalHref(vs) },
+    { label: vs.name, href: vitalSignHref(vs) },
+    { label: indicator.name },
+  ]}
+>
+  <div class="stack" data-gap="xl">
+    <PsInfoVsiDetailHeader
+      name={indicator.name}
+      vitalSign={{ name: vs.name, href: vitalSignHref(vs) }}
+      hueVar={vs.goalHueVar}
+      printUrl={`${VS_SITE}/VitalSignIndicator/PrintToPdf/${vsi.id}`}
+    />
+    <div class="sidebar" data-side="end" data-gap="2xl">
+      <PsInfoVsiSidebar
+        hueVar={vs.goalHueVar}
+        progress={vsi.progress}
+        progressIcon={PROGRESS_ICON[vsi.progress]}
+        target={detail.target}
+        dataSource={detail.dataSource}
+        reporter={detail.reporter}
+        completeReportHref={completeReportHref(vsi.id)}
+        shiReport={shiReportHref ? { href: shiReportHref } : undefined}
+        lastUpdated={detail.lastUpdated}
+      />
+      <div class="stack" data-gap="xl">
+        <PsInfoVsiOverview description={detail.description} chart={detail.chart} />
+        <PsInfoVsiSection title="Key Vital Sign Indicator Results" hueVar={vs.goalHueVar}>
+          <ul>{detail.keyResults.map((r) => <li>{r}</li>)}</ul>
+        </PsInfoVsiSection>
+        {shi.field.enabled.importanceToSalmon && shi.field.importanceToSalmon && (
+          <PsInfoShiImportance
+            hueVar={vs.goalHueVar}
+            paragraphs={shi.field.importanceToSalmon}
+            {shiReportHref}
+            landingHref={shiRoutes.landing}
+            mark={{ src: SHI_LOGO.src, width: SHI_LOGO.width, height: SHI_LOGO.height }}
+          />
+        )}
+        <PsInfoVsiSection title="Contributing Partners" hueVar={vs.goalHueVar}>
+          <PsInfoVsiPartners partners={detail.partners} />
+        </PsInfoVsiSection>
+      </div>
+    </div>
+  </div>
+</PsInfoVsProdChrome>

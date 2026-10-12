@@ -1,0 +1,60 @@
+---
+// PsInfoVsiDetailHeader — the head of prod's VitalSignIndicator/Detail page:
+// the parent Vital Sign as a link above the indicator name (both in the goal's
+// ThemeColor), with Print To PDF at the right.
+//
+// bcn-lego-checked: checked esa-page-header (title/eyebrow/actions, but no
+// per-goal color hook on the title and the eyebrow is not a link); Print To
+// PDF is the esa-button lego. Goal colors clear 4.5:1 on white (habitat
+// #8228bf 7.0:1, water #018470 4.9:1). psinfo-vsi-detail-header is the
+// reusable home for indicator pages.
+import EsaButton from '@esa/ecology/esa-button.astro';
+import EsaIcon from '@esa/ecology/esa-icon.astro';
+
+interface Props {
+  /** Indicator name, the page h1. */
+  name: string;
+  vitalSign: { name: string; href: string };
+  /** --ps-info-goal-* token. */
+  hueVar: string;
+  /** Prod PrintToPdf URL; omitted where prod has no print view. */
+  printUrl?: string;
+}
+const { name, vitalSign, hueVar, printUrl } = Astro.props;
+const PRINTER = '<path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M6 9V3a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v6"/><rect x="6" y="14" width="12" height="8" rx="1"/>';
+---
+<header class="vsihead" style={`--hue: var(${hueVar})`}>
+  <div class="vsihead__text">
+    <a class="vsihead__vs" href={vitalSign.href}>{vitalSign.name}</a>
+    <h1 class="vsihead__title">{name}</h1>
+  </div>
+  {printUrl && (
+    <EsaButton href={printUrl} variant="primary">
+      <EsaIcon name="printer" size="sm" paths={PRINTER} />
+      Print To PDF
+    </EsaButton>
+  )}
+</header>
+
+<style>
+  .vsihead {
+    display: flex; align-items: flex-end; justify-content: space-between;
+    flex-wrap: wrap; gap: var(--spacing-400);
+  }
+  .vsihead__text { display: flex; flex-direction: column; gap: var(--spacing-200); }
+  .vsihead__vs {
+    font-size: 1rem; font-weight: var(--font-weight-semibold);
+    text-transform: uppercase; letter-spacing: 0.03em;
+    color: var(--hue); text-decoration: underline; text-underline-offset: 3px;
+  }
+  .vsihead__vs:focus-visible { outline: 2px solid var(--focus-ring-color); outline-offset: 2px; }
+  .vsihead__title {
+    margin: 0;
+    font-size: 2rem; font-weight: var(--font-weight-semibold); line-height: 1.2;
+    text-transform: uppercase; letter-spacing: 0.01em;
+    color: var(--hue);
+  }
+  @media (max-width: 640px) {
+    .vsihead__title { font-size: 1.5rem; }
+  }
+</style>
