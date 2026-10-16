@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>PS Info in Search and AI Answers</title>
-<meta name="description" content="How people, search engines and AI assistants find and read Puget Sound Info, and where the biggest gains are.">
+<title>Finding PS Info in Search</title>
+<meta name="description" content="How Google, Bing and AI assistants find and read Puget Sound Info, and where the biggest gains are.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400..700&family=Lora:wght@400..700&display=swap">
@@ -82,7 +82,7 @@ p { margin: 0 0 1rem; }
 
 /* Hero */
 .hero { background: var(--hero-bg); color: var(--hero-text); padding: 4.5rem 0 4rem; }
-.hero h1 { font-size: clamp(2.25rem, 5vw, 3.5rem); font-weight: 600; letter-spacing: -0.01em; max-width: 14ch; }
+.hero h1 { font-size: clamp(2.25rem, 5vw, 3.5rem); font-weight: 600; letter-spacing: -0.01em; max-width: 20ch; }
 .hero .date { color: var(--hero-text-2); margin: 1rem 0 2rem; font-size: 1rem; }
 .hero .lede { font-size: 1.25rem; line-height: 1.55; color: var(--hero-text); max-width: 40rem; margin: 0; }
 .hero .lede + .lede { margin-top: 1rem; color: var(--hero-text-2); }
@@ -123,7 +123,7 @@ section > .wrap > h2 { font-size: clamp(1.75rem, 3.5vw, 2.375rem); margin-bottom
 .mark.na { background: transparent; color: var(--text-3); border-color: var(--border); }
 
 .callouts { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; margin-top: 3rem; }
-.callouts h3 { font-size: 1.25rem; margin-bottom: 0.5rem; }
+.callouts h4 { font-family: var(--font-display); font-weight: 600; line-height: 1.2; font-size: 1.25rem; margin: 0 0 0.5rem; }
 .callouts p { color: var(--text-2); margin: 0; }
 
 /* Findings */
@@ -159,11 +159,22 @@ section > .wrap > h2 { font-size: clamp(1.75rem, 3.5vw, 2.375rem); margin-bottom
 /* AI source cards */
 .cards { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.25rem; }
 .card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 1.5rem; }
-.card h3 { font-size: 1.25rem; margin-bottom: 0.5rem; }
+.card h4 { font-family: var(--font-display); font-weight: 600; line-height: 1.2; font-size: 1.25rem; margin: 0 0 0.5rem; }
 .card p { color: var(--text-2); margin: 0; }
 .quote { margin: 3rem 0 0; max-width: var(--measure); }
 .quote blockquote { margin: 0; font-family: var(--font-display); font-size: clamp(1.375rem, 2.6vw, 1.75rem); line-height: 1.4; color: var(--brand); }
 .quote figcaption { color: var(--text-2); margin-top: 1rem; }
+
+/* How search works */
+.steps { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 2rem; }
+.steps li { border-top: 2px solid var(--brand); padding-top: 1rem; }
+.steps h3 { font-size: 1.375rem; margin-bottom: 0.5rem; }
+.steps p { color: var(--text-2); margin: 0; }
+
+/* Addendum */
+.addendum { margin-top: 3.5rem; border-top: 1px solid var(--border-strong); }
+.sub { margin-top: 3.5rem; scroll-margin-top: 3rem; }
+.sub > h3 { font-size: clamp(1.5rem, 3vw, 1.875rem); margin-bottom: 1rem; }
 
 /* Search mock */
 .controls { display: flex; flex-wrap: wrap; gap: 1.5rem 2.5rem; margin-bottom: 1.75rem; }
@@ -222,7 +233,7 @@ dialog.panel::backdrop { background: var(--scrim); }
 @media (max-width: 52rem) {
   .facts { grid-template-columns: repeat(2, 1fr); }
   .fact:nth-child(3) { padding-left: 0; border-left: 0; }
-  .callouts, .strengths, .cards, .serp-layout { grid-template-columns: 1fr; }
+  .callouts, .strengths, .cards, .serp-layout, .steps { grid-template-columns: 1fr; }
   .group { grid-template-columns: 1fr; gap: 1.25rem; }
 }
 @media (max-width: 36rem) {
@@ -244,15 +255,15 @@ dialog.panel::backdrop { background: var(--scrim); }
 
 <header class="hero">
   <div class="wrap">
-    <h1>PS Info in Search and AI Answers</h1>
+    <h1>Finding PS Info in Search</h1>
     <p class="date">October 16, 2026</p>
-    <p class="lede">When someone asks an AI assistant about the Action Agenda, the Vital Signs or eelgrass, PS Info is already the source it quotes. When they ask a broader question, like how Puget Sound is doing, the answer comes from somewhere else.</p>
-    <p class="lede">Nothing blocks search engines or AI tools from the site. What holds it back is that most of its pages are hard to discover and thinly described. Most of the fixes are small.</p>
+    <p class="lede">Google and Bing can reach every PS Info site, and the pages carry substantial, accurate content. What holds the site back is that most pages are hard for search engines to find and thinly described. None of the five sites publishes a page map, and nearly every page leaves its search summary blank.</p>
+    <p class="lede">Most of the fixes are small. They help AI assistants too, which find pages through the same search indexes.</p>
     <div class="facts">
-      <div class="fact"><b>8 of 13</b><span>AI answers cited PS Info</span></div>
-      <div class="fact"><b>186 of 189</b><span>pages have no search description</span></div>
-      <div class="fact"><b>0 of 86</b><span>indicators reachable by plain links on the PS Info site</span></div>
-      <div class="fact"><b>20 to 51 s</b><span>for the main content to appear on a phone</span></div>
+      <div class="fact"><b>186 of 189</b><span>pages have no search summary</span></div>
+      <div class="fact"><b>28 of about 70</b><span>Vital Signs indicators reachable by plain links</span></div>
+      <div class="fact"><b>73 to 91</b><span>search score out of 100 on the pages tested</span></div>
+      <div class="fact"><b>52 to 55</b><span>speed score out of 100 on phones</span></div>
     </div>
   </div>
 </header>
@@ -260,173 +271,36 @@ dialog.panel::backdrop { background: var(--scrim); }
 <nav class="toc" aria-label="Sections">
   <div class="wrap">
     <ul>
-      <li><a href="#answers">AI Answers</a></li>
-      <li><a href="#source">Becoming the Source</a></li>
-      <li><a href="#obstacles">What Gets in the Way</a></li>
+      <li><a href="#how">How Search Works</a></li>
       <li><a href="#searcher">What a Searcher Sees</a></li>
       <li><a href="#working">What Works</a></li>
+      <li><a href="#obstacles">What Gets in the Way</a></li>
       <li><a href="#plan">Where to Start</a></li>
       <li><a href="#pages">Page by Page</a></li>
+      <li><a href="#addendum">AI Addendum</a></li>
     </ul>
   </div>
 </nav>
 
 <main>
 
-<section id="answers">
+<section id="how">
   <div class="wrap">
-    <h2>What AI Assistants Cite Today</h2>
-    <p class="intro">Six questions a resident, reporter or partner might ask, put to ChatGPT, Gemini and Perplexity without signing in.</p>
-
-    <table class="matrix">
-      <thead>
-        <tr><th scope="col">Question</th><th scope="col">ChatGPT</th><th scope="col">Gemini</th><th scope="col">Perplexity</th></tr>
-      </thead>
-      <tbody id="matrix-body"></tbody>
-    </table>
-
-    <div class="callouts">
-      <div>
-        <h3>Named topics win</h3>
-        <p>Ask about the Action Agenda, the Vital Signs or a specific indicator, and both ChatGPT and Gemini go straight to PS Info and repeat its numbers accurately, such as 51,700 acres of eelgrass.</p>
-      </div>
-      <div>
-        <h3>Broad questions go elsewhere</h3>
-        <p>Questions like how the Sound is doing or how vessels affect orcas are answered from State of the Sound, the Encyclopedia of Puget Sound and NOAA, even though PS Info covers both.</p>
-      </div>
-      <div>
-        <h3>Weak names travel with the citation</h3>
-        <p>Citations show the page names the site gives them: "2026 AA Explorer", "PS Info", or a bare web address. Those are the labels a reader sees next to the answer.</p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<section id="source">
-  <div class="wrap">
-    <h2>Becoming the Source AI Cites</h2>
-    <p class="intro">AI assistants that cite sources find pages through the same search indexes as everyone else (ChatGPT leans on Bing, Gemini on Google), so everything here helps them too. A few things matter even more for AI.</p>
-    <div class="cards">
-      <div class="card">
-        <h3>Say the answer in a sentence</h3>
-        <p>AI quotes sentences, not icons or charts. A plain summary line at the top of each indicator stating its current value, target and direction is the most quotable thing PS Info could add.</p>
-      </div>
-      <div class="card">
-        <h3>Be linked from the sites AI already trusts</h3>
-        <p>Broad answers come from State of the Sound, the Encyclopedia of Puget Sound, NOAA and Wikipedia. Links from those pages to the specific PS Info indicator make PS Info the source behind the source.</p>
-      </div>
-      <div class="card">
-        <h3>One name and one home for each thing</h3>
-        <p>Consistent names like "Puget Sound Vital Signs" rather than "VS" or "AA Explorer", and one address per indicator, so every mention builds the same page's reputation.</p>
-      </div>
-      <div class="card">
-        <h3>Show that it's current</h3>
-        <p>A visible last-updated date and reporting period tell people and AI that the figure is recent enough to repeat.</p>
-      </div>
-    </div>
-    <figure class="quote">
-      <blockquote>"Eelgrass covers about 51,700 acres of Puget Sound (2021 to 2023 average)."</blockquote>
-      <figcaption>The kind of sentence an AI assistant can quote word for word. PS Info already has this one. The goal is one like it, including status and trend, on every indicator.</figcaption>
-    </figure>
-  </div>
-</section>
-
-<section id="obstacles">
-  <div class="wrap">
-    <h2>What Gets in the Way</h2>
-    <p class="intro">Search engines and AI tools all work the same way: they find pages by following links and site maps, then decide what a page is about from its name, description and readable text. Each problem below breaks one of those steps.</p>
-
-    <div class="group">
-      <header>
-        <h3>Being Found</h3>
-        <p>Whether a search engine or AI tool can discover the page at all.</p>
-      </header>
-      <div>
-        <article class="finding">
-          <h4>The sites publish no map of their pages</h4>
-          <p>None of the PS Info sites (PS Info, Action Agenda, Vital Signs, Progress Indicators, NEP Atlas) offers the standard page list that search engines and AI tools look for first, or the short file that tells them what they may read. They have to discover every page by wandering links.</p>
-        </article>
-        <article class="finding">
-          <h4>The indicator lists are invisible to anything that doesn't run scripts</h4>
-          <p>The Indicators list, the Progress Indicators list and the Vital Signs indicator lists draw themselves in the browser after the page loads. A tool reading the page as delivered sees no links to the indicators. Following plain links, it reached <span class="num">none</span> of the 86 indicators in the Indicators list and <span class="num">about 28</span> of the roughly 70 Vital Signs indicators.</p>
-        </article>
-        <article class="finding">
-          <h4>Search Console isn't set up</h4>
-          <p>No sign of Google Search Console or Bing Webmaster Tools on any of the sites. Without them there is no way to submit a page list, see which searches bring people in, or measure whether any of these changes worked.</p>
-        </article>
-        <article class="finding">
-          <h4>The short address doesn't work</h4>
-          <p>Typing pugetsoundinfo.wa.gov without the "www" goes nowhere. The address isn't connected to anything.</p>
-        </article>
-      </div>
-    </div>
-
-    <div class="group">
-      <header>
-        <h3>Being Understood</h3>
-        <p>Whether a tool can tell what a page is about once it arrives.</p>
-      </header>
-      <div>
-        <article class="finding">
-          <h4>Pages have no description</h4>
-          <p><span class="num">186 of 189</span> pages have no summary for search results. Search engines and AI tools then guess, usually from the navigation menu, which reads the same on every page.</p>
-        </article>
-        <article class="finding">
-          <h4>Page names are generic and repeated</h4>
-          <p>Names read like "Vital Signs | Orcas" or "Progress Indicators" with stray spaces, and every tab of an Action Agenda topic shares one name, so <span class="num">84 of 86</span> Action Agenda pages have the same name as another page. An indicator page is called "PS Info | Urban growth", with no mention of Puget Sound or what kind of measure it is.</p>
-        </article>
-        <article class="finding">
-          <h4>Status and trend aren't written down</h4>
-          <p>Whether an indicator is getting better, meeting its target or showing mixed results appears only as an icon. The words exist only in the icon's hidden label, and charts are images or drawings with no data in text. An AI tool asked "is eelgrass getting better" has to piece the answer together.</p>
-        </article>
-        <article class="finding">
-          <h4>The same indicator lives at two addresses</h4>
-          <p>Eelgrass Area is published on both the PS Info site and the Vital Signs site, and nothing says which is the official one. The two copies split the credit, and the AI tools tested cite the PS Info copy rather than the Vital Signs one.</p>
-        </article>
-        <article class="finding">
-          <h4>No page has a main heading yet</h4>
-          <p>Every page shows its title as styled text rather than a true heading, so tools lose the clearest signal of what the page is about. This is already fixed and goes live with the next release.</p>
-        </article>
-        <article class="finding">
-          <h4>Shared links have no preview</h4>
-          <p>A PS Info link pasted into email, Teams or social media shows no title card, summary or image. The sites also don't identify themselves as a Washington State agency resource in the way search engines can read.</p>
-        </article>
-      </div>
-    </div>
-
-    <div class="group">
-      <header>
-        <h3>Being Trusted</h3>
-        <p>Signals that tell search engines the site is reliable and current.</p>
-      </header>
-      <div>
-        <article class="finding">
-          <h4>Missing pages look like site failures</h4>
-          <p>A removed or unknown indicator returns a server error rather than "not found". To a search engine that reads as a broken site, not a retired page.</p>
-        </article>
-        <article class="finding">
-          <h4>A handful of broken links</h4>
-          <p>Three Vital Signs links lead to errors, one points to the wrong site, and two links on the PS Info programs page are unfinished placeholders. Software demo pages bundled with the site are also publicly reachable on the official addresses.</p>
-        </article>
-        <article class="finding">
-          <h4>Link text says little</h4>
-          <p>Links on every page tested use labels that don't say where they go. On the Vital Signs home, the wheel's links are all labeled "Vital Sign link" rather than the name of each vital sign.</p>
-        </article>
-      </div>
-    </div>
-
-    <div class="group">
-      <header>
-        <h3>Speed</h3>
-        <p>How long people wait, which search engines measure and weigh.</p>
-      </header>
-      <div>
-        <article class="finding">
-          <h4>Pages are very slow on phones</h4>
-          <p>On a typical phone connection the main content takes <span class="num">20 to 51 seconds</span> to appear (4 to 18 seconds on a desktop). Every page scores 52 to 55 out of 100 for speed on phones. The site sends its files uncompressed, makes browsers download them again on every visit, and loads editing tools that only signed-in staff use. The PS Info home page weighs 6.8 MB, most of it the embedded map story.</p>
-        </article>
-      </div>
-    </div>
+    <h2>How Search Engines Find a Page</h2>
+    <ol class="steps">
+      <li>
+        <h3>Discover</h3>
+        <p>Search engines follow plain links from page to page and read each site's page map. A page they can't reach this way may never appear in results.</p>
+      </li>
+      <li>
+        <h3>Understand</h3>
+        <p>They read the page's name, summary, main heading and text to decide what it's about and which searches it answers.</p>
+      </li>
+      <li>
+        <h3>Show</h3>
+        <p>The page name becomes the blue headline of the result and the summary becomes the text underneath. With no summary, the search engine picks text from the page itself.</p>
+      </li>
+    </ol>
   </div>
 </section>
 
@@ -476,12 +350,12 @@ dialog.panel::backdrop { background: var(--scrim); }
     <h2>What's Already Working</h2>
     <div class="strengths">
       <div>
-        <h3>Open to every AI tool</h3>
-        <p>ChatGPT, Claude, Perplexity, Google, Bing and Common Crawl all receive exactly the same page a visitor does. Nothing is blocked or challenged.</p>
+        <h3>Open to every search engine</h3>
+        <p>Google, Bing and AI tools such as ChatGPT, Claude and Perplexity all receive exactly the same page a visitor does. Nothing is blocked or challenged.</p>
       </div>
       <div>
         <h3>Indicator findings are real text</h3>
-        <p>Descriptions, key results, targets and last-updated dates are written into the page itself, which is why AI answers about eelgrass quote the site accurately.</p>
+        <p>Descriptions, key results, targets and last-updated dates are written into the page itself, so search engines can read them without running any scripts.</p>
       </div>
       <div>
         <h3>Substantial content</h3>
@@ -490,6 +364,103 @@ dialog.panel::backdrop { background: var(--scrim); }
       <div>
         <h3>Accessible and secure</h3>
         <p>Every page scores 89 to 100 for accessibility, every site is secure, and every page declares its language.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="obstacles">
+  <div class="wrap">
+    <h2>What Gets in the Way</h2>
+    <div class="group">
+      <header>
+        <h3>Being Found</h3>
+        <p>Whether a search engine can discover the page at all.</p>
+      </header>
+      <div>
+        <article class="finding">
+          <h4>The sites publish no map of their pages</h4>
+          <p>None of the PS Info sites (PS Info, Action Agenda, Vital Signs, Progress Indicators, NEP Atlas) offers the standard page list that search engines look for first, or the short file that tells them what they may read. They have to discover every page by wandering links.</p>
+        </article>
+        <article class="finding">
+          <h4>The indicator lists are invisible to anything that doesn't run scripts</h4>
+          <p>The Indicators list, the Progress Indicators list and the Vital Signs indicator lists draw themselves in the browser after the page loads. A search engine reading the page as delivered sees no links to the indicators. Following plain links, it reached <span class="num">none</span> of the 86 indicators in the Indicators list and <span class="num">about 28</span> of the roughly 70 Vital Signs indicators.</p>
+        </article>
+        <article class="finding">
+          <h4>Search Console isn't set up</h4>
+          <p>No sign of Google Search Console or Bing Webmaster Tools on any of the sites. Without them there is no way to submit a page list, see which searches bring people in, or measure whether any of these changes worked.</p>
+        </article>
+        <article class="finding">
+          <h4>The short address doesn't work</h4>
+          <p>Typing pugetsoundinfo.wa.gov without the "www" goes nowhere. The address isn't connected to anything.</p>
+        </article>
+      </div>
+    </div>
+
+    <div class="group">
+      <header>
+        <h3>Being Understood</h3>
+        <p>Whether a search engine can tell what a page is about once it arrives.</p>
+      </header>
+      <div>
+        <article class="finding">
+          <h4>Pages have no description</h4>
+          <p><span class="num">186 of 189</span> pages have no summary for search results. Search engines then pick text themselves, usually from the navigation menu, which reads the same on every page.</p>
+        </article>
+        <article class="finding">
+          <h4>Page names are generic and repeated</h4>
+          <p>Names read like "Vital Signs | Orcas" or "Progress Indicators" with stray spaces, and every tab of an Action Agenda topic shares one name, so <span class="num">84 of 86</span> Action Agenda pages have the same name as another page. An indicator page is called "PS Info | Urban growth", with no mention of Puget Sound or what kind of measure it is.</p>
+        </article>
+        <article class="finding">
+          <h4>Status and trend aren't written down</h4>
+          <p>Whether an indicator is getting better, meeting its target or showing mixed results appears only as an icon. The words exist only in the icon's hidden label, and charts are images or drawings with no data in text. Search engines have little readable text to match a question like "is eelgrass getting better".</p>
+        </article>
+        <article class="finding">
+          <h4>The same indicator lives at two addresses</h4>
+          <p>Eelgrass Area is published on both the PS Info site and the Vital Signs site, and nothing says which is the official one. The two copies split the credit in search results.</p>
+        </article>
+        <article class="finding">
+          <h4>No page has a main heading yet</h4>
+          <p>Every page shows its title as styled text rather than a true heading, so search engines lose the clearest signal of what the page is about. This is already fixed and goes live with the next release.</p>
+        </article>
+        <article class="finding">
+          <h4>Shared links have no preview</h4>
+          <p>A PS Info link pasted into email, Teams or social media shows no title card, summary or image. The sites also don't identify themselves as a Washington State agency resource in the way search engines can read.</p>
+        </article>
+      </div>
+    </div>
+
+    <div class="group">
+      <header>
+        <h3>Being Trusted</h3>
+        <p>Signals that tell search engines the site is reliable and current.</p>
+      </header>
+      <div>
+        <article class="finding">
+          <h4>Missing pages look like site failures</h4>
+          <p>A removed or unknown indicator returns a server error rather than "not found". To a search engine that reads as a broken site, not a retired page.</p>
+        </article>
+        <article class="finding">
+          <h4>A handful of broken links</h4>
+          <p>Three Vital Signs links lead to errors, one points to the wrong site, and two links on the PS Info programs page are unfinished placeholders. Software demo pages bundled with the site are also publicly reachable on the official addresses.</p>
+        </article>
+        <article class="finding">
+          <h4>Link text says little</h4>
+          <p>Links on every page tested use labels that don't say where they go. On the Vital Signs home, the wheel's links are all labeled "Vital Sign link" rather than the name of each vital sign.</p>
+        </article>
+      </div>
+    </div>
+
+    <div class="group">
+      <header>
+        <h3>Speed</h3>
+        <p>How long people wait, which search engines measure and weigh.</p>
+      </header>
+      <div>
+        <article class="finding">
+          <h4>Pages are very slow on phones</h4>
+          <p>On a typical phone connection the main content takes <span class="num">20 to 51 seconds</span> to appear (4 to 18 seconds on a desktop). Every page scores 52 to 55 out of 100 for speed on phones. The site sends its files uncompressed, makes browsers download them again on every visit, and loads editing tools that only signed-in staff use. The PS Info home page weighs 6.8 MB, most of it the embedded map story.</p>
+        </article>
       </div>
     </div>
   </div>
@@ -506,12 +477,12 @@ dialog.panel::backdrop { background: var(--scrim); }
         <thead><tr><th scope="col">Change</th><th scope="col">What It Does</th><th scope="col">Effort</th></tr></thead>
         <tbody>
           <tr><td>Set up Search Console and Bing Webmaster Tools</td><td>Lets the team submit pages, see search traffic and measure every change below.</td><td><span class="effort">Small</span></td></tr>
-          <tr><td>Publish a page map and a reading guide for each site</td><td>Tells search engines and AI tools what exists and what they may use, instead of leaving them to wander links.</td><td><span class="effort">Small to Medium</span></td></tr>
-          <tr><td>Give every page a distinct, descriptive name</td><td>Fixes the duplicate and generic names, and the labels readers see beside AI citations.</td><td><span class="effort">Small</span></td></tr>
+          <tr><td>Publish a page map and a reading guide for each site</td><td>Tells search engines what exists and what they may read, instead of leaving them to wander links.</td><td><span class="effort">Small to Medium</span></td></tr>
+          <tr><td>Give every page a distinct, descriptive name</td><td>Fixes the duplicate and generic names people see as the headline of each result.</td><td><span class="effort">Small</span></td></tr>
           <tr><td>Name one official address per page</td><td>Settles the two-copies problem so credit goes to one page.</td><td><span class="effort">Small</span></td></tr>
-          <tr><td>Write status and trend as words</td><td>Puts "getting better" or "mixed results" next to the icon, where people and tools can read it.</td><td><span class="effort">Small</span></td></tr>
+          <tr><td>Write status and trend as words</td><td>Puts "getting better" or "mixed results" next to the icon, where people and search engines can read it.</td><td><span class="effort">Small</span></td></tr>
           <tr><td>Speed up file delivery</td><td>Compressing and reusing files cuts roughly 1.5 MB from every page view.</td><td><span class="effort">Small</span></td></tr>
-          <tr><td>Main headings on every page</td><td>Gives each page a clear title tools can rely on.</td><td><span class="effort done">Already built, in the next release</span></td></tr>
+          <tr><td>Main headings on every page</td><td>Gives each page a clear title search engines can rely on.</td><td><span class="effort done">Already built, in the next release</span></td></tr>
         </tbody>
       </table>
     </div>
@@ -522,9 +493,9 @@ dialog.panel::backdrop { background: var(--scrim); }
       <table class="plan">
         <thead><tr><th scope="col">Change</th><th scope="col">What It Does</th><th scope="col">Effort</th></tr></thead>
         <tbody>
-          <tr><td>Make indicator lists readable without scripts</td><td>Lets search engines and AI tools follow the lists to every indicator page, while keeping the filtering and sorting people use.</td><td><span class="effort">Medium</span></td></tr>
-          <tr><td>Add a description to every page</td><td>Drawn from text the site already has, such as each indicator's summary. Shapes what search results and AI answers say.</td><td><span class="effort">Medium</span></td></tr>
-          <tr><td>Describe indicators as datasets</td><td>Marks indicator pages as official public data, which can surface them in Google's dataset search and strengthens AI citations.</td><td><span class="effort">Medium</span></td></tr>
+          <tr><td>Make indicator lists readable without scripts</td><td>Lets search engines follow the lists to every indicator page, while keeping the filtering and sorting people use.</td><td><span class="effort">Medium</span></td></tr>
+          <tr><td>Add a description to every page</td><td>Drawn from text the site already has, such as each indicator's summary. Shapes the text under each search result.</td><td><span class="effort">Medium</span></td></tr>
+          <tr><td>Describe indicators as datasets</td><td>Marks indicator pages as official public data, which can surface them in Google Dataset Search.</td><td><span class="effort">Medium</span></td></tr>
           <tr><td>Add link previews and agency identity</td><td>Title cards when links are shared, and a clear signal that the sites belong to a state agency.</td><td><span class="effort">Small</span></td></tr>
           <tr><td>Return "not found" for missing pages and fix broken links</td><td>Removes the error signals that make the site look unreliable.</td><td><span class="effort">Small</span></td></tr>
           <tr><td>Connect the short address</td><td>Makes pugetsoundinfo.wa.gov without "www" lead to the site.</td><td><span class="effort">Small</span></td></tr>
@@ -570,6 +541,66 @@ dialog.panel::backdrop { background: var(--scrim); }
         </thead>
         <tbody id="pages-body"></tbody>
       </table>
+    </div>
+  </div>
+</section>
+
+<section id="addendum" class="addendum">
+  <div class="wrap">
+    <h2>Addendum: AI Assistants</h2>
+    <p class="intro">AI assistants that cite sources find pages through the same search indexes as everyone else: ChatGPT leans on Bing, Gemini on Google.</p>
+    <div class="sub" id="answers">
+    <h3>What AI Assistants Cite Today</h3>
+    <p class="intro">Six questions a resident, reporter or partner might ask, put to ChatGPT, Gemini and Perplexity without signing in.</p>
+
+    <table class="matrix">
+      <thead>
+        <tr><th scope="col">Question</th><th scope="col">ChatGPT</th><th scope="col">Gemini</th><th scope="col">Perplexity</th></tr>
+      </thead>
+      <tbody id="matrix-body"></tbody>
+    </table>
+
+    <div class="callouts">
+      <div>
+        <h4>Named topics win</h4>
+        <p>Ask about the Action Agenda, the Vital Signs or a specific indicator, and both ChatGPT and Gemini go straight to PS Info and repeat its numbers accurately, such as 51,700 acres of eelgrass.</p>
+      </div>
+      <div>
+        <h4>Broad questions go elsewhere</h4>
+        <p>Questions like how the Sound is doing or how vessels affect orcas are answered from State of the Sound, the Encyclopedia of Puget Sound and NOAA, even though PS Info covers both.</p>
+      </div>
+      <div>
+        <h4>Weak names travel with the citation</h4>
+        <p>Citations show the page names the site gives them: "2026 AA Explorer", "PS Info", or a bare web address. Those are the labels a reader sees next to the answer.</p>
+      </div>
+    </div>
+    </div>
+
+    <div class="sub" id="source">
+    <h3>Becoming the Source AI Cites</h3>
+    <p class="intro">Everything in the search plan helps here too. A few things matter even more for AI.</p>
+    <div class="cards">
+      <div class="card">
+        <h4>Say the answer in a sentence</h4>
+        <p>AI quotes sentences, not icons or charts. A plain summary line at the top of each indicator stating its current value, target and direction is the most quotable thing PS Info could add.</p>
+      </div>
+      <div class="card">
+        <h4>Be linked from the sites AI already trusts</h4>
+        <p>Broad answers come from State of the Sound, the Encyclopedia of Puget Sound, NOAA and Wikipedia. Links from those pages to the specific PS Info indicator make PS Info the source behind the source.</p>
+      </div>
+      <div class="card">
+        <h4>One name and one home for each thing</h4>
+        <p>Consistent names like "Puget Sound Vital Signs" rather than "VS" or "AA Explorer", and one address per indicator, so every mention builds the same page's reputation.</p>
+      </div>
+      <div class="card">
+        <h4>Show that it's current</h4>
+        <p>A visible last-updated date and reporting period tell people and AI that the figure is recent enough to repeat.</p>
+      </div>
+    </div>
+    <figure class="quote">
+      <blockquote>"Eelgrass covers about 51,700 acres of Puget Sound (2021 to 2023 average)."</blockquote>
+      <figcaption>The kind of sentence an AI assistant can quote word for word. PS Info already has this one. The goal is one like it, including status and trend, on every indicator.</figcaption>
+    </figure>
     </div>
   </div>
 </section>
