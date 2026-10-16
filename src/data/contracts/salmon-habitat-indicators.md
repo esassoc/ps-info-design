@@ -52,9 +52,13 @@ Reproduced from the live site at 1440 and 390 widths:
    SHI route.
 3. About paragraphs. Placeholder copy of similar length; PSP's text is not used.
 4. Habitat diorama with the six buttons. The deck's watercolor life-cycle
-   graphic is replaced by an original, museum-style cross-section from the
-   open Sound to a headwater stream (`shi-diorama-art.svg`, geometry in
-   `src/data/shi-diorama.ts`). The deck's four life-cycle stages are dropped.
+   graphic is replaced by an original, museum-style cross-section from a
+   headwater stream to the open Sound, the way the fish go
+   (`shi-diorama-art.svg`, geometry in `src/data/shi-diorama.ts`). It runs the
+   full window width above 760px; the buttons keep the page column. A life
+   cycle loop above the scene (`src/data/shi-lifecycle.ts`) sets each stage
+   over its habitat: eggs and alevins, fry and parr, smolts and ocean adults on
+   the downstream lane, adults returning to spawn on the upstream lane.
    All 16 indicators appear as labelled landmarks in the scene, each linking
    where its table row links. Each habitat is a traced region. Hover outlines
    it; selecting it outlines and tints it and labels it with its indicator
