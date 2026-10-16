@@ -63,7 +63,9 @@ const SCENE_DESC = {
     'gather in the estuary marsh beside a pocket estuary; the river crosses a beach below a feeder bluff into the Sound, ' +
     'cut away to show kelp, eelgrass and fish. Adults swim back up the river to spawn.',
 };
-const { width: SCENE_W, height: SCENE_H, regions: REGIONS, landmarks: LANDMARKS, art } = SCENES[scene];
+const { width: SCENE_W, height: SCENE_H, regions: REGIONS, landmarks: LANDMARKS, art: rawArt } = SCENES[scene];
+// The art partial gets explicit scene units, so it scales with the outer viewBox (the zoom magnifier moves it).
+const art = rawArt.replace('<svg ', `<svg width="${SCENE_W}" height="${SCENE_H}" `);
 
 const bySlug = Object.fromEntries(categories.map((c) => [c.slug, c])) as Record<string, HabitatCategory>;
 const CHECK = '<path d="M20 6 9 17l-5-5"/>';
@@ -183,6 +185,7 @@ const countFor = (slug: HabitatCategorySlug) => SHI_GRID_ROWS.filter((r) => r.ca
 </div>
 
 <script>
+  import { initMagnify, type MagnifyMode } from './shi-magnify';
   const root = document.querySelector<HTMLElement>('[data-shi-explorer]');
   if (root) {
     const buttons = [...root.querySelectorAll<HTMLButtonElement>('[data-shi-cat-btn]')];
@@ -321,6 +324,10 @@ const countFor = (slug: HabitatCategorySlug) => SHI_GRID_ROWS.filter((r) => r.ca
       window.addEventListener('resize', fitScroller);
     }
     render();
+
+    // Magnification options, compared through ?mag=lens|zoom|detail.
+    const mag = new URLSearchParams(location.search).get('mag');
+    if (mag === 'lens' || mag === 'zoom' || mag === 'detail') initMagnify(root, mag as MagnifyMode);
   }
 </script>
 
@@ -340,6 +347,23 @@ const countFor = (slug: HabitatCategorySlug) => SHI_GRID_ROWS.filter((r) => r.ca
     border: 1px solid var(--shi-art-frame-line); opacity: 0.55;
   }
   .shix__art { display: block; width: 100%; height: auto; }
+  .shix[data-mag] .shix__frame { overflow: hidden; }
+
+  /* Magnifiers (shi-magnify.ts): a round window onto an enlarged copy of the scene, rimmed in the
+     frame's ivory and brass like a museum loupe. Built at runtime, so the rules reach in with :global. */
+  .shix__frame :global(.shix-mag) {
+    position: absolute; z-index: 2; overflow: hidden; pointer-events: none;
+    border-radius: 50%; background: var(--shi-art-frame);
+    border: 3px solid var(--shi-art-ivory);
+    box-shadow: 0 0 0 1.5px var(--shi-art-frame-line), 0 8px 24px rgba(5, 31, 51, 0.35);
+    opacity: 0; transition: opacity 140ms ease;
+  }
+  .shix__frame :global(.shix-mag.is-shown) { opacity: 1; }
+  .shix__frame :global(.shix-mag > svg) { position: absolute; top: 0; left: 0; transform-origin: 0 0; display: block; }
+  .shix__frame :global(.shix-mag--lens) { width: 200px; height: 200px; margin: -100px 0 0 -100px; transition: none; }
+  .shix__frame :global(.shix-mag--detail) { width: 230px; height: 230px; top: 20px; right: 20px; }
+  .shix__frame :global(.shix-mag--detail.is-left) { right: auto; left: 20px; }
+  .shix[data-mag='lens'] .shix__art { cursor: zoom-in; }
 
   /* Life cycle loop over the scene: navy ink on the page, no category color (stages are not habitats). */
   .shix__cycle { display: block; width: 100%; height: auto; padding: 0 7px; box-sizing: border-box; overflow: visible; }
@@ -462,5 +486,6 @@ const countFor = (slug: HabitatCategorySlug) => SHI_GRID_ROWS.filter((r) => r.ca
   @media (prefers-reduced-motion: reduce) {
     .shix__btn:hover, .shix__btn.is-hover { transform: none; }
     .zone__halo, .zone__line, .exhibit, .lm, .lm__ring { transition: none; }
+    .shix__frame :global(.shix-mag) { transition: none; }
   }
 </style>
