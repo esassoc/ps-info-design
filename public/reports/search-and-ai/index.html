@@ -33,6 +33,7 @@
   --yes-bg: var(--blue-50); --yes-text: var(--blue-800); --yes-border: var(--blue-200);
   --no-bg: var(--gray-100); --no-text: var(--gray-700); --no-border: var(--gray-200);
   --start-bg: var(--orange-50); --start-text: var(--orange-700); --start-border: var(--orange-200);
+  --serp-link: #1a0dab;
   --scrim: rgba(5, 31, 51, 0.45);
   --shadow: 0 12px 40px rgba(5, 31, 51, 0.18);
 
@@ -51,7 +52,7 @@
     --yes-bg: #0d2a40; --yes-text: var(--blue-100); --yes-border: #1d4566;
     --no-bg: #222d38; --no-text: #b8c2cc; --no-border: #3b4855;
     --start-bg: #3a2410; --start-text: var(--orange-200); --start-border: #6b4116;
-    --scrim: rgba(0, 0, 0, 0.6); --shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+    --serp-link: #8ab4f8; --scrim: rgba(0, 0, 0, 0.6); --shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
   }
 }
 :root[data-theme="dark"] {
@@ -63,7 +64,7 @@
   --yes-bg: #0d2a40; --yes-text: var(--blue-100); --yes-border: #1d4566;
   --no-bg: #222d38; --no-text: #b8c2cc; --no-border: #3b4855;
   --start-bg: #3a2410; --start-text: var(--orange-200); --start-border: #6b4116;
-  --scrim: rgba(0, 0, 0, 0.6); --shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+  --serp-link: #8ab4f8; --scrim: rgba(0, 0, 0, 0.6); --shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
 }
 
 * { box-sizing: border-box; }
@@ -151,9 +152,40 @@ section > .wrap > h2 { font-size: clamp(1.75rem, 3.5vw, 2.375rem); margin-bottom
 .plan thead th { font-size: 0.9375rem; color: var(--text-3); font-weight: 600; }
 .plan td:first-child { font-weight: 600; width: 32%; }
 .plan td:nth-child(2) { color: var(--text-2); }
-.plan td:last-child { width: 9rem; white-space: nowrap; }
+.plan td:last-child { width: 11rem; }
 .effort { display: inline-block; font-size: 0.875rem; font-weight: 600; padding: 0.125rem 0.5rem; border-radius: 4px; border: 1px solid var(--border-strong); color: var(--text-2); }
 .effort.done { background: var(--yes-bg); color: var(--yes-text); border-color: var(--yes-border); }
+
+/* AI source cards */
+.cards { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.25rem; }
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 1.5rem; }
+.card h3 { font-size: 1.25rem; margin-bottom: 0.5rem; }
+.card p { color: var(--text-2); margin: 0; }
+.quote { margin: 3rem 0 0; max-width: var(--measure); }
+.quote blockquote { margin: 0; font-family: var(--font-display); font-size: clamp(1.375rem, 2.6vw, 1.75rem); line-height: 1.4; color: var(--brand); }
+.quote figcaption { color: var(--text-2); margin-top: 1rem; }
+
+/* Search mock */
+.controls { display: flex; flex-wrap: wrap; gap: 1.5rem 2.5rem; margin-bottom: 1.75rem; }
+.control-label { display: block; font-size: 0.9375rem; font-weight: 600; color: var(--text-3); margin-bottom: 0.5rem; }
+.seg { display: inline-flex; border: 1px solid var(--border-strong); border-radius: 8px; overflow: hidden; }
+.seg button { font: inherit; font-size: 0.9375rem; font-weight: 600; padding: 0.5rem 1rem; border: 0; background: var(--bg); color: var(--text-2); cursor: pointer; }
+.seg button + button { border-left: 1px solid var(--border-strong); }
+.seg button:hover { background: var(--surface); }
+.seg button[aria-pressed="true"] { background: var(--brand); color: var(--bg); }
+.serp-layout { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: 2.5rem; align-items: start; }
+.serp { background: var(--bg); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem 1.75rem; box-shadow: 0 1px 2px rgba(5, 31, 51, 0.06); font-family: Arial, Helvetica, sans-serif; }
+.serp-site { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem; }
+.serp-icon { width: 28px; height: 28px; border-radius: 50%; background: var(--surface-strong); border: 1px solid var(--border); flex-shrink: 0; }
+.serp-name { font-size: 0.875rem; color: var(--text); line-height: 1.3; }
+.serp-url { font-size: 0.8125rem; color: var(--text-3); line-height: 1.3; word-break: break-all; }
+.serp-title { font-size: 1.25rem; line-height: 1.3; color: var(--serp-link); margin: 0.25rem 0 0.375rem; white-space: pre-wrap; }
+.serp-desc { font-size: 0.875rem; line-height: 1.55; color: var(--text-2); margin: 0; }
+.serp-desc.empty { font-style: italic; color: var(--text-3); }
+.serp-notes h3 { font-family: var(--font-sans); font-size: 1.125rem; font-weight: 700; margin-bottom: 0.75rem; }
+.serp-notes ul { margin: 0; padding-left: 1.125rem; color: var(--text-2); }
+.serp-notes li + li { margin-top: 0.5rem; }
+.serp-caption { color: var(--text-3); font-size: 0.9375rem; margin-top: 1.5rem; max-width: var(--measure); }
 
 /* Pages table */
 .filters { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1.25rem; }
@@ -190,7 +222,7 @@ dialog.panel::backdrop { background: var(--scrim); }
 @media (max-width: 52rem) {
   .facts { grid-template-columns: repeat(2, 1fr); }
   .fact:nth-child(3) { padding-left: 0; border-left: 0; }
-  .callouts, .strengths { grid-template-columns: 1fr; }
+  .callouts, .strengths, .cards, .serp-layout { grid-template-columns: 1fr; }
   .group { grid-template-columns: 1fr; gap: 1.25rem; }
 }
 @media (max-width: 36rem) {
@@ -229,7 +261,9 @@ dialog.panel::backdrop { background: var(--scrim); }
   <div class="wrap">
     <ul>
       <li><a href="#answers">AI Answers</a></li>
+      <li><a href="#source">Becoming the Source</a></li>
       <li><a href="#obstacles">What Gets in the Way</a></li>
+      <li><a href="#searcher">What a Searcher Sees</a></li>
       <li><a href="#working">What Works</a></li>
       <li><a href="#plan">Where to Start</a></li>
       <li><a href="#pages">Page by Page</a></li>
@@ -265,6 +299,35 @@ dialog.panel::backdrop { background: var(--scrim); }
         <p>Citations show the page names the site gives them: "2026 AA Explorer", "PS Info", or a bare web address. Those are the labels a reader sees next to the answer.</p>
       </div>
     </div>
+  </div>
+</section>
+
+<section id="source">
+  <div class="wrap">
+    <h2>Becoming the Source AI Cites</h2>
+    <p class="intro">AI assistants that cite sources find pages through the same search indexes as everyone else (ChatGPT leans on Bing, Gemini on Google), so everything here helps them too. A few things matter even more for AI.</p>
+    <div class="cards">
+      <div class="card">
+        <h3>Say the answer in a sentence</h3>
+        <p>AI quotes sentences, not icons or charts. A plain summary line at the top of each indicator stating its current value, target and direction is the most quotable thing PS Info could add.</p>
+      </div>
+      <div class="card">
+        <h3>Be linked from the sites AI already trusts</h3>
+        <p>Broad answers come from State of the Sound, the Encyclopedia of Puget Sound, NOAA and Wikipedia. Links from those pages to the specific PS Info indicator make PS Info the source behind the source.</p>
+      </div>
+      <div class="card">
+        <h3>One name and one home for each thing</h3>
+        <p>Consistent names like "Puget Sound Vital Signs" rather than "VS" or "AA Explorer", and one address per indicator, so every mention builds the same page's reputation.</p>
+      </div>
+      <div class="card">
+        <h3>Show that it's current</h3>
+        <p>A visible last-updated date and reporting period tell people and AI that the figure is recent enough to repeat.</p>
+      </div>
+    </div>
+    <figure class="quote">
+      <blockquote>"Eelgrass covers about 51,700 acres of Puget Sound (2021 to 2023 average)."</blockquote>
+      <figcaption>The kind of sentence an AI assistant can quote word for word. PS Info already has this one. The goal is one like it, including status and trend, on every indicator.</figcaption>
+    </figure>
   </div>
 </section>
 
@@ -367,6 +430,47 @@ dialog.panel::backdrop { background: var(--scrim); }
   </div>
 </section>
 
+<section id="searcher">
+  <div class="wrap">
+    <h2>What a Searcher Sees</h2>
+    <div class="controls">
+      <div>
+        <span class="control-label" id="serp-page-label">Page</span>
+        <div class="seg" role="group" aria-labelledby="serp-page-label" id="serp-page">
+          <button type="button" aria-pressed="true" data-v="eelgrass">Eelgrass</button>
+          <button type="button" aria-pressed="false" data-v="salmon">Salmon Topic</button>
+          <button type="button" aria-pressed="false" data-v="urban">Urban Growth</button>
+        </div>
+      </div>
+      <div>
+        <span class="control-label" id="serp-ver-label">Version</span>
+        <div class="seg" role="group" aria-labelledby="serp-ver-label" id="serp-ver">
+          <button type="button" aria-pressed="true" data-v="today">Today</button>
+          <button type="button" aria-pressed="false" data-v="improved">Improved</button>
+        </div>
+      </div>
+    </div>
+    <div class="serp-layout">
+      <div class="serp" aria-live="polite">
+        <div class="serp-site">
+          <span class="serp-icon" aria-hidden="true"></span>
+          <div>
+            <div class="serp-name" id="serp-name"></div>
+            <div class="serp-url" id="serp-url"></div>
+          </div>
+        </div>
+        <div class="serp-title" id="serp-title"></div>
+        <p class="serp-desc" id="serp-desc"></p>
+      </div>
+      <div class="serp-notes">
+        <h3 id="serp-notes-head"></h3>
+        <ul id="serp-notes"></ul>
+      </div>
+    </div>
+    <p class="serp-caption">Improved versions are illustrations written from text already on each page. Final wording is PSP's call.</p>
+  </div>
+</section>
+
 <section id="working">
   <div class="wrap">
     <h2>What's Already Working</h2>
@@ -407,7 +511,7 @@ dialog.panel::backdrop { background: var(--scrim); }
           <tr><td>Name one official address per page</td><td>Settles the two-copies problem so credit goes to one page.</td><td><span class="effort">Small</span></td></tr>
           <tr><td>Write status and trend as words</td><td>Puts "getting better" or "mixed results" next to the icon, where people and tools can read it.</td><td><span class="effort">Small</span></td></tr>
           <tr><td>Speed up file delivery</td><td>Compressing and reusing files cuts roughly 1.5 MB from every page view.</td><td><span class="effort">Small</span></td></tr>
-          <tr><td>Main headings on every page</td><td>Gives each page a clear title tools can rely on.</td><td><span class="effort done">Done, next release</span></td></tr>
+          <tr><td>Main headings on every page</td><td>Gives each page a clear title tools can rely on.</td><td><span class="effort done">Already built, in the next release</span></td></tr>
         </tbody>
       </table>
     </div>
@@ -606,6 +710,49 @@ document.querySelectorAll('.filter').forEach(b => b.addEventListener('click', ()
   document.querySelectorAll('.filter').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
   renderPages(b.dataset.site);
 }));
+
+const NO_DESC = 'No summary. The search engine fills this space with text it picks, often navigation labels.';
+const SERP = {
+  eelgrass: {
+    name: 'Puget Sound Vital Signs',
+    today: { url: 'https://vitalsigns.pugetsoundinfo.wa.gov > VitalSignIndicator > Detail > 10', title: 'Vital Signs  | Eelgrass Area', desc: null,
+      notes: ['The title leads with the site name and carries a double space.', 'No summary.', 'The address is a number.'] },
+    improved: { url: 'https://vitalsigns.pugetsoundinfo.wa.gov > eelgrass-area', title: 'Eelgrass Area | Puget Sound Vital Signs', desc: 'Puget Sound has about 51,700 acres of eelgrass (2021 to 2023 average). See the target, trend and data behind this Vital Signs indicator.',
+      notes: ['Topic first, site second.', 'Summary written from the figure already on the page.', 'Readable address, for the next platform.'] }
+  },
+  salmon: {
+    name: 'Puget Sound Action Agenda',
+    today: { url: 'https://actionagenda.pugetsoundinfo.wa.gov > 2026-2030 > Topic > 01 > Progress', title: '2026 AA Explorer | Abundant and Harvestable Salmon', desc: null,
+      notes: ['The Overview, Implementation and Progress tabs share this exact title.', '"AA Explorer" is an internal name searchers won\'t use.', 'No summary.'] },
+    improved: { url: 'https://actionagenda.pugetsoundinfo.wa.gov > 2026-2030 > salmon > progress', title: 'Salmon Progress | 2026-2030 Puget Sound Action Agenda', desc: 'How the 2026-2030 Action Agenda is tracking toward abundant and harvestable salmon, with investments and progress by strategy.',
+      notes: ['Each tab has its own title.', 'Uses the name people search for.', 'Summary states what the page covers.'] }
+  },
+  urban: {
+    name: 'Puget Sound Info',
+    today: { url: 'https://www.pugetsoundinfo.wa.gov > Indicator > Detail > 186', title: 'PS Info | Urban growth', desc: null,
+      notes: ['"PS Info" says little to someone who doesn\'t know the site.', 'No summary.', 'The slowest page reviewed on a phone.'] },
+    improved: { url: 'https://www.pugetsoundinfo.wa.gov > indicators > urban-growth', title: 'Urban Growth Indicator | Puget Sound Info', desc: 'Tracks the share of new Puget Sound housing built inside Urban Growth Areas, toward the 2030 target of increasing that share in 8 of 12 counties.',
+      notes: ['Says what the indicator measures and whose site it is.', 'Summary written from the description and target already on the page.', 'Readable address, for the next platform.'] }
+  }
+};
+const serpState = { page: 'eelgrass', ver: 'today' };
+function renderSerp() {
+  const s = SERP[serpState.page], v = s[serpState.ver];
+  document.getElementById('serp-name').textContent = s.name;
+  document.getElementById('serp-url').textContent = v.url;
+  document.getElementById('serp-title').textContent = v.title;
+  const d = document.getElementById('serp-desc');
+  d.textContent = v.desc || NO_DESC; d.classList.toggle('empty', !v.desc);
+  document.getElementById('serp-notes-head').textContent = serpState.ver === 'today' ? "What's Happening" : 'What Changed';
+  const ul = document.getElementById('serp-notes'); ul.replaceChildren(); v.notes.forEach(n => ul.append(el('li', {}, n)));
+}
+for (const [id, key] of [['serp-page', 'page'], ['serp-ver', 'ver']]) {
+  document.querySelectorAll('#' + id + ' button').forEach(b => b.addEventListener('click', () => {
+    document.querySelectorAll('#' + id + ' button').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+    serpState[key] = b.dataset.v; renderSerp();
+  }));
+}
+renderSerp();
 
 const links = [...document.querySelectorAll('.toc a')];
 const io = new IntersectionObserver((entries) => {
