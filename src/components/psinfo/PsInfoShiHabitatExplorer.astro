@@ -33,13 +33,37 @@ import {
   SHI_DIORAMA_REGIONS,
   SHI_DIORAMA_WIDTH,
 } from '../../data/shi-diorama';
+import { SHI_ISO_HEIGHT, SHI_ISO_LANDMARKS, SHI_ISO_REGIONS, SHI_ISO_WIDTH } from '../../data/shi-iso';
 import { SHI_LIFECYCLE_STAGES, SHI_LIFECYCLE_SUMMARY } from '../../data/shi-lifecycle';
-import art from './shi-diorama-art.svg?raw';
+import dioramaArt from './shi-diorama-art.svg?raw';
+import isoArt from './shi-iso-art.svg?raw';
 
 interface Props {
   categories: HabitatCategory[];
+  /** 'diorama': the flat museum cross-section; 'isometric': the terraced 2.5D model. */
+  scene?: 'diorama' | 'isometric';
 }
-const { categories } = Astro.props;
+const { categories, scene = 'diorama' } = Astro.props;
+
+const SCENES = {
+  diorama: { width: SHI_DIORAMA_WIDTH, height: SHI_DIORAMA_HEIGHT, regions: SHI_DIORAMA_REGIONS, landmarks: SHI_DIORAMA_LANDMARKS, art: dioramaArt },
+  isometric: { width: SHI_ISO_WIDTH, height: SHI_ISO_HEIGHT, regions: SHI_ISO_REGIONS, landmarks: SHI_ISO_LANDMARKS, art: isoArt },
+};
+const SCENE_DESC = {
+  diorama:
+    'A diorama cross-section from a headwater stream below the Cascades on the left to the open Sound on the right, ' +
+    'cut away beneath the waterline. Adult chinook, coho and chum spawn over gravel in the headwaters among log jams, ' +
+    'below a road culvert. Fry with parr marks migrate downstream through streams and floodplains and freshwater pools, ' +
+    'smolt in the estuary, and enter the Sound past beaches with eelgrass meadows and bull kelp. After years in marine ' +
+    'water the adults return through the estuary and up the river to spawn.',
+  isometric:
+    'A tabletop model of six habitat terraces stepping down from the headwaters below the Cascades at the back left to ' +
+    'the open Sound at the front right, one river running through them over small falls. Spawners and a log jam sit ' +
+    'below a road culvert in the headwaters; fry move down through freshwater and a floodplain with an oxbow; smolts ' +
+    'gather in the estuary marsh beside a pocket estuary; the river crosses a beach below a feeder bluff into the Sound, ' +
+    'cut away to show kelp, eelgrass and fish. Adults swim back up the river to spawn.',
+};
+const { width: SCENE_W, height: SCENE_H, regions: REGIONS, landmarks: LANDMARKS, art } = SCENES[scene];
 
 const bySlug = Object.fromEntries(categories.map((c) => [c.slug, c])) as Record<string, HabitatCategory>;
 const CHECK = '<path d="M20 6 9 17l-5-5"/>';
@@ -48,22 +72,31 @@ const catStyle = (slug: HabitatCategorySlug) =>
   `--cat: ${SHI_CATEGORY_FILL[bySlug[slug].colorGroup]}; --cat-on: ${SHI_CATEGORY_ON_FILL[bySlug[slug].colorGroup]}`;
 
 // Buttons sit under the scene in its own order, headwaters to open Sound.
-const buttons = SHI_DIORAMA_REGIONS.map((r) => bySlug[r.slug]).filter(Boolean);
+const buttons = REGIONS.map((r) => bySlug[r.slug]).filter(Boolean);
 
 const rowBySlug = Object.fromEntries(SHI_GRID_ROWS.map((r) => [r.slug, r]));
 const indicatorHref = (h: string) => (/^https?:/.test(h) ? h : withBase(h));
-const landmarks = SHI_DIORAMA_LANDMARKS.map((l) => ({ ...l, href: indicatorHref(rowBySlug[l.slug].href) }));
+const landmarks = LANDMARKS.map((l) => ({ ...l, href: indicatorHref(rowBySlug[l.slug].href) }));
 // Life cycle loop: a racetrack over the full scene width. The lower lane runs downstream
 // (left to right), the upper lane back upstream; chevrons mark the heading of each lane.
-const LC_H = 104, LC_TOP = 34, LC_BOT = 70, LC_R = (LC_BOT - LC_TOP) / 2, LC_L = 40 + LC_R, LC_RT = SHI_DIORAMA_WIDTH - 40 - LC_R;
+const LC_H = 104, LC_TOP = 34, LC_BOT = 70, LC_R = (LC_BOT - LC_TOP) / 2, LC_L = 40 + LC_R, LC_RT = SCENE_W - 40 - LC_R;
 const lcLoop = `M${LC_L} ${LC_BOT} L${LC_RT} ${LC_BOT} A${LC_R} ${LC_R} 0 0 0 ${LC_RT} ${LC_TOP} L${LC_L} ${LC_TOP} A${LC_R} ${LC_R} 0 0 0 ${LC_L} ${LC_BOT} Z`;
+// A stage sits over the middle of its habitat's region (the horizontal extent of its traced shape).
+const regionX = Object.fromEntries(
+  REGIONS.map((r) => {
+    const xs = [...r.d.matchAll(/[ML]?\s*(-?[\d.]+)[ ,](-?[\d.]+)/g)].map((m) => parseFloat(m[1]));
+    return [r.slug, (Math.min(...xs) + Math.max(...xs)) / 2];
+  }),
+);
+const lcStages = SHI_LIFECYCLE_STAGES.map((st) => ({ ...st, x: st.lane === 'out' ? regionX[st.habitat] : SCENE_W / 2 }));
+const outX = lcStages.filter((st) => st.lane === 'out').map((st) => st.x).sort((a, b) => a - b);
 const lcChevrons = [
-  ...[230, 508, 836].map((x) => ({ x, y: LC_BOT, dir: 1 })),
-  ...[300, 820].map((x) => ({ x, y: LC_TOP, dir: -1 })),
+  ...outX.slice(1).map((x, k) => ({ x: (x + outX[k]) / 2, y: LC_BOT, dir: 1 })),
+  ...[0.27, 0.73].map((t) => ({ x: SCENE_W * t, y: LC_TOP, dir: -1 })),
 ];
 const countFor = (slug: HabitatCategorySlug) => SHI_GRID_ROWS.filter((r) => r.category === slug).length;
 ---
-<div class="shix" data-shi-explorer>
+<div class="shix" data-shi-explorer data-scene={scene} style={`--shix-scene-w: ${SCENE_W}px`}>
   <ul class="shix__buttons" role="list">
     {buttons.map((c) => (
       <li>
@@ -77,12 +110,12 @@ const countFor = (slug: HabitatCategorySlug) => SHI_GRID_ROWS.filter((r) => r.ca
 
   <div class="shix__strip" role="region" aria-label="Salmon habitat diorama" data-shi-strip>
     <div class="shix__pan">
-      <svg class="shix__cycle" viewBox={`0 0 ${SHI_DIORAMA_WIDTH} ${LC_H}`} role="img" aria-label={SHI_LIFECYCLE_SUMMARY}>
+      <svg class="shix__cycle" viewBox={`0 0 ${SCENE_W} ${LC_H}`} role="img" aria-label={SHI_LIFECYCLE_SUMMARY}>
         <path class="cycle__loop" d={lcLoop} />
         {lcChevrons.map((c) => (
           <path class="cycle__chev" d={`M${c.x - 5 * c.dir} ${c.y - 6} L${c.x + 4 * c.dir} ${c.y} L${c.x - 5 * c.dir} ${c.y + 6}`} />
         ))}
-        {SHI_LIFECYCLE_STAGES.map((st) => {
+        {lcStages.map((st) => {
           const y = st.lane === 'out' ? LC_BOT : LC_TOP;
           return (
             <g transform={`translate(${st.x} ${y})`}>
@@ -93,22 +126,15 @@ const countFor = (slug: HabitatCategorySlug) => SHI_GRID_ROWS.filter((r) => r.ca
         })}
       </svg>
       <div class="shix__frame">
-        <svg class="shix__art" viewBox={`0 0 ${SHI_DIORAMA_WIDTH} ${SHI_DIORAMA_HEIGHT}`} width={SHI_DIORAMA_WIDTH} height={SHI_DIORAMA_HEIGHT}>
+        <svg class="shix__art" viewBox={`0 0 ${SCENE_W} ${SCENE_H}`} width={SCENE_W} height={SCENE_H}>
           <g role="img" aria-labelledby="shix-title shix-desc">
             <title id="shix-title">Salmon habitats from the headwaters to Puget Sound</title>
-            <desc id="shix-desc">
-              A diorama cross-section from a headwater stream below the Cascades on the left to the open Sound on
-              the right, cut away beneath the waterline. Adult chinook, coho and chum spawn over gravel in the
-              headwaters among log jams, below a road culvert. Fry with parr marks migrate downstream through
-              streams and floodplains and freshwater pools, smolt in the estuary, and enter the Sound past beaches
-              with eelgrass meadows and bull kelp. After years in marine water the adults return through the
-              estuary and up the river to spawn.
-            </desc>
+            <desc id="shix-desc">{SCENE_DESC[scene]}</desc>
             <Fragment set:html={art} />
           </g>
 
           <g class="shix__zones">
-            {SHI_DIORAMA_REGIONS.map((r) => (
+            {REGIONS.map((r) => (
               <g class="zone" data-shi-cat-zone={r.slug} style={catStyle(r.slug)}>
                 <path class="zone__halo" d={r.d} />
                 <path class="zone__line" d={r.d}><title>{bySlug[r.slug].label}</title></path>
@@ -117,7 +143,7 @@ const countFor = (slug: HabitatCategorySlug) => SHI_GRID_ROWS.filter((r) => r.ca
           </g>
 
           <g class="shix__exhibits" aria-hidden="true">
-            {SHI_DIORAMA_REGIONS.map((r) => (
+            {REGIONS.map((r) => (
               <g class="exhibit" data-shi-exhibit={r.slug} style={catStyle(r.slug)}>
                 <line class="exhibit__lead" x1={r.pin.x} y1={r.pin.y} x2={r.label.x} y2={r.label.y} />
                 <circle class="exhibit__pin" cx={r.pin.x} cy={r.pin.y} r="3" />
@@ -430,7 +456,7 @@ const countFor = (slug: HabitatCategorySlug) => SHI_GRID_ROWS.filter((r) => r.ca
       overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: thin;
       margin: 0 calc(-1 * var(--spacing-400)); padding: var(--spacing-200) var(--spacing-400) var(--spacing-400);
     }
-    .shix__pan { width: 1110px; }
+    .shix__pan { width: var(--shix-scene-w); }
     .shix__buttons { grid-template-columns: 1fr 1fr; }
   }
   @media (prefers-reduced-motion: reduce) {
