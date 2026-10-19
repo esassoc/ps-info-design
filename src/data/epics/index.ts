@@ -70,7 +70,8 @@ export const epicMarkAttrs = (storyKey: string, label: string): Record<string, s
 });
 
 /** The story's marked parts in page order, numbered before any is dropped, so
-    the live outlines and the story page screenshots always agree. A wrapper
+    the live outlines and the story page screenshots always agree. Parts that
+    share a label share a number (every SHI mark in a table is one item). A wrapper
     that boxes nothing itself (display: contents, a span around blocks) takes
     the union of its children. Self-contained: psinfo-epic-bar calls it in the
     browser and scripts/epic-shots.mjs runs it inside the page it shoots. */
@@ -90,11 +91,14 @@ export function measureMarks(storyKey: string): EpicMarkBox[] {
       bottom: Math.max(...kids.map((k) => k.bottom)),
     };
   };
-  return Array.from(document.querySelectorAll(`[data-epic-mark="${CSS.escape(storyKey)}"]`)).map((el, i) => {
+  const numbers = new Map<string, number>();
+  return Array.from(document.querySelectorAll(`[data-epic-mark="${CSS.escape(storyKey)}"]`)).map((el) => {
     const b = boxOf(el);
+    const label = el.getAttribute('data-epic-mark-label') ?? '';
+    if (!numbers.has(label)) numbers.set(label, numbers.size + 1);
     return {
-      n: i + 1,
-      label: el.getAttribute('data-epic-mark-label') ?? '',
+      n: numbers.get(label) ?? 0,
+      label,
       rect: b && b.right > b.left && b.bottom > b.top ? { x: b.left, y: b.top, w: b.right - b.left, h: b.bottom - b.top } : null,
     };
   });

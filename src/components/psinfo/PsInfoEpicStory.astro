@@ -12,6 +12,7 @@
 import EsaBadge from '@esa/ecology/esa-badge.astro';
 import '@esa/tokens/typography.css';
 import '@esa/tokens/a11y.css';
+import '../../styles/epic-marks.css';
 import type { Epic, EpicShot, EpicShotMark, EpicShots, EpicStory } from '../../data/epics/types';
 import { jiraHref, stepHref } from '../../data/epics/index';
 import { withBase } from '../../lib/base';
@@ -42,7 +43,7 @@ const pages = story.pages.map((page, i) => {
     shots: shots.map((shot) => ({
       shot,
       alt: shot.marks.length
-        ? `${page.title}, outlined: ${[...shot.marks].sort(byN).map((m) => m.label).join(', ')}`
+        ? `${page.title}, outlined: ${[...new Set([...shot.marks].sort(byN).map((m) => m.label))].join(', ')}`
         : page.title,
     })),
   };
@@ -64,7 +65,7 @@ const pages = story.pages.map((page, i) => {
           <ol class="epicstory__labels" role="list">
             {labels.map((m) => (
               <li class="epicstory__label">
-                <span class="epicstory__num typography-label-sm-strong" aria-hidden="true">{m.n}</span>
+                <span class="epic-num typography-label-sm-strong" aria-hidden="true">{m.n}</span>
                 <span class="typography-body-md"><span class="visually-hidden">{m.n}, </span>{m.label}</span>
               </li>
             ))}
@@ -97,24 +98,6 @@ const pages = story.pages.map((page, i) => {
     display: flex; align-items: baseline; gap: var(--spacing-200);
     color: var(--color-text-primary);
   }
-  /* The same number mark psinfo-epic-shot and psinfo-epic-bar draw. */
-  .epicstory__num {
-    flex: none;
-    display: grid;
-    place-items: center;
-    box-sizing: border-box;
-    inline-size: 1.75rem;
-    block-size: 1.75rem;
-    border-radius: var(--radius-full);
-    background: var(--epic-mark-color);
-    color: var(--epic-mark-ink);
-    font-variant-numeric: tabular-nums;
-    box-shadow: 0 0 0 var(--border-width-200) var(--color-surface);
-  }
-  @media (forced-colors: active) {
-    .epicstory__num { border: var(--border-width-100) solid CanvasText; }
-  }
-
   @media (max-width: 640px) {
     .epicstory { padding-inline: var(--spacing-400); }
   }

@@ -5,9 +5,9 @@
 // switch, and the pager. A page under two stories renders one variant per
 // story; the script shows the one ?story= names, else the first.
 //
-// Outlines draw a numbered box around each psinfo-epic-mark of the active
-// story, numbered in page order so they match psinfo-epic-shot's screenshots
-// (same tokens, sizes and offsets). The switch shows only when the page has
+// Outlines draw a box around each psinfo-epic-mark of the active story. Marks
+// that share a label share a number, shown once on the first of them, so they
+// match psinfo-epic-shot's screenshots (both draw from styles/epic-marks.css). The switch shows only when the page has
 // marks for that story; its state lasts for the tab. Alt+Shift+H hides and
 // shows the bar (a modified shortcut, so 2.1.4 holds); ?bar=off starts it
 // hidden. Renders nothing on a page no epic walks.
@@ -18,6 +18,7 @@ import EsaIcon from '@esa/ecology/esa-icon.astro';
 import { epicSteps, normalizeRoute, stepHref, stopsForRoute, storyRoute } from '../../data/epics/index';
 import { withBase } from '../../lib/base';
 import '@esa/tokens/typography.css';
+import '../../styles/epic-marks.css';
 
 const found = stopsForRoute(normalizeRoute(Astro.url.pathname, import.meta.env.BASE_URL));
 const steps = found ? epicSteps(found.epic) : [];
@@ -105,8 +106,8 @@ const total = steps.length;
 </style>
 
 <!-- The overlay is built at runtime and appended to body, outside this
-     component's scope, so its rules are global under .epic-outlines. Geometry
-     matches psinfo-epic-shot exactly. -->
+     component's scope: the container is global here, and the outline and number
+     come from styles/epic-marks.css, shared with psinfo-epic-shot. -->
 <style is:global>
   .epic-outlines {
     position: absolute;
@@ -116,32 +117,6 @@ const total = steps.length;
     height: 0;
     pointer-events: none;
     z-index: 1000;
-  }
-  .epic-outlines__box {
-    position: absolute;
-    outline: var(--border-width-300) solid var(--epic-mark-color);
-    outline-offset: var(--spacing-100);
-    border-radius: var(--radius-100);
-  }
-  .epic-outlines__n {
-    position: absolute;
-    top: 0;
-    left: 0;
-    transform: translate(-50%, -50%);
-    display: grid;
-    place-items: center;
-    box-sizing: border-box;
-    inline-size: 1.75rem;
-    block-size: 1.75rem;
-    border-radius: var(--radius-full);
-    background: var(--epic-mark-color);
-    color: var(--epic-mark-ink);
-    font-variant-numeric: tabular-nums;
-    box-shadow: 0 0 0 var(--border-width-200) var(--color-surface);
-  }
-  /* Forced colors drop the fill and the halo; a border keeps the number a mark. */
-  @media (forced-colors: active) {
-    .epic-outlines__n { border: var(--border-width-100) solid CanvasText; }
   }
 </style>
 
@@ -207,18 +182,22 @@ const total = steps.length;
       const sx = window.scrollX;
       const sy = window.scrollY;
       const boxes: HTMLElement[] = [];
+      const numbered = new Set<number>();
       for (const { n: num, rect: r } of measureMarks(activeKey)) {
         if (!r) continue;
         const box = document.createElement('div');
-        box.className = 'epic-outlines__box';
+        box.className = 'epic-outline';
         box.style.left = `${r.x + sx}px`;
         box.style.top = `${r.y + sy}px`;
         box.style.width = `${r.w}px`;
         box.style.height = `${r.h}px`;
-        const n = document.createElement('span');
-        n.className = 'epic-outlines__n typography-label-sm-strong';
-        n.textContent = String(num);
-        box.append(n);
+        if (!numbered.has(num)) {
+          numbered.add(num);
+          const n = document.createElement('span');
+          n.className = 'epic-num typography-label-sm-strong';
+          n.textContent = String(num);
+          box.append(n);
+        }
         boxes.push(box);
       }
       if (!overlay) {

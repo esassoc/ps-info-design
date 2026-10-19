@@ -1,8 +1,8 @@
 ---
 // PsInfoEpicShot: one annotated screenshot on a story page. The image in a
-// quiet frame, and over it a numbered outline for each marked part, drawn with
-// the same tokens, sizes and offsets psinfo-epic-bar uses for the live outlines
-// on the prototype page. Outlines and numbers are aria-hidden: the img alt
+// quiet frame, and over it an outline for each marked part, from the same
+// styles/epic-marks.css psinfo-epic-bar draws the live outlines with. Parts
+// that share a label share a number, shown once per shot. Outlines and numbers are aria-hidden: the img alt
 // names what is outlined, and psinfo-epic-story's numbered labels carry the
 // rest. A shot taller than 1200 CSS px scrolls inside an 80vh frame that is
 // itself a labelled, keyboard-reachable region.
@@ -11,6 +11,7 @@
 import type { EpicShot } from '../../data/epics/types';
 import { withBase } from '../../lib/base';
 import '@esa/tokens/typography.css';
+import '../../styles/epic-marks.css';
 
 interface Props {
   shot: EpicShot;
@@ -22,6 +23,7 @@ const { shot, alt } = Astro.props;
 /** CSS px. Taller shots scroll inside the frame. */
 const TALL = 1200;
 const tall = shot.height > TALL;
+const firstOfN = new Set(shot.marks.map((m) => shot.marks.find((o) => o.n === m.n)));
 ---
 <div
   class:list={['epicshot', tall && 'epicshot--tall']}
@@ -33,8 +35,8 @@ const tall = shot.height > TALL;
   <div class="epicshot__img">
     <img src={withBase(shot.src)} width={shot.width} height={shot.height} alt={alt} loading="lazy" decoding="async" />
     {shot.marks.map((m) => (
-      <span class="epicshot__mark" style={`left: ${m.x}%; top: ${m.y}%; width: ${m.w}%; height: ${m.h}%`} aria-hidden="true">
-        <span class="epicshot__num typography-label-sm-strong">{m.n}</span>
+      <span class="epic-outline" style={`left: ${m.x}%; top: ${m.y}%; width: ${m.w}%; height: ${m.h}%`} aria-hidden="true">
+        {firstOfN.has(m) && <span class="epic-num typography-label-sm-strong">{m.n}</span>}
       </span>
     ))}
   </div>
@@ -55,34 +57,4 @@ const tall = shot.height > TALL;
 
   .epicshot__img { position: relative; max-inline-size: var(--epicshot-w); }
   .epicshot__img img { display: block; inline-size: 100%; block-size: auto; }
-
-  /* The mark geometry matches psinfo-epic-bar's live outlines exactly. */
-  .epicshot__mark {
-    position: absolute;
-    outline: var(--border-width-300) solid var(--epic-mark-color);
-    outline-offset: var(--spacing-100);
-    border-radius: var(--radius-100);
-    pointer-events: none;
-  }
-  .epicshot__num {
-    position: absolute;
-    inset-block-start: 0;
-    inset-inline-start: 0;
-    transform: translate(-50%, -50%);
-    display: grid;
-    place-items: center;
-    box-sizing: border-box;
-    inline-size: 1.75rem;
-    block-size: 1.75rem;
-    border-radius: var(--radius-full);
-    background: var(--epic-mark-color);
-    color: var(--epic-mark-ink);
-    font-variant-numeric: tabular-nums;
-    box-shadow: 0 0 0 var(--border-width-200) var(--color-surface);
-  }
-
-  /* Forced colors drop the fill and the halo; a border keeps the number a mark. */
-  @media (forced-colors: active) {
-    .epicshot__num { border: var(--border-width-100) solid CanvasText; }
-  }
 </style>

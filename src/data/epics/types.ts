@@ -55,7 +55,7 @@ export interface EpicMarkBox {
 
 /** A marked part's place on a screenshot, in percent of the image. */
 export interface EpicShotMark {
-  /** 1-based, in page order; matches the outline numbers on the live page. */
+  /** 1-based, by first appearance of its label in page order; matches the live outlines. */
   n: number;
   /** The mark's own label, as written in the page's markup. */
   label: string;
