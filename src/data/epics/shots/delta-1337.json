@@ -1,0 +1,38 @@
+{
+  "DELTA-1343": {
+    "/prototypes/salmon-habitat-indicators/vital-sign-indicators/floodplain-function": [
+      {
+        "src": "/epic-shots/delta-1337/delta-1343/salmon-habitat-indicators-vital-sign-indicators-floodplain-function-1.jpg",
+        "width": 821,
+        "height": 194,
+        "marks": [
+          {
+            "n": 1,
+            "label": "Importance to Salmon section",
+            "x": 2.92,
+            "y": 14.42,
+            "w": 94.18,
+            "h": 73.05
+          }
+        ]
+      }
+    ],
+    "/prototypes/salmon-habitat-indicators/vital-sign-indicators/summer-low-flow": [
+      {
+        "src": "/epic-shots/delta-1337/delta-1343/salmon-habitat-indicators-vital-sign-indicators-summer-low-flow-1.jpg",
+        "width": 821,
+        "height": 283,
+        "marks": [
+          {
+            "n": 1,
+            "label": "Importance to Salmon section",
+            "x": 2.92,
+            "y": 9.95,
+            "w": 94.18,
+            "h": 81.45
+          }
+        ]
+      }
+    ]
+  }
+}

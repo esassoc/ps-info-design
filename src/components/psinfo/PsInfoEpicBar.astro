@@ -1,0 +1,270 @@
+---
+// PsInfoEpicBar: the slim previous/next bar at the very top of every prototype
+// page an epic walks, above the client's site chrome. Back to the epic page,
+// the story the page answers (one link to its story page), the Outlines
+// switch, and the pager. A page under two stories renders one variant per
+// story; the script shows the one ?story= names, else the first.
+//
+// Outlines draw a numbered box around each psinfo-epic-mark of the active
+// story, numbered in page order so they match psinfo-epic-shot's screenshots
+// (same tokens, sizes and offsets). The switch shows only when the page has
+// marks for that story; its state lasts for the tab. Alt+Shift+H hides and
+// shows the bar (a modified shortcut, so 2.1.4 holds); ?bar=off starts it
+// hidden. Renders nothing on a page no epic walks.
+//
+// bcn-lego-checked: esa-app-bar is the nearest lego but never wraps (its start slot is flex: none, so a long story title overflows a 320px viewport, failing 1.4.10), spreads no data-* attribute for the script hook, and its fixed 32px density is not a slim bar; esa-pagination pages a list by events, not pages by links. The pager is esa-button (chrome, so links stay links), the switch esa-switch-toggle, the back arrow esa-icon, laid out with .repel and .cluster. Checked Beacon shared ui components (no walkthrough bar). psinfo-epic-bar is the reusable home; the only bespoke CSS is the bar surface, its two text links and the runtime outline overlay.
+import EsaButton from '@esa/ecology/esa-button.astro';
+import EsaIcon from '@esa/ecology/esa-icon.astro';
+import { epicSteps, normalizeRoute, stepHref, stopsForRoute, storyRoute } from '../../data/epics/index';
+import { withBase } from '../../lib/base';
+import '@esa/tokens/typography.css';
+
+const found = stopsForRoute(normalizeRoute(Astro.url.pathname, import.meta.env.BASE_URL));
+const steps = found ? epicSteps(found.epic) : [];
+const total = steps.length;
+---
+{found && (
+  <nav class="epicbar" aria-label="Prototype Walkthrough" data-epic-bar>
+    {found.stops.map(({ index, step }, i) => {
+      const prev = steps[index - 1];
+      const next = steps[index + 1];
+      return (
+        <div class="epicbar__stop repel" data-gap="sm" data-epic-stop={step.story.key} hidden={i > 0}>
+          <div class="epicbar__where cluster" data-gap="lg">
+            <a class="epicbar__link epicbar__back typography-label-md" href={withBase(found.epic.route)}><EsaIcon name="arrow-left" size="sm" />{found.epic.title}</a>
+            <a class="epicbar__link typography-label-md" href={withBase(storyRoute(found.epic, step.story))}><span class="typography-label-md-strong">{step.story.key}</span>{' '}{step.story.title}</a>
+          </div>
+          <div class="cluster" data-gap="md">
+            <esa-switch-toggle label="Outlines" data-epic-outlines hidden></esa-switch-toggle>
+            <div class="cluster" data-gap="xs">
+              {prev ? (
+                <EsaButton variant="chrome" size="sm" iconOnly icon="chevron-left" label={`Previous: ${prev.page.title}`} href={withBase(stepHref(found.epic, prev))} />
+              ) : (
+                <EsaButton variant="chrome" size="sm" iconOnly icon="chevron-left" label="Previous" disabled />
+              )}
+              <span class="epicbar__pos typography-label-md">{index + 1} of {total}</span>
+              {next ? (
+                <EsaButton variant="chrome" size="sm" iconOnly icon="chevron-right" label={`Next: ${next.page.title}`} href={withBase(stepHref(found.epic, next))} />
+              ) : (
+                <EsaButton variant="chrome" size="sm" iconOnly icon="chevron-right" label="Next" disabled />
+              )}
+            </div>
+          </div>
+        </div>
+      );
+    })}
+  </nav>
+)}
+
+<style>
+  .epicbar {
+    /* Two roles re-pointed for this one surface (tier 3, local). The house ring,
+       orange-600, measures 2.91:1 on the sunken gray, short of 1.4.11's 3:1;
+       orange-700 holds 4.28:1. The switch's off track reads
+       --color-border-default-strong (hub gray-8, 1.71:1 here); gray-500 holds
+       4.64:1 against the bar and 5.08:1 under the thumb. */
+    --focus-ring-color: var(--color-secondary-strong);
+    --color-border-default-strong: var(--ps-info-gray-500);
+    min-block-size: calc(var(--spacing-500) + 2 * var(--spacing-150));
+    padding-block: var(--spacing-150);
+    padding-inline: var(--spacing-400);
+    background: var(--color-surface-sunken);
+    border-block-end: var(--border-width-100) solid var(--color-border);
+    color: var(--color-text-primary);
+  }
+  /* .repel and esa-switch-toggle's :host both set display, which beats the UA
+     [hidden] rule; the hidden attribute has to win here. */
+  .epicbar[hidden],
+  .epicbar :global([hidden]) { display: none; }
+
+  /* Side by side the two links keep the wide gap; stacked on a phone they sit
+     close, so the bar stays short above the client header. */
+  .epicbar__where { row-gap: var(--spacing-100); }
+
+  /* The two text links (back to the epic page, the story) share one type and
+     one treatment; only the pager is icon buttons. */
+  .epicbar__link {
+    padding-block: var(--spacing-100);
+    color: var(--color-text-primary);
+    text-decoration: none;
+  }
+  .epicbar__back {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-100);
+    color: var(--color-text-secondary);
+  }
+  .epicbar__link:hover { text-decoration: underline; text-underline-offset: 0.15em; }
+  .epicbar__link:focus-visible { outline: 2px solid var(--focus-ring-color); outline-offset: 2px; }
+
+  .epicbar__pos {
+    color: var(--color-text-secondary);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+</style>
+
+<!-- The overlay is built at runtime and appended to body, outside this
+     component's scope, so its rules are global under .epic-outlines. Geometry
+     matches psinfo-epic-shot exactly. -->
+<style is:global>
+  .epic-outlines {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 0;
+    pointer-events: none;
+    z-index: 1000;
+  }
+  .epic-outlines__box {
+    position: absolute;
+    outline: var(--border-width-300) solid var(--epic-mark-color);
+    outline-offset: var(--spacing-100);
+    border-radius: var(--radius-100);
+  }
+  .epic-outlines__n {
+    position: absolute;
+    top: 0;
+    left: 0;
+    transform: translate(-50%, -50%);
+    display: grid;
+    place-items: center;
+    box-sizing: border-box;
+    inline-size: 1.75rem;
+    block-size: 1.75rem;
+    border-radius: var(--radius-full);
+    background: var(--epic-mark-color);
+    color: var(--epic-mark-ink);
+    font-variant-numeric: tabular-nums;
+    box-shadow: 0 0 0 var(--border-width-200) var(--color-surface);
+  }
+  /* Forced colors drop the fill and the halo; a border keeps the number a mark. */
+  @media (forced-colors: active) {
+    .epic-outlines__n { border: var(--border-width-100) solid CanvasText; }
+  }
+</style>
+
+<script>
+  import '@esa/ecology/esa-switch-toggle';
+  import { STORY_PARAM, measureMarks } from '../../data/epics/index';
+
+  type SwitchEl = HTMLElement & { checked: boolean };
+
+  /** sessionStorage: 'on' while a presenter walks the epic with outlines on. */
+  const OUTLINES_KEY = 'epic-outlines';
+
+  const readOutlines = (): boolean => {
+    try {
+      return sessionStorage.getItem(OUTLINES_KEY) === 'on';
+    } catch {
+      return false;
+    }
+  };
+
+  const writeOutlines = (on: boolean): void => {
+    try {
+      if (on) sessionStorage.setItem(OUTLINES_KEY, 'on');
+      else sessionStorage.removeItem(OUTLINES_KEY);
+    } catch {
+      /* Storage blocked: the switch still works for this page. */
+    }
+  };
+
+  const isEditable = (target: EventTarget | undefined): boolean =>
+    target instanceof HTMLElement && (target.isContentEditable || target.matches('input, textarea, select'));
+
+  const initEpicBar = (nav: HTMLElement): void => {
+    const params = new URLSearchParams(location.search);
+
+    // 1. The active story: the variant ?story= names, else the first.
+    const stops = Array.from(nav.querySelectorAll<HTMLElement>('[data-epic-stop]'));
+    const wanted = params.get(STORY_PARAM);
+    const active = stops.find((s) => s.dataset.epicStop === wanted) ?? stops[0];
+    if (!active) return;
+    for (const s of stops) s.hidden = s !== active;
+
+    // 2. URL switch.
+    if (params.get('bar') === 'off') nav.hidden = true;
+
+    // 4. Marks for the active story, in DOM order.
+    const activeKey = active.dataset.epicStop ?? '';
+    const markCount = measureMarks(activeKey).length;
+
+    let on = false;
+    let overlay: HTMLDivElement | null = null;
+    let frame = 0;
+
+    // 5. One overlay in document coordinates; numbers follow page order, so a
+    // mark with no box keeps its number and simply draws nothing.
+    const draw = (): void => {
+      frame = 0;
+      if (!on || nav.hidden) {
+        overlay?.remove();
+        overlay = null;
+        return;
+      }
+      const sx = window.scrollX;
+      const sy = window.scrollY;
+      const boxes: HTMLElement[] = [];
+      for (const { n: num, rect: r } of measureMarks(activeKey)) {
+        if (!r) continue;
+        const box = document.createElement('div');
+        box.className = 'epic-outlines__box';
+        box.style.left = `${r.x + sx}px`;
+        box.style.top = `${r.y + sy}px`;
+        box.style.width = `${r.w}px`;
+        box.style.height = `${r.h}px`;
+        const n = document.createElement('span');
+        n.className = 'epic-outlines__n typography-label-sm-strong';
+        n.textContent = String(num);
+        box.append(n);
+        boxes.push(box);
+      }
+      if (!overlay) {
+        overlay = document.createElement('div');
+        overlay.className = 'epic-outlines';
+        overlay.setAttribute('aria-hidden', 'true');
+        document.body.append(overlay);
+      }
+      overlay.replaceChildren(...boxes);
+    };
+    const schedule = (): void => {
+      if (!frame) frame = requestAnimationFrame(draw);
+    };
+
+    // 3. Alt+Shift+H hides and shows the bar, and the outlines with it.
+    document.addEventListener('keydown', (e) => {
+      if (e.defaultPrevented || e.repeat) return;
+      if (e.code !== 'KeyH' || !e.altKey || !e.shiftKey || e.ctrlKey || e.metaKey) return;
+      if (isEditable(e.composedPath()[0])) return;
+      e.preventDefault();
+      nav.hidden = !nav.hidden;
+      draw();
+    });
+
+    if (!markCount) return;
+    const toggle = active.querySelector<SwitchEl>('[data-epic-outlines]');
+    if (!toggle) return;
+    on = readOutlines();
+    toggle.checked = on;
+    toggle.hidden = false;
+    toggle.addEventListener('change', (e) => {
+      on = (e as CustomEvent<{ checked: boolean }>).detail.checked;
+      writeOutlines(on);
+      draw();
+    });
+
+    // Redraw when layout moves: resize and reflow, late images, web fonts, and
+    // any inner scrolling pane (window scroll needs nothing: boxes sit in
+    // document coordinates).
+    new ResizeObserver(schedule).observe(document.documentElement);
+    window.addEventListener('load', schedule);
+    document.fonts?.ready.then(schedule);
+    document.addEventListener('scroll', (e) => { if (e.target !== document) schedule(); }, { capture: true, passive: true });
+    draw();
+  };
+
+  const bar = document.querySelector<HTMLElement>('[data-epic-bar]');
+  if (bar) initEpicBar(bar);
+</script>

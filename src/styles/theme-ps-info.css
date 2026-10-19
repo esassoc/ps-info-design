@@ -181,4 +181,11 @@
 
   /* ===== (6) --button-on-warning ===== */
   --button-on-warning: #ffffff;
+
+  /* ===== (9) EPIC PREVIEW — the outlines and numbers that point at what a
+     story adds (psinfo-epic-bar live, psinfo-epic-shot on story pages).
+     Orange-600 holds 3.2:1 on white for the outline; the number sits on it
+     in the deepest navy (5.1:1). ===== */
+  --epic-mark-color: var(--ps-info-orange-600);
+  --epic-mark-ink:   var(--ps-info-blue-950);
 }

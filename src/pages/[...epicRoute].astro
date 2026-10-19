@@ -1,0 +1,54 @@
+---
+// Epic and story pages, one of each per epic and story in src/data/epics/,
+// at the routes the epic files name. An epic page lists its stories and their
+// pages; a story page shows each of its pages with the parts the story adds
+// outlined and numbered (screenshots from scripts/epic-shots.mjs).
+// prose-prop-checked: `story` is a Jira story record (key, title, pages), never page copy
+import BaseLayout from '../layouts/BaseLayout.astro';
+import EsaPageHeader from '@esa/ecology/esa-page-header.astro';
+import EsaBreadcrumbs from '@esa/ecology/esa-breadcrumbs.astro';
+import PsInfoEpicIndex from '../components/psinfo/PsInfoEpicIndex.astro';
+import PsInfoEpicStory from '../components/psinfo/PsInfoEpicStory.astro';
+import type { Epic, EpicStory } from '../data/epics/types';
+import { EPICS, storyRoute } from '../data/epics/index';
+import { withBase } from '../lib/base';
+
+export function getStaticPaths() {
+  const param = (route: string) => route.replace(/^\//, '');
+  return EPICS.flatMap((epic) => [
+    { params: { epicRoute: param(epic.route) }, props: { epic } },
+    ...epic.stories.map((story) => ({ params: { epicRoute: param(storyRoute(epic, story)) }, props: { epic, story } })),
+  ]);
+}
+
+interface Props {
+  epic: Epic;
+  /** The Jira story record on a story page; absent on the epic page. */
+  story?: EpicStory;
+}
+const { epic, story } = Astro.props;
+const home = { label: 'Home', href: withBase('/') };
+---
+<!-- manifest:
+  layout: BaseLayout > center spine
+  sections:
+    - stories and pages  -> ps-info-epic-index (epic page; header slot: esa-page-header + esa-breadcrumbs)
+    - annotated pages    -> ps-info-epic-story (story page; header slot: esa-page-header + esa-breadcrumbs)
+-->
+<BaseLayout title={story ? `${story.key} ${story.title}` : epic.title}>
+  <main id="main-content" class="center">
+    {story ? (
+      <PsInfoEpicStory {epic} {story}>
+        <EsaPageHeader slot="header" title={story.title}>
+          <EsaBreadcrumbs slot="breadcrumbs" items={[home, { label: epic.title, href: withBase(epic.route) }, { label: story.key }]} size="md" />
+        </EsaPageHeader>
+      </PsInfoEpicStory>
+    ) : (
+      <PsInfoEpicIndex {epic}>
+        <EsaPageHeader slot="header" title={epic.title}>
+          <EsaBreadcrumbs slot="breadcrumbs" items={[home, { label: epic.title }]} size="md" />
+        </EsaPageHeader>
+      </PsInfoEpicIndex>
+    )}
+  </main>
+</BaseLayout>

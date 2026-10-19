@@ -1,0 +1,20 @@
+---
+// PsInfoEpicGate: the base layout wraps its whole body in this. When the
+// current route belongs to an epic that sets a password (its epic page, a
+// story page, or a page it walks), the body sits behind psinfo-password-gate,
+// a casual deterrent on a public site rather than access control. One unlock
+// covers the whole epic for that browser tab. Any other route renders the body
+// as is, with no wrapper element.
+import PsInfoPasswordGate from './PsInfoPasswordGate.astro';
+import { epicForRoute, gateStorageKey, normalizeRoute } from '../../data/epics/index';
+
+const route = normalizeRoute(Astro.url.pathname, import.meta.env.BASE_URL);
+const epic = epicForRoute(route);
+---
+{epic?.password ? (
+  <PsInfoPasswordGate password={epic.password} storageKey={gateStorageKey(epic)} title={epic.title}>
+    <slot />
+  </PsInfoPasswordGate>
+) : (
+  <slot />
+)}

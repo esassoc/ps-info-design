@@ -8,6 +8,9 @@
 // Deliberately NOT PsInfoAppShell — the unified-nav rail is a separate
 // proposal, and these pages show how a new module fits the site as it is.
 //
+// The epic walkthrough bar (psinfo-epic-bar) sits above the client's chrome,
+// after the skip link, on pages an epic walks.
+//
 // bcn-lego-checked: the trail is the esa-breadcrumbs lego; header and footer
 // are psinfo-vs-prod-header / psinfo-vs-prod-footer. The only layout CSS here
 // is the skip link (same treatment as PsInfoAppShell) and the content width.
@@ -15,6 +18,7 @@ import BaseLayout from './BaseLayout.astro';
 import PsInfoVsProdHeader from '../components/psinfo/PsInfoVsProdHeader.astro';
 import PsInfoPsiProdHeader from '../components/psinfo/PsInfoPsiProdHeader.astro';
 import PsInfoVsProdFooter from '../components/psinfo/PsInfoVsProdFooter.astro';
+import PsInfoEpicBar from '../components/psinfo/PsInfoEpicBar.astro';
 import EsaBreadcrumbs, { type EsaBreadcrumbItem } from '@esa/ecology/esa-breadcrumbs.astro';
 import '../styles/theme-shi.css';
 
@@ -42,6 +46,7 @@ const PROD_FONTS =
 <BaseLayout title={title}>
   <link slot="head" rel="stylesheet" href={PROD_FONTS} />
   <a class="skip-link" href="#main-content">Skip to main content</a>
+  <PsInfoEpicBar />
   {site === 'ps-info' ? <PsInfoPsiProdHeader /> : <PsInfoVsProdHeader image={headerImage} {hueVar} {activeGoal} />}
   <div class="vspage">
     {trail && <EsaBreadcrumbs items={trail} size="md" />}

@@ -1,0 +1,121 @@
+---
+// PsInfoEpicStory: the body of a story page. The story's key linked to Jira,
+// then one section per prototype page the story answers: the page title linked
+// to the page (carrying ?story= when the page sits under more than one story),
+// its case label as a quiet badge, and, when the story has screenshots of that
+// page, the numbered labels beside the annotated shots (psinfo-epic-shot).
+// Shots come from scripts/epic-shots.mjs as src/data/epics/shots/<epic key>.json;
+// a missing file or entry renders the heading alone. The grouped shape of
+// psinfo-epic-index, one level down.
+// prose-prop-checked: `story` is a Jira story record (key, title, pages), never page copy
+// bcn-lego-checked: no esa- lego pairs a numbered label list with annotated images, and esa-link-column's heading is a span where these pages need real h2 headings; checked Beacon shared ui components (none); psinfo-epic-story is the reusable home
+import EsaBadge from '@esa/ecology/esa-badge.astro';
+import '@esa/tokens/typography.css';
+import '@esa/tokens/a11y.css';
+import type { Epic, EpicShot, EpicShotMark, EpicShots, EpicStory } from '../../data/epics/types';
+import { jiraHref, stepHref } from '../../data/epics/index';
+import { withBase } from '../../lib/base';
+import PsInfoEpicShot from './PsInfoEpicShot.astro';
+
+interface Props {
+  epic: Epic;
+  /** The Jira story record this page shows (key, title, pages). */
+  story: EpicStory;
+}
+const { epic, story } = Astro.props;
+
+const SHOT_FILES = import.meta.glob<EpicShots>('../../data/epics/shots/*.json', { eager: true, import: 'default' });
+const storyShots = SHOT_FILES[`../../data/epics/shots/${epic.key.toLowerCase()}.json`]?.[story.key] ?? {};
+
+const byN = (a: EpicShotMark, b: EpicShotMark) => a.n - b.n;
+
+const pages = story.pages.map((page, i) => {
+  const shots: EpicShot[] = storyShots[page.route] ?? [];
+  // One label per number across all of this page's shots, in mark order.
+  const marks = new Map<number, EpicShotMark>();
+  for (const m of shots.flatMap((s) => s.marks).sort(byN)) if (!marks.has(m.n)) marks.set(m.n, m);
+  return {
+    page,
+    id: `epicstory-${story.key}-${i + 1}`,
+    href: withBase(stepHref(epic, { story, page })),
+    labels: [...marks.values()],
+    shots: shots.map((shot) => ({
+      shot,
+      alt: shot.marks.length
+        ? `${page.title}, outlined: ${[...shot.marks].sort(byN).map((m) => m.label).join(', ')}`
+        : page.title,
+    })),
+  };
+});
+---
+<div class="epicstory stack" data-gap="2xl">
+  <div class="stack" data-gap="xl">
+    <slot name="header" />
+    <p class="epicstory__story">Story: <a href={jiraHref(story.key)}>{story.key}</a></p>
+  </div>
+  {pages.map(({ page, id, href, labels, shots }) => (
+    <section class="stack" data-gap="md" aria-labelledby={id}>
+      <h2 id={id} class="epicstory__h2 cluster typography-title-strong" data-gap="xs">
+        <a href={href}>{page.title}</a>
+        {page.label && <EsaBadge value={page.label} variant="neutral" size="sm" />}
+      </h2>
+      {shots.length > 0 && (
+        <div class="sidebar" data-side="end" data-gap="lg">
+          <ol class="epicstory__labels" role="list">
+            {labels.map((m) => (
+              <li class="epicstory__label">
+                <span class="epicstory__num typography-label-sm-strong" aria-hidden="true">{m.n}</span>
+                <span class="typography-body-md"><span class="visually-hidden">{m.n}, </span>{m.label}</span>
+              </li>
+            ))}
+          </ol>
+          <div class="stack" data-gap="lg">
+            {shots.map(({ shot, alt }) => <PsInfoEpicShot shot={shot} alt={alt} />)}
+          </div>
+        </div>
+      )}
+    </section>
+  ))}
+</div>
+
+<style>
+  .epicstory {
+    padding-block: var(--spacing-700) var(--spacing-900);
+    padding-inline: var(--spacing-500);
+  }
+  .epicstory__story { margin: 0; }
+  .epicstory__h2 { margin: 0; color: var(--color-text-primary); }
+  .epicstory a { color: var(--color-text-link); text-decoration: underline; text-underline-offset: 0.15em; }
+  .epicstory a:hover { color: var(--color-text-link-hover); }
+  .epicstory a:focus-visible { outline: 2px solid var(--focus-ring-color); outline-offset: 2px; }
+
+  .epicstory__labels {
+    list-style: none; margin: 0; padding: 0;
+    display: flex; flex-direction: column; gap: var(--spacing-300);
+  }
+  .epicstory__label {
+    display: flex; align-items: baseline; gap: var(--spacing-200);
+    color: var(--color-text-primary);
+  }
+  /* The same number mark psinfo-epic-shot and psinfo-epic-bar draw. */
+  .epicstory__num {
+    flex: none;
+    display: grid;
+    place-items: center;
+    box-sizing: border-box;
+    inline-size: 1.75rem;
+    block-size: 1.75rem;
+    border-radius: var(--radius-full);
+    background: var(--epic-mark-color);
+    color: var(--epic-mark-ink);
+    font-variant-numeric: tabular-nums;
+    box-shadow: 0 0 0 var(--border-width-200) var(--color-surface);
+  }
+  @media (forced-colors: active) {
+    .epicstory__num { border: var(--border-width-100) solid CanvasText; }
+  }
+
+  @media (max-width: 640px) {
+    .epicstory { padding-inline: var(--spacing-400); }
+  }
+</style>

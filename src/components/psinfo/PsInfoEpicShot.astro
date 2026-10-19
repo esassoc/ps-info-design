@@ -1,0 +1,88 @@
+---
+// PsInfoEpicShot: one annotated screenshot on a story page. The image in a
+// quiet frame, and over it a numbered outline for each marked part, drawn with
+// the same tokens, sizes and offsets psinfo-epic-bar uses for the live outlines
+// on the prototype page. Outlines and numbers are aria-hidden: the img alt
+// names what is outlined, and psinfo-epic-story's numbered labels carry the
+// rest. A shot taller than 1200 CSS px scrolls inside an 80vh frame that is
+// itself a labelled, keyboard-reachable region.
+//
+// bcn-lego-checked: esa-card is the nearest frame but clips overflow (a corner number sits half outside its mark) and takes no tabindex/role for the tall-shot scroll region; the .frame primitive is a ratio-locked crop; no esa- lego overlays marks on an image; checked Beacon shared ui components (none); psinfo-epic-shot is the reusable home
+import type { EpicShot } from '../../data/epics/types';
+import { withBase } from '../../lib/base';
+import '@esa/tokens/typography.css';
+
+interface Props {
+  shot: EpicShot;
+  /** The img alt: the page and the parts outlined on it. */
+  alt: string;
+}
+const { shot, alt } = Astro.props;
+
+/** CSS px. Taller shots scroll inside the frame. */
+const TALL = 1200;
+const tall = shot.height > TALL;
+---
+<div
+  class:list={['epicshot', tall && 'epicshot--tall']}
+  style={`--epicshot-w: ${shot.width}px`}
+  tabindex={tall ? '0' : undefined}
+  role={tall ? 'region' : undefined}
+  aria-label={tall ? alt : undefined}
+>
+  <div class="epicshot__img">
+    <img src={withBase(shot.src)} width={shot.width} height={shot.height} alt={alt} loading="lazy" decoding="async" />
+    {shot.marks.map((m) => (
+      <span class="epicshot__mark" style={`left: ${m.x}%; top: ${m.y}%; width: ${m.w}%; height: ${m.h}%`} aria-hidden="true">
+        <span class="epicshot__num typography-label-sm-strong">{m.n}</span>
+      </span>
+    ))}
+  </div>
+</div>
+
+<style>
+  /* content-box so the cap is the shot's own width; padding and border sit outside it. */
+  .epicshot {
+    box-sizing: content-box;
+    max-inline-size: var(--epicshot-w);
+    padding: var(--spacing-200);
+    border: var(--border-width-100) solid var(--color-border);
+    border-radius: var(--radius-100);
+    background: var(--color-surface);
+  }
+  .epicshot--tall { max-block-size: 80vh; overflow-y: auto; }
+  .epicshot--tall:focus-visible { outline: 2px solid var(--focus-ring-color); outline-offset: 2px; }
+
+  .epicshot__img { position: relative; max-inline-size: var(--epicshot-w); }
+  .epicshot__img img { display: block; inline-size: 100%; block-size: auto; }
+
+  /* The mark geometry matches psinfo-epic-bar's live outlines exactly. */
+  .epicshot__mark {
+    position: absolute;
+    outline: var(--border-width-300) solid var(--epic-mark-color);
+    outline-offset: var(--spacing-100);
+    border-radius: var(--radius-100);
+    pointer-events: none;
+  }
+  .epicshot__num {
+    position: absolute;
+    inset-block-start: 0;
+    inset-inline-start: 0;
+    transform: translate(-50%, -50%);
+    display: grid;
+    place-items: center;
+    box-sizing: border-box;
+    inline-size: 1.75rem;
+    block-size: 1.75rem;
+    border-radius: var(--radius-full);
+    background: var(--epic-mark-color);
+    color: var(--epic-mark-ink);
+    font-variant-numeric: tabular-nums;
+    box-shadow: 0 0 0 var(--border-width-200) var(--color-surface);
+  }
+
+  /* Forced colors drop the fill and the halo; a border keeps the number a mark. */
+  @media (forced-colors: active) {
+    .epicshot__num { border: var(--border-width-100) solid CanvasText; }
+  }
+</style>

@@ -10,6 +10,8 @@ import '../styles/theme-ps-info.css';
 // Runtime handoff inspector — self-gating: dormant unless the current route
 // has a bundle at public/handoff/<slug>/ (generated via `npx handoff`).
 import HandoffInspector from '@esa/handoff/HandoffInspector.astro';
+// An epic that sets a password locks its epic page, story pages and every page it walks.
+import PsInfoEpicGate from '../components/psinfo/PsInfoEpicGate.astro';
 
 interface Props {
   title?: string;
@@ -26,6 +28,8 @@ const GOOGLE_FONTS =
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <!-- Public prototypes that copy live client sites: keep them out of search. -->
+    <meta name="robots" content="noindex" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link rel="stylesheet" href={GOOGLE_FONTS} />
@@ -57,7 +61,7 @@ const GOOGLE_FONTS =
     </style>
   </head>
   <body>
-    <slot />
+    <PsInfoEpicGate><slot /></PsInfoEpicGate>
     <HandoffInspector />
   </body>
 </html>

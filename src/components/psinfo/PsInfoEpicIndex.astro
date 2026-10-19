@@ -1,0 +1,52 @@
+---
+// PsInfoEpicIndex: the body of an epic page. The epic's key (linked to Jira),
+// then one section per story: the story's key linked to Jira and its Jira title
+// linked to its story page, with the prototype pages that answer it as a plain
+// list beneath. The grouped-list shape of /shi, made general: nothing here
+// knows which epic it shows.
+// bcn-lego-checked: esa-link-column is the nearest lego but its heading is a span (a footer column), and these stories need real h2 headings for screen-reader navigation; checked Beacon shared ui components (no index list); psinfo-epic-index is the reusable home
+import type { Epic } from '../../data/epics/types';
+import { epicSteps, jiraHref, stepHref, storyRoute } from '../../data/epics/index';
+import { withBase } from '../../lib/base';
+
+interface Props {
+  epic: Epic;
+}
+const { epic } = Astro.props;
+const steps = epicSteps(epic);
+---
+<div class="epicindex stack" data-gap="xl">
+  <slot name="header" />
+  <p class="epicindex__epic">Epic: <a href={jiraHref(epic.key)}>{epic.key}</a> {epic.title}</p>
+  {epic.stories.map((story) => (
+    <section class="stack" data-gap="xs" aria-labelledby={`epicindex-${story.key}`}>
+      <h2 id={`epicindex-${story.key}`} class="epicindex__h2 typography-title-strong">
+        <a href={jiraHref(story.key)}>{story.key}</a> <a href={withBase(storyRoute(epic, story))}>{story.title}</a>
+      </h2>
+      <ul class="epicindex__list" role="list">
+        {steps.filter((s) => s.story === story).map((step) => (
+          <li>
+            <a href={withBase(stepHref(epic, step))}>{step.page.title}</a>{step.page.label && <span class="epicindex__label">: {step.page.label}</span>}
+          </li>
+        ))}
+      </ul>
+    </section>
+  ))}
+</div>
+
+<style>
+  .epicindex { max-width: 60rem; padding-block: var(--spacing-700) var(--spacing-900); padding-inline: var(--spacing-500); }
+  .epicindex__epic { margin: 0; }
+  .epicindex__h2 { margin: 0; color: var(--color-text-primary); }
+  .epicindex__list {
+    list-style: none; margin: 0; padding: 0;
+    display: flex; flex-direction: column; gap: var(--spacing-100);
+  }
+  .epicindex a { color: var(--color-text-link); text-decoration: underline; text-underline-offset: 0.15em; }
+  .epicindex a:hover { color: var(--color-text-link-hover); }
+  .epicindex a:focus-visible { outline: 2px solid var(--focus-ring-color); outline-offset: 2px; }
+  .epicindex__label { color: var(--color-text-secondary); }
+  @media (max-width: 640px) {
+    .epicindex { padding-inline: var(--spacing-400); }
+  }
+</style>

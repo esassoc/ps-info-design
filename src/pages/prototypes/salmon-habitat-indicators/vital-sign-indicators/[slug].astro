@@ -14,6 +14,7 @@ import PsInfoVsiOverview from '../../../../components/psinfo/PsInfoVsiOverview.a
 import PsInfoVsiSection from '../../../../components/psinfo/PsInfoVsiSection.astro';
 import PsInfoShiImportance from '../../../../components/psinfo/PsInfoShiImportance.astro';
 import PsInfoVsiPartners from '../../../../components/psinfo/PsInfoVsiPartners.astro';
+import PsInfoEpicMark from '../../../../components/psinfo/PsInfoEpicMark.astro';
 import {
   PROGRESS_ICON,
   SHI_BY_SLUG,
@@ -51,7 +52,7 @@ const activeGoal = vs.goalId === 7 ? 'functioning-habitat' : 'healthy-water-qual
     - reference rail              -> ps-info-vsi-sidebar
     - description + chart         -> ps-info-vsi-overview
     - key results                 -> ps-info-vsi-section
-    - importance to salmon        -> ps-info-shi-importance
+    - importance to salmon        -> ps-info-epic-mark > ps-info-shi-importance
     - contributing partners       -> ps-info-vsi-section > ps-info-vsi-partners
 -->
 <PsInfoVsProdChrome
@@ -90,12 +91,14 @@ const activeGoal = vs.goalId === 7 ? 'functioning-habitat' : 'healthy-water-qual
           <ul>{detail.keyResults.map((r) => <li>{r}</li>)}</ul>
         </PsInfoVsiSection>
         {importance && (
-          <PsInfoShiImportance
-            hueVar={vs.goalHueVar}
-            paragraphs={importance}
-            landingHref={shiRoutes.landing}
-            mark={{ src: SHI_LOGO.src, width: SHI_LOGO.width, height: SHI_LOGO.height }}
-          />
+          <PsInfoEpicMark story="DELTA-1343" label="Importance to Salmon section">
+            <PsInfoShiImportance
+              hueVar={vs.goalHueVar}
+              paragraphs={importance}
+              landingHref={shiRoutes.landing}
+              mark={{ src: SHI_LOGO.src, width: SHI_LOGO.width, height: SHI_LOGO.height }}
+            />
+          </PsInfoEpicMark>
         )}
         <PsInfoVsiSection title="Contributing Partners" hueVar={vs.goalHueVar}>
           <PsInfoVsiPartners partners={detail.partners} />

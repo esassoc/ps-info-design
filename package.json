@@ -6,10 +6,11 @@
   "private": true,
   "scripts": {
     "dev": "astro dev",
-    "build": "astro build",
+    "build": "astro build && node scripts/epic-shots.mjs && astro build",
     "preview": "astro preview",
     "deploy": "astro build && gh-pages -d dist --dotfiles",
-    "doctor": "node ../ecology/scripts/doctor.mjs"
+    "doctor": "node ../ecology/scripts/doctor.mjs",
+    "shots": "node scripts/epic-shots.mjs"
   },
   "dependencies": {
     "@esa/docs": "file:../ecology/packages/docs",
@@ -22,6 +23,7 @@
   "devDependencies": {
     "@esa/handoff": "file:../ecology/packages/handoff",
     "axe-core": "^4.12.1",
-    "gh-pages": "^6.3.0"
+    "gh-pages": "^6.3.0",
+    "playwright-core": "^1.64.1"
   }
 }
