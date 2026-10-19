@@ -181,15 +181,22 @@ const total = steps.length;
       }
       const sx = window.scrollX;
       const sy = window.scrollY;
+      // A part that runs to the window's edges (a full-bleed strip) is outlined
+      // flush inside them, so its outline and its number stay on screen.
+      const REACH = 8; // outline offset plus width
+      const vw = document.documentElement.clientWidth;
       const boxes: HTMLElement[] = [];
       const numbered = new Set<number>();
       for (const { n: num, rect: r } of measureMarks(activeKey)) {
         if (!r) continue;
+        const left = Math.max(r.x + sx, 0);
+        const right = Math.min(r.x + r.w + sx, vw);
+        const flush = left < REACH || right > vw - REACH;
         const box = document.createElement('div');
-        box.className = 'epic-outline';
-        box.style.left = `${r.x + sx}px`;
+        box.className = flush ? 'epic-outline epic-outline--flush' : 'epic-outline';
+        box.style.left = `${left}px`;
         box.style.top = `${r.y + sy}px`;
-        box.style.width = `${r.w}px`;
+        box.style.width = `${Math.max(0, right - left)}px`;
         box.style.height = `${r.h}px`;
         if (!numbered.has(num)) {
           numbered.add(num);

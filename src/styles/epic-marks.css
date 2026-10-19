@@ -39,6 +39,14 @@
   transform: translate(-50%, -50%);
 }
 
+/* A part that runs to the window's edges: the outline sits inside its box and
+   the number moves in from the corner, so both stay on screen. */
+.epic-outline--flush { outline-offset: calc(-1 * var(--border-width-300)); }
+.epic-outline--flush > .epic-num {
+  inset-inline-start: var(--spacing-200);
+  transform: translate(0, -50%);
+}
+
 /* Forced colors drop the fill and the halo; a border keeps the number a mark. */
 @media (forced-colors: active) {
   .epic-num { border: var(--border-width-100) solid CanvasText; }

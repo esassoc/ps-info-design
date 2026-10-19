@@ -69,26 +69,32 @@ export const epicMarkAttrs = (storyKey: string, label: string): Record<string, s
   'data-epic-mark-label': label,
 });
 
+/** CSS px. A story-page shot taller than this scrolls inside its frame, so
+    scripts/epic-shots.mjs splits a group of marks before its shot gets there. */
+export const EPIC_SHOT_TALL = 1200;
+
 /** The story's marked parts in page order, numbered before any is dropped, so
     the live outlines and the story page screenshots always agree. Parts that
-    share a label share a number (every SHI mark in a table is one item). A wrapper
-    that boxes nothing itself (display: contents, a span around blocks) takes
-    the union of its children. Self-contained: psinfo-epic-bar calls it in the
-    browser and scripts/epic-shots.mjs runs it inside the page it shoots. */
+    share a label share a number (every SHI mark in a table is one item). A part
+    is boxed where it paints: its own box plus any descendant that spills past it
+    (a full-bleed strip inside a page-column wrapper), and a wrapper that boxes
+    nothing itself (display: contents) takes the union of its children.
+    Self-contained: psinfo-epic-bar calls it in the browser and
+    scripts/epic-shots.mjs runs it inside the page it shoots. */
 export function measureMarks(storyKey: string): EpicMarkBox[] {
   type Box = { left: number; top: number; right: number; bottom: number };
   const boxOf = (el: Element): Box | null => {
     const r = el.getBoundingClientRect();
-    if (r.width || r.height) return { left: r.left, top: r.top, right: r.right, bottom: r.bottom };
-    const kids = Array.from(el.children)
-      .map(boxOf)
-      .filter((k): k is Box => k !== null);
-    if (!kids.length) return null;
+    const own = r.width > 1 && r.height > 1 ? { left: r.left, top: r.top, right: r.right, bottom: r.bottom } : null;
+    // An svg's box already holds its drawing; a clipping box holds its children.
+    const clips = el instanceof SVGElement || (own !== null && getComputedStyle(el).overflow !== 'visible');
+    const boxes = [own, ...(clips ? [] : Array.from(el.children).map(boxOf))].filter((k): k is Box => k !== null);
+    if (!boxes.length) return null;
     return {
-      left: Math.min(...kids.map((k) => k.left)),
-      top: Math.min(...kids.map((k) => k.top)),
-      right: Math.max(...kids.map((k) => k.right)),
-      bottom: Math.max(...kids.map((k) => k.bottom)),
+      left: Math.min(...boxes.map((k) => k.left)),
+      top: Math.min(...boxes.map((k) => k.top)),
+      right: Math.max(...boxes.map((k) => k.right)),
+      bottom: Math.max(...boxes.map((k) => k.bottom)),
     };
   };
   const numbers = new Map<string, number>();

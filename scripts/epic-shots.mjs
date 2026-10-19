@@ -23,7 +23,7 @@ const PAD = { top: 28, side: 24, bottom: 24 }; // top clears the number badge on
 const MIN_WIDTH = 720;
 const CLUSTER_GAP = 200;
 
-const { EPICS, epicSteps, gateStorageKey, measureMarks, storySlug } = await import(
+const { EPICS, EPIC_SHOT_TALL, epicSteps, gateStorageKey, measureMarks, storySlug } = await import(
   pathToFileURL(path.join(ROOT, 'src/data/epics/index.ts')).href
 );
 
@@ -80,8 +80,9 @@ async function shootEpic(epic) {
 
     const docWidth = scroll.docWidth;
     const shots = [];
-    for (const [i, group] of clusters(marks).entries()) {
-      const clip = await snapClip(page, clipFor(group, docWidth));
+    const fitted = [];
+    for (const group of clusters(marks)) fitted.push(...(await fit(page, group, docWidth)));
+    for (const [i, { group, clip }] of fitted.entries()) {
       const file = `${slugFor(epicPage.route)}-${i + 1}.jpg`;
       const dir = path.join(outDir, storySlug(story));
       await mkdir(dir, { recursive: true });
@@ -145,28 +146,87 @@ async function hideFixed(page) {
   });
 }
 
-/** Moves the crop's top and bottom edges outward until neither cuts through a
-    line of text, an image or a control. */
-async function snapClip(page, clip) {
-  return page.evaluate(({ x, y, width, height }) => {
-    const LEAVES = 'h1, h2, h3, h4, h5, h6, p, dt, dd, figcaption, label, a, button, img, svg';
-    const boxes = Array.from(document.querySelectorAll(LEAVES))
-      .map((el) => el.getBoundingClientRect())
-      .filter((r) => r.width && r.height && r.height < 120)
-      .map((r) => ({ top: r.top + scrollY, bottom: r.bottom + scrollY, left: r.left + scrollX, right: r.right + scrollX }))
-      .filter((b) => b.right > x && b.left < x + width);
+/** Moves the crop's edges until none cuts through a line of text, an image or a
+    control. The top and bottom move outward. A side pulls in past text beside
+    the marks (a neighbouring column), or moves out past it when pulling in would
+    cut into the marks. */
+async function snapClip(page, clip, group, docWidth) {
+  const keep = {
+    left: Math.min(...group.map((m) => m.x)) - PAD.side,
+    right: Math.max(...group.map((m) => m.x + m.w)) + PAD.side,
+  };
+  return page.evaluate(({ clip: { x, y, width, height }, keep, docWidth }) => {
+    const toPage = (r) => ({ top: r.top + scrollY, bottom: r.bottom + scrollY, left: r.left + scrollX, right: r.right + scrollX });
+    const seen = (el) => {
+      const r = el.getBoundingClientRect();
+      // A 1px box is visually hidden text (sr-only); its lines paint nowhere.
+      return r.width > 1 && r.height > 1 && el.checkVisibility({ opacityProperty: true, visibilityProperty: true });
+    };
+    const lines = [];
+    const range = document.createRange();
+    const walk = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+    for (let t = walk.nextNode(); t; t = walk.nextNode()) {
+      if (!t.data.trim() || !t.parentElement || !seen(t.parentElement)) continue;
+      range.selectNodeContents(t);
+      for (const r of range.getClientRects()) if (r.width && r.height) lines.push(toPage(r));
+    }
+    const boxes = (sel) =>
+      Array.from(document.querySelectorAll(sel))
+        .filter(seen)
+        .map((el) => el.getBoundingClientRect())
+        .filter((r) => r.height < 120)
+        .map(toPage);
+    // Top and bottom: short blocks whole, then every line of text.
+    const rows = [...boxes('h1, h2, h3, h4, h5, h6, p, dt, dd, figcaption, label, a, button, img, svg'), ...lines];
+    // Sides: lines, controls and images only; a block's box is wider than what it shows.
+    const sides = [...boxes('button, img, svg, input, select, textarea'), ...lines];
     let top = y;
     let bottom = y + height;
-    for (let pass = 0; pass < 2; pass++) {
+    let left = x;
+    let right = x + width;
+    for (let pass = 0; pass < 3; pass++) {
       let moved = false;
-      for (const b of boxes) {
+      for (const b of sides) {
+        if (b.bottom <= top || b.top >= bottom) continue;
+        if (b.left < left && b.right > right) continue; // wider than the crop: full-bleed art
+        if (b.left < right && b.right > right) {
+          const next = b.left - 8 >= keep.right ? b.left - 8 : Math.min(docWidth, b.right + 8);
+          if (next !== right) { right = next; moved = true; }
+        }
+        if (b.left < left && b.right > left) {
+          const next = b.right + 8 <= keep.left ? b.right + 8 : Math.max(0, b.left - 8);
+          if (next !== left) { left = next; moved = true; }
+        }
+      }
+      for (const b of rows) {
+        if (b.right <= left || b.left >= right) continue;
         if (b.top < top && b.bottom > top) { top = Math.max(0, b.top - 8); moved = true; }
         if (b.top < bottom && b.bottom > bottom) { bottom = b.bottom + 8; moved = true; }
       }
       if (!moved) break;
     }
-    return { x, y: Math.round(top), width, height: Math.round(bottom - top) };
-  }, clip);
+    return { x: Math.round(left), y: Math.round(top), width: Math.round(right - left), height: Math.round(bottom - top) };
+  }, { clip, keep, docWidth });
+}
+
+/** One shot per group, split at the widest gap between its marks while the shot
+    would be too tall to show whole on the story page. */
+async function fit(page, group, docWidth) {
+  const clip = await snapClip(page, clipFor(group, docWidth), group, docWidth);
+  if (clip.height <= EPIC_SHOT_TALL || group.length < 2) return [{ group, clip }];
+  const byTop = [...group].sort((a, b) => a.y - b.y);
+  let at = 1;
+  let widest = -Infinity;
+  let bottom = -Infinity;
+  for (let i = 1; i < byTop.length; i++) {
+    bottom = Math.max(bottom, byTop[i - 1].y + byTop[i - 1].h);
+    if (byTop[i].y - bottom > widest) {
+      widest = byTop[i].y - bottom;
+      at = i;
+    }
+  }
+  const byN = (g) => g.sort((a, b) => a.n - b.n);
+  return [...(await fit(page, byN(byTop.slice(0, at)), docWidth)), ...(await fit(page, byN(byTop.slice(at)), docWidth))];
 }
 
 /** Marks that sit near each other share one screenshot. */
