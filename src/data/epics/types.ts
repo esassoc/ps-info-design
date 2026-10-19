@@ -57,12 +57,18 @@ export interface EpicMarkBox {
   rect: { x: number; y: number; w: number; h: number } | null;
 }
 
+/** Where a part's number sits: beside its outline (start, end), over or under
+    it, or, when none of those is clear of the page's text, inside its corner. */
+export type EpicBadgeSide = 'start' | 'end' | 'above' | 'below' | 'inside';
+
 /** A marked part's place on a screenshot, in percent of the image. */
 export interface EpicShotMark {
   /** 1-based, by first appearance of its label in page order; matches the live outlines. */
   n: number;
   /** The mark's own label, as written in the page's markup. */
   label: string;
+  /** Where its number sits, chosen in the page by placeBadges. */
+  badge: EpicBadgeSide;
   x: number;
   y: number;
   w: number;

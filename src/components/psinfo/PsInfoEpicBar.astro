@@ -7,7 +7,8 @@
 //
 // Outlines draw a numbered box around each part the active story marks, one
 // per label: a mark the page repeats is outlined once, on its first instance,
-// matching psinfo-epic-shot's screenshots (both measure with measureMarks and
+// matching psinfo-epic-shot's screenshots (both measure with measureMarks, put
+// each number beside its outline off the page's text with placeBadges, and
 // draw from styles/epic-marks.css). The switch shows only when the page has
 // marks for that story; its state lasts for the tab. Alt+Shift+H hides and
 // shows the bar (a modified shortcut, so 2.1.4 holds); ?bar=off starts it
@@ -123,7 +124,7 @@ const total = steps.length;
 
 <script>
   import '@esa/ecology/esa-switch-toggle';
-  import { STORY_PARAM, measureMarks } from '../../data/epics/index';
+  import { STORY_PARAM, measureMarks, placeBadges } from '../../data/epics/index';
 
   type SwitchEl = HTMLElement & { checked: boolean };
 
@@ -187,7 +188,9 @@ const total = steps.length;
       const REACH = 8; // outline offset plus width
       const vw = document.documentElement.clientWidth;
       const boxes: HTMLElement[] = [];
-      for (const { n: num, rect: r } of measureMarks(activeKey)) {
+      const parts = measureMarks(activeKey);
+      const badges = placeBadges({ parts, width: vw });
+      for (const [i, { n: num, rect: r }] of parts.entries()) {
         if (!r) continue;
         const left = Math.max(r.x + sx, 0);
         const right = Math.min(r.x + r.w + sx, vw);
@@ -200,6 +203,7 @@ const total = steps.length;
         box.style.height = `${r.h}px`;
         const n = document.createElement('span');
         n.className = 'epic-num typography-label-sm-strong';
+        n.dataset.side = badges[i].side;
         n.textContent = String(num);
         box.append(n);
         boxes.push(box);

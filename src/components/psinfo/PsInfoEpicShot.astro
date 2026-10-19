@@ -4,9 +4,11 @@
 // same styles/epic-marks.css psinfo-epic-bar draws the live outlines with.
 // Outlines and numbers are aria-hidden: the img alt names what is outlined, and
 // psinfo-epic-story's numbered labels carry the rest. Every shot shows at full
-// height; the page scrolls, never the frame.
+// height; the page scrolls, never the frame. Each number sits on the side the
+// page chose for it (placeBadges), and every mark size scales with the image,
+// so at any width a number lands where it did on the page: clear of its text.
 //
-// bcn-lego-checked: esa-card is the nearest frame but clips overflow (a corner number sits half outside its mark); the .frame primitive is a ratio-locked crop; no esa- lego overlays marks on an image; checked Beacon shared ui components (none); psinfo-epic-shot is the reusable home
+// bcn-lego-checked: esa-card is the nearest frame but clips overflow (a number sits outside its mark); the .frame primitive is a ratio-locked crop; no esa- lego overlays marks on an image; checked Beacon shared ui components (none); psinfo-epic-shot is the reusable home
 import type { EpicShot } from '../../data/epics/types';
 import { withBase } from '../../lib/base';
 import '@esa/tokens/typography.css';
@@ -19,13 +21,15 @@ interface Props {
 }
 const { shot, alt } = Astro.props;
 
+/** One image pixel at the size the image is shown (the image box is the container). */
+const imagePx = `calc(${(100 / shot.width).toFixed(5)} * 1cqw)`;
 ---
 <div class="epicshot" style={`--epicshot-w: ${shot.width}px`}>
-  <div class="epicshot__img">
+  <div class="epicshot__img" style={`--epic-px: ${imagePx}`}>
     <img src={withBase(shot.src)} width={shot.width} height={shot.height} alt={alt} loading="lazy" decoding="async" />
     {shot.marks.map((m) => (
       <span class="epic-outline" style={`left: ${m.x}%; top: ${m.y}%; width: ${m.w}%; height: ${m.h}%`} aria-hidden="true">
-        <span class="epic-num typography-label-sm-strong">{m.n}</span>
+        <span class="epic-num typography-label-sm-strong" data-side={m.badge ?? 'start'}>{m.n}</span>
       </span>
     ))}
   </div>
@@ -42,6 +46,20 @@ const { shot, alt } = Astro.props;
     background: var(--color-surface);
   }
 
-  .epicshot__img { position: relative; max-inline-size: var(--epicshot-w); }
+  .epicshot__img {
+    position: relative;
+    max-inline-size: var(--epicshot-w);
+    container-type: inline-size;
+    /* The marks scale with the image. Multiples of one image pixel, mirroring the
+       live sizes: border-width-300, spacing-100, radius-100, the number's
+       1.75rem, border-width-200 for its halo. */
+    --epic-outline-width: calc(3 * var(--epic-px));
+    --epic-outline-offset: calc(4 * var(--epic-px));
+    --epic-outline-radius: calc(4 * var(--epic-px));
+    --epic-num-size: calc(28 * var(--epic-px));
+    --epic-num-halo: calc(2 * var(--epic-px));
+  }
+  /* label-sm-strong's largest size, 0.875rem, scaled the same way. */
+  .epicshot__img .epic-num { font-size: calc(14 * var(--epic-px)); }
   .epicshot__img img { display: block; inline-size: 100%; block-size: auto; }
 </style>

@@ -1,7 +1,7 @@
 // Every epic this spoke presents, and the lookups the epic page, story pages,
 // previous/next bar and gate share. Pure functions over the epic files, so
 // scripts/epic-shots.mjs can import this module too.
-import type { Epic, EpicMarkBox, EpicPage, EpicStep, EpicStory } from './types.ts';
+import type { Epic, EpicBadgeSide, EpicMarkBox, EpicPage, EpicStep, EpicStory } from './types.ts';
 import { SHI_EPIC } from './shi.ts';
 
 export const EPICS: Epic[] = [SHI_EPIC];
@@ -115,4 +115,59 @@ export function measureMarks(storyKey: string): EpicMarkBox[] {
     });
   }
   return [...parts.values()];
+}
+
+/** px at full size: how far an outline's outer edge sits out from its part
+    (styles/epic-marks.css: outline offset spacing-100 plus width border-width-300). */
+export const EPIC_MARK_EDGE = 7;
+
+/** Each part's number, placed off the page's text. The first side, in the order
+    start, end, above, below, where the number stays inside `width`, below the
+    top of the page and clear of every line of text, every other part and every
+    number already placed; failing all four, inside the part's corner. `box` is
+    the number in viewport pixels at full size. The geometry mirrors
+    styles/epic-marks.css: a 28px number, the outline's outer edge 7px out from
+    the part, and a 4px space past that. Self-contained, like measureMarks. */
+export function placeBadges({ parts, width }: { parts: EpicMarkBox[]; width: number }): { side: EpicBadgeSide; box: { x: number; y: number; w: number; h: number } | null }[] {
+  type Box = { x: number; y: number; w: number; h: number };
+  const SIZE = 28;
+  const EDGE = 7;
+  const GAP = 11;
+  const HALO = 2;
+  const hit = (a: Box, b: Box): boolean => a.x < b.x + b.w && b.x < a.x + a.w && a.y < b.y + b.h && b.y < a.y + a.h;
+  const lines: Box[] = [];
+  const range = document.createRange();
+  const walk = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+  for (let t = walk.nextNode(); t; t = walk.nextNode()) {
+    const el = t.parentElement;
+    // Skip the numbers already drawn, and visually hidden text (a 1px box paints nothing).
+    if (!t.textContent?.trim() || !el || el.closest('.epic-outlines')) continue;
+    const r = el.getBoundingClientRect();
+    if (r.width <= 1 || r.height <= 1 || !el.checkVisibility({ opacityProperty: true, visibilityProperty: true })) continue;
+    range.selectNodeContents(t);
+    for (const l of Array.from(range.getClientRects())) if (l.width && l.height) lines.push({ x: l.left, y: l.top, w: l.width, h: l.height });
+  }
+  const outlines = parts.map((p) => (p.rect ? { x: p.rect.x - EDGE, y: p.rect.y - EDGE, w: p.rect.w + 2 * EDGE, h: p.rect.h + 2 * EDGE } : null));
+  const placed: Box[] = [];
+  const pageTop = -window.scrollY;
+  return parts.map(({ rect: r }, i) => {
+    if (!r) return { side: 'inside' as const, box: null };
+    const blockers = [...lines, ...placed, ...outlines.filter((o, j): o is Box => o !== null && j !== i)];
+    const sides: [EpicBadgeSide, Box][] = [
+      ['start', { x: r.x - GAP - SIZE, y: r.y - EDGE, w: SIZE, h: SIZE }],
+      ['end', { x: r.x + r.w + GAP, y: r.y - EDGE, w: SIZE, h: SIZE }],
+      ['above', { x: r.x, y: r.y - GAP - SIZE, w: SIZE, h: SIZE }],
+      ['below', { x: r.x, y: r.y + r.h + GAP, w: SIZE, h: SIZE }],
+    ];
+    for (const [side, b] of sides) {
+      if (b.x < 0 || b.x + b.w > width || b.y < pageTop) continue;
+      const halo = { x: b.x - HALO, y: b.y - HALO, w: b.w + 2 * HALO, h: b.h + 2 * HALO };
+      if (blockers.some((o) => hit(halo, o))) continue;
+      placed.push(b);
+      return { side, box: b };
+    }
+    const inside = { x: r.x + 4, y: r.y + 4, w: SIZE, h: SIZE };
+    placed.push(inside);
+    return { side: 'inside' as const, box: inside };
+  });
 }

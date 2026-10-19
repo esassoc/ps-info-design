@@ -19,12 +19,12 @@ import { chromium } from 'playwright-core';
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const VIEWPORT = { width: 1280, height: 900 };
 const SCALE = 2;
-const PAD = { top: 28, side: 24, bottom: 24 }; // top clears the number badge on the corner
+const PAD = 24; // around each part's outline and number
 const MIN_WIDTH = 720;
 const MIN_HEIGHT = 360; // enough of the page around one small mark to show where it sits
 const CLUSTER_GAP = 200;
 
-const { EPICS, EPIC_SHOT_TALL, exampleOf, gateStorageKey, measureMarks, storySlug } = await import(
+const { EPICS, EPIC_MARK_EDGE, EPIC_SHOT_TALL, exampleOf, gateStorageKey, measureMarks, placeBadges, storySlug } = await import(
   pathToFileURL(path.join(ROOT, 'src/data/epics/index.ts')).href
 );
 
@@ -76,12 +76,25 @@ async function shootEpic(epic) {
     // The bar's own measurement, so the numbers here match the live outlines.
     const measured = await page.evaluate(measureMarks, story.key);
     const scroll = await page.evaluate(() => ({ x: scrollX, y: scrollY, docWidth: document.documentElement.scrollWidth }));
-    const marks = measured
-      .filter((m) => m.rect)
-      .map(({ n, label, rect }) => ({ n, label, x: rect.x + scroll.x, y: rect.y + scroll.y, w: rect.w, h: rect.h }));
+    const docWidth = scroll.docWidth;
+    // The bar's own placement, so each number sits where it does live.
+    const badges = await page.evaluate(placeBadges, { parts: measured, width: docWidth });
+    const marks = measured.flatMap(({ n, label, rect }, i) => {
+      if (!rect) return [];
+      const x = rect.x + scroll.x;
+      const y = rect.y + scroll.y;
+      const { side, box } = badges[i];
+      // What a shot of this part has to hold: its outline's outer edge and its number.
+      const ext = {
+        left: Math.min(x - EPIC_MARK_EDGE, box ? box.x + scroll.x : Infinity),
+        top: Math.min(y - EPIC_MARK_EDGE, box ? box.y + scroll.y : Infinity),
+        right: Math.max(x + rect.w + EPIC_MARK_EDGE, box ? box.x + scroll.x + box.w : -Infinity),
+        bottom: Math.max(y + rect.h + EPIC_MARK_EDGE, box ? box.y + scroll.y + box.h : -Infinity),
+      };
+      return [{ n, label, badge: side, x, y, w: rect.w, h: rect.h, ext }];
+    });
     if (!marks.length) continue;
 
-    const docWidth = scroll.docWidth;
     const shots = [];
     const fitted = [];
     for (const group of clusters(marks)) fitted.push(...(await fit(page, group, docWidth)));
@@ -97,6 +110,7 @@ async function shootEpic(epic) {
         marks: group.map((m) => ({
           n: m.n,
           label: m.label,
+          badge: m.badge,
           x: pct(m.x - clip.x, clip.width),
           y: pct(m.y - clip.y, clip.height),
           w: pct(m.w, clip.width),
@@ -157,10 +171,10 @@ async function hideFixed(page) {
     trimmed stays out, so no move undoes another. */
 async function snapClip(page, clip, group, docWidth) {
   const keep = {
-    left: Math.min(...group.map((m) => m.x)) - PAD.side,
-    right: Math.max(...group.map((m) => m.x + m.w)) + PAD.side,
-    top: Math.min(...group.map((m) => m.y)) - PAD.top,
-    bottom: Math.max(...group.map((m) => m.y + m.h)) + PAD.bottom,
+    left: Math.min(...group.map((m) => m.ext.left)) - PAD,
+    right: Math.max(...group.map((m) => m.ext.right)) + PAD,
+    top: Math.min(...group.map((m) => m.ext.top)) - PAD,
+    bottom: Math.max(...group.map((m) => m.ext.bottom)) + PAD,
   };
   return page.evaluate(({ clip: { x, y, width, height }, keep, docWidth }) => {
     const toPage = (r) => ({ top: r.top + scrollY, bottom: r.bottom + scrollY, left: r.left + scrollX, right: r.right + scrollX });
@@ -248,14 +262,14 @@ async function snapClip(page, clip, group, docWidth) {
 async function fit(page, group, docWidth) {
   const clip = await snapClip(page, clipFor(group, docWidth), group, docWidth);
   if (clip.height <= EPIC_SHOT_TALL || group.length < 2) return [{ group, clip }];
-  const byTop = [...group].sort((a, b) => a.y - b.y);
+  const byTop = [...group].sort((a, b) => a.ext.top - b.ext.top);
   let at = 1;
   let widest = -Infinity;
   let bottom = -Infinity;
   for (let i = 1; i < byTop.length; i++) {
-    bottom = Math.max(bottom, byTop[i - 1].y + byTop[i - 1].h);
-    if (byTop[i].y - bottom > widest) {
-      widest = byTop[i].y - bottom;
+    bottom = Math.max(bottom, byTop[i - 1].ext.bottom);
+    if (byTop[i].ext.top - bottom > widest) {
+      widest = byTop[i].ext.top - bottom;
       at = i;
     }
   }
@@ -265,22 +279,22 @@ async function fit(page, group, docWidth) {
 
 /** Marks that sit near each other share one screenshot. */
 function clusters(marks) {
-  const byTop = [...marks].sort((a, b) => a.y - b.y);
+  const byTop = [...marks].sort((a, b) => a.ext.top - b.ext.top);
   const groups = [];
   for (const m of byTop) {
     const last = groups.at(-1);
-    const bottom = last ? Math.max(...last.map((g) => g.y + g.h)) : -Infinity;
-    if (last && m.y <= bottom + CLUSTER_GAP) last.push(m);
+    const bottom = last ? Math.max(...last.map((g) => g.ext.bottom)) : -Infinity;
+    if (last && m.ext.top <= bottom + CLUSTER_GAP) last.push(m);
     else groups.push([m]);
   }
   return groups.map((g) => g.sort((a, b) => a.n - b.n));
 }
 
 function clipFor(group, docWidth) {
-  let left = Math.min(...group.map((m) => m.x)) - PAD.side;
-  let right = Math.max(...group.map((m) => m.x + m.w)) + PAD.side;
-  let top = Math.max(0, Math.min(...group.map((m) => m.y)) - PAD.top);
-  let bottom = Math.max(...group.map((m) => m.y + m.h)) + PAD.bottom;
+  let left = Math.min(...group.map((m) => m.ext.left)) - PAD;
+  let right = Math.max(...group.map((m) => m.ext.right)) + PAD;
+  let top = Math.max(0, Math.min(...group.map((m) => m.ext.top)) - PAD);
+  let bottom = Math.max(...group.map((m) => m.ext.bottom)) + PAD;
   if (bottom - top < MIN_HEIGHT) {
     const grow = (MIN_HEIGHT - (bottom - top)) / 2;
     top -= grow;
