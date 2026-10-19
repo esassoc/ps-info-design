@@ -1,22 +1,26 @@
 ---
-// PsInfoEpicStory: the body of a story page. The story's key linked to Jira,
-// then the story's one illustrative example (exampleOf): that page's title
-// linked to the page (carrying ?story= when the page sits under more than one
-// story), its case label as a quiet badge, and the numbered labels beside its
-// annotated shots (psinfo-epic-shot). The epic page lists every page; this
-// shows one. Shots come from scripts/epic-shots.mjs as
-// src/data/epics/shots/<epic key>.json; a missing file or entry renders the
-// heading alone.
+// PsInfoEpicStory: the body of a story page, the story's annotated overview.
+// One psinfo-group for the story's one illustrative example (exampleOf): the
+// band names the page and its case label, with Open Page to the page itself
+// (carrying ?story= when the page sits under more than one story); under it,
+// the numbered labels beside the page's annotated shots (psinfo-epic-shot).
+// The epic page lists every page; this shows one. Shots come from
+// scripts/epic-shots.mjs as src/data/epics/shots/<epic key>.json; a missing
+// file or entry renders the band alone. The page header comes in the header
+// slot.
 // prose-prop-checked: `story` is a Jira story record (key, title, pages), never page copy
-// bcn-lego-checked: no esa- lego pairs a numbered label list with annotated images, and esa-link-column's heading is a span where these pages need real h2 headings; checked Beacon shared ui components (none); psinfo-epic-story is the reusable home
+// bcn-lego-checked: no esa- lego pairs a numbered label list with annotated images; the band is psinfo-group, the button esa-button. Checked Beacon shared ui components (none); psinfo-epic-story is the reusable home
 import EsaBadge from '@esa/ecology/esa-badge.astro';
+import EsaButton from '@esa/ecology/esa-button.astro';
 import '@esa/tokens/typography.css';
 import '@esa/tokens/a11y.css';
 import '../../styles/epic-marks.css';
 import type { Epic, EpicShot, EpicShotMark, EpicShots, EpicStory } from '../../data/epics/types';
-import { exampleOf, jiraHref, stepHref } from '../../data/epics/index';
+import { exampleOf, stepHref } from '../../data/epics/index';
 import { withBase } from '../../lib/base';
 import PsInfoEpicShot from './PsInfoEpicShot.astro';
+import PsInfoGroup from './PsInfoGroup.astro';
+import '@esa/tokens/layouts.css';
 
 interface Props {
   epic: Epic;
@@ -43,18 +47,16 @@ const annotated = shots.map((shot) => ({
   alt: shot.marks.length ? `${page.title}, outlined: ${[...shot.marks].sort(byN).map((m) => m.label).join(', ')}` : page.title,
 }));
 ---
-<div class="epicstory stack" data-gap="2xl">
-  <div class="stack" data-gap="xl">
-    <slot name="header" />
-    <p class="epicstory__story">Story: <a href={jiraHref(story.key)}>{story.key}</a></p>
-  </div>
-  <section class="stack" data-gap="md" aria-labelledby={id}>
-    <h2 id={id} class="epicstory__h2 cluster typography-title-strong" data-gap="xs">
-      <a href={href}>{page.title}</a>
+<div class="stack" data-gap="2xl">
+  <slot name="header" />
+  <PsInfoGroup id={id}>
+    <Fragment slot="title">
+      <span>{page.title}</span>
       {page.label && <EsaBadge value={page.label} variant="neutral" size="sm" />}
-    </h2>
+    </Fragment>
+    <EsaButton slot="actions" variant="primary" size="sm" href={href} iconRight="arrow-right">Open Page</EsaButton>
     {annotated.length > 0 && (
-      <div class="sidebar" data-side="end" data-gap="lg">
+      <div class="epicstory__body sidebar" data-side="end" data-gap="lg">
         <ol class="epicstory__labels" role="list">
           {labels.map((m) => (
             <li class="epicstory__label">
@@ -68,20 +70,11 @@ const annotated = shots.map((shot) => ({
         </div>
       </div>
     )}
-  </section>
+  </PsInfoGroup>
 </div>
 
 <style>
-  .epicstory {
-    padding-block: var(--spacing-700) var(--spacing-900);
-    padding-inline: var(--spacing-500);
-  }
-  .epicstory__story { margin: 0; }
-  .epicstory__h2 { margin: 0; color: var(--color-text-primary); }
-  .epicstory a { color: var(--color-text-link); text-decoration: underline; text-underline-offset: 0.15em; }
-  .epicstory a:hover { color: var(--color-text-link-hover); }
-  .epicstory a:focus-visible { outline: 2px solid var(--focus-ring-color); outline-offset: 2px; }
-
+  .epicstory__body { padding-block-start: var(--spacing-400); }
   .epicstory__labels {
     list-style: none; margin: 0; padding: 0;
     display: flex; flex-direction: column; gap: var(--spacing-300);
@@ -89,8 +82,5 @@ const annotated = shots.map((shot) => ({
   .epicstory__label {
     display: flex; align-items: baseline; gap: var(--spacing-200);
     color: var(--color-text-primary);
-  }
-  @media (max-width: 640px) {
-    .epicstory { padding-inline: var(--spacing-400); }
   }
 </style>

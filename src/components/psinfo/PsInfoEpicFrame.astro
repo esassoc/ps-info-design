@@ -1,0 +1,81 @@
+---
+// PsInfoEpicFrame: the chrome of an epic's own pages, the epic page and its
+// story pages. Linear's frame, measured from a screenshot and ported by the
+// Radial skin (radial-design docs/private/briefs/radial-skin/linear-measured.md;
+// src/layouts/AppShell.astro): one white panel inset 8px on the neutral page,
+// its hairline darker toward the top-left corner, a 44px head bar holding the
+// breadcrumbs and the page's tools, and one centered content column. PS Info's
+// own neutrals; none of Radial's identity.
+//
+// It owns the page's <main>, so the skip link lands on the content and not on
+// the head bar. Slots: "head" (esa-breadcrumbs), "tools" (right of the head
+// bar), and the content.
+//
+// bcn-lego-checked: esa-app-shell is the house app frame but brings a rail, an omnibox and a profile menu a presentation page has no use for; esa-container centers a column but draws no panel or head bar; esa-card is a record card, not a page frame. Checked Beacon shared ui components (no presentation frame). psinfo-epic-frame is the reusable home.
+import '@esa/tokens/layouts.css';
+---
+<div class="epicframe">
+  <div class="epicframe__panel">
+    <div class="epicframe__head repel" data-gap="sm">
+      <slot name="head" />
+      <div class="cluster" data-gap="sm"><slot name="tools" /></div>
+    </div>
+    <main id="main-content" class="epicframe__body">
+      <slot />
+    </main>
+  </div>
+</div>
+
+<style>
+  /* The page around the panel: Linear's chrome, a step darker than the panel.
+     Secondary buttons re-pointed here (tier 3, local) to Linear's raised
+     neutral button: the panel's white, a hairline, primary ink, the hover
+     wash. The PS Info theme leaves the hub's brand-muted roles on hub green,
+     which reads as a status here. */
+  .epicframe {
+    --color-background-brand-muted: var(--color-surface);
+    --color-background-brand-muted-hover: var(--color-primary-subtle);
+    --color-content-on-brand-muted: var(--color-text-primary);
+    --color-border-default-strong: var(--color-border-strong);
+    box-sizing: border-box;
+    min-block-size: 100dvh;
+    padding: var(--spacing-200);
+    background: var(--color-surface-sunken);
+  }
+
+  /* The lit corner: a transparent border showing a gradient laid under the
+     padding box, darkest at the top-left (theme-skin's --rd-edge-lit, a step
+     past the hairline in light) and the plain hairline from 70% out. */
+  .epicframe__panel {
+    box-sizing: border-box;
+    min-block-size: calc(100dvh - 2 * var(--spacing-200));
+    border: var(--border-width-100) solid transparent;
+    border-radius: var(--radius-200);
+    background:
+      linear-gradient(var(--color-surface), var(--color-surface)) padding-box,
+      radial-gradient(calc(2 * var(--spacing-1000)) var(--spacing-1000) at 0 0, var(--color-border-strong), var(--color-border) 70%) border-box;
+  }
+
+  /* Linear's panel header: 44px, a hairline under it. */
+  .epicframe__head {
+    min-block-size: calc(var(--spacing-650) + var(--spacing-100));
+    padding-block: var(--spacing-100);
+    padding-inline: var(--spacing-400) var(--spacing-200);
+    border-block-end: var(--border-width-100) solid var(--color-border);
+  }
+
+  .epicframe__body {
+    display: block;
+    max-inline-size: 60rem;
+    margin-inline: auto;
+    padding-block: var(--spacing-700) var(--spacing-900);
+    padding-inline: var(--spacing-600);
+  }
+
+  /* A phone gives the panel the whole screen. */
+  @media (max-width: 640px) {
+    .epicframe { padding: 0; }
+    .epicframe__panel { min-block-size: 100dvh; border-radius: 0; border-width: 0; }
+    .epicframe__body { padding-block: var(--spacing-600) var(--spacing-800); padding-inline: var(--spacing-400); }
+  }
+</style>
