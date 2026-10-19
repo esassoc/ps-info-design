@@ -69,8 +69,9 @@ export const epicMarkAttrs = (storyKey: string, label: string): Record<string, s
   'data-epic-mark-label': label,
 });
 
-/** CSS px. A story-page shot taller than this scrolls inside its frame, so
-    scripts/epic-shots.mjs splits a group of marks before its shot gets there. */
+/** CSS px. scripts/epic-shots.mjs splits a group of marks at the widest gap
+    between them before its shot gets taller than this; a single mark taller
+    than this keeps one shot. */
 export const EPIC_SHOT_TALL = 1200;
 
 /** The story's marked parts in page order, numbered before any is dropped, so

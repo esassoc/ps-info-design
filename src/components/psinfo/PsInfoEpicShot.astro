@@ -2,14 +2,13 @@
 // PsInfoEpicShot: one annotated screenshot on a story page. The image in a
 // quiet frame, and over it an outline for each marked part, from the same
 // styles/epic-marks.css psinfo-epic-bar draws the live outlines with. Parts
-// that share a label share a number, shown once per shot. Outlines and numbers are aria-hidden: the img alt
-// names what is outlined, and psinfo-epic-story's numbered labels carry the
-// rest. A shot taller than EPIC_SHOT_TALL scrolls inside an 80vh frame that is
-// itself a labelled, keyboard-reachable region.
+// that share a label share a number, shown once per shot. Outlines and numbers
+// are aria-hidden: the img alt names what is outlined, and psinfo-epic-story's
+// numbered labels carry the rest. Every shot shows at full height; the page
+// scrolls, never the frame.
 //
-// bcn-lego-checked: esa-card is the nearest frame but clips overflow (a corner number sits half outside its mark) and takes no tabindex/role for the tall-shot scroll region; the .frame primitive is a ratio-locked crop; no esa- lego overlays marks on an image; checked Beacon shared ui components (none); psinfo-epic-shot is the reusable home
+// bcn-lego-checked: esa-card is the nearest frame but clips overflow (a corner number sits half outside its mark); the .frame primitive is a ratio-locked crop; no esa- lego overlays marks on an image; checked Beacon shared ui components (none); psinfo-epic-shot is the reusable home
 import type { EpicShot } from '../../data/epics/types';
-import { EPIC_SHOT_TALL } from '../../data/epics/index';
 import { withBase } from '../../lib/base';
 import '@esa/tokens/typography.css';
 import '../../styles/epic-marks.css';
@@ -21,16 +20,9 @@ interface Props {
 }
 const { shot, alt } = Astro.props;
 
-const tall = shot.height > EPIC_SHOT_TALL;
 const firstOfN = new Set(shot.marks.map((m) => shot.marks.find((o) => o.n === m.n)));
 ---
-<div
-  class:list={['epicshot', tall && 'epicshot--tall']}
-  style={`--epicshot-w: ${shot.width}px`}
-  tabindex={tall ? '0' : undefined}
-  role={tall ? 'region' : undefined}
-  aria-label={tall ? alt : undefined}
->
+<div class="epicshot" style={`--epicshot-w: ${shot.width}px`}>
   <div class="epicshot__img">
     <img src={withBase(shot.src)} width={shot.width} height={shot.height} alt={alt} loading="lazy" decoding="async" />
     {shot.marks.map((m) => (
@@ -51,8 +43,6 @@ const firstOfN = new Set(shot.marks.map((m) => shot.marks.find((o) => o.n === m.
     border-radius: var(--radius-100);
     background: var(--color-surface);
   }
-  .epicshot--tall { max-block-size: 80vh; overflow-y: auto; }
-  .epicshot--tall:focus-visible { outline: 2px solid var(--focus-ring-color); outline-offset: 2px; }
 
   .epicshot__img { position: relative; max-inline-size: var(--epicshot-w); }
   .epicshot__img img { display: block; inline-size: 100%; block-size: auto; }
