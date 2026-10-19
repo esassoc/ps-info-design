@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// epic-shots: screenshots every page each epic walks, cropped to the parts a
+// epic-shots: screenshots each story's example page, cropped to the parts the
 // story marks in the page's own markup (data-epic-mark), and records where
 // those marks sit so the story pages can outline and number them.
 //
@@ -21,9 +21,10 @@ const VIEWPORT = { width: 1280, height: 900 };
 const SCALE = 2;
 const PAD = { top: 28, side: 24, bottom: 24 }; // top clears the number badge on the corner
 const MIN_WIDTH = 720;
+const MIN_HEIGHT = 360; // enough of the page around one small mark to show where it sits
 const CLUSTER_GAP = 200;
 
-const { EPICS, EPIC_SHOT_TALL, epicSteps, gateStorageKey, measureMarks, storySlug } = await import(
+const { EPICS, EPIC_SHOT_TALL, exampleOf, gateStorageKey, measureMarks, storySlug } = await import(
   pathToFileURL(path.join(ROOT, 'src/data/epics/index.ts')).href
 );
 
@@ -64,7 +65,9 @@ async function shootEpic(epic) {
   const result = {};
   let count = 0;
 
-  for (const { story, page: epicPage } of epicSteps(epic)) {
+  // One illustrative page per story: the one its story page shows.
+  for (const story of epic.stories) {
+    const epicPage = exampleOf(story);
     await page.goto(`${origin}${base}${epicPage.route.replace(/^\//, '')}?bar=off`, { waitUntil: 'load' });
     const selector = `[data-epic-mark="${story.key}"]`;
     if (!(await page.locator(selector).count())) continue;
@@ -147,13 +150,17 @@ async function hideFixed(page) {
 }
 
 /** Moves the crop's edges until none cuts through a line of text, an image or a
-    control. The top and bottom move outward. A side pulls in past text beside
-    the marks (a neighbouring column), or moves out past it when pulling in would
-    cut into the marks. */
+    control. Beside the marks, an edge backs off a neighbour (another column)
+    when it can without cutting into the marks, and otherwise moves out to take
+    it whole. Above and below the marks is context: what would widen the crop or
+    cut a chart is trimmed off instead. What is taken whole stays in and what is
+    trimmed stays out, so no move undoes another. */
 async function snapClip(page, clip, group, docWidth) {
   const keep = {
     left: Math.min(...group.map((m) => m.x)) - PAD.side,
     right: Math.max(...group.map((m) => m.x + m.w)) + PAD.side,
+    top: Math.min(...group.map((m) => m.y)) - PAD.top,
+    bottom: Math.max(...group.map((m) => m.y + m.h)) + PAD.bottom,
   };
   return page.evaluate(({ clip: { x, y, width, height }, keep, docWidth }) => {
     const toPage = (r) => ({ top: r.top + scrollY, bottom: r.bottom + scrollY, left: r.left + scrollX, right: r.right + scrollX });
@@ -170,42 +177,69 @@ async function snapClip(page, clip, group, docWidth) {
       range.selectNodeContents(t);
       for (const r of range.getClientRects()) if (r.width && r.height) lines.push(toPage(r));
     }
-    const boxes = (sel) =>
-      Array.from(document.querySelectorAll(sel))
-        .filter(seen)
-        .map((el) => el.getBoundingClientRect())
-        .filter((r) => r.height < 120)
-        .map(toPage);
+    const boxOf = (el) => toPage(el.getBoundingClientRect());
+    const all = (sel) => Array.from(document.querySelectorAll(sel)).filter(seen).map(boxOf);
+    const short = (boxes) => boxes.filter((b) => b.bottom - b.top < 120);
+    // A web component's text sits in its shadow root, out of the walk above: take its host whole.
+    const hosts = short(Array.from(document.querySelectorAll('*')).filter((el) => el.shadowRoot && seen(el)).map(boxOf));
     // Top and bottom: short blocks whole, then every line of text.
-    const rows = [...boxes('h1, h2, h3, h4, h5, h6, p, dt, dd, figcaption, label, a, button, img, svg'), ...lines];
+    const rows = [...short(all('h1, h2, h3, h4, h5, h6, p, dt, dd, figcaption, label, a, button, img, svg')), ...hosts, ...lines];
     // Sides: lines, controls and images only; a block's box is wider than what it shows.
-    const sides = [...boxes('button, img, svg, input, select, textarea'), ...lines];
-    let top = y;
-    let bottom = y + height;
-    let left = x;
-    let right = x + width;
-    for (let pass = 0; pass < 3; pass++) {
-      let moved = false;
+    const sides = [...short(all('button, img, svg, input, select, textarea')), ...hosts, ...lines];
+    // Charts, photos and maps: too tall to take whole, so an edge on one backs off it.
+    const media = all('img, svg, canvas, video, iframe').filter((b) => b.bottom - b.top >= 120);
+
+    const edge = { top: y, bottom: y + height, left: x, right: x + width };
+    const limit = { top: 0, bottom: Infinity, left: 0, right: docWidth };
+    let moved = false;
+    const set = (side, value) => {
+      if (edge[side] !== value) { edge[side] = value; moved = true; }
+    };
+    const trimTop = (to) => { limit.top = Math.max(limit.top, to); if (edge.top < limit.top) set('top', limit.top); };
+    const trimBottom = (to) => { limit.bottom = Math.min(limit.bottom, to); if (edge.bottom > limit.bottom) set('bottom', limit.bottom); };
+    for (let pass = 0; pass < 6; pass++) {
+      moved = false;
       for (const b of sides) {
-        if (b.bottom <= top || b.top >= bottom) continue;
-        if (b.left < left && b.right > right) continue; // wider than the crop: full-bleed art
-        if (b.left < right && b.right > right) {
-          const next = b.left - 8 >= keep.right ? b.left - 8 : Math.min(docWidth, b.right + 8);
-          if (next !== right) { right = next; moved = true; }
+        if (b.bottom <= edge.top || b.top >= edge.bottom) continue;
+        if (b.left < edge.left && b.right > edge.right) continue; // wider than the crop: full-bleed art
+        const cutsRight = b.left < edge.right && b.right > edge.right;
+        const cutsLeft = b.left < edge.left && b.right > edge.left;
+        if (!cutsRight && !cutsLeft) continue;
+        if (b.bottom <= keep.top) { trimTop(b.bottom + 8); continue; }
+        if (b.top >= keep.bottom) { trimBottom(b.top - 8); continue; }
+        if (cutsRight) {
+          if (b.left - 8 >= keep.right) { set('right', b.left - 8); limit.right = Math.min(limit.right, edge.right); }
+          else { set('right', Math.min(limit.right, b.right + 8)); keep.right = Math.max(keep.right, edge.right); }
         }
-        if (b.left < left && b.right > left) {
-          const next = b.right + 8 <= keep.left ? b.right + 8 : Math.max(0, b.left - 8);
-          if (next !== left) { left = next; moved = true; }
+        if (cutsLeft) {
+          if (b.right + 8 <= keep.left) { set('left', b.right + 8); limit.left = Math.max(limit.left, edge.left); }
+          else { set('left', Math.max(limit.left, b.left - 8)); keep.left = Math.min(keep.left, edge.left); }
         }
       }
+      for (const b of media) {
+        if (b.right <= edge.left || b.left >= edge.right) continue;
+        if (b.top < edge.bottom && b.bottom > edge.bottom && b.top - 8 >= keep.bottom) trimBottom(b.top - 8);
+        if (b.top < edge.top && b.bottom > edge.top && b.bottom + 8 <= keep.top) trimTop(b.bottom + 8);
+      }
       for (const b of rows) {
-        if (b.right <= left || b.left >= right) continue;
-        if (b.top < top && b.bottom > top) { top = Math.max(0, b.top - 8); moved = true; }
-        if (b.top < bottom && b.bottom > bottom) { bottom = b.bottom + 8; moved = true; }
+        if (b.right <= edge.left || b.left >= edge.right) continue;
+        if (b.top < edge.top && b.bottom > edge.top) {
+          if (b.top - 8 >= limit.top) { set('top', Math.max(0, b.top - 8)); keep.top = Math.min(keep.top, edge.top); }
+          else if (b.bottom + 8 <= keep.top) trimTop(b.bottom + 8);
+        }
+        if (b.top < edge.bottom && b.bottom > edge.bottom) {
+          if (b.bottom + 8 <= limit.bottom) { set('bottom', b.bottom + 8); keep.bottom = Math.max(keep.bottom, edge.bottom); }
+          else if (b.top - 8 >= keep.bottom) trimBottom(b.top - 8);
+        }
       }
       if (!moved) break;
     }
-    return { x: Math.round(left), y: Math.round(top), width: Math.round(right - left), height: Math.round(bottom - top) };
+    return {
+      x: Math.round(edge.left),
+      y: Math.round(edge.top),
+      width: Math.round(edge.right - edge.left),
+      height: Math.round(edge.bottom - edge.top),
+    };
   }, { clip, keep, docWidth });
 }
 
@@ -245,8 +279,14 @@ function clusters(marks) {
 function clipFor(group, docWidth) {
   let left = Math.min(...group.map((m) => m.x)) - PAD.side;
   let right = Math.max(...group.map((m) => m.x + m.w)) + PAD.side;
-  const top = Math.max(0, Math.min(...group.map((m) => m.y)) - PAD.top);
-  const bottom = Math.max(...group.map((m) => m.y + m.h)) + PAD.bottom;
+  let top = Math.max(0, Math.min(...group.map((m) => m.y)) - PAD.top);
+  let bottom = Math.max(...group.map((m) => m.y + m.h)) + PAD.bottom;
+  if (bottom - top < MIN_HEIGHT) {
+    const grow = (MIN_HEIGHT - (bottom - top)) / 2;
+    top -= grow;
+    bottom += grow;
+    if (top < 0) { bottom -= top; top = 0; }
+  }
   if (right - left < MIN_WIDTH) {
     const grow = (MIN_WIDTH - (right - left)) / 2;
     left -= grow;

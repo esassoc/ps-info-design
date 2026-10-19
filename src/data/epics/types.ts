@@ -13,6 +13,9 @@ export interface EpicPage {
   route: string;
   /** Short case label shown beside the title on the epic and story pages. */
   label?: string;
+  /** The story page shows this page as the story's one illustrative example.
+      At most one per story; without one, the first page. */
+  example?: boolean;
 }
 
 export interface EpicStory {
@@ -45,8 +48,9 @@ export interface EpicStep {
   page: EpicPage;
 }
 
-/** A marked part as measured in the page: numbered first, so a part with no
-    box keeps its number. `rect` is in viewport pixels, null when it has none. */
+/** A marked part as measured in the page, one per label: numbered first, so a
+    part with no box keeps its number. `rect` is in viewport pixels, null when
+    no instance of it has a box. */
 export interface EpicMarkBox {
   n: number;
   label: string;

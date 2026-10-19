@@ -1,7 +1,7 @@
 // Every epic this spoke presents, and the lookups the epic page, story pages,
 // previous/next bar and gate share. Pure functions over the epic files, so
 // scripts/epic-shots.mjs can import this module too.
-import type { Epic, EpicMarkBox, EpicStep, EpicStory } from './types.ts';
+import type { Epic, EpicMarkBox, EpicPage, EpicStep, EpicStory } from './types.ts';
 import { SHI_EPIC } from './shi.ts';
 
 export const EPICS: Epic[] = [SHI_EPIC];
@@ -16,6 +16,9 @@ export const storyRoute = (epic: Epic, story: EpicStory): string => `${epic.rout
     listed under two stories is two stops. */
 export const epicSteps = (epic: Epic): EpicStep[] =>
   epic.stories.flatMap((story) => story.pages.map((page) => ({ story, page })));
+
+/** The page a story page shows as the story's one illustrative example. */
+export const exampleOf = (story: EpicStory): EpicPage => story.pages.find((p) => p.example) ?? story.pages[0];
 
 /** Query parameter naming the story a page was reached from. */
 export const STORY_PARAM = 'story';
@@ -74,13 +77,14 @@ export const epicMarkAttrs = (storyKey: string, label: string): Record<string, s
     than this keeps one shot. */
 export const EPIC_SHOT_TALL = 1200;
 
-/** The story's marked parts in page order, numbered before any is dropped, so
-    the live outlines and the story page screenshots always agree. Parts that
-    share a label share a number (every SHI mark in a table is one item). A part
-    is boxed where it paints: its own box plus any descendant that spills past it
-    (a full-bleed strip inside a page-column wrapper), and a wrapper that boxes
-    nothing itself (display: contents) takes the union of its children.
-    Self-contained: psinfo-epic-bar calls it in the browser and
+/** The story's marked parts in page order, one per label, numbered before any
+    is dropped, so the live outlines and the story page screenshots always
+    agree. A label the page repeats (the SHI mark on every table row) is one
+    part, outlined on its first instance that has a box: one example, not every
+    copy. A part is boxed where it paints: its own box plus any descendant that
+    spills past it (a full-bleed strip inside a page-column wrapper), and a
+    wrapper that boxes nothing itself (display: contents) takes the union of its
+    children. Self-contained: psinfo-epic-bar calls it in the browser and
     scripts/epic-shots.mjs runs it inside the page it shoots. */
 export function measureMarks(storyKey: string): EpicMarkBox[] {
   type Box = { left: number; top: number; right: number; bottom: number };
@@ -98,15 +102,17 @@ export function measureMarks(storyKey: string): EpicMarkBox[] {
       bottom: Math.max(...boxes.map((k) => k.bottom)),
     };
   };
-  const numbers = new Map<string, number>();
-  return Array.from(document.querySelectorAll(`[data-epic-mark="${CSS.escape(storyKey)}"]`)).map((el) => {
-    const b = boxOf(el);
+  const parts = new Map<string, EpicMarkBox>();
+  for (const el of Array.from(document.querySelectorAll(`[data-epic-mark="${CSS.escape(storyKey)}"]`))) {
     const label = el.getAttribute('data-epic-mark-label') ?? '';
-    if (!numbers.has(label)) numbers.set(label, numbers.size + 1);
-    return {
-      n: numbers.get(label) ?? 0,
+    const known = parts.get(label);
+    if (known?.rect) continue;
+    const b = boxOf(el);
+    parts.set(label, {
+      n: known?.n ?? parts.size + 1,
       label,
       rect: b && b.right > b.left && b.bottom > b.top ? { x: b.left, y: b.top, w: b.right - b.left, h: b.bottom - b.top } : null,
-    };
-  });
+    });
+  }
+  return [...parts.values()];
 }

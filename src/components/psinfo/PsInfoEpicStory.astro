@@ -1,12 +1,12 @@
 ---
 // PsInfoEpicStory: the body of a story page. The story's key linked to Jira,
-// then one section per prototype page the story answers: the page title linked
-// to the page (carrying ?story= when the page sits under more than one story),
-// its case label as a quiet badge, and, when the story has screenshots of that
-// page, the numbered labels beside the annotated shots (psinfo-epic-shot).
-// Shots come from scripts/epic-shots.mjs as src/data/epics/shots/<epic key>.json;
-// a missing file or entry renders the heading alone. The grouped shape of
-// psinfo-epic-index, one level down.
+// then the story's one illustrative example (exampleOf): that page's title
+// linked to the page (carrying ?story= when the page sits under more than one
+// story), its case label as a quiet badge, and the numbered labels beside its
+// annotated shots (psinfo-epic-shot). The epic page lists every page; this
+// shows one. Shots come from scripts/epic-shots.mjs as
+// src/data/epics/shots/<epic key>.json; a missing file or entry renders the
+// heading alone.
 // prose-prop-checked: `story` is a Jira story record (key, title, pages), never page copy
 // bcn-lego-checked: no esa- lego pairs a numbered label list with annotated images, and esa-link-column's heading is a span where these pages need real h2 headings; checked Beacon shared ui components (none); psinfo-epic-story is the reusable home
 import EsaBadge from '@esa/ecology/esa-badge.astro';
@@ -14,7 +14,7 @@ import '@esa/tokens/typography.css';
 import '@esa/tokens/a11y.css';
 import '../../styles/epic-marks.css';
 import type { Epic, EpicShot, EpicShotMark, EpicShots, EpicStory } from '../../data/epics/types';
-import { jiraHref, stepHref } from '../../data/epics/index';
+import { exampleOf, jiraHref, stepHref } from '../../data/epics/index';
 import { withBase } from '../../lib/base';
 import PsInfoEpicShot from './PsInfoEpicShot.astro';
 
@@ -30,53 +30,45 @@ const storyShots = SHOT_FILES[`../../data/epics/shots/${epic.key.toLowerCase()}.
 
 const byN = (a: EpicShotMark, b: EpicShotMark) => a.n - b.n;
 
-const pages = story.pages.map((page, i) => {
-  const shots: EpicShot[] = storyShots[page.route] ?? [];
-  // One label per number across all of this page's shots, in mark order.
-  const marks = new Map<number, EpicShotMark>();
-  for (const m of shots.flatMap((s) => s.marks).sort(byN)) if (!marks.has(m.n)) marks.set(m.n, m);
-  return {
-    page,
-    id: `epicstory-${story.key}-${i + 1}`,
-    href: withBase(stepHref(epic, { story, page })),
-    labels: [...marks.values()],
-    shots: shots.map((shot) => ({
-      shot,
-      alt: shot.marks.length
-        ? `${page.title}, outlined: ${[...new Set([...shot.marks].sort(byN).map((m) => m.label))].join(', ')}`
-        : page.title,
-    })),
-  };
-});
+const page = exampleOf(story);
+const shots: EpicShot[] = storyShots[page.route] ?? [];
+// One label per number across the page's shots, in mark order.
+const marks = new Map<number, EpicShotMark>();
+for (const m of shots.flatMap((s) => s.marks).sort(byN)) if (!marks.has(m.n)) marks.set(m.n, m);
+const labels = [...marks.values()];
+const id = `epicstory-${story.key}-example`;
+const href = withBase(stepHref(epic, { story, page }));
+const annotated = shots.map((shot) => ({
+  shot,
+  alt: shot.marks.length ? `${page.title}, outlined: ${[...shot.marks].sort(byN).map((m) => m.label).join(', ')}` : page.title,
+}));
 ---
 <div class="epicstory stack" data-gap="2xl">
   <div class="stack" data-gap="xl">
     <slot name="header" />
     <p class="epicstory__story">Story: <a href={jiraHref(story.key)}>{story.key}</a></p>
   </div>
-  {pages.map(({ page, id, href, labels, shots }) => (
-    <section class="stack" data-gap="md" aria-labelledby={id}>
-      <h2 id={id} class="epicstory__h2 cluster typography-title-strong" data-gap="xs">
-        <a href={href}>{page.title}</a>
-        {page.label && <EsaBadge value={page.label} variant="neutral" size="sm" />}
-      </h2>
-      {shots.length > 0 && (
-        <div class="sidebar" data-side="end" data-gap="lg">
-          <ol class="epicstory__labels" role="list">
-            {labels.map((m) => (
-              <li class="epicstory__label">
-                <span class="epic-num typography-label-sm-strong" aria-hidden="true">{m.n}</span>
-                <span class="typography-body-md"><span class="visually-hidden">{m.n}, </span>{m.label}</span>
-              </li>
-            ))}
-          </ol>
-          <div class="stack" data-gap="lg">
-            {shots.map(({ shot, alt }) => <PsInfoEpicShot shot={shot} alt={alt} />)}
-          </div>
+  <section class="stack" data-gap="md" aria-labelledby={id}>
+    <h2 id={id} class="epicstory__h2 cluster typography-title-strong" data-gap="xs">
+      <a href={href}>{page.title}</a>
+      {page.label && <EsaBadge value={page.label} variant="neutral" size="sm" />}
+    </h2>
+    {annotated.length > 0 && (
+      <div class="sidebar" data-side="end" data-gap="lg">
+        <ol class="epicstory__labels" role="list">
+          {labels.map((m) => (
+            <li class="epicstory__label">
+              <span class="epic-num typography-label-sm-strong" aria-hidden="true">{m.n}</span>
+              <span class="typography-body-md"><span class="visually-hidden">{m.n}, </span>{m.label}</span>
+            </li>
+          ))}
+        </ol>
+        <div class="stack" data-gap="lg">
+          {annotated.map(({ shot, alt }) => <PsInfoEpicShot shot={shot} alt={alt} />)}
         </div>
-      )}
-    </section>
-  ))}
+      </div>
+    )}
+  </section>
 </div>
 
 <style>

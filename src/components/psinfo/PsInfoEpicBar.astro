@@ -5,9 +5,10 @@
 // switch, and the pager. A page under two stories renders one variant per
 // story; the script shows the one ?story= names, else the first.
 //
-// Outlines draw a box around each psinfo-epic-mark of the active story. Marks
-// that share a label share a number, shown once on the first of them, so they
-// match psinfo-epic-shot's screenshots (both draw from styles/epic-marks.css). The switch shows only when the page has
+// Outlines draw a numbered box around each part the active story marks, one
+// per label: a mark the page repeats is outlined once, on its first instance,
+// matching psinfo-epic-shot's screenshots (both measure with measureMarks and
+// draw from styles/epic-marks.css). The switch shows only when the page has
 // marks for that story; its state lasts for the tab. Alt+Shift+H hides and
 // shows the bar (a modified shortcut, so 2.1.4 holds); ?bar=off starts it
 // hidden. Renders nothing on a page no epic walks.
@@ -186,7 +187,6 @@ const total = steps.length;
       const REACH = 8; // outline offset plus width
       const vw = document.documentElement.clientWidth;
       const boxes: HTMLElement[] = [];
-      const numbered = new Set<number>();
       for (const { n: num, rect: r } of measureMarks(activeKey)) {
         if (!r) continue;
         const left = Math.max(r.x + sx, 0);
@@ -198,13 +198,10 @@ const total = steps.length;
         box.style.top = `${r.y + sy}px`;
         box.style.width = `${Math.max(0, right - left)}px`;
         box.style.height = `${r.h}px`;
-        if (!numbered.has(num)) {
-          numbered.add(num);
-          const n = document.createElement('span');
-          n.className = 'epic-num typography-label-sm-strong';
-          n.textContent = String(num);
-          box.append(n);
-        }
+        const n = document.createElement('span');
+        n.className = 'epic-num typography-label-sm-strong';
+        n.textContent = String(num);
+        box.append(n);
         boxes.push(box);
       }
       if (!overlay) {
