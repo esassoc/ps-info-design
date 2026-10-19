@@ -21,6 +21,8 @@ interface Props {
   indicatorType?: string;
   /** The indicator is a Salmon Habitat Indicator. */
   isShi: boolean;
+  /** Jira key of the story that adds the SHI mark here (epic preview). */
+  shiMarkStory?: string;
   measurementUnit: string;
   trend: { label: string; icon: string };
   targetStatus?: { label: string; icon: string };
@@ -41,7 +43,7 @@ const icon = (file: string) => withBase(`/photos/vital-signs/icons/${file}`);
     <dt>Indicator Type</dt>
     <dd class="cirbasics__types">
       {p.indicatorType && <span>{p.indicatorType}</span>}
-      {p.isShi && <PsInfoShiMark />}
+      {p.isShi && <PsInfoShiMark epicStory={p.shiMarkStory} />}
     </dd>
   </div>
   <div><dt>Measurement Unit</dt><dd>{p.measurementUnit}</dd></div>

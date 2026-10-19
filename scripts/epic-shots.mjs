@@ -69,6 +69,7 @@ async function shootEpic(epic) {
     const selector = `[data-epic-mark="${story.key}"]`;
     if (!(await page.locator(selector).count())) continue;
     await Promise.race([settle(page), page.waitForTimeout(20000)]);
+    await hideFixed(page);
     // The bar's own measurement, so the numbers here match the live outlines.
     const measured = await page.evaluate(measureMarks, story.key);
     const scroll = await page.evaluate(() => ({ x: scrollX, y: scrollY, docWidth: document.documentElement.scrollWidth }));
@@ -80,7 +81,7 @@ async function shootEpic(epic) {
     const docWidth = scroll.docWidth;
     const shots = [];
     for (const [i, group] of clusters(marks).entries()) {
-      const clip = clipFor(group, docWidth);
+      const clip = await snapClip(page, clipFor(group, docWidth));
       const file = `${slugFor(epicPage.route)}-${i + 1}.jpg`;
       const dir = path.join(outDir, storySlug(story));
       await mkdir(dir, { recursive: true });
@@ -116,7 +117,7 @@ async function settle(page) {
     await document.fonts.ready;
     const step = innerHeight;
     for (let y = 0; y < document.documentElement.scrollHeight; y += step) {
-      scrollTo(0, y);
+      scrollTo({ top: y, behavior: 'instant' });
       await new Promise((r) => setTimeout(r, 60));
     }
     const pending = [...document.images].filter((img) => !img.complete);
@@ -128,9 +129,44 @@ async function settle(page) {
     );
     // A lazy image that never came into view never fires either event.
     await Promise.race([loaded, new Promise((r) => setTimeout(r, 3000))]);
-    scrollTo(0, 0);
+    scrollTo({ top: 0, behavior: 'instant' });
   });
   await page.waitForTimeout(250);
+}
+
+/** Fixed chrome (the skip link, a back-to-top button) is not part of the page
+    a story changes, and a full-page capture of a very tall page can paint it
+    in the middle of the crop. Hidden for the screenshots only. */
+async function hideFixed(page) {
+  await page.evaluate(() => {
+    for (const el of document.body.querySelectorAll('*')) {
+      if (getComputedStyle(el).position === 'fixed') el.style.setProperty('visibility', 'hidden', 'important');
+    }
+  });
+}
+
+/** Moves the crop's top and bottom edges outward until neither cuts through a
+    line of text, an image or a control. */
+async function snapClip(page, clip) {
+  return page.evaluate(({ x, y, width, height }) => {
+    const LEAVES = 'h1, h2, h3, h4, h5, h6, p, dt, dd, figcaption, label, a, button, img, svg';
+    const boxes = Array.from(document.querySelectorAll(LEAVES))
+      .map((el) => el.getBoundingClientRect())
+      .filter((r) => r.width && r.height && r.height < 120)
+      .map((r) => ({ top: r.top + scrollY, bottom: r.bottom + scrollY, left: r.left + scrollX, right: r.right + scrollX }))
+      .filter((b) => b.right > x && b.left < x + width);
+    let top = y;
+    let bottom = y + height;
+    for (let pass = 0; pass < 2; pass++) {
+      let moved = false;
+      for (const b of boxes) {
+        if (b.top < top && b.bottom > top) { top = Math.max(0, b.top - 8); moved = true; }
+        if (b.top < bottom && b.bottom > bottom) { bottom = b.bottom + 8; moved = true; }
+      }
+      if (!moved) break;
+    }
+    return { x, y: Math.round(top), width, height: Math.round(bottom - top) };
+  }, clip);
 }
 
 /** Marks that sit near each other share one screenshot. */
@@ -156,8 +192,9 @@ function clipFor(group, docWidth) {
     left -= grow;
     right += grow;
   }
-  left = Math.max(0, left);
-  right = Math.min(docWidth, right);
+  // Width lost at one edge of the page goes to the other side.
+  if (left < 0) { right -= left; left = 0; }
+  if (right > docWidth) { left = Math.max(0, left - (right - docWidth)); right = docWidth; }
   return { x: Math.round(left), y: Math.round(top), width: Math.round(right - left), height: Math.round(bottom - top) };
 }
 

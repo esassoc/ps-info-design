@@ -37,8 +37,10 @@ interface Props {
   /** Indicator hrefs that are Salmon Habitat Indicators: each gets the SHI
    *  mark (icon plus label, never the icon alone) under its name. */
   salmonMarked?: string[];
+  /** Jira key of the story that adds those SHI marks (epic preview). */
+  shiMarkStory?: string;
 }
-const { goals = [], vitalSigns, frameHueVar, colorCoded = false, expandedLevels = 1, treeId = 'vstree', salmonMarked = [] } = Astro.props;
+const { goals = [], vitalSigns, frameHueVar, colorCoded = false, expandedLevels = 1, treeId = 'vstree', salmonMarked = [], shiMarkStory } = Astro.props;
 const indHref = (h: string) => (isExternalHref(h) ? h : withBase(h));
 
 const PROGRESS_ICON: Record<ProgressLabel, string> = {
@@ -187,7 +189,7 @@ const uid = (...parts: (string | number)[]) =>
                     <div class="vstree__row vstree__row--ind">
                       <span class="vstree__name">
                         <a class="vstree__link vstree__link--ind" href={indHref(ind.href)} {...(isExternalHref(ind.href) ? { target: '_blank', rel: 'noopener' } : {})}>{ind.name}</a>
-                        {salmonMarked.includes(ind.href) && <PsInfoShiMark />}
+                        {salmonMarked.includes(ind.href) && <PsInfoShiMark epicStory={shiMarkStory} />}
                       </span>
                       <span class="vstree__cell">
                         <img src={withBase(`/photos/vital-signs/icons/${PROGRESS_ICON[ind.progress]}`)} alt={progressAlt(ind.progress)} width="64" height="64" loading="lazy" />

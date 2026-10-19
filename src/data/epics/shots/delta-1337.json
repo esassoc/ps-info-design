@@ -34,5 +34,489 @@
         ]
       }
     ]
+  },
+  "DELTA-1344": {
+    "/prototypes/salmon-habitat-indicators/indicator-reports/summer-low-flow": [
+      {
+        "src": "/epic-shots/delta-1337/delta-1344/salmon-habitat-indicators-indicator-reports-summer-low-flow-1.jpg",
+        "width": 1158,
+        "height": 2632,
+        "marks": [
+          {
+            "n": 1,
+            "label": "Salmon Habitat Indicator field",
+            "x": 2.07,
+            "y": 1.05,
+            "w": 95.85,
+            "h": 98.01
+          }
+        ]
+      }
+    ],
+    "/prototypes/salmon-habitat-indicators/indicator-reports/floodplain-function": [
+      {
+        "src": "/epic-shots/delta-1337/delta-1344/salmon-habitat-indicators-indicator-reports-floodplain-function-1.jpg",
+        "width": 1158,
+        "height": 217,
+        "marks": [
+          {
+            "n": 1,
+            "label": "Salmon Habitat Indicator field",
+            "x": 2.07,
+            "y": 12.7,
+            "w": 95.85,
+            "h": 75.85
+          }
+        ]
+      }
+    ]
+  },
+  "DELTA-1345": {
+    "/prototypes/salmon-habitat-indicators/indicators/fish-passage": [
+      {
+        "src": "/epic-shots/delta-1337/delta-1345/salmon-habitat-indicators-indicators-fish-passage-1.jpg",
+        "width": 720,
+        "height": 122,
+        "marks": [
+          {
+            "n": 1,
+            "label": "Salmon Habitat Indicator mark",
+            "x": 11.81,
+            "y": 44.58,
+            "w": 32.77,
+            "h": 36.07
+          }
+        ]
+      },
+      {
+        "src": "/epic-shots/delta-1337/delta-1345/salmon-habitat-indicators-indicators-fish-passage-2.jpg",
+        "width": 821,
+        "height": 194,
+        "marks": [
+          {
+            "n": 2,
+            "label": "Importance to Salmon section",
+            "x": 2.92,
+            "y": 14.35,
+            "w": 94.18,
+            "h": 73.05
+          }
+        ]
+      }
+    ],
+    "/prototypes/salmon-habitat-indicators/indicators/large-wood": [
+      {
+        "src": "/epic-shots/delta-1337/delta-1345/salmon-habitat-indicators-indicators-large-wood-1.jpg",
+        "width": 720,
+        "height": 122,
+        "marks": [
+          {
+            "n": 1,
+            "label": "Salmon Habitat Indicator mark",
+            "x": 11.81,
+            "y": 44.58,
+            "w": 32.77,
+            "h": 36.07
+          }
+        ]
+      },
+      {
+        "src": "/epic-shots/delta-1337/delta-1345/salmon-habitat-indicators-indicators-large-wood-2.jpg",
+        "width": 821,
+        "height": 194,
+        "marks": [
+          {
+            "n": 2,
+            "label": "Importance to Salmon section",
+            "x": 2.92,
+            "y": 14.56,
+            "w": 94.18,
+            "h": 73.05
+          }
+        ]
+      }
+    ]
+  },
+  "DELTA-1346": {
+    "/prototypes/salmon-habitat-indicators/all-indicators": [
+      {
+        "src": "/epic-shots/delta-1337/delta-1346/salmon-habitat-indicators-all-indicators-1.jpg",
+        "width": 720,
+        "height": 335,
+        "marks": [
+          {
+            "n": 1,
+            "label": "Salmon Habitat Indicator mark",
+            "x": 24.31,
+            "y": 8.36,
+            "w": 26.62,
+            "h": 8.36
+          },
+          {
+            "n": 1,
+            "label": "Salmon Habitat Indicator mark",
+            "x": 24.31,
+            "y": 33.73,
+            "w": 26.62,
+            "h": 8.36
+          },
+          {
+            "n": 1,
+            "label": "Salmon Habitat Indicator mark",
+            "x": 24.31,
+            "y": 59.1,
+            "w": 26.62,
+            "h": 8.36
+          },
+          {
+            "n": 1,
+            "label": "Salmon Habitat Indicator mark",
+            "x": 24.31,
+            "y": 84.48,
+            "w": 26.62,
+            "h": 8.36
+          }
+        ]
+      },
+      {
+        "src": "/epic-shots/delta-1337/delta-1346/salmon-habitat-indicators-all-indicators-2.jpg",
+        "width": 720,
+        "height": 165,
+        "marks": [
+          {
+            "n": 1,
+            "label": "Salmon Habitat Indicator mark",
+            "x": 24.31,
+            "y": 16.97,
+            "w": 26.62,
+            "h": 16.97
+          },
+          {
+            "n": 1,
+            "label": "Salmon Habitat Indicator mark",
+            "x": 24.31,
+            "y": 68.48,
+            "w": 26.62,
+            "h": 16.97
+          }
+        ]
+      },
+      {
+        "src": "/epic-shots/delta-1337/delta-1346/salmon-habitat-indicators-all-indicators-3.jpg",
+        "width": 720,
+        "height": 1247,
+        "marks": [
+          {
+            "n": 1,
+            "label": "Salmon Habitat Indicator mark",
+            "x": 24.31,
+            "y": 2.25,
+            "w": 26.62,
+            "h": 2.25
+          },
+          {
+            "n": 1,
+            "label": "Salmon Habitat Indicator mark",
+            "x": 24.31,
+            "y": 9.06,
+            "w": 26.62,
+            "h": 2.25
+          },
+          {
+            "n": 1,
+            "label": "Salmon Habitat Indicator mark",
+            "x": 24.31,
+            "y": 15.88,
+            "w": 26.62,
+            "h": 2.25
+          },
+          {
+            "n": 1,
+            "label": "Salmon Habitat Indicator mark",
+            "x": 24.31,
+            "y": 22.69,
+            "w": 26.62,
+            "h": 2.25
+          },
+          {
+            "n": 1,
+            "label": "Salmon Habitat Indicator mark",
+            "x": 24.31,
+            "y": 36.33,
+            "w": 26.62,
+            "h": 2.25
+          },
+          {
+            "n": 1,
+            "label": "Salmon Habitat Indicator mark",
+            "x": 24.31,
+            "y": 43.14,
+            "w": 26.62,
+            "h": 2.25
+          },
+          {
+            "n": 1,
+            "label": "Salmon Habitat Indicator mark",
+            "x": 24.31,
+            "y": 57.82,
+            "w": 26.62,
+            "h": 2.25
+          },
+          {
+            "n": 1,
+            "label": "Salmon Habitat Indicator mark",
+            "x": 24.31,
+            "y": 71.45,
+            "w": 26.62,
+            "h": 2.25
+          },
+          {
+            "n": 1,
+            "label": "Salmon Habitat Indicator mark",
+            "x": 24.31,
+            "y": 82.2,
+            "w": 26.62,
+            "h": 2.25
+          },
+          {
+            "n": 1,
+            "label": "Salmon Habitat Indicator mark",
+            "x": 24.31,
+            "y": 95.83,
+            "w": 26.62,
+            "h": 2.25
+          }
+        ]
+      }
+    ],
+    "/prototypes/salmon-habitat-indicators/vital-sign-goals/functioning-habitat": [
+      {
+        "src": "/epic-shots/delta-1337/delta-1346/salmon-habitat-indicators-vital-sign-goals-functioning-habitat-1.jpg",
+        "width": 720,
+        "height": 343,
+        "marks": [
+          {
+            "n": 1,
+            "label": "Salmon Habitat Indicator mark",
+            "x": 24.31,
+            "y": 10.37,
+            "w": 26.62,
+            "h": 8.16
+          },
+          {
+            "n": 1,
+            "label": "Salmon Habitat Indicator mark",
+            "x": 24.31,
+            "y": 35.15,
+            "w": 26.62,
+            "h": 8.16
+          },
+          {
+            "n": 1,
+            "label": "Salmon Habitat Indicator mark",
+            "x": 24.31,
+            "y": 59.93,
+            "w": 26.62,
+            "h": 8.16
+          },
+          {
+            "n": 1,
+            "label": "Salmon Habitat Indicator mark",
+            "x": 24.31,
+            "y": 84.71,
+            "w": 26.62,
+            "h": 8.16
+          }
+        ]
+      },
+      {
+        "src": "/epic-shots/delta-1337/delta-1346/salmon-habitat-indicators-vital-sign-goals-functioning-habitat-2.jpg",
+        "width": 720,
+        "height": 173,
+        "marks": [
+          {
+            "n": 1,
+            "label": "Salmon Habitat Indicator mark",
+            "x": 24.31,
+            "y": 20.56,
+            "w": 26.62,
+            "h": 16.18
+          },
+          {
+            "n": 1,
+            "label": "Salmon Habitat Indicator mark",
+            "x": 24.31,
+            "y": 69.69,
+            "w": 26.62,
+            "h": 16.18
+          }
+        ]
+      },
+      {
+        "src": "/epic-shots/delta-1337/delta-1346/salmon-habitat-indicators-vital-sign-goals-functioning-habitat-3.jpg",
+        "width": 720,
+        "height": 598,
+        "marks": [
+          {
+            "n": 1,
+            "label": "Salmon Habitat Indicator mark",
+            "x": 24.31,
+            "y": 5.95,
+            "w": 26.62,
+            "h": 4.68
+          },
+          {
+            "n": 1,
+            "label": "Salmon Habitat Indicator mark",
+            "x": 24.31,
+            "y": 20.16,
+            "w": 26.62,
+            "h": 4.68
+          },
+          {
+            "n": 1,
+            "label": "Salmon Habitat Indicator mark",
+            "x": 24.31,
+            "y": 34.38,
+            "w": 26.62,
+            "h": 4.68
+          },
+          {
+            "n": 1,
+            "label": "Salmon Habitat Indicator mark",
+            "x": 24.31,
+            "y": 48.59,
+            "w": 26.62,
+            "h": 4.68
+          },
+          {
+            "n": 1,
+            "label": "Salmon Habitat Indicator mark",
+            "x": 24.31,
+            "y": 77.02,
+            "w": 26.62,
+            "h": 4.68
+          },
+          {
+            "n": 1,
+            "label": "Salmon Habitat Indicator mark",
+            "x": 24.31,
+            "y": 91.23,
+            "w": 26.62,
+            "h": 4.68
+          }
+        ]
+      }
+    ],
+    "/prototypes/salmon-habitat-indicators/vital-sign-goals/healthy-water-quality": [
+      {
+        "src": "/epic-shots/delta-1337/delta-1346/salmon-habitat-indicators-vital-sign-goals-healthy-water-quality-1.jpg",
+        "width": 720,
+        "height": 562,
+        "marks": [
+          {
+            "n": 1,
+            "label": "Salmon Habitat Indicator mark",
+            "x": 24.31,
+            "y": 6.33,
+            "w": 26.62,
+            "h": 4.98
+          },
+          {
+            "n": 1,
+            "label": "Salmon Habitat Indicator mark",
+            "x": 24.31,
+            "y": 36.58,
+            "w": 26.62,
+            "h": 4.98
+          },
+          {
+            "n": 1,
+            "label": "Salmon Habitat Indicator mark",
+            "x": 24.31,
+            "y": 60.42,
+            "w": 26.62,
+            "h": 4.98
+          },
+          {
+            "n": 1,
+            "label": "Salmon Habitat Indicator mark",
+            "x": 24.31,
+            "y": 90.67,
+            "w": 26.62,
+            "h": 4.98
+          }
+        ]
+      }
+    ],
+    "/prototypes/salmon-habitat-indicators/indicator-reports/summer-low-flow": [
+      {
+        "src": "/epic-shots/delta-1337/delta-1346/salmon-habitat-indicators-indicator-reports-summer-low-flow-1.jpg",
+        "width": 720,
+        "height": 119,
+        "marks": [
+          {
+            "n": 1,
+            "label": "Salmon Habitat Indicator mark",
+            "x": 36.72,
+            "y": 34.77,
+            "w": 26.62,
+            "h": 23.53
+          }
+        ]
+      }
+    ]
+  },
+  "DELTA-1347": {
+    "/prototypes/salmon-habitat-indicators": [
+      {
+        "src": "/epic-shots/delta-1337/delta-1347/salmon-habitat-indicators-1.jpg",
+        "width": 1158,
+        "height": 2399,
+        "marks": [
+          {
+            "n": 1,
+            "label": "Logo and About",
+            "x": 2.07,
+            "y": 1.17,
+            "w": 95.85,
+            "h": 13.59
+          },
+          {
+            "n": 2,
+            "label": "Habitat diorama",
+            "x": 2.07,
+            "y": 16.76,
+            "w": 95.85,
+            "h": 31.64
+          },
+          {
+            "n": 3,
+            "label": "Indicator table",
+            "x": 2.07,
+            "y": 52.57,
+            "w": 95.85,
+            "h": 46.44
+          }
+        ]
+      }
+    ],
+    "/prototypes/salmon-habitat-indicators/list": [
+      {
+        "src": "/epic-shots/delta-1337/delta-1347/salmon-habitat-indicators-list-1.jpg",
+        "width": 1158,
+        "height": 1474,
+        "marks": [
+          {
+            "n": 1,
+            "label": "Indicators by habitat",
+            "x": 2.07,
+            "y": 1.87,
+            "w": 95.85,
+            "h": 96.47
+          }
+        ]
+      }
+    ]
   }
 }

@@ -14,6 +14,7 @@ import PsInfoCirBox from '../../../../components/psinfo/PsInfoCirBox.astro';
 import PsInfoCirBasics from '../../../../components/psinfo/PsInfoCirBasics.astro';
 import PsInfoCirChart from '../../../../components/psinfo/PsInfoCirChart.astro';
 import PsInfoShiReportField from '../../../../components/psinfo/PsInfoShiReportField.astro';
+import PsInfoEpicMark from '../../../../components/psinfo/PsInfoEpicMark.astro';
 import {
   DETAIL_BY_SLUG,
   PROGRESS_ICON,
@@ -57,7 +58,7 @@ const kind = standalone ? 'Salmon Habitat Indicator' : 'Vital Sign Indicator';
     - importance                 -> ps-info-cir-box
     - key results                -> ps-info-cir-box
     - methods                    -> ps-info-cir-box
-    - salmon habitat indicator   -> ps-info-shi-report-field
+    - salmon habitat indicator   -> ps-info-epic-mark > ps-info-shi-report-field
 -->
 <PsInfoVsProdChrome title={`PS Info | ${indicator.name}`} site="ps-info">
   <div class="stack" data-gap="xl">
@@ -76,6 +77,7 @@ const kind = standalone ? 'Salmon Habitat Indicator' : 'Vital Sign Indicator';
           indicator={indicator.name}
           indicatorType={standalone ? undefined : 'Vital Sign Indicator'}
           isShi={true}
+          shiMarkStory="DELTA-1346"
           measurementUnit={detail.measurementUnit}
           trend={{ label: status.progress, icon: PROGRESS_ICON[status.progress] }}
           targetStatus={status.targetStatus && { label: status.targetStatus, icon: TARGET_ICON[status.targetStatus] }}
@@ -108,9 +110,11 @@ const kind = standalone ? 'Salmon Habitat Indicator' : 'Vital Sign Indicator';
         {detail.methods.map((p) => <p>{p}</p>)}
       </PsInfoCirBox>
     )}
-    <PsInfoShiReportField
-      field={shi.field}
-      id={SHI_FIELD_ANCHOR}
-    />
+    <PsInfoEpicMark story="DELTA-1344" label="Salmon Habitat Indicator field">
+      <PsInfoShiReportField
+        field={shi.field}
+        id={SHI_FIELD_ANCHOR}
+      />
+    </PsInfoEpicMark>
   </div>
 </PsInfoVsProdChrome>

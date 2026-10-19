@@ -8,7 +8,7 @@ const SHI = '/prototypes/salmon-habitat-indicators';
 export const SHI_EPIC: Epic = {
   key: 'DELTA-1337',
   title: 'Salmon Habitat Indicators',
-  route: '/epic-preview/shi',
+  route: '/shi',
   stories: [
     {
       key: 'DELTA-1343',

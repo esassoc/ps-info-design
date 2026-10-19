@@ -13,6 +13,7 @@ import PsInfoVsiSidebar from '../../../../components/psinfo/PsInfoVsiSidebar.ast
 import PsInfoVsiOverview from '../../../../components/psinfo/PsInfoVsiOverview.astro';
 import PsInfoVsiSection from '../../../../components/psinfo/PsInfoVsiSection.astro';
 import PsInfoShiImportance from '../../../../components/psinfo/PsInfoShiImportance.astro';
+import PsInfoEpicMark from '../../../../components/psinfo/PsInfoEpicMark.astro';
 import PsInfoVsiPartners from '../../../../components/psinfo/PsInfoVsiPartners.astro';
 import {
   PROGRESS_ICON,
@@ -53,7 +54,7 @@ const activeGoal = vs.goalId === 7 ? 'functioning-habitat' : 'healthy-water-qual
     - reference rail (own trend)  -> ps-info-vsi-sidebar
     - description + chart         -> ps-info-vsi-overview
     - key results                 -> ps-info-vsi-section
-    - importance to salmon        -> ps-info-shi-importance
+    - importance to salmon        -> ps-info-epic-mark > ps-info-shi-importance
     - contributing partners       -> ps-info-vsi-section > ps-info-vsi-partners
 -->
 <PsInfoVsProdChrome
@@ -76,7 +77,7 @@ const activeGoal = vs.goalId === 7 ? 'functioning-habitat' : 'healthy-water-qual
       hueVar={vs.goalHueVar}
       printUrl={`${VS_SITE}/SalmonHabitatIndicator/PrintToPdf/${indicator.slug}`}
     >
-      <PsInfoShiMark slot="mark" size="md" />
+      <PsInfoShiMark slot="mark" size="md" epicStory="DELTA-1345" />
     </PsInfoVsiDetailHeader>
     <div class="sidebar" data-side="end" data-gap="2xl">
       <PsInfoVsiSidebar
@@ -96,12 +97,14 @@ const activeGoal = vs.goalId === 7 ? 'functioning-habitat' : 'healthy-water-qual
           <ul>{detail.keyResults.map((r) => <li>{r}</li>)}</ul>
         </PsInfoVsiSection>
         {importance && (
-          <PsInfoShiImportance
-            hueVar={vs.goalHueVar}
-            paragraphs={importance}
-            landingHref={shiRoutes.landing}
-            mark={{ src: SHI_LOGO.src, width: SHI_LOGO.width, height: SHI_LOGO.height }}
-          />
+          <PsInfoEpicMark story="DELTA-1345" label="Importance to Salmon section">
+            <PsInfoShiImportance
+              hueVar={vs.goalHueVar}
+              paragraphs={importance}
+              landingHref={shiRoutes.landing}
+              mark={{ src: SHI_LOGO.src, width: SHI_LOGO.width, height: SHI_LOGO.height }}
+            />
+          </PsInfoEpicMark>
         )}
         <PsInfoVsiSection title="Contributing Partners" hueVar={vs.goalHueVar}>
           <PsInfoVsiPartners partners={detail.partners} />
