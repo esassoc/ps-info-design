@@ -4,6 +4,9 @@
 // (psinfo-pi-indicators-grid — same engine, toolbar, count line, and shared
 // .psinfo-agrid skin) with SHI columns, plus an external habitat filter driven
 // by psinfo-shi-habitat-explorer through the `shi:filter` document event.
+// Columns follow DELTA-1347: the indicator links to its VSI page (VSI and
+// VSI+) or standalone page (SHI), a Status column pairs prod's trend icon with
+// its words, and there is no Type column.
 //
 // bcn-lego-checked: no esa- data-grid/table lego exists (checked the full
 // catalog); ag-grid-community is the repo's table engine; toolbar buttons are
@@ -62,6 +65,17 @@ const swatches = Object.fromEntries(categories.map((c) => [c.slug, SHI_CATEGORY_
     a.href = href;
     return a;
   }
+  function status(row: ShiGridRow): HTMLSpanElement {
+    const span = document.createElement('span');
+    span.className = 'shigrid__status';
+    const img = document.createElement('img');
+    img.src = `${import.meta.env.BASE_URL}photos/vital-signs/icons/${row.progressIcon}`;
+    img.alt = '';
+    img.width = 32;
+    img.height = 32;
+    span.append(img, document.createTextNode(row.progress));
+    return span;
+  }
   function habitat(row: ShiGridRow): HTMLSpanElement {
     const span = document.createElement('span');
     span.className = 'shigrid__habitat';
@@ -79,12 +93,13 @@ const swatches = Object.fromEntries(categories.map((c) => [c.slug, SHI_CATEGORY_
   const columnDefs: ColDef<ShiGridRow>[] = [
     { headerName: 'Salmon Habitat Indicator', field: 'indicator', flex: 2.2, minWidth: 220,
       cellRenderer: (p: ICellRendererParams<ShiGridRow>) => link(p.data!.indicator, href(p.data!.href)) },
+    { headerName: 'Status', field: 'progress', flex: 1.3, minWidth: 170,
+      cellRenderer: (p: ICellRendererParams<ShiGridRow>) => status(p.data!) },
     { headerName: 'Description', field: 'description', flex: 3, minWidth: 260 },
     { headerName: 'Habitat', field: 'categoryLabel', flex: 1.5, minWidth: 170,
       cellRenderer: (p: ICellRendererParams<ShiGridRow>) => habitat(p.data!) },
     { headerName: 'Vital Sign', field: 'vitalSign', flex: 1.6, minWidth: 180,
       cellRenderer: (p: ICellRendererParams<ShiGridRow>) => link(p.data!.vitalSign, p.data!.vitalSignHref) },
-    { headerName: 'Type', field: 'relationship', flex: 1, minWidth: 120 },
   ];
 
   const host = document.getElementById('shi-grid') as HTMLDivElement;
@@ -148,7 +163,7 @@ const swatches = Object.fromEntries(categories.map((c) => [c.slug, SHI_CATEGORY_
   document.getElementById('shi-grid-download')?.addEventListener('click', () => {
     api.exportDataAsCsv({
       fileName: 'salmon-habitat-indicators-export',
-      columnKeys: ['indicator', 'description', 'categoryLabel', 'vitalSign', 'relationship'],
+      columnKeys: ['indicator', 'progress', 'description', 'categoryLabel', 'vitalSign'],
     });
   });
 </script>
@@ -187,6 +202,8 @@ const swatches = Object.fromEntries(categories.map((c) => [c.slug, SHI_CATEGORY_
   #shi-grid :global(.shigrid__link) { color: var(--color-text-link); text-decoration: underline; text-underline-offset: 2px; }
   #shi-grid :global(.shigrid__link:hover) { color: var(--color-text-link-hover); }
   #shi-grid :global(.shigrid__link:focus-visible) { outline: 2px solid var(--focus-ring-color); outline-offset: 1px; }
+  #shi-grid :global(.shigrid__status) { display: inline-flex; align-items: center; gap: var(--spacing-200); }
+  #shi-grid :global(.shigrid__status img) { flex: none; width: 2rem; height: 2rem; }
   #shi-grid :global(.shigrid__habitat) { display: inline-flex; align-items: center; gap: var(--spacing-200); }
   #shi-grid :global(.shigrid__swatch) {
     flex: none; width: 0.875rem; height: 0.875rem; border-radius: var(--radius-sm);

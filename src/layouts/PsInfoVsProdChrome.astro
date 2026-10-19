@@ -2,7 +2,10 @@
 // PsInfoVsProdChrome — pages that ship INSIDE today's Vital Signs site, framed
 // in its production chrome: the photo header with the network bar, Vital Signs
 // banner and goal columns; the location trail; the content column; the gray
-// footer. Deliberately NOT PsInfoAppShell — the unified-nav rail is a separate
+// footer. `site="ps-info"` swaps in the www report header (Complete Indicator
+// Reports live on www.pugetsoundinfo.wa.gov, not the Vital Signs site) and
+// drops the trail, since the report's own title chip carries it.
+// Deliberately NOT PsInfoAppShell — the unified-nav rail is a separate
 // proposal, and these pages show how a new module fits the site as it is.
 //
 // bcn-lego-checked: the trail is the esa-breadcrumbs lego; header and footer
@@ -10,23 +13,26 @@
 // is the skip link (same treatment as PsInfoAppShell) and the content width.
 import BaseLayout from './BaseLayout.astro';
 import PsInfoVsProdHeader from '../components/psinfo/PsInfoVsProdHeader.astro';
+import PsInfoPsiProdHeader from '../components/psinfo/PsInfoPsiProdHeader.astro';
 import PsInfoVsProdFooter from '../components/psinfo/PsInfoVsProdFooter.astro';
 import EsaBreadcrumbs, { type EsaBreadcrumbItem } from '@esa/ecology/esa-breadcrumbs.astro';
 import '../styles/theme-shi.css';
 
 interface Props {
   title: string;
-  /** public/ path of the header photograph. */
-  headerImage: string;
+  /** Which live site frames the page. */
+  site?: 'vital-signs' | 'ps-info';
+  /** public/ path of the header photograph (Vital Signs site only). */
+  headerImage?: string;
   /** --ps-info-goal-* token for the header's closing rule. */
   hueVar?: string;
   activeGoal?: string;
-  /** Location trail; the last item is the current page. */
-  trail: EsaBreadcrumbItem[];
+  /** Location trail; the last item is the current page (Vital Signs site only). */
+  trail?: EsaBreadcrumbItem[];
   /** Visually hidden h1, for pages whose prod layout shows no heading. */
   hiddenHeading?: string;
 }
-const { title, headerImage, hueVar, activeGoal, trail, hiddenHeading } = Astro.props;
+const { title, site = 'vital-signs', headerImage = '/photos/vital-signs/headers/vs-home-banner.jpg', hueVar, activeGoal, trail, hiddenHeading } = Astro.props;
 
 // The live Vital Signs site sets every string in Fira Sans (vitalSigns.min.css
 // imports it from Google Fonts); theme-shi re-points --font-sans/--font-display.
@@ -36,9 +42,9 @@ const PROD_FONTS =
 <BaseLayout title={title}>
   <link slot="head" rel="stylesheet" href={PROD_FONTS} />
   <a class="skip-link" href="#main-content">Skip to main content</a>
-  <PsInfoVsProdHeader image={headerImage} {hueVar} {activeGoal} />
+  {site === 'ps-info' ? <PsInfoPsiProdHeader /> : <PsInfoVsProdHeader image={headerImage} {hueVar} {activeGoal} />}
   <div class="vspage">
-    <EsaBreadcrumbs items={trail} size="md" />
+    {trail && <EsaBreadcrumbs items={trail} size="md" />}
     <main id="main-content">
       {hiddenHeading && <h1 class="vspage__hidden">{hiddenHeading}</h1>}
       <slot />

@@ -1,0 +1,19 @@
+---
+// Embedded map for the Summer low flow SHI Map subfield (DELTA-1344): the
+// document the report's Map frame loads, standing in for the ArcGIS web app
+// PSP would paste into the Map box's Embedded Url. No site chrome; the
+// caption lives on the report.
+import BaseLayout from '../../../../layouts/BaseLayout.astro';
+import PsInfoShiMap from '../../../../components/psinfo/PsInfoShiMap.astro';
+import { LOW_FLOW_MAP_POINTS } from '../../../../data/pages/salmon-habitat-indicators';
+---
+<!-- manifest:
+  layout: BaseLayout > main
+  sections:
+    - web map -> ps-info-shi-map
+-->
+<BaseLayout title="Summer low flow salmon analysis streamgages">
+  <main>
+    <PsInfoShiMap points={LOW_FLOW_MAP_POINTS} mapId="shi-map" label="Summer low flow salmon analysis streamgages" />
+  </main>
+</BaseLayout>

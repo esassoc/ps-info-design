@@ -1,0 +1,55 @@
+---
+// PsInfoShiList — the landing page's plain list view (DELTA-1347): every
+// Salmon Habitat Indicator grouped by habitat, in the graphic's order from
+// headwaters to the open Sound, each with its status in icon and words and a
+// link to the same page the graphic and grid open. No graphic, no filters.
+//
+// bcn-lego-checked: checked esa-link-column (link lists without a per-item
+// status) and esa-card (a surface; a reading list needs none). Headings,
+// lists and links only; psinfo-shi-list is the reusable home.
+import { withBase } from '../../lib/base';
+import type { ShiGridRow } from '../../data/pages/salmon-habitat-indicators';
+
+interface Props {
+  groups: { slug: string; label: string; rows: ShiGridRow[] }[];
+}
+const { groups } = Astro.props;
+const href = (h: string) => (/^https?:/.test(h) ? h : withBase(h));
+---
+<div class="shilist">
+  {groups.map((g) => (
+    <section class="shilist__group" aria-labelledby={`shilist-${g.slug}`}>
+      <h2 class="shilist__h" id={`shilist-${g.slug}`}>{g.label}</h2>
+      <ul class="shilist__items" role="list">
+        {g.rows.map((r) => (
+          <li class="shilist__item">
+            <a class="shilist__name" href={href(r.href)}>{r.indicator}</a>
+            <span class="shilist__status">
+              <img src={withBase(`/photos/vital-signs/icons/${r.progressIcon}`)} alt="" width="32" height="32" />
+              {r.progress}
+            </span>
+          </li>
+        ))}
+      </ul>
+    </section>
+  ))}
+</div>
+
+<style>
+  .shilist { display: flex; flex-direction: column; gap: var(--spacing-700); }
+  .shilist__group { display: flex; flex-direction: column; gap: var(--spacing-300); }
+  .shilist__h { margin: 0; font-size: 1.375rem; font-weight: var(--font-weight-semibold); color: var(--ps-info-blue-800); }
+  .shilist__items { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--color-border-light); }
+  .shilist__item {
+    display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap;
+    gap: var(--spacing-200) var(--spacing-500);
+    padding: var(--spacing-300) 0;
+    border-bottom: 1px solid var(--color-border-light);
+    font-size: var(--ps-info-text-body);
+  }
+  .shilist__name { color: var(--color-text-link); text-decoration: underline; text-underline-offset: 2px; }
+  .shilist__name:hover { color: var(--color-text-link-hover); }
+  .shilist__name:focus-visible { outline: 2px solid var(--focus-ring-color); outline-offset: 2px; }
+  .shilist__status { display: inline-flex; align-items: center; gap: var(--spacing-200); color: var(--color-text-secondary); }
+  .shilist__status img { width: 2rem; height: 2rem; }
+</style>

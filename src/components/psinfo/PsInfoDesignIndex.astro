@@ -1,0 +1,47 @@
+---
+// PsInfoDesignIndex: the body of /shi. One section per Jira story (key linked
+// to Jira, then the story title), with the prototype pages that answer it as a
+// list of links beneath.
+// bcn-lego-checked: esa-link-column is the nearest lego but its heading is a span (a footer column), and these stories need real h2 headings for screen-reader navigation; checked Beacon shared ui components (no index list); psinfo-design-index is the reusable home
+import type { DesignStory } from '../../data/design-index';
+import { JIRA_BROWSE } from '../../data/design-index';
+import { withBase } from '../../lib/base';
+
+interface Props {
+  stories: DesignStory[];
+  epic: { key: string; title: string };
+}
+const { stories, epic } = Astro.props;
+---
+<div class="dindex stack" data-gap="xl">
+  <slot name="header" />
+  <p class="dindex__epic">Epic: <a href={`${JIRA_BROWSE}${epic.key}`}>{epic.key}</a> {epic.title}</p>
+  {stories.map((story) => (
+    <section class="stack" data-gap="xs" aria-labelledby={`dindex-${story.key}`}>
+      <h2 id={`dindex-${story.key}`} class="dindex__h2 typography-title-strong">
+        <a href={`${JIRA_BROWSE}${story.key}`}>{story.key}</a> {story.title}
+      </h2>
+      <ul class="dindex__list" role="list">
+        {story.entries.map((e) => (
+          <li>
+            <a href={withBase(e.route)}>{e.title}</a>{e.detail && <span class="dindex__detail">: {e.detail}</span>}
+          </li>
+        ))}
+      </ul>
+    </section>
+  ))}
+</div>
+
+<style>
+  .dindex { max-width: 60rem; padding-block: var(--spacing-700) var(--spacing-900); padding-inline: var(--spacing-500); }
+  .dindex__epic { margin: 0; }
+  .dindex__h2 { margin: 0; color: var(--color-text-primary); }
+  .dindex__list {
+    list-style: none; margin: 0; padding: 0;
+    display: flex; flex-direction: column; gap: var(--spacing-100);
+  }
+  .dindex a { color: var(--color-text-link); text-decoration: underline; text-underline-offset: 0.15em; }
+  .dindex a:hover { color: var(--color-text-link-hover); }
+  .dindex a:focus-visible { outline: 2px solid var(--focus-ring-color); outline-offset: 2px; }
+  .dindex__detail { color: var(--color-text-secondary); }
+</style>

@@ -1,0 +1,47 @@
+---
+// PsInfoCirBox — one "blue box" of the Complete Indicator Report
+// (prod Indicator/Detail): a section under a navy title bar, white body, thin
+// border. Basics, Map, Description, the charts, Importance, Key Results,
+// Methods, and the Salmon Habitat Indicator field all use it.
+//
+// bcn-lego-checked: checked esa-card (no filled title bar) and
+// esa-collapsible (prod's boxes are always open, never collapsible). The bar
+// is prod's section header: 16px+, white on blue-800 (11:1). The uppercase
+// is prod's own report heading style, kept for fidelity.
+// psinfo-cir-box is the reusable home.
+interface Props {
+  title: string;
+  /** Section id; the heading id derives from it. */
+  id: string;
+}
+const { title, id } = Astro.props;
+---
+<section class="cirbox" id={id} aria-labelledby={`${id}-title`}>
+  <h2 class="cirbox__bar" id={`${id}-title`}>{title}</h2>
+  <div class="cirbox__body">
+    <slot />
+  </div>
+</section>
+
+<style>
+  .cirbox { border: 1px solid var(--color-border); background: var(--color-surface); min-width: 0; scroll-margin-top: var(--spacing-500); }
+  .cirbox__bar {
+    margin: 0;
+    padding: var(--spacing-250) var(--spacing-400);
+    background: var(--ps-info-blue-800); color: #ffffff;
+    font-size: 1.125rem; font-weight: var(--font-weight-semibold);
+    text-transform: uppercase; letter-spacing: 0.01em;
+  }
+  .cirbox__body {
+    display: flex; flex-direction: column; gap: var(--spacing-400);
+    padding: var(--spacing-500);
+    font-size: var(--ps-info-text-body); line-height: 1.6; color: var(--color-text-primary);
+  }
+  .cirbox__body :global(p) { margin: 0; }
+  .cirbox__body :global(ul) { margin: 0; padding-left: 1.25rem; display: flex; flex-direction: column; gap: var(--spacing-200); }
+  .cirbox__body :global(a) { color: var(--color-text-link); text-decoration: underline; text-underline-offset: 2px; }
+  .cirbox__body :global(a:focus-visible) { outline: 2px solid var(--focus-ring-color); outline-offset: 2px; }
+  .cirbox__body :global(figure img) { max-width: 100%; height: auto; }
+  .cirbox__body :global(figure) { margin: 0; display: flex; flex-direction: column; gap: var(--spacing-200); }
+  .cirbox__body :global(figcaption) { font-size: var(--ps-info-text-meta-lg); line-height: 1.5; color: var(--color-text-secondary); }
+</style>

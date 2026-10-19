@@ -5,25 +5,28 @@
 // same shape as prod's PugetSoundIndicator with its 1:1 VitalSignIndicator /
 // ProgressIndicator wrappers. Every SHI nests under an existing Vital Sign.
 //
-// Three relationship types (PSP's own vocabulary):
-//   VSI   same analysis; the VSI gains an "Importance to Salmon" subfield
-//   VSI+  extra salmon analysis; the SHI gets its own report page
-//   SHI   no VSI analog yet; still sits under a Vital Sign
+// Three types (kickoff 2026-10-13):
+//   VSI  same as the VSI; the VSI page gains "Importance to Salmon" and
+//           shares the VSI's status and trend
+//   VSI+  VSI Plus: the VSI plus a salmon metric, reported in the Salmon
+//           Habitat Indicator field of the Complete Indicator Report; shares
+//           the VSI's status and trend
+//   SHI  standalone: its own page with its own status and trend; still
+//           sits under a Vital Sign
 //
 // The Salmon Habitat Indicator field is ONE new section on the indicator
 // report (PSP's preferred option), made of subfields that are switched on or
 // off per indicator.
 
-import type { ProgressLabel } from './pages/goals';
+import type { ProgressLabel, TargetStatusLabel } from './pages/goals';
 
 // ── Relationship to the Vital Sign Indicator ───────────────────────────────
+/** Internal only (VSI / VSI+ / SHI): never shown to public users, kickoff
+ *  2026-10-13 ("I don't think they need to know type"). */
 export type ShiRelationship = 'same' | 'extended' | 'independent';
 
-export const SHI_RELATIONSHIP_LABEL: Record<ShiRelationship, string> = {
-  same: 'VSI',
-  extended: 'VSI+',
-  independent: 'SHI',
-};
+/** The label the SHI mark carries everywhere it appears (never the icon alone). */
+export const SHI_MARK_LABEL = 'Salmon Habitat Indicator';
 
 // ── Habitat categories (the six landing-page buttons) ──────────────────────
 export type HabitatCategorySlug =
@@ -60,6 +63,7 @@ export interface VitalSignRef {
 // ── The Salmon Habitat Indicator field and its subfields ───────────────────
 export type ShiSubfield =
   | 'importanceToSalmon'
+  | 'map'
   | 'chart'
   | 'description'
   | 'keyResults'
@@ -72,6 +76,7 @@ export type ShiSubfield =
 /** Subfield order and labels, as listed in the deck. */
 export const SHI_SUBFIELDS: { key: ShiSubfield; label: string }[] = [
   { key: 'importanceToSalmon', label: 'Importance to Salmon' },
+  { key: 'map', label: 'SHI Map' },
   { key: 'chart', label: 'SHI Chart' },
   { key: 'description', label: 'SHI Description' },
   { key: 'keyResults', label: 'Key SHI Results' },
@@ -82,15 +87,8 @@ export const SHI_SUBFIELDS: { key: ShiSubfield; label: string }[] = [
   { key: 'reportingGuidance', label: 'Reporting Guidance' },
 ];
 
-export interface ShiChart {
-  kind: 'gauge-grid';
-  /** Streamgages in the salmon analysis (the VSI analysis uses a subset). */
-  gauges: ShiGauge[];
-  firstYear: number;
-  lastYear: number;
-  caption: string;
-}
-
+/** A streamgage in the Summer low flow salmon analysis (mock source data
+ *  behind the SHI Chart image and the embedded SHI Map). */
 export interface ShiGauge {
   name: string;
   /** USGS station number. */
@@ -102,6 +100,35 @@ export interface ShiGauge {
   pctBelowNormal: number[];
 }
 
+/** A point on the embedded map (a monitoring site). */
+export interface ShiMapPoint {
+  name: string;
+  lat: number;
+  lon: number;
+  /** Shared with the Vital Sign Indicator, or added for the salmon metric. */
+  set: 'shared' | 'added';
+}
+
+/** prod Indicator/Detail Map box (EditPugetSoundIndicatorMapViewModel): an
+ *  uploaded Image or an Embedded Url (an ArcGIS web app in an iframe), each
+ *  with a caption and an optional external map link. */
+export type IndicatorMap = (
+  | { mode: 'embeddedUrl'; url: string; /** iframe title */ title: string; height?: number }
+  | { mode: 'image'; src: string; alt: string; width: number; height: number }
+) & {
+  caption?: string;
+  externalLink?: { name: string; url: string };
+};
+
+/** prod Indicator/Detail Chart box (PugetSoundIndicatorChartType): Chart
+ *  Image, Chart URL, Embedded HTML File or No Data, each with a caption.
+ *  Data (the live Google Chart from reported values) is not mocked. */
+export type IndicatorChart = (
+  | { mode: 'image'; src: string; alt: string; width: number; height: number }
+  | { mode: 'embedUrl' | 'htmlFile'; src: string; /** iframe title */ title: string; height?: number }
+  | { mode: 'noData' }
+) & { caption?: string };
+
 export interface ShiDataset {
   name: string;
   steward: string;
@@ -112,7 +139,8 @@ export interface ShiDataset {
 export interface SalmonHabitatIndicatorField {
   enabled: Record<ShiSubfield, boolean>;
   importanceToSalmon?: string[];
-  chart?: ShiChart;
+  map?: IndicatorMap;
+  chart?: IndicatorChart;
   description?: string;
   keyResults?: string[];
   methods?: string[];
@@ -133,6 +161,9 @@ export interface SalmonHabitatIndicatorFacet {
   relationship: ShiRelationship;
   category: HabitatCategorySlug;
   field: SalmonHabitatIndicatorField;
+  /** SHI only: its own status and trend, set by an admin. VSI and VSI+
+   *  read the Vital Sign Indicator's. */
+  standalone?: { progress: ProgressLabel; targetStatus?: TargetStatusLabel };
 }
 
 // ── The shared base entity ─────────────────────────────────────────────────
@@ -172,10 +203,14 @@ export interface VsiReporter {
 
 export interface VsiPartner {
   name: string;
-  logo: string;
+  /** public/ path; partners without a logo on file render as a text link. */
+  logo?: string;
   href: string;
 }
 
+/** One indicator's detail record: the VitalSignIndicator/Detail page and the
+ *  Complete Indicator Report (Indicator/Detail) read the same fields. A SHI
+ *  SHI's standalone page uses the same record. */
 export interface VsiDetail {
   /** Slug of the PugetSoundIndicator this page renders. */
   indicatorSlug: string;
@@ -187,4 +222,9 @@ export interface VsiDetail {
   reporter: VsiReporter;
   lastUpdated: string;
   partners: VsiPartner[];
+  /** Complete Indicator Report fields. */
+  measurementUnit: string;
+  importance?: string[];
+  monitoringProgram?: string;
+  methods?: string[];
 }

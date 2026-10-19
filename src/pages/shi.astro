@@ -1,0 +1,24 @@
+---
+// SHI: the Salmon Habitat Indicator prototypes, one section per Jira story,
+// for walking PSP through the work. Data: src/data/design-index.ts.
+import BaseLayout from '../layouts/BaseLayout.astro';
+import EsaPageHeader from '@esa/ecology/esa-page-header.astro';
+import EsaBreadcrumbs from '@esa/ecology/esa-breadcrumbs.astro';
+import PsInfoDesignIndex from '../components/psinfo/PsInfoDesignIndex.astro';
+import { SHI_EPIC, SHI_STORIES } from '../data/design-index';
+import { withBase } from '../lib/base';
+---
+<!-- manifest:
+  layout: BaseLayout > center spine
+  sections:
+    - stories and pages  -> ps-info-design-index (header slot: esa-page-header + esa-breadcrumbs)
+-->
+<BaseLayout title="Salmon Habitat Indicators">
+  <main id="main-content" class="center">
+    <PsInfoDesignIndex stories={SHI_STORIES} epic={SHI_EPIC}>
+      <EsaPageHeader slot="header" title="Salmon Habitat Indicators">
+        <EsaBreadcrumbs slot="breadcrumbs" items={[{ label: 'Home', href: withBase('/') }, { label: 'Salmon Habitat Indicators' }]} size="md" />
+      </EsaPageHeader>
+    </PsInfoDesignIndex>
+  </main>
+</BaseLayout>

@@ -31,9 +31,11 @@ const { name, subtitle, logo, aboutParagraphs } = Astro.props;
       <p class="shihero__subtitle">{subtitle}</p>
     </div>
   </div>
-  <div class="shihero__about">
-    {aboutParagraphs.map((p) => <p>{p}</p>)}
-  </div>
+  {aboutParagraphs.length > 0 && (
+    <div class="shihero__about">
+      {aboutParagraphs.map((p) => <p>{p}</p>)}
+    </div>
+  )}
 </header>
 
 <style>

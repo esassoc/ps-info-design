@@ -1,8 +1,11 @@
 ---
 // Salmon Habitat Indicators — landing page, inside today's Vital Signs site.
-// Built from PSP's SHI mock-up (v29, 2026-08-28): title band and logo, About
-// text, the life-cycle graphic with six habitat buttons, and the table of all
-// Salmon Habitat Indicators. Buttons and graphic zones filter the table.
+// Built from PSP's SHI mock-up (v29, 2026-08-28), revised after the
+// 2026-10-13 kickoff (DELTA-1347): logo lockup and About text, the life cycle
+// loop over a full-width habitat graphic that follows the fish, landmarks that
+// magnify on hover, a link to the plain list view, and the table of all
+// Salmon Habitat Indicators with status and no Type column. Buttons and
+// graphic zones filter the table.
 // Contract: src/data/contracts/salmon-habitat-indicators.md
 import PsInfoVsProdChrome from '../../../layouts/PsInfoVsProdChrome.astro';
 import PsInfoShiHero from '../../../components/psinfo/PsInfoShiHero.astro';
@@ -32,7 +35,6 @@ import { withBase } from '../../../lib/base';
 -->
 <PsInfoVsProdChrome
   title="Salmon Habitat Indicators"
-  headerImage="/photos/vital-signs/headers/vs-home-banner.jpg"
   trail={[
     { label: 'About the Vital Signs', href: `${VS_SITE}/About` },
     { label: 'All Indicators', href: withBase(shiRoutes.allIndicators) },
@@ -41,7 +43,7 @@ import { withBase } from '../../../lib/base';
 >
   <div class="stack" data-gap="2xl">
     <PsInfoShiHero name={SHI_SITE_NAME} subtitle={SHI_SUBTITLE} logo={SHI_LOGO} aboutParagraphs={SHI_ABOUT} />
-    <PsInfoShiHabitatExplorer categories={HABITAT_CATEGORIES} />
+    <PsInfoShiHabitatExplorer categories={HABITAT_CATEGORIES} listHref={shiRoutes.list} />
     <div class="stack" data-gap="md">
       <PsInfoSectionTitle title={SHI_GRID_HEADING} size="lg" />
       <PsInfoShiIndicatorsGrid rows={SHI_GRID_ROWS} categories={HABITAT_CATEGORIES} label="All Salmon Habitat Indicators" />

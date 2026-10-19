@@ -16,6 +16,7 @@
 // with aria-expanded/aria-controls; the status icons carry the source's full
 // alt text; search input is labeled.
 import EsaIcon from '@esa/ecology/esa-icon.astro';
+import PsInfoShiMark from './PsInfoShiMark.astro';
 import { withBase } from '../../lib/base';
 import { isExternalHref } from '../../lib/psinfoExternalLink';
 import type { GoalDetail, GoalVitalSign, ProgressLabel, TargetStatusLabel } from '../../data/pages/goals';
@@ -33,13 +34,12 @@ interface Props {
   expandedLevels?: 1 | 2;
   /** Unique id when multiple trees share a page. */
   treeId?: string;
-  /** Adds a Salmon Habitat column: indicators keyed by their prod href get the
-   *  SHI mark plus a text link (never the icon alone). */
-  salmonMarks?: Record<string, { label: string; href: string }>;
-  /** public/ path of the SHI mark shown beside each salmon link. */
-  salmonMarkSrc?: string;
+  /** Indicator hrefs that are Salmon Habitat Indicators: each gets the SHI
+   *  mark (icon plus label, never the icon alone) under its name. */
+  salmonMarked?: string[];
 }
-const { goals = [], vitalSigns, frameHueVar, colorCoded = false, expandedLevels = 1, treeId = 'vstree', salmonMarks, salmonMarkSrc } = Astro.props;
+const { goals = [], vitalSigns, frameHueVar, colorCoded = false, expandedLevels = 1, treeId = 'vstree', salmonMarked = [] } = Astro.props;
+const indHref = (h: string) => (isExternalHref(h) ? h : withBase(h));
 
 const PROGRESS_ICON: Record<ProgressLabel, string> = {
   'Getting Better': 'progress-gettingbetter.png',
@@ -69,7 +69,7 @@ const MINUS = '<path d="M5 12h14"/>';
 const uid = (...parts: (string | number)[]) =>
   [treeId, ...parts].join('-').toLowerCase().replace(/[^a-z0-9-]+/g, '');
 ---
-<div class:list={['vstree', { 'vstree--salmon': salmonMarks }]} id={treeId} style={`--frame: var(${frameHueVar ?? '--ps-info-blue-800'})`}>
+<div class="vstree" id={treeId} style={`--frame: var(${frameHueVar ?? '--ps-info-blue-800'})`}>
   <div class="vstree__toolbar">
     <button type="button" class="vstree__lvlbtn" data-tree-expand>Expand Level</button>
     <button type="button" class="vstree__lvlbtn" data-tree-collapse>Collapse Level</button>
@@ -87,7 +87,6 @@ const uid = (...parts: (string | number)[]) =>
     </span>
     <span class="vstree__head-col">Indicator Progress</span>
     <span class="vstree__head-col">Target Status</span>
-    {salmonMarks && <span class="vstree__head-col">Salmon Habitat</span>}
   </div>
 
   {vitalSigns && (
@@ -186,7 +185,10 @@ const uid = (...parts: (string | number)[]) =>
                 {vsign.indicators.map((ind) => (
                   <li data-tree-row data-level="2" data-text={ind.name.toLowerCase()}>
                     <div class="vstree__row vstree__row--ind">
-                      <a class="vstree__link vstree__link--ind" href={ind.href} {...(isExternalHref(ind.href) ? { target: '_blank', rel: 'noopener' } : {})}>{ind.name}</a>
+                      <span class="vstree__name">
+                        <a class="vstree__link vstree__link--ind" href={indHref(ind.href)} {...(isExternalHref(ind.href) ? { target: '_blank', rel: 'noopener' } : {})}>{ind.name}</a>
+                        {salmonMarked.includes(ind.href) && <PsInfoShiMark />}
+                      </span>
                       <span class="vstree__cell">
                         <img src={withBase(`/photos/vital-signs/icons/${PROGRESS_ICON[ind.progress]}`)} alt={progressAlt(ind.progress)} width="64" height="64" loading="lazy" />
                       </span>
@@ -195,16 +197,6 @@ const uid = (...parts: (string | number)[]) =>
                           <img src={withBase(`/photos/vital-signs/icons/${TARGET_ICON[ind.targetStatus]}`)} alt={targetAlt(ind.targetStatus)} width="64" height="64" loading="lazy" />
                         )}
                       </span>
-                      {salmonMarks && (
-                        <span class="vstree__cell vstree__cell--salmon">
-                          {salmonMarks[ind.href] && (
-                            <a class="vstree__salmon" href={/^https?:/.test(salmonMarks[ind.href].href) ? salmonMarks[ind.href].href : withBase(salmonMarks[ind.href].href)}>
-                              {salmonMarkSrc && <img src={withBase(salmonMarkSrc)} alt="" width="28" height="24" />}
-                              <span>{salmonMarks[ind.href].label}</span>
-                            </a>
-                          )}
-                        </span>
-                      )}
                     </div>
                   </li>
                 ))}
@@ -379,21 +371,12 @@ const uid = (...parts: (string | number)[]) =>
   .vstree__link:focus-visible { outline: 2px solid var(--focus-ring-color); outline-offset: 2px; }
   .vstree__link--goal { font-weight: var(--font-weight-semibold); }
   .vstree__cell { display: flex; justify-content: center; }
-  .vstree--salmon .vstree__head, .vstree--salmon .vstree__row--ind { grid-template-columns: 1fr 110px 110px 150px; }
-  .vstree__cell--salmon { justify-content: flex-start; }
-  .vstree__salmon {
-    display: inline-flex; align-items: center; gap: var(--spacing-200);
-    font-size: var(--ps-info-text-meta-lg); color: var(--color-text-link);
-    text-decoration: underline; text-underline-offset: 2px;
-  }
-  .vstree__cell .vstree__salmon img { width: 28px; height: auto; flex: none; }
-  .vstree__salmon:focus-visible { outline: 2px solid var(--focus-ring-color); outline-offset: 2px; }
+  .vstree__name { display: flex; flex-direction: column; align-items: flex-start; gap: var(--spacing-150); }
   .vstree__cell img { width: 64px; height: 64px; }
 
   @media (max-width: 720px) {
     .vstree__head { grid-template-columns: 1fr 72px 72px; }
     .vstree__row--ind { grid-template-columns: 1fr 72px 72px; padding-left: var(--spacing-500); }
-    .vstree--salmon .vstree__head, .vstree--salmon .vstree__row--ind { grid-template-columns: 1fr 72px 72px 96px; }
     .vstree__cell img { width: 48px; height: 48px; }
   }
 </style>

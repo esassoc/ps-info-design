@@ -38,8 +38,10 @@ import art from './shi-diorama-art.svg?raw';
 
 interface Props {
   categories: HabitatCategory[];
+  /** The plain list view: the same indicators and links without the graphic. */
+  listHref: string;
 }
-const { categories } = Astro.props;
+const { categories, listHref } = Astro.props;
 
 const bySlug = Object.fromEntries(categories.map((c) => [c.slug, c])) as Record<string, HabitatCategory>;
 const CHECK = '<path d="M20 6 9 17l-5-5"/>';
@@ -64,6 +66,7 @@ const lcChevrons = [
 const countFor = (slug: HabitatCategorySlug) => SHI_GRID_ROWS.filter((r) => r.category === slug).length;
 ---
 <div class="shix" data-shi-explorer>
+  <p class="shix__alt"><a href={withBase(listHref)}>View as a List</a></p>
   <ul class="shix__buttons" role="list">
     {buttons.map((c) => (
       <li>
@@ -137,15 +140,19 @@ const countFor = (slug: HabitatCategorySlug) => SHI_GRID_ROWS.filter((r) => r.ca
               <a class="lm" data-shi-landmark={l.slug} data-shi-cat={l.category} href={l.href} style={catStyle(l.category)}>
                 <line class="lm__lead" x1={l.x} y1={l.y} x2={l.plaque.x} y2={l.plaque.y} />
                 <g class="lm__label" transform={`translate(${l.plaque.x} ${l.plaque.y})`}>
-                  <rect class="lm__plaque" rx="2" />
-                  <text class="lm__text" text-anchor="middle" y="5">{l.label}</text>
+                  <g class="lm__zoom">
+                    <rect class="lm__plaque" rx="2" />
+                    <text class="lm__text" text-anchor="middle" y="5">{l.label}</text>
+                  </g>
                 </g>
                 <g class="lm__mark" transform={`translate(${l.x} ${l.y})`}>
-                  <circle class="lm__focus lm__focus--halo" r="13" />
-                  <circle class="lm__focus" r="13" />
-                  <circle class="lm__hit" r="14" />
-                  <circle class="lm__ring" r="7" />
-                  <circle class="lm__dot" r="2.2" />
+                  <g class="lm__zoom">
+                    <circle class="lm__focus lm__focus--halo" r="13" />
+                    <circle class="lm__focus" r="13" />
+                    <circle class="lm__hit" r="14" />
+                    <circle class="lm__ring" r="7" />
+                    <circle class="lm__dot" r="2.2" />
+                  </g>
                 </g>
               </a>
             ))}
@@ -300,6 +307,14 @@ const countFor = (slug: HabitatCategorySlug) => SHI_GRID_ROWS.filter((r) => r.ca
 
 <style>
   .shix { display: flex; flex-direction: column; gap: var(--spacing-400); }
+  .shix__alt { order: 0; margin: 0; align-self: flex-end; font-size: var(--ps-info-text-body); }
+  .shix__alt a { color: var(--color-text-link); text-decoration: underline; text-underline-offset: 3px; }
+  .shix__alt a:focus-visible { outline: 2px solid var(--focus-ring-color); outline-offset: 2px; }
+  /* Magnify on hover (kickoff 2026-10-13): the hovered or focused landmark and
+     its plaque scale up in place; transform only, so nothing reflows. */
+  .lm__zoom { transform-box: fill-box; transform-origin: center; transition: transform 160ms ease-out; }
+  .lm:hover .lm__zoom, .lm:focus-visible .lm__zoom, .lm.is-open .lm__zoom { transform: scale(1.45); }
+  @media (prefers-reduced-motion: reduce) { .lm__zoom { transition: none; } }
   .shix__buttons { order: 2; }
   .shix__strip { order: 1; position: relative; }
   .shix__strip:focus-visible { outline: 3px solid var(--focus-ring-color); outline-offset: 4px; }

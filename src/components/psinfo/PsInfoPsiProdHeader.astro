@@ -1,0 +1,48 @@
+---
+// PsInfoPsiProdHeader — the live Puget Sound Info site header as it ships on
+// www.pugetsoundinfo.wa.gov report pages (Indicator/Detail, captured
+// 2026-10-16): one solid brand band with the site name at left and Request
+// Support and Log In at right. The Vital Signs pages use
+// psinfo-vs-prod-header instead.
+//
+// bcn-lego-checked: checked esa-app-bar (neutral app chrome; prod's band is
+// the brand blue) and esa-header-nav (multi-item nav). Same link treatment as
+// psinfo-vs-prod-header's network bar; psinfo-psi-prod-header is the reusable
+// home for www report pages.
+const PSINFO_SITE = 'https://www.pugetsoundinfo.wa.gov';
+---
+<header class="psiprod">
+  <nav class="psiprod__bar" aria-label="Puget Sound Info">
+    <a class="psiprod__link psiprod__link--site" href={PSINFO_SITE}>Puget Sound Info</a>
+    <div class="psiprod__account">
+      <a class="psiprod__link" href={`${PSINFO_SITE}/Help/Support`}>Request Support</a>
+      <a class="psiprod__link" href={`${PSINFO_SITE}/Account/Login`}>Log In</a>
+    </div>
+  </nav>
+</header>
+
+<style>
+  .psiprod { background: var(--ps-info-blue-800); }
+  .psiprod__bar {
+    display: flex; align-items: center; justify-content: space-between;
+    flex-wrap: wrap; gap: var(--spacing-200) var(--spacing-600);
+    padding: var(--spacing-600) var(--spacing-600) var(--spacing-900);
+  }
+  .psiprod__account { display: flex; align-items: center; flex-wrap: wrap; gap: var(--spacing-500); }
+  .psiprod__link {
+    color: #ffffff; text-decoration: none;
+    font-size: 1.125rem; font-weight: var(--font-weight-semibold);
+    text-transform: uppercase; letter-spacing: 0.02em;
+    min-height: 24px; display: inline-flex; align-items: center;
+  }
+  .psiprod__link--site { font-size: 1.375rem; }
+  .psiprod__link:hover { text-decoration: underline; text-underline-offset: 4px; }
+  .psiprod__link:focus-visible { outline: 2px solid #ffffff; outline-offset: 3px; }
+
+  @media (max-width: 640px) {
+    .psiprod__bar { padding: var(--spacing-300) var(--spacing-400) var(--spacing-500); }
+    .psiprod__link { font-size: 1rem; }
+    .psiprod__link--site { font-size: 1.125rem; }
+    .psiprod__account { gap: var(--spacing-300); }
+  }
+</style>

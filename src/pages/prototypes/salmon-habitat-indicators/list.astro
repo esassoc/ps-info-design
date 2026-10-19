@@ -1,0 +1,39 @@
+---
+// Salmon Habitat Indicators, list view — the accessible alternative to the
+// landing page's habitat graphic (DELTA-1347), linked from it: the same
+// indicators, statuses and links as a plain list grouped by habitat, in the
+// graphic's order from headwaters to the open Sound.
+// Contract: src/data/contracts/salmon-habitat-indicators.md
+import PsInfoVsProdChrome from '../../../layouts/PsInfoVsProdChrome.astro';
+import PsInfoShiHero from '../../../components/psinfo/PsInfoShiHero.astro';
+import PsInfoShiList from '../../../components/psinfo/PsInfoShiList.astro';
+import {
+  SHI_LIST_GROUPS,
+  SHI_LOGO,
+  SHI_SITE_NAME,
+  SHI_SUBTITLE,
+  VS_SITE,
+  shiRoutes,
+} from '../../../data/pages/salmon-habitat-indicators';
+import { withBase } from '../../../lib/base';
+---
+<!-- manifest:
+  layout: PsInfoVsProdChrome > stack(2xl) spine
+  sections:
+    - logo lockup              -> ps-info-shi-hero
+    - indicators by habitat    -> ps-info-shi-list
+-->
+<PsInfoVsProdChrome
+  title="Salmon Habitat Indicators, List"
+  trail={[
+    { label: 'About the Vital Signs', href: `${VS_SITE}/About` },
+    { label: 'All Indicators', href: withBase(shiRoutes.allIndicators) },
+    { label: 'Salmon Habitat Indicators', href: withBase(shiRoutes.landing) },
+    { label: 'List' },
+  ]}
+>
+  <div class="stack" data-gap="2xl">
+    <PsInfoShiHero name={SHI_SITE_NAME} subtitle={SHI_SUBTITLE} logo={SHI_LOGO} aboutParagraphs={[]} />
+    <PsInfoShiList groups={SHI_LIST_GROUPS} />
+  </div>
+</PsInfoVsProdChrome>

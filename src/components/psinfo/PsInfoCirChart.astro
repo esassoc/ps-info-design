@@ -1,0 +1,39 @@
+---
+// PsInfoCirChart — the body of the Complete Indicator Report's Chart box
+// (prod PugetSoundIndicatorChart): the chart in its display mode, then the
+// caption. The report's own chart and the SHI Chart subfield both use it, so
+// the salmon chart offers every mode the indicator chart does.
+//
+// bcn-lego-checked: no esa- lego renders an uploaded chart image or an
+// embedded chart frame with a caption (esa-card is a surface, not a figure);
+// checked Beacon (no chart figure). psinfo-cir-chart is the reusable home.
+import { withBase } from '../../lib/base';
+import type { IndicatorChart } from '../../data/shi-domain';
+
+interface Props {
+  chart: IndicatorChart;
+}
+const { chart } = Astro.props;
+const local = (src: string) => (src.startsWith('/') ? withBase(src) : src);
+---
+<figure class="circhart">
+  {chart.mode === 'image' && (
+    <a href={local(chart.src)}>
+      <img src={local(chart.src)} alt={chart.alt} width={chart.width} height={chart.height} loading="lazy" />
+    </a>
+  )}
+  {(chart.mode === 'embedUrl' || chart.mode === 'htmlFile') && (
+    <iframe class="circhart__frame" src={local(chart.src)} title={chart.title} style={`height: ${chart.height ?? 350}px`} loading="lazy"></iframe>
+  )}
+  {chart.mode === 'noData' && <p class="circhart__none">No reported data available</p>}
+  {chart.caption && <figcaption class="circhart__caption">{chart.caption}</figcaption>}
+</figure>
+
+<style>
+  .circhart { margin: 0; display: flex; flex-direction: column; gap: var(--spacing-300); }
+  .circhart img { width: 100%; height: auto; }
+  .circhart a:focus-visible { outline: 2px solid var(--focus-ring-color); outline-offset: 2px; }
+  .circhart__frame { width: 100%; border: 0; }
+  .circhart__none { margin: 0; text-align: center; color: var(--color-text-secondary); }
+  .circhart__caption { color: var(--color-text-secondary); }
+</style>

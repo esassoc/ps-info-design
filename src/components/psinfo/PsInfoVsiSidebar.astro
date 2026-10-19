@@ -2,16 +2,15 @@
 // PsInfoVsiSidebar — the reference rail of prod's VitalSignIndicator/Detail
 // page: Indicator Trend (prod's own progress icon), Target, Data Source,
 // Vital Sign Indicator Reporter, Indicator Details with the Complete Indicator
-// Report link. When the indicator has its own Salmon Habitat
-// Indicator report (VSI+), a Salmon Habitat Indicator entry links to it,
-// in the same place the Complete Indicator Report link lives.
+// Report link. A standalone SHI (SHI) shows its own trend and, when set,
+// its target status, and names its reporter accordingly.
 //
 // bcn-lego-checked: checked psinfo-vital-sign-detail-sidebar (the Vital Sign
 // page's rail: Related Strategies + reporter org, no trend icon, target, data
 // source or report links) and esa-card; headings in the goal ThemeColor as
 // prod sets them. psinfo-vsi-sidebar is the reusable home for indicator pages.
 import { withBase } from '../../lib/base';
-import type { ProgressLabel } from '../../data/pages/goals';
+import type { ProgressLabel, TargetStatusLabel } from '../../data/pages/goals';
 import type { VsiReporter } from '../../data/shi-domain';
 
 interface Props {
@@ -19,19 +18,29 @@ interface Props {
   hueVar: string;
   progress: ProgressLabel;
   progressIcon: string;
+  targetStatus?: { label: TargetStatusLabel; icon: string };
   target: string;
   dataSource: string;
   reporter: VsiReporter;
+  /** Heading over the reporter (prod: "Vital Sign Indicator Reporter"). */
+  reporterLabel?: string;
   completeReportHref: string;
-  /** Present when a Salmon Habitat Indicator report exists for this indicator. */
-  shiReport?: { href: string };
 }
-const { hueVar, progress, progressIcon, target, dataSource, reporter, completeReportHref, shiReport } = Astro.props;
+const {
+  hueVar, progress, progressIcon, targetStatus, target, dataSource, reporter,
+  reporterLabel = 'Vital Sign Indicator Reporter', completeReportHref,
+} = Astro.props;
+const href = (h: string) => (/^https?:/.test(h) ? h : withBase(h));
 ---
 <aside class="vsiside" aria-label="Indicator reference" style={`--hue: var(${hueVar})`}>
   <section>
-    <h2 class="vsiside__h">Indicator Trend</h2>
-    <img class="vsiside__trend" src={withBase(`/photos/vital-signs/icons/${progressIcon}`)} alt={`Progress: ${progress}`} width="72" height="72" />
+    <h2 class="vsiside__h">{targetStatus ? 'Indicator Trend / Target Status' : 'Indicator Trend'}</h2>
+    <div class="vsiside__icons">
+      <img class="vsiside__trend" src={withBase(`/photos/vital-signs/icons/${progressIcon}`)} alt={`Progress: ${progress}`} width="72" height="72" />
+      {targetStatus && (
+        <img class="vsiside__trend" src={withBase(`/photos/vital-signs/icons/${targetStatus.icon}`)} alt={`Target status: ${targetStatus.label}`} width="72" height="72" />
+      )}
+    </div>
   </section>
   <section>
     <h2 class="vsiside__h">Target</h2>
@@ -42,7 +51,7 @@ const { hueVar, progress, progressIcon, target, dataSource, reporter, completeRe
     <p>{dataSource}</p>
   </section>
   <section>
-    <h2 class="vsiside__h">Vital Sign Indicator Reporter</h2>
+    <h2 class="vsiside__h">{reporterLabel}</h2>
     <p>
       {reporter.name}<br />
       <a href={`mailto:${reporter.email}`}>{reporter.email}</a><br />
@@ -51,14 +60,8 @@ const { hueVar, progress, progressIcon, target, dataSource, reporter, completeRe
   </section>
   <section>
     <h2 class="vsiside__h">Indicator Details</h2>
-    <p><a href={completeReportHref}>Complete Indicator Report</a></p>
+    <p><a href={href(completeReportHref)}>Complete Indicator Report</a></p>
   </section>
-  {shiReport && (
-    <section>
-      <h2 class="vsiside__h">Salmon Habitat Indicator</h2>
-      <p><a href={withBase(shiReport.href)}>Salmon Habitat Indicator Report</a></p>
-    </section>
-  )}
 </aside>
 
 <style>
@@ -69,6 +72,7 @@ const { hueVar, progress, progressIcon, target, dataSource, reporter, completeRe
   .vsiside section { display: flex; flex-direction: column; gap: var(--spacing-200); }
   .vsiside p { margin: 0; overflow-wrap: anywhere; }
   .vsiside__h { margin: 0; font-size: 1.0625rem; font-weight: var(--font-weight-regular); color: var(--hue); }
+  .vsiside__icons { display: flex; gap: var(--spacing-300); }
   .vsiside__trend { width: 72px; height: 72px; }
   .vsiside a { color: var(--color-text-link); text-decoration: underline; text-underline-offset: 2px; }
   .vsiside a:focus-visible { outline: 2px solid var(--focus-ring-color); outline-offset: 2px; }
