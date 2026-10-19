@@ -107,6 +107,14 @@
   --color-text-link:       var(--ps-info-blue-600);
   --color-text-link-hover: var(--ps-info-blue-800);
   --color-surface-inverse: var(--ps-info-blue-950);
+  /* The hub's components read the tier-2 brand roles, not the names above,
+     and fell back to the hub's green (white on it is 2.95:1). */
+  --color-background-brand:        var(--ps-info-blue-800);
+  --color-background-brand-hover:  var(--ps-info-blue-900);
+  --color-background-brand-active: var(--ps-info-blue-900);
+  --color-border-brand:            var(--ps-info-blue-800);
+  --color-content-brand:           var(--ps-info-blue-800);
+  --color-content-on-brand:        var(--ps-info-gray-0);
 
   /* ===== (2) NEUTRAL CHAIN ===== */
   --color-text-primary:   var(--ps-info-gray-900);
