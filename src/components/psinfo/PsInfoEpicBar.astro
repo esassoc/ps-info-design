@@ -1,7 +1,7 @@
 ---
 // PsInfoEpicBar: the slim previous/next bar at the very top of every prototype
 // page an epic walks, above the client's site chrome. Back to the epic page,
-// the story the page answers (one link to its story page), the Outlines
+// the story the page answers (one link to its section on the epic page), the Outlines
 // switch, and the pager. A page under two stories renders one variant per
 // story; the script shows the one ?story= names, else the first.
 //
@@ -17,7 +17,7 @@
 // bcn-lego-checked: esa-app-bar is the nearest lego but never wraps (its start slot is flex: none, so a long story title overflows a 320px viewport, failing 1.4.10), spreads no data-* attribute for the script hook, and its fixed 32px density is not a slim bar; esa-pagination pages a list by events, not pages by links. The pager is esa-button (chrome, so links stay links), the switch esa-switch-toggle, the back arrow esa-icon, laid out with .repel and .cluster. Checked Beacon shared ui components (no walkthrough bar). psinfo-epic-bar is the reusable home; the only bespoke CSS is the bar surface, its two text links and the runtime outline overlay.
 import EsaButton from '@esa/ecology/esa-button.astro';
 import EsaIcon from '@esa/ecology/esa-icon.astro';
-import { epicSteps, normalizeRoute, stepHref, stopsForRoute, storyRoute } from '../../data/epics/index';
+import { epicSteps, normalizeRoute, stepHref, stopsForRoute, storyHref } from '../../data/epics/index';
 import { withBase } from '../../lib/base';
 import '@esa/tokens/typography.css';
 import '../../styles/epic-marks.css';
@@ -35,7 +35,7 @@ const total = steps.length;
         <div class="epicbar__stop repel" data-gap="sm" data-epic-stop={step.story.key} hidden={i > 0}>
           <div class="epicbar__where cluster" data-gap="lg">
             <a class="epicbar__link epicbar__back typography-label-md" href={withBase(found.epic.route)}><EsaIcon name="arrow-left" size="sm" />{found.epic.title}</a>
-            <a class="epicbar__link typography-label-md" href={withBase(storyRoute(found.epic, step.story))}><span class="typography-label-md-strong">{step.story.key}</span>{' '}{step.story.title}</a>
+            <a class="epicbar__link typography-label-md" href={withBase(storyHref(found.epic, step.story))}><span class="typography-label-md-strong">{step.story.key}</span>{' '}{step.story.title}</a>
           </div>
           <div class="cluster" data-gap="md">
             <esa-switch-toggle label="Outlines" data-epic-outlines hidden></esa-switch-toggle>

@@ -11,9 +11,9 @@ export interface EpicPage {
   title: string;
   /** Root-relative, base-less route; wrap with withBase() at render. */
   route: string;
-  /** Short case label shown beside the title on the epic and story pages. */
+  /** Short case label shown beside the title on the epic page. */
   label?: string;
-  /** The story page shows this page as the story's one illustrative example.
+  /** The story's section shows this page as its one illustrative example.
       At most one per story; without one, the first page. */
   example?: boolean;
 }
@@ -30,11 +30,11 @@ export interface Epic {
   /** Jira key, e.g. DELTA-1337. */
   key: string;
   title: string;
-  /** Root-relative, base-less route of the epic page. Story pages sit under it. */
+  /** Root-relative, base-less route of the epic page. */
   route: string;
   stories: EpicStory[];
   /**
-   * Optional. Locks the epic page, its story pages and every page in it behind
+   * Optional. Locks the epic page and every page in it behind
    * psinfo-password-gate. Plain text by design: the gate is a casual deterrent
    * on a public site, not access control (see the gate's header).
    */

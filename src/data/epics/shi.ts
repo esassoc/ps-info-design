@@ -1,7 +1,7 @@
 // DELTA-1337 Salmon Habitat Indicators: the stories and the prototype pages
-// that answer each one; `example` picks the page each story page shows. Story
+// that answer each one; `example` picks the page each story's section shows. Story
 // titles are the Jira titles, verbatim; labels are PSP's own terms (VSI, VSI+,
-// SHI), shown on the epic and story pages only.
+// SHI), shown on the epic page only.
 import type { Epic } from './types.ts';
 
 const SHI = '/prototypes/salmon-habitat-indicators';

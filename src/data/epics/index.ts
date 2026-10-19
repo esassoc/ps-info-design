@@ -1,4 +1,4 @@
-// Every epic this spoke presents, and the lookups the epic page, story pages,
+// Every epic this spoke presents, and the lookups the epic page,
 // previous/next bar and gate share. Pure functions over the epic files, so
 // scripts/epic-shots.mjs can import this module too.
 import type { Epic, EpicBadgeSide, EpicMarkBox, EpicPage, EpicStep, EpicStory } from './types.ts';
@@ -10,14 +10,15 @@ export const JIRA_BROWSE = 'https://sitkatech.atlassian.net/browse/';
 export const jiraHref = (key: string): string => `${JIRA_BROWSE}${key}`;
 
 export const storySlug = (story: EpicStory): string => story.key.toLowerCase();
-export const storyRoute = (epic: Epic, story: EpicStory): string => `${epic.route}/${storySlug(story)}`;
+/** A story's section on its epic page (/shi#delta-1343). */
+export const storyHref = (epic: Epic, story: EpicStory): string => `${epic.route}#${storySlug(story)}`;
 
 /** The epic's walk: every page under every story, in story order. A page
     listed under two stories is two stops. */
 export const epicSteps = (epic: Epic): EpicStep[] =>
   epic.stories.flatMap((story) => story.pages.map((page) => ({ story, page })));
 
-/** The page a story page shows as the story's one illustrative example. */
+/** The page a story's section shows as its one illustrative example. */
 export const exampleOf = (story: EpicStory): EpicPage => story.pages.find((p) => p.example) ?? story.pages[0];
 
 /** Query parameter naming the story a page was reached from. */
@@ -52,14 +53,9 @@ export function stopsForRoute(route: string): { epic: Epic; stops: { index: numb
   return undefined;
 }
 
-/** The epic a route belongs to: its epic page, a story page, or a page it walks. */
+/** The epic a route belongs to: its epic page or a page it walks. */
 export function epicForRoute(route: string): Epic | undefined {
-  return EPICS.find(
-    (epic) =>
-      route === epic.route ||
-      epic.stories.some((s) => route === storyRoute(epic, s)) ||
-      epicSteps(epic).some(({ page }) => page.route === route),
-  );
+  return EPICS.find((epic) => route === epic.route || epicSteps(epic).some(({ page }) => page.route === route));
 }
 
 /** sessionStorage key: one unlock covers the whole epic for the tab. */
@@ -78,7 +74,7 @@ export const epicMarkAttrs = (storyKey: string, label: string): Record<string, s
 export const EPIC_SHOT_TALL = 1200;
 
 /** The story's marked parts in page order, one per label, numbered before any
-    is dropped, so the live outlines and the story page screenshots always
+    is dropped, so the live outlines and the epic page's screenshots always
     agree. A label the page repeats (the SHI mark on every table row) is one
     part, outlined on its first instance that has a box: one example, not every
     copy. A part is boxed where it paints: its own box plus any descendant that

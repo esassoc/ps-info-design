@@ -1,30 +1,29 @@
 ---
-// PsInfoEpicStory: the body of a story page, the story's annotated overview.
-// One psinfo-group for the story's one illustrative example (exampleOf): the
-// band names the page and its case label, with Open Page to the page itself
-// (carrying ?story= when the page sits under more than one story); under it,
-// the numbered labels beside the page's annotated shots (psinfo-epic-shot).
-// The epic page lists every page; this shows one. Shots come from
-// scripts/epic-shots.mjs as src/data/epics/shots/<epic key>.json; a missing
-// file or entry renders the band alone. The page header comes in the header
-// slot.
+// PsInfoEpicStory: one story's section body on its epic page, under the
+// story's band. Two nested psinfo-groups: the story's one illustrative example
+// (exampleOf), named with its case label and an Open Page button (carrying
+// ?story= when the page sits under more than one story), with the numbered
+// labels beside its annotated shots (psinfo-epic-shot); then Pages, the rows of
+// every page that answers the story. Shots come from scripts/epic-shots.mjs as
+// src/data/epics/shots/<epic key>.json; a missing file or entry renders the
+// example's band alone.
 // prose-prop-checked: `story` is a Jira story record (key, title, pages), never page copy
-// bcn-lego-checked: no esa- lego pairs a numbered label list with annotated images; the band is psinfo-group, the button esa-button. Checked Beacon shared ui components (none); psinfo-epic-story is the reusable home
+// bcn-lego-checked: no esa- lego pairs a numbered label list with annotated images; the bands and rows are psinfo-group, the button esa-button. Checked Beacon shared ui components (none); psinfo-epic-story is the reusable home
 import EsaBadge from '@esa/ecology/esa-badge.astro';
 import EsaButton from '@esa/ecology/esa-button.astro';
 import '@esa/tokens/typography.css';
 import '@esa/tokens/a11y.css';
+import '@esa/tokens/layouts.css';
 import '../../styles/epic-marks.css';
 import type { Epic, EpicShot, EpicShotMark, EpicShots, EpicStory } from '../../data/epics/types';
-import { exampleOf, stepHref } from '../../data/epics/index';
+import { epicSteps, exampleOf, stepHref, storySlug } from '../../data/epics/index';
 import { withBase } from '../../lib/base';
 import PsInfoEpicShot from './PsInfoEpicShot.astro';
 import PsInfoGroup from './PsInfoGroup.astro';
-import '@esa/tokens/layouts.css';
 
 interface Props {
   epic: Epic;
-  /** The Jira story record this page shows (key, title, pages). */
+  /** The Jira story record this section shows (key, title, pages). */
   story: EpicStory;
 }
 const { epic, story } = Astro.props;
@@ -40,21 +39,23 @@ const shots: EpicShot[] = storyShots[page.route] ?? [];
 const marks = new Map<number, EpicShotMark>();
 for (const m of shots.flatMap((s) => s.marks).sort(byN)) if (!marks.has(m.n)) marks.set(m.n, m);
 const labels = [...marks.values()];
-const id = `epicstory-${story.key}-example`;
+const slug = storySlug(story);
 const href = withBase(stepHref(epic, { story, page }));
 const annotated = shots.map((shot) => ({
   shot,
   alt: shot.marks.length ? `${page.title}, outlined: ${[...shot.marks].sort(byN).map((m) => m.label).join(', ')}` : page.title,
 }));
+const rows = epicSteps(epic)
+  .filter((s) => s.story === story)
+  .map((step) => ({ href: withBase(stepHref(epic, step)), title: step.page.title, label: step.page.label }));
 ---
-<div class="stack" data-gap="2xl">
-  <slot name="header" />
-  <PsInfoGroup id={id}>
+<div class="epicstory stack" data-gap="xl">
+  <PsInfoGroup id={`${slug}-example`} level={3}>
     <Fragment slot="title">
       <span>{page.title}</span>
       {page.label && <EsaBadge value={page.label} variant="neutral" size="sm" />}
     </Fragment>
-    <EsaButton slot="actions" variant="primary" size="sm" href={href} iconRight="arrow-right">Open Page</EsaButton>
+    <EsaButton slot="actions" variant="secondary" size="sm" href={href} iconRight="arrow-right">Open Page</EsaButton>
     {annotated.length > 0 && (
       <div class="epicstory__body sidebar" data-side="end" data-gap="lg">
         <ol class="epicstory__labels" role="list">
@@ -71,10 +72,14 @@ const annotated = shots.map((shot) => ({
       </div>
     )}
   </PsInfoGroup>
+  <PsInfoGroup id={`${slug}-pages`} level={3} rows={rows}>
+    <Fragment slot="title">Pages</Fragment>
+  </PsInfoGroup>
 </div>
 
 <style>
-  .epicstory__body { padding-block-start: var(--spacing-400); }
+  .epicstory { padding-block-start: var(--spacing-200); }
+  .epicstory__body { padding-block-start: var(--spacing-200); }
   .epicstory__labels {
     list-style: none; margin: 0; padding: 0;
     display: flex; flex-direction: column; gap: var(--spacing-300);

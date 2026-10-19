@@ -1,16 +1,18 @@
 ---
 // PsInfoGroup: a titled group, Linear's grouped list as the Radial skin ports
 // it (radial-design src/components/RdSection.astro and the record-list rules
-// in src/styles/theme-skin.css). A band on the sunken neutral carries the
-// group's h2 and its actions; under it, rows or a body.
+// in src/styles/theme-skin.css). A band carries the group's heading and its
+// actions; under it a body, then rows. The band is the sunken neutral for a
+// top-level group (h2); a group nested in another's body takes a plain band
+// and an h3, so the two levels never look alike.
 //
 // Rows are the things to open: each a whole-row link with a title and an
 // optional quiet badge. No box per row, a hairline between rows, and the hover
 // fill takes the hairline's place. Measured from Linear: rows 40px at least
 // (--rd-row-h), 8px corners.
 //
-// Slots: "title" (the h2's content), "actions" (right of the band), and a body
-// under the band or the rows.
+// Slots: "title" (the heading's content), "actions" (right of the band), and
+// a body under the band, above any rows.
 //
 // bcn-lego-checked: esa-collapsible folds its body away and heads with a label, where a group stays open under a real h2; esa-link-column heads with a span; esa-card boxes each record, where Linear's rows share one surface. Checked Beacon shared ui components (no grouped list). psinfo-group is the reusable home.
 import EsaBadge from '@esa/ecology/esa-badge.astro';
@@ -25,18 +27,23 @@ interface Row {
 }
 
 interface Props {
-  /** The band's h2 id; the section is labelled by it. */
+  /** The heading's id; the section is labelled by it, and links can land on it. */
   id: string;
-  /** Rows under the band, in order. */
+  /** Rows under the band and body, in order. */
   rows?: Row[];
+  /** 2 (default): a top-level group on a sunken band. 3: a group nested in
+      another's body, on a plain band. */
+  level?: 2 | 3;
 }
-const { id, rows = [] } = Astro.props;
+const { id, rows = [], level = 2 } = Astro.props;
+const Heading = level === 3 ? 'h3' : 'h2';
 ---
-<section class="group stack" data-gap="xs" aria-labelledby={id}>
+<section class="group stack" data-gap="xs" data-level={level} aria-labelledby={id}>
   <div class="group__band">
-    <h2 id={id} class="group__title typography-label-md-strong"><slot name="title" /></h2>
+    <Heading id={id} class="group__title typography-label-md-strong"><slot name="title" /></Heading>
     {Astro.slots.has('actions') && <div class="group__actions cluster" data-gap="sm"><slot name="actions" /></div>}
   </div>
+  <slot />
   {rows.length > 0 && (
     <ul class="group__rows" role="list">
       {rows.map((row) => (
@@ -49,7 +56,6 @@ const { id, rows = [] } = Astro.props;
       ))}
     </ul>
   )}
-  <slot />
 </section>
 
 <style>
@@ -67,6 +73,7 @@ const { id, rows = [] } = Astro.props;
     border-radius: var(--radius-200);
     background: var(--color-surface-sunken);
   }
+  [data-level='3'] > .group__band { background: none; }
   .group__title {
     display: flex;
     flex-wrap: wrap;
@@ -74,6 +81,7 @@ const { id, rows = [] } = Astro.props;
     gap: var(--spacing-100) var(--spacing-300);
     margin: 0;
     color: var(--color-text-primary);
+    scroll-margin-block-start: var(--spacing-400);
   }
 
   .group__rows { list-style: none; margin: 0; padding: 0; }

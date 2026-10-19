@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // epic-shots: screenshots each story's example page, cropped to the parts the
 // story marks in the page's own markup (data-epic-mark), and records where
-// those marks sit so the story pages can outline and number them.
+// those marks sit so the epic page can outline and number them.
 //
 //   node scripts/epic-shots.mjs                          serve dist/ (run after astro build)
 //   node scripts/epic-shots.mjs --url http://localhost:4327   shoot a running dev server
@@ -65,7 +65,7 @@ async function shootEpic(epic) {
   const result = {};
   let count = 0;
 
-  // One illustrative page per story: the one its story page shows.
+  // One illustrative page per story: the one its story's section shows.
   for (const story of epic.stories) {
     const epicPage = exampleOf(story);
     await page.goto(`${origin}${base}${epicPage.route.replace(/^\//, '')}?bar=off`, { waitUntil: 'load' });
@@ -258,7 +258,7 @@ async function snapClip(page, clip, group, docWidth) {
 }
 
 /** One shot per group, split at the widest gap between its marks while the shot
-    would be too tall to show whole on the story page. */
+    would be too tall to show whole on the epic page. */
 async function fit(page, group, docWidth) {
   const clip = await snapClip(page, clipFor(group, docWidth), group, docWidth);
   if (clip.height <= EPIC_SHOT_TALL || group.length < 2) return [{ group, clip }];

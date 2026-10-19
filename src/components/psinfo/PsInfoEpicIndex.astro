@@ -1,47 +1,42 @@
 ---
-// PsInfoEpicIndex: the body of an epic page. One psinfo-group per story: the
-// band carries the story's key (linked to Jira) and its Jira title, with an
-// Overview button to the story page; the rows under it are the prototype
-// pages that answer the story, the work to review. Nothing here knows which
-// epic it shows. The page header, with the Start action, comes in the header
-// slot.
+// PsInfoEpicIndex: the body of an epic page, every story on one page to scroll.
+// One psinfo-group per story: the band carries the story's key (linked to
+// Jira) and its Jira title, and its heading carries the story's anchor
+// (/shi#delta-1343) so a story can still be linked; under it,
+// psinfo-epic-story's annotated example and the pages to review. Nothing here
+// knows which epic it shows. The page header comes in the header slot.
 // prose-prop-checked: `epic` is a Jira epic record (key, title, stories), never page copy
-import EsaButton from '@esa/ecology/esa-button.astro';
 import '@esa/tokens/typography.css';
 import '@esa/tokens/layouts.css';
 import type { Epic } from '../../data/epics/types';
-import { epicSteps, jiraHref, stepHref, storyRoute } from '../../data/epics/index';
-import { withBase } from '../../lib/base';
+import { jiraHref, storySlug } from '../../data/epics/index';
+import PsInfoEpicStory from './PsInfoEpicStory.astro';
 import PsInfoGroup from './PsInfoGroup.astro';
 
 interface Props {
   epic: Epic;
 }
 const { epic } = Astro.props;
-const steps = epicSteps(epic);
-const groups = epic.stories.map((story) => ({
-  story,
-  rows: steps
-    .filter((s) => s.story === story)
-    .map((step) => ({ href: withBase(stepHref(epic, step)), title: step.page.title, label: step.page.label })),
-}));
 ---
 <div class="stack" data-gap="2xl">
   <slot name="header" />
-  <div class="stack" data-gap="xl">
-    {groups.map(({ story, rows }) => (
-      <PsInfoGroup id={`epicindex-${story.key}`} rows={rows}>
+  <div class="epicindex stack">
+    {epic.stories.map((story) => (
+      <PsInfoGroup id={storySlug(story)}>
         <Fragment slot="title">
           <a class="epicindex__key typography-label-md" href={jiraHref(story.key)}>{story.key}</a>
           <span>{story.title}</span>
         </Fragment>
-        <EsaButton slot="actions" variant="secondary" size="sm" href={withBase(storyRoute(epic, story))}>Overview</EsaButton>
+        <PsInfoEpicStory {epic} {story} />
       </PsInfoGroup>
     ))}
   </div>
 </div>
 
 <style>
+  /* Stories sit well apart: each is a band, an example and its pages. */
+  .epicindex { --gap: var(--spacing-800); }
+
   /* The key is a link inside the band's heading: underlined at rest, a step
      quieter than the title it keys. */
   .epicindex__key {

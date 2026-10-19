@@ -1,67 +1,41 @@
 ---
-// Epic and story pages, one of each per epic and story in src/data/epics/,
-// at the routes the epic files name, in the epic frame. An epic page lists its
-// stories and their pages, and starts at the first story; a story page shows
-// its example page with the parts the story adds outlined and numbered
-// (screenshots from scripts/epic-shots.mjs), and pages through the stories.
-// prose-prop-checked: `story` is a Jira story record (key, title, pages), never page copy
+// Epic pages, one per epic in src/data/epics/, at the route its file names, in
+// the epic frame. Every story on one page to scroll: its band, its annotated
+// example page (screenshots from scripts/epic-shots.mjs) and the pages to
+// review. Each story's heading is its anchor (/shi#delta-1343).
+// prose-prop-checked: `epic` is a Jira epic record (key, title, stories), never page copy
 import BaseLayout from '../layouts/BaseLayout.astro';
 import EsaPageHeader from '@esa/ecology/esa-page-header.astro';
 import EsaBreadcrumbs from '@esa/ecology/esa-breadcrumbs.astro';
 import EsaButton from '@esa/ecology/esa-button.astro';
 import PsInfoEpicFrame from '../components/psinfo/PsInfoEpicFrame.astro';
 import PsInfoEpicIndex from '../components/psinfo/PsInfoEpicIndex.astro';
-import PsInfoEpicPager from '../components/psinfo/PsInfoEpicPager.astro';
-import PsInfoEpicStory from '../components/psinfo/PsInfoEpicStory.astro';
-import type { Epic, EpicStory } from '../data/epics/types';
-import { EPICS, jiraHref, storyRoute } from '../data/epics/index';
+import type { Epic } from '../data/epics/types';
+import { EPICS, jiraHref } from '../data/epics/index';
 import { withBase } from '../lib/base';
 
 export function getStaticPaths() {
-  const param = (route: string) => route.replace(/^\//, '');
-  return EPICS.flatMap((epic) => [
-    { params: { epicRoute: param(epic.route) }, props: { epic } },
-    ...epic.stories.map((story) => ({ params: { epicRoute: param(storyRoute(epic, story)) }, props: { epic, story } })),
-  ]);
+  return EPICS.map((epic) => ({ params: { epicRoute: epic.route.replace(/^\//, '') }, props: { epic } }));
 }
 
 interface Props {
   epic: Epic;
-  /** The Jira story record on a story page; absent on the epic page. */
-  story?: EpicStory;
 }
-const { epic, story } = Astro.props;
+const { epic } = Astro.props;
 const home = { label: 'Home', href: withBase('/') };
-const stop = (s: EpicStory | undefined) => s && { href: withBase(storyRoute(epic, s)), title: `${s.key} ${s.title}` };
-const at = story ? epic.stories.indexOf(story) : -1;
-const first = epic.stories[0];
 ---
 <!-- manifest:
   layout: BaseLayout > psinfo-epic-frame
   sections:
-    - head bar          -> esa-breadcrumbs, esa-button (the Jira key), psinfo-epic-pager (story pages)
-    - stories and pages -> psinfo-epic-index (epic page; header slot: esa-page-header + Start esa-button)
-    - annotated example -> psinfo-epic-story (story page; header slot: esa-page-header)
+    - head bar -> esa-breadcrumbs, esa-button (the Jira key)
+    - stories  -> psinfo-epic-index (header slot: esa-page-header; per story: psinfo-group > psinfo-epic-story)
 -->
-<BaseLayout title={story ? `${story.key} ${story.title}` : epic.title}>
-  {story ? (
-    <PsInfoEpicFrame>
-      <EsaBreadcrumbs slot="head" items={[home, { label: epic.title, href: withBase(epic.route) }, { label: story.key }]} size="sm" />
-      <EsaButton slot="tools" variant="ghost" size="sm" href={jiraHref(story.key)} iconRight="external-link">{story.key}</EsaButton>
-      <PsInfoEpicPager slot="tools" prev={stop(epic.stories[at - 1])} next={stop(epic.stories[at + 1])} position={at + 1} total={epic.stories.length} />
-      <PsInfoEpicStory {epic} {story}>
-        <EsaPageHeader slot="header" title={story.title} />
-      </PsInfoEpicStory>
-    </PsInfoEpicFrame>
-  ) : (
-    <PsInfoEpicFrame>
-      <EsaBreadcrumbs slot="head" items={[home, { label: epic.title }]} size="sm" />
-      <EsaButton slot="tools" variant="ghost" size="sm" href={jiraHref(epic.key)} iconRight="external-link">{epic.key}</EsaButton>
-      <PsInfoEpicIndex {epic}>
-        <EsaPageHeader slot="header" title={epic.title}>
-          {first && <EsaButton slot="actions" variant="primary" href={withBase(storyRoute(epic, first))} iconRight="arrow-right">Start</EsaButton>}
-        </EsaPageHeader>
-      </PsInfoEpicIndex>
-    </PsInfoEpicFrame>
-  )}
+<BaseLayout title={epic.title}>
+  <PsInfoEpicFrame>
+    <EsaBreadcrumbs slot="head" items={[home, { label: epic.title }]} size="sm" />
+    <EsaButton slot="tools" variant="ghost" size="sm" href={jiraHref(epic.key)} iconRight="external-link">{epic.key}</EsaButton>
+    <PsInfoEpicIndex {epic}>
+      <EsaPageHeader slot="header" title={epic.title} />
+    </PsInfoEpicIndex>
+  </PsInfoEpicFrame>
 </BaseLayout>
