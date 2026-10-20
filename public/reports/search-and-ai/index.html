@@ -1,0 +1,795 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Finding PS Info in Search</title>
+<meta name="description" content="How Google, Bing and AI assistants find and read Puget Sound Info, and where the biggest gains are.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400..700&family=Lora:wght@400..700&display=swap">
+<style>
+:root {
+  --blue-50: #eef4f8; --blue-100: #dce9f1; --blue-200: #b9d1e2; --blue-300: #8bb2cd;
+  --blue-600: #00549a; --blue-800: #0a3b5c; --blue-900: #072c46; --blue-950: #051f33;
+  --orange-50: #fdf3ea; --orange-200: #f8d0a8; --orange-500: #ef892e; --orange-700: #b25a10;
+  --gray-0: #ffffff; --gray-50: #f8fafb; --gray-100: #eff2f5; --gray-200: #dfe4e9; --gray-300: #c4ccd4;
+  --gray-500: #626e7a; --gray-700: #46515b; --gray-900: #202932; --gray-950: #141b23;
+
+  --bg: var(--gray-0);
+  --surface: var(--gray-50);
+  --surface-strong: var(--gray-100);
+  --text: var(--gray-900);
+  --text-2: var(--gray-700);
+  --text-3: var(--gray-500);
+  --border: var(--gray-200);
+  --border-strong: var(--gray-300);
+  --brand: var(--blue-800);
+  --link: var(--blue-600);
+  --hero-bg: var(--blue-800);
+  --hero-text: #ffffff;
+  --hero-text-2: var(--blue-100);
+  --accent: var(--orange-500);
+  --yes-bg: var(--blue-50); --yes-text: var(--blue-800); --yes-border: var(--blue-200);
+  --no-bg: var(--gray-100); --no-text: var(--gray-700); --no-border: var(--gray-200);
+  --start-bg: var(--orange-50); --start-text: var(--orange-700); --start-border: var(--orange-200);
+  --serp-link: #1a0dab;
+  --scrim: rgba(5, 31, 51, 0.45);
+  --shadow: 0 12px 40px rgba(5, 31, 51, 0.18);
+
+  --font-sans: 'Source Sans 3', system-ui, -apple-system, sans-serif;
+  --font-display: 'Lora', Georgia, serif;
+  --measure: 44rem;
+  --wide: 68rem;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: var(--gray-950); --surface: #1a232c; --surface-strong: #222d38;
+    --text: #e8edf2; --text-2: #b8c2cc; --text-3: #8d99a5;
+    --border: #2c3844; --border-strong: #3b4855;
+    --brand: var(--blue-200); --link: var(--blue-300);
+    --hero-bg: var(--blue-950); --hero-text: #ffffff; --hero-text-2: var(--blue-200);
+    --yes-bg: #0d2a40; --yes-text: var(--blue-100); --yes-border: #1d4566;
+    --no-bg: #222d38; --no-text: #b8c2cc; --no-border: #3b4855;
+    --start-bg: #3a2410; --start-text: var(--orange-200); --start-border: #6b4116;
+    --serp-link: #8ab4f8; --scrim: rgba(0, 0, 0, 0.6); --shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+  }
+}
+:root[data-theme="dark"] {
+  --bg: var(--gray-950); --surface: #1a232c; --surface-strong: #222d38;
+  --text: #e8edf2; --text-2: #b8c2cc; --text-3: #8d99a5;
+  --border: #2c3844; --border-strong: #3b4855;
+  --brand: var(--blue-200); --link: var(--blue-300);
+  --hero-bg: var(--blue-950); --hero-text: #ffffff; --hero-text-2: var(--blue-200);
+  --yes-bg: #0d2a40; --yes-text: var(--blue-100); --yes-border: #1d4566;
+  --no-bg: #222d38; --no-text: #b8c2cc; --no-border: #3b4855;
+  --start-bg: #3a2410; --start-text: var(--orange-200); --start-border: #6b4116;
+  --serp-link: #8ab4f8; --scrim: rgba(0, 0, 0, 0.6); --shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+}
+
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0; background: var(--bg); color: var(--text);
+  font-family: var(--font-sans); font-size: 1.0625rem; line-height: 1.6;
+}
+a { color: var(--link); }
+h1, h2, h3 { font-family: var(--font-display); font-weight: 600; line-height: 1.2; margin: 0; }
+p { margin: 0 0 1rem; }
+
+.wrap { max-width: var(--wide); margin: 0 auto; padding: 0 1.5rem; }
+.prose { max-width: var(--measure); }
+
+/* Hero */
+.hero { background: var(--hero-bg); color: var(--hero-text); padding: 4.5rem 0 4rem; }
+.hero h1 { font-size: clamp(2.25rem, 5vw, 3.5rem); font-weight: 600; letter-spacing: -0.01em; max-width: 20ch; }
+.hero .date { color: var(--hero-text-2); margin: 1rem 0 2rem; font-size: 1rem; }
+.hero .lede { font-size: 1.25rem; line-height: 1.55; color: var(--hero-text); max-width: 40rem; margin: 0; }
+.hero .lede + .lede { margin-top: 1rem; color: var(--hero-text-2); }
+
+.facts { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; margin-top: 3rem; border-top: 1px solid rgba(255,255,255,0.2); }
+.fact { padding: 1.25rem 1.25rem 0 0; }
+.fact + .fact { padding-left: 1.25rem; border-left: 1px solid rgba(255,255,255,0.2); }
+.fact b { display: block; font-family: var(--font-display); font-size: 2rem; font-weight: 600; line-height: 1.1; }
+.fact span { color: var(--hero-text-2); font-size: 0.9375rem; line-height: 1.4; display: block; margin-top: 0.375rem; }
+
+/* Section nav */
+.toc { border-bottom: 1px solid var(--border); background: var(--bg); position: sticky; top: 0; z-index: 5; }
+.toc ul { list-style: none; margin: 0; padding: 0; display: flex; gap: 1.75rem; overflow-x: auto; }
+.toc a { display: block; padding: 0.875rem 0; color: var(--text-2); text-decoration: none; font-size: 0.9375rem; font-weight: 600; white-space: nowrap; border-bottom: 2px solid transparent; }
+.toc a:hover { color: var(--text); }
+.toc a[aria-current="true"] { color: var(--brand); border-bottom-color: var(--accent); }
+
+/* Sections */
+section { padding: 4.5rem 0 1rem; scroll-margin-top: 3rem; }
+section > .wrap > h2 { font-size: clamp(1.75rem, 3.5vw, 2.375rem); margin-bottom: 1rem; }
+.intro { font-size: 1.1875rem; color: var(--text-2); max-width: var(--measure); margin-bottom: 2.25rem; }
+
+/* Answer matrix */
+.matrix { width: 100%; border-collapse: collapse; }
+.matrix th, .matrix td { text-align: left; vertical-align: top; padding: 1rem 1rem 1rem 0; border-bottom: 1px solid var(--border); }
+.matrix thead th { font-size: 0.9375rem; color: var(--text-3); font-weight: 600; padding-top: 0; }
+.matrix tbody th { font-weight: 600; width: 34%; }
+.matrix tbody tr { cursor: pointer; }
+.matrix tbody tr:hover th, .matrix tbody tr:hover td { background: var(--surface); }
+.matrix tbody tr:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+.q-open { font: inherit; font-weight: 600; color: var(--text); background: none; border: 0; padding: 0; text-align: left; cursor: pointer; }
+.q-open:hover { color: var(--link); text-decoration: underline; }
+.cell-src { display: block; color: var(--text-3); font-size: 0.9375rem; margin-top: 0.375rem; line-height: 1.4; }
+
+.mark { display: inline-block; font-size: 0.875rem; font-weight: 600; padding: 0.125rem 0.5rem; border-radius: 4px; border: 1px solid; white-space: nowrap; }
+.mark.yes { background: var(--yes-bg); color: var(--yes-text); border-color: var(--yes-border); }
+.mark.no { background: var(--no-bg); color: var(--no-text); border-color: var(--no-border); }
+.mark.na { background: transparent; color: var(--text-3); border-color: var(--border); }
+
+.callouts { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; margin-top: 3rem; }
+.callouts h4 { font-family: var(--font-display); font-weight: 600; line-height: 1.2; font-size: 1.25rem; margin: 0 0 0.5rem; }
+.callouts p { color: var(--text-2); margin: 0; }
+
+/* Findings */
+.group { display: grid; grid-template-columns: 16rem 1fr; gap: 2rem; padding: 2.5rem 0; border-top: 1px solid var(--border); }
+.group:first-of-type { border-top: 0; padding-top: 0.5rem; }
+.group > header h3 { font-size: 1.5rem; }
+.group > header p { color: var(--text-2); margin-top: 0.5rem; }
+.finding { padding-bottom: 1.75rem; margin-bottom: 1.75rem; border-bottom: 1px solid var(--border); }
+.finding:last-child { border-bottom: 0; margin-bottom: 0; padding-bottom: 0; }
+.finding h4 { font-family: var(--font-sans); font-size: 1.1875rem; font-weight: 700; margin: 0 0 0.5rem; line-height: 1.35; }
+.finding p { color: var(--text-2); max-width: var(--measure); }
+.finding p:last-child { margin-bottom: 0; }
+.finding .num { font-weight: 700; color: var(--text); }
+
+/* Strengths */
+.strengths { display: grid; grid-template-columns: repeat(2, 1fr); gap: 2rem 3rem; }
+.strengths h3 { font-family: var(--font-sans); font-size: 1.1875rem; font-weight: 700; margin-bottom: 0.375rem; }
+.strengths p { color: var(--text-2); margin: 0; }
+
+/* Plan */
+.phase { margin-bottom: 3rem; }
+.phase h3 { font-size: 1.5rem; margin-bottom: 0.375rem; }
+.phase > p { color: var(--text-2); max-width: var(--measure); }
+.plan { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+.plan th, .plan td { text-align: left; vertical-align: top; padding: 0.875rem 1rem 0.875rem 0; border-bottom: 1px solid var(--border); }
+.plan thead th { font-size: 0.9375rem; color: var(--text-3); font-weight: 600; }
+.plan td:first-child { font-weight: 600; width: 32%; }
+.plan td:nth-child(2) { color: var(--text-2); }
+.plan td:last-child { width: 11rem; }
+.effort { display: inline-block; font-size: 0.875rem; font-weight: 600; padding: 0.125rem 0.5rem; border-radius: 4px; border: 1px solid var(--border-strong); color: var(--text-2); }
+.effort.done { background: var(--yes-bg); color: var(--yes-text); border-color: var(--yes-border); }
+
+/* AI source cards */
+.cards { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.25rem; }
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 1.5rem; }
+.card h4 { font-family: var(--font-display); font-weight: 600; line-height: 1.2; font-size: 1.25rem; margin: 0 0 0.5rem; }
+.card p { color: var(--text-2); margin: 0; }
+.quote { margin: 3rem 0 0; max-width: var(--measure); }
+.quote blockquote { margin: 0; font-family: var(--font-display); font-size: clamp(1.375rem, 2.6vw, 1.75rem); line-height: 1.4; color: var(--brand); }
+.quote figcaption { color: var(--text-2); margin-top: 1rem; }
+
+/* How search works */
+.steps { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 2rem; }
+.steps li { border-top: 2px solid var(--brand); padding-top: 1rem; }
+.steps h3 { font-size: 1.375rem; margin-bottom: 0.5rem; }
+.steps p { color: var(--text-2); margin: 0; }
+
+/* Addendum */
+.addendum { margin-top: 3.5rem; border-top: 1px solid var(--border-strong); }
+.sub { margin-top: 3.5rem; scroll-margin-top: 3rem; }
+.sub > h3 { font-size: clamp(1.5rem, 3vw, 1.875rem); margin-bottom: 1rem; }
+
+/* Search mock */
+.controls { display: flex; flex-wrap: wrap; gap: 1.5rem 2.5rem; margin-bottom: 1.75rem; }
+.control-label { display: block; font-size: 0.9375rem; font-weight: 600; color: var(--text-3); margin-bottom: 0.5rem; }
+.seg { display: inline-flex; border: 1px solid var(--border-strong); border-radius: 8px; overflow: hidden; }
+.seg button { font: inherit; font-size: 0.9375rem; font-weight: 600; padding: 0.5rem 1rem; border: 0; background: var(--bg); color: var(--text-2); cursor: pointer; }
+.seg button + button { border-left: 1px solid var(--border-strong); }
+.seg button:hover { background: var(--surface); }
+.seg button[aria-pressed="true"] { background: var(--brand); color: var(--bg); }
+.serp-layout { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: 2.5rem; align-items: start; }
+.serp { background: var(--bg); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem 1.75rem; box-shadow: 0 1px 2px rgba(5, 31, 51, 0.06); font-family: Arial, Helvetica, sans-serif; }
+.serp-site { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem; }
+.serp-icon { width: 28px; height: 28px; border-radius: 50%; background: var(--surface-strong); border: 1px solid var(--border); flex-shrink: 0; }
+.serp-name { font-size: 0.875rem; color: var(--text); line-height: 1.3; }
+.serp-url { font-size: 0.8125rem; color: var(--text-3); line-height: 1.3; word-break: break-all; }
+.serp-title { font-size: 1.25rem; line-height: 1.3; color: var(--serp-link); margin: 0.25rem 0 0.375rem; white-space: pre-wrap; }
+.serp-desc { font-size: 0.875rem; line-height: 1.55; color: var(--text-2); margin: 0; }
+.serp-desc.empty { font-style: italic; color: var(--text-3); }
+.serp-notes h3 { font-family: var(--font-sans); font-size: 1.125rem; font-weight: 700; margin-bottom: 0.75rem; }
+.serp-notes ul { margin: 0; padding-left: 1.125rem; color: var(--text-2); }
+.serp-notes li + li { margin-top: 0.5rem; }
+.serp-caption { color: var(--text-3); font-size: 0.9375rem; margin-top: 1.5rem; max-width: var(--measure); }
+
+/* Pages table */
+.filters { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1.25rem; }
+.filter { font: inherit; font-size: 0.9375rem; font-weight: 600; padding: 0.375rem 0.875rem; border-radius: 999px; border: 1px solid var(--border-strong); background: var(--bg); color: var(--text-2); cursor: pointer; }
+.filter:hover { background: var(--surface); }
+.filter[aria-pressed="true"] { background: var(--brand); border-color: var(--brand); color: var(--bg); }
+.table-scroll { overflow-x: auto; }
+.pages { width: 100%; border-collapse: collapse; min-width: 46rem; font-size: 1rem; }
+.pages th, .pages td { text-align: left; vertical-align: top; padding: 0.75rem 1rem 0.75rem 0; border-bottom: 1px solid var(--border); }
+.pages thead th { font-size: 0.9375rem; color: var(--text-3); font-weight: 600; }
+.pages td.n { font-variant-numeric: tabular-nums; white-space: nowrap; }
+.pages .site { display: block; color: var(--text-3); font-size: 0.9375rem; }
+.pages td:last-child { color: var(--text-2); }
+
+main { padding-bottom: 5rem; }
+
+/* Side panel */
+dialog.panel { margin: 0 0 0 auto; height: 100%; max-height: 100%; width: min(34rem, 100%); max-width: 100%; border: 0; border-left: 1px solid var(--border); padding: 0; background: var(--bg); color: var(--text); box-shadow: var(--shadow); }
+dialog.panel::backdrop { background: var(--scrim); }
+.panel-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; padding: 1.5rem 1.5rem 1rem; border-bottom: 1px solid var(--border); position: sticky; top: 0; background: var(--bg); }
+.panel-head h2 { font-size: 1.5rem; }
+.close { font: inherit; font-size: 0.9375rem; font-weight: 600; padding: 0.375rem 0.75rem; border-radius: 6px; border: 1px solid var(--border-strong); background: var(--bg); color: var(--text); cursor: pointer; flex-shrink: 0; }
+.close:hover { background: var(--surface); }
+.panel-body { padding: 1.5rem; }
+.engine { padding-bottom: 1.5rem; margin-bottom: 1.5rem; border-bottom: 1px solid var(--border); }
+.engine:last-child { border-bottom: 0; }
+.engine-top { display: flex; justify-content: space-between; align-items: center; gap: 1rem; margin-bottom: 0.75rem; }
+.engine h3 { font-family: var(--font-sans); font-size: 1.125rem; font-weight: 700; }
+.engine dl { margin: 0; }
+.engine dt { font-size: 0.9375rem; font-weight: 600; color: var(--text-3); margin-top: 0.75rem; }
+.engine dd { margin: 0.25rem 0 0; }
+.engine ul { margin: 0.25rem 0 0; padding-left: 1.125rem; }
+
+@media (max-width: 52rem) {
+  .facts { grid-template-columns: repeat(2, 1fr); }
+  .fact:nth-child(3) { padding-left: 0; border-left: 0; }
+  .callouts, .strengths, .cards, .serp-layout, .steps { grid-template-columns: 1fr; }
+  .group { grid-template-columns: 1fr; gap: 1.25rem; }
+}
+@media (max-width: 36rem) {
+  .wrap { padding: 0 1rem; }
+  .hero { padding: 3rem 0 2.5rem; }
+  .facts { grid-template-columns: 1fr; }
+  .fact, .fact + .fact { padding-left: 0; border-left: 0; }
+  .matrix thead { display: none; }
+  .matrix, .matrix tbody, .matrix tr, .matrix th, .matrix td { display: block; width: 100%; }
+  .matrix tbody tr { border-bottom: 1px solid var(--border); padding: 1rem 0; }
+  .matrix tbody th, .matrix tbody td { border: 0; padding: 0.25rem 0; }
+  .matrix tbody th { width: 100%; padding-bottom: 0.5rem; }
+  .matrix td::before { content: attr(data-label) ": "; color: var(--text-3); font-weight: 600; font-size: 0.9375rem; }
+  .plan td:first-child { width: auto; }
+}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <h1>Finding PS Info in Search</h1>
+    <p class="date">October 16, 2026</p>
+    <p class="lede">Google and Bing can reach every PS Info site, and the pages carry substantial, accurate content. What holds the site back is that most pages are hard for search engines to find and thinly described. None of the five sites publishes a page map, and nearly every page leaves its search summary blank.</p>
+    <p class="lede">Most of the fixes are small. They help AI assistants too, which find pages through the same search indexes.</p>
+    <div class="facts">
+      <div class="fact"><b>186 of 189</b><span>pages have no search summary</span></div>
+      <div class="fact"><b>28 of about 70</b><span>Vital Signs indicators reachable by plain links</span></div>
+      <div class="fact"><b>73 to 91</b><span>search score out of 100 on the pages tested</span></div>
+      <div class="fact"><b>52 to 55</b><span>speed score out of 100 on phones</span></div>
+    </div>
+  </div>
+</header>
+
+<nav class="toc" aria-label="Sections">
+  <div class="wrap">
+    <ul>
+      <li><a href="#how">How Search Works</a></li>
+      <li><a href="#searcher">What a Searcher Sees</a></li>
+      <li><a href="#working">What Works</a></li>
+      <li><a href="#obstacles">What Gets in the Way</a></li>
+      <li><a href="#plan">Where to Start</a></li>
+      <li><a href="#pages">Page by Page</a></li>
+      <li><a href="#addendum">AI Addendum</a></li>
+    </ul>
+  </div>
+</nav>
+
+<main>
+
+<section id="how">
+  <div class="wrap">
+    <h2>How Search Engines Find a Page</h2>
+    <ol class="steps">
+      <li>
+        <h3>Discover</h3>
+        <p>Search engines follow plain links from page to page and read each site's page map. A page they can't reach this way may never appear in results.</p>
+      </li>
+      <li>
+        <h3>Understand</h3>
+        <p>They read the page's name, summary, main heading and text to decide what it's about and which searches it answers.</p>
+      </li>
+      <li>
+        <h3>Show</h3>
+        <p>The page name becomes the blue headline of the result and the summary becomes the text underneath. With no summary, the search engine picks text from the page itself.</p>
+      </li>
+    </ol>
+  </div>
+</section>
+
+<section id="searcher">
+  <div class="wrap">
+    <h2>What a Searcher Sees</h2>
+    <div class="controls">
+      <div>
+        <span class="control-label" id="serp-page-label">Page</span>
+        <div class="seg" role="group" aria-labelledby="serp-page-label" id="serp-page">
+          <button type="button" aria-pressed="true" data-v="eelgrass">Eelgrass</button>
+          <button type="button" aria-pressed="false" data-v="salmon">Salmon Topic</button>
+          <button type="button" aria-pressed="false" data-v="urban">Urban Growth</button>
+        </div>
+      </div>
+      <div>
+        <span class="control-label" id="serp-ver-label">Version</span>
+        <div class="seg" role="group" aria-labelledby="serp-ver-label" id="serp-ver">
+          <button type="button" aria-pressed="true" data-v="today">Today</button>
+          <button type="button" aria-pressed="false" data-v="improved">Improved</button>
+        </div>
+      </div>
+    </div>
+    <div class="serp-layout">
+      <div class="serp" aria-live="polite">
+        <div class="serp-site">
+          <span class="serp-icon" aria-hidden="true"></span>
+          <div>
+            <div class="serp-name" id="serp-name"></div>
+            <div class="serp-url" id="serp-url"></div>
+          </div>
+        </div>
+        <div class="serp-title" id="serp-title"></div>
+        <p class="serp-desc" id="serp-desc"></p>
+      </div>
+      <div class="serp-notes">
+        <h3 id="serp-notes-head"></h3>
+        <ul id="serp-notes"></ul>
+      </div>
+    </div>
+    <p class="serp-caption">Improved versions are illustrations written from text already on each page. Final wording is PSP's call.</p>
+  </div>
+</section>
+
+<section id="working">
+  <div class="wrap">
+    <h2>What's Already Working</h2>
+    <div class="strengths">
+      <div>
+        <h3>Open to every search engine</h3>
+        <p>Google, Bing and AI tools such as ChatGPT, Claude and Perplexity all receive exactly the same page a visitor does. Nothing is blocked or challenged.</p>
+      </div>
+      <div>
+        <h3>Indicator findings are real text</h3>
+        <p>Descriptions, key results, targets and last-updated dates are written into the page itself, so search engines can read them without running any scripts.</p>
+      </div>
+      <div>
+        <h3>Substantial content</h3>
+        <p>Typical pages carry 700 to 2,500 words of real explanation. There are no thin placeholder pages on the Action Agenda, Vital Signs or Progress Indicators sites.</p>
+      </div>
+      <div>
+        <h3>Accessible and secure</h3>
+        <p>Every page scores 89 to 100 for accessibility, every site is secure, and every page declares its language.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="obstacles">
+  <div class="wrap">
+    <h2>What Gets in the Way</h2>
+    <div class="group">
+      <header>
+        <h3>Being Found</h3>
+        <p>Whether a search engine can discover the page at all.</p>
+      </header>
+      <div>
+        <article class="finding">
+          <h4>The sites publish no map of their pages</h4>
+          <p>None of the PS Info sites (PS Info, Action Agenda, Vital Signs, Progress Indicators, NEP Atlas) offers the standard page list that search engines look for first, or the short file that tells them what they may read. They have to discover every page by wandering links.</p>
+        </article>
+        <article class="finding">
+          <h4>The indicator lists are invisible to anything that doesn't run scripts</h4>
+          <p>The Indicators list, the Progress Indicators list and the Vital Signs indicator lists draw themselves in the browser after the page loads. A search engine reading the page as delivered sees no links to the indicators. Following plain links, it reached <span class="num">none</span> of the 86 indicators in the Indicators list and <span class="num">about 28</span> of the roughly 70 Vital Signs indicators.</p>
+        </article>
+        <article class="finding">
+          <h4>Search Console isn't set up</h4>
+          <p>No sign of Google Search Console or Bing Webmaster Tools on any of the sites. Without them there is no way to submit a page list, see which searches bring people in, or measure whether any of these changes worked.</p>
+        </article>
+        <article class="finding">
+          <h4>The short address doesn't work</h4>
+          <p>Typing pugetsoundinfo.wa.gov without the "www" goes nowhere. The address isn't connected to anything.</p>
+        </article>
+      </div>
+    </div>
+
+    <div class="group">
+      <header>
+        <h3>Being Understood</h3>
+        <p>Whether a search engine can tell what a page is about once it arrives.</p>
+      </header>
+      <div>
+        <article class="finding">
+          <h4>Pages have no description</h4>
+          <p><span class="num">186 of 189</span> pages have no summary for search results. Search engines then pick text themselves, usually from the navigation menu, which reads the same on every page.</p>
+        </article>
+        <article class="finding">
+          <h4>Page names are generic and repeated</h4>
+          <p>Names read like "Vital Signs | Orcas" or "Progress Indicators" with stray spaces, and every tab of an Action Agenda topic shares one name, so <span class="num">84 of 86</span> Action Agenda pages have the same name as another page. An indicator page is called "PS Info | Urban growth", with no mention of Puget Sound or what kind of measure it is.</p>
+        </article>
+        <article class="finding">
+          <h4>Status and trend aren't written down</h4>
+          <p>Whether an indicator is getting better, meeting its target or showing mixed results appears only as an icon. The words exist only in the icon's hidden label, and charts are images or drawings with no data in text. Search engines have little readable text to match a question like "is eelgrass getting better".</p>
+        </article>
+        <article class="finding">
+          <h4>The same indicator lives at two addresses</h4>
+          <p>Eelgrass Area is published on both the PS Info site and the Vital Signs site, and nothing says which is the official one. The two copies split the credit in search results.</p>
+        </article>
+        <article class="finding">
+          <h4>No page has a main heading yet</h4>
+          <p>Every page shows its title as styled text rather than a true heading, so search engines lose the clearest signal of what the page is about. This is already fixed and goes live with the next release.</p>
+        </article>
+        <article class="finding">
+          <h4>Shared links have no preview</h4>
+          <p>A PS Info link pasted into email, Teams or social media shows no title card, summary or image. The sites also don't identify themselves as a Washington State agency resource in the way search engines can read.</p>
+        </article>
+      </div>
+    </div>
+
+    <div class="group">
+      <header>
+        <h3>Being Trusted</h3>
+        <p>Signals that tell search engines the site is reliable and current.</p>
+      </header>
+      <div>
+        <article class="finding">
+          <h4>Missing pages look like site failures</h4>
+          <p>A removed or unknown indicator returns a server error rather than "not found". To a search engine that reads as a broken site, not a retired page.</p>
+        </article>
+        <article class="finding">
+          <h4>A handful of broken links</h4>
+          <p>Three Vital Signs links lead to errors, one points to the wrong site, and two links on the PS Info programs page are unfinished placeholders. Software demo pages bundled with the site are also publicly reachable on the official addresses.</p>
+        </article>
+        <article class="finding">
+          <h4>Link text says little</h4>
+          <p>Links on every page tested use labels that don't say where they go. On the Vital Signs home, the wheel's links are all labeled "Vital Sign link" rather than the name of each vital sign.</p>
+        </article>
+      </div>
+    </div>
+
+    <div class="group">
+      <header>
+        <h3>Speed</h3>
+        <p>How long people wait, which search engines measure and weigh.</p>
+      </header>
+      <div>
+        <article class="finding">
+          <h4>Pages are very slow on phones</h4>
+          <p>On a typical phone connection the main content takes <span class="num">20 to 51 seconds</span> to appear (4 to 18 seconds on a desktop). Every page scores 52 to 55 out of 100 for speed on phones. The site sends its files uncompressed, makes browsers download them again on every visit, and loads editing tools that only signed-in staff use. The PS Info home page weighs 6.8 MB, most of it the embedded map story.</p>
+        </article>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="plan">
+  <div class="wrap">
+    <h2>Where to Start</h2>
+    
+    <div class="phase">
+      <h3>Start Here</h3>
+      <p>Small changes that unlock everything else.</p>
+      <table class="plan">
+        <thead><tr><th scope="col">Change</th><th scope="col">What It Does</th><th scope="col">Effort</th></tr></thead>
+        <tbody>
+          <tr><td>Set up Search Console and Bing Webmaster Tools</td><td>Lets the team submit pages, see search traffic and measure every change below.</td><td><span class="effort">Small</span></td></tr>
+          <tr><td>Publish a page map and a reading guide for each site</td><td>Tells search engines what exists and what they may read, instead of leaving them to wander links.</td><td><span class="effort">Small to Medium</span></td></tr>
+          <tr><td>Give every page a distinct, descriptive name</td><td>Fixes the duplicate and generic names people see as the headline of each result.</td><td><span class="effort">Small</span></td></tr>
+          <tr><td>Name one official address per page</td><td>Settles the two-copies problem so credit goes to one page.</td><td><span class="effort">Small</span></td></tr>
+          <tr><td>Write status and trend as words</td><td>Puts "getting better" or "mixed results" next to the icon, where people and search engines can read it.</td><td><span class="effort">Small</span></td></tr>
+          <tr><td>Speed up file delivery</td><td>Compressing and reusing files cuts roughly 1.5 MB from every page view.</td><td><span class="effort">Small</span></td></tr>
+          <tr><td>Main headings on every page</td><td>Gives each page a clear title search engines can rely on.</td><td><span class="effort done">Already built, in the next release</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="phase">
+      <h3>Next</h3>
+      <p>The changes that make the indicator pages discoverable and well described.</p>
+      <table class="plan">
+        <thead><tr><th scope="col">Change</th><th scope="col">What It Does</th><th scope="col">Effort</th></tr></thead>
+        <tbody>
+          <tr><td>Make indicator lists readable without scripts</td><td>Lets search engines follow the lists to every indicator page, while keeping the filtering and sorting people use.</td><td><span class="effort">Medium</span></td></tr>
+          <tr><td>Add a description to every page</td><td>Drawn from text the site already has, such as each indicator's summary. Shapes the text under each search result.</td><td><span class="effort">Medium</span></td></tr>
+          <tr><td>Describe indicators as datasets</td><td>Marks indicator pages as official public data, which can surface them in Google Dataset Search.</td><td><span class="effort">Medium</span></td></tr>
+          <tr><td>Add link previews and agency identity</td><td>Title cards when links are shared, and a clear signal that the sites belong to a state agency.</td><td><span class="effort">Small</span></td></tr>
+          <tr><td>Return "not found" for missing pages and fix broken links</td><td>Removes the error signals that make the site look unreliable.</td><td><span class="effort">Small</span></td></tr>
+          <tr><td>Connect the short address</td><td>Makes pugetsoundinfo.wa.gov without "www" lead to the site.</td><td><span class="effort">Small</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="phase">
+      <h3>Later</h3>
+      <p>Worth doing once the basics are in place.</p>
+      <table class="plan">
+        <thead><tr><th scope="col">Change</th><th scope="col">What It Does</th><th scope="col">Effort</th></tr></thead>
+        <tbody>
+          <tr><td>Lighter pages for phones</td><td>Stops loading staff-only tools and heavy embeds for public visitors.</td><td><span class="effort">Medium</span></td></tr>
+          <tr><td>Clearer link labels</td><td>Names each link's destination, including the Vital Signs wheel.</td><td><span class="effort">Small to Medium</span></td></tr>
+          <tr><td>Readable web addresses</td><td>Addresses like /vital-signs/orcas instead of numbers. Helpful, but the largest change on this list.</td><td><span class="effort">Large</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<section id="pages">
+  <div class="wrap">
+    <h2>Page by Page</h2>
+        <div class="filters" role="group" aria-label="Filter by site">
+      <button class="filter" type="button" aria-pressed="true" data-site="all">All Sites</button>
+      <button class="filter" type="button" aria-pressed="false" data-site="PS Info">PS Info</button>
+      <button class="filter" type="button" aria-pressed="false" data-site="Action Agenda">Action Agenda</button>
+      <button class="filter" type="button" aria-pressed="false" data-site="Vital Signs">Vital Signs</button>
+      <button class="filter" type="button" aria-pressed="false" data-site="Progress Indicators">Progress Indicators</button>
+    </div>
+    <div class="table-scroll">
+      <table class="pages">
+        <thead>
+          <tr>
+            <th scope="col">Page</th>
+            <th scope="col">Search Score (of 100)</th>
+            <th scope="col">Phone Load Time</th>
+            <th scope="col">Description</th>
+            <th scope="col">Hidden Until Scripts Run</th>
+          </tr>
+        </thead>
+        <tbody id="pages-body"></tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<section id="addendum" class="addendum">
+  <div class="wrap">
+    <h2>Addendum: AI Assistants</h2>
+    <p class="intro">AI assistants that cite sources find pages through the same search indexes as everyone else: ChatGPT leans on Bing, Gemini on Google.</p>
+    <div class="sub" id="answers">
+    <h3>What AI Assistants Cite Today</h3>
+    <p class="intro">Six questions a resident, reporter or partner might ask, put to ChatGPT, Gemini and Perplexity without signing in.</p>
+
+    <table class="matrix">
+      <thead>
+        <tr><th scope="col">Question</th><th scope="col">ChatGPT</th><th scope="col">Gemini</th><th scope="col">Perplexity</th></tr>
+      </thead>
+      <tbody id="matrix-body"></tbody>
+    </table>
+
+    <div class="callouts">
+      <div>
+        <h4>Named topics win</h4>
+        <p>Ask about the Action Agenda, the Vital Signs or a specific indicator, and both ChatGPT and Gemini go straight to PS Info and repeat its numbers accurately, such as 51,700 acres of eelgrass.</p>
+      </div>
+      <div>
+        <h4>Broad questions go elsewhere</h4>
+        <p>Questions like how the Sound is doing or how vessels affect orcas are answered from State of the Sound, the Encyclopedia of Puget Sound and NOAA, even though PS Info covers both.</p>
+      </div>
+      <div>
+        <h4>Weak names travel with the citation</h4>
+        <p>Citations show the page names the site gives them: "2026 AA Explorer", "PS Info", or a bare web address. Those are the labels a reader sees next to the answer.</p>
+      </div>
+    </div>
+    </div>
+
+    <div class="sub" id="source">
+    <h3>Becoming the Source AI Cites</h3>
+    <p class="intro">Everything in the search plan helps here too. A few things matter even more for AI.</p>
+    <div class="cards">
+      <div class="card">
+        <h4>Say the answer in a sentence</h4>
+        <p>AI quotes sentences, not icons or charts. A plain summary line at the top of each indicator stating its current value, target and direction is the most quotable thing PS Info could add.</p>
+      </div>
+      <div class="card">
+        <h4>Be linked from the sites AI already trusts</h4>
+        <p>Broad answers come from State of the Sound, the Encyclopedia of Puget Sound, NOAA and Wikipedia. Links from those pages to the specific PS Info indicator make PS Info the source behind the source.</p>
+      </div>
+      <div class="card">
+        <h4>One name and one home for each thing</h4>
+        <p>Consistent names like "Puget Sound Vital Signs" rather than "VS" or "AA Explorer", and one address per indicator, so every mention builds the same page's reputation.</p>
+      </div>
+      <div class="card">
+        <h4>Show that it's current</h4>
+        <p>A visible last-updated date and reporting period tell people and AI that the figure is recent enough to repeat.</p>
+      </div>
+    </div>
+    <figure class="quote">
+      <blockquote>"Eelgrass covers about 51,700 acres of Puget Sound (2021 to 2023 average)."</blockquote>
+      <figcaption>The kind of sentence an AI assistant can quote word for word. PS Info already has this one. The goal is one like it, including status and trend, on every indicator.</figcaption>
+    </figure>
+    </div>
+  </div>
+</section>
+
+</main>
+
+
+<dialog class="panel" id="panel" aria-labelledby="panel-title">
+  <div class="panel-head">
+    <h2 id="panel-title"></h2>
+    <button class="close" type="button" id="panel-close">Close</button>
+  </div>
+  <div class="panel-body" id="panel-body"></div>
+</dialog>
+
+<script>
+const QUESTIONS = [
+  {
+    q: 'How is Puget Sound doing?',
+    chatgpt: { cited: true, psinfo: ['Number of Southern Resident killer whales'], other: ['State of the Sound', 'Encyclopedia of Puget Sound', 'Washington State Department of Ecology', 'Puget Sound Partnership'] },
+    gemini: { cited: false, psinfo: [], other: ['Puget Sound Regional Council', 'Washington State Department of Ecology', 'Puget Sound Institute', 'Encyclopedia of Puget Sound', 'KING 5 News'] },
+    perplexity: { cited: false, psinfo: [], other: ['PNAMP', 'State of the Sound', 'Puget Sound Estuary (Ecology)', 'Encyclopedia of Puget Sound', 'Puget Sound Partnership'] }
+  },
+  {
+    q: 'What is the Puget Sound Action Agenda?',
+    chatgpt: { cited: true, psinfo: ['Action Agenda Explorer home, shown as "2026 AA Explorer"'], other: ['Puget Sound Partnership'] },
+    gemini: { cited: true, psinfo: ['Action Agenda Explorer home, cited six times'], other: ['Puget Sound Partnership', 'Encyclopedia of Puget Sound'] },
+    perplexity: { asked: false }
+  },
+  {
+    q: 'What are the Puget Sound Vital Signs?',
+    chatgpt: { cited: true, psinfo: ['About the Vital Signs, shown as "Vital Signs"'], other: ['Puget Sound Partnership'], note: 'Described six recovery goals, including "Abundant water quantity". The site shows five.' },
+    gemini: { cited: true, psinfo: ['All Indicators'], other: ['Encyclopedia of Puget Sound', 'Salish Sea Restoration'] },
+    perplexity: { asked: false }
+  },
+  {
+    q: 'How are Southern Resident orcas affected by vessels in Puget Sound?',
+    chatgpt: { cited: false, psinfo: [], other: ['NOAA Fisheries', 'Washington Department of Fish and Wildlife'] },
+    gemini: { cited: false, psinfo: [], other: ['Encyclopedia of Puget Sound', 'NOAA Fisheries', 'Puget Sound Starts Here', 'National Institutes of Health (PMC)'] },
+    perplexity: { asked: false }
+  },
+  {
+    q: 'What is the status of eelgrass in Puget Sound?',
+    chatgpt: { cited: true, psinfo: ['Eelgrass Area, shown as "PS Info"', 'Short and long-term change at eelgrass sites'], other: ['Encyclopedia of Puget Sound'], note: 'Quoted 51,700 acres and the rise from 2004 to 2016 and decline through 2023, directly from the indicator.' },
+    gemini: { cited: true, psinfo: ['Eelgrass Area', 'Short and long-term change at eelgrass sites'], other: ['University of Washington', 'Encyclopedia of Puget Sound', 'USGS', 'Northwest Straits Commission'] },
+    perplexity: { asked: false }
+  },
+  {
+    q: 'Puget Sound salmon recovery progress indicators',
+    chatgpt: { cited: true, psinfo: ['Wild Chinook salmon indicator', 'Progress Indicators, shown only as its web address'], other: ['State of Salmon in Watersheds', 'Recreation and Conservation Office'], note: 'Reported the Chinook status as "Mixed results", which on the site appears only as an icon label.' },
+    gemini: { cited: false, psinfo: [], other: ['Puget Sound Institute', 'State of Salmon in Watersheds', 'Snohomish County', 'Puget Sound Salmon Recovery Hub', 'Encyclopedia of Puget Sound'] },
+    perplexity: { asked: false }
+  }
+];
+const ENGINES = [['chatgpt', 'ChatGPT'], ['gemini', 'Gemini'], ['perplexity', 'Perplexity']];
+
+const PAGES = [
+  ['PS Info', 'Home', 82, 30.1, false, 'Embedded map story'],
+  ['PS Info', 'Indicators list', 73, 27.8, false, 'All 86 indicators and their links'],
+  ['PS Info', 'Indicator: Urban growth', 82, 50.9, false, 'Update history, chart'],
+  ['PS Info', 'Data Center', 80, 28.4, false, ''],
+  ['Action Agenda', 'Home', 91, 37.1, true, ''],
+  ['Action Agenda', 'Salmon topic: Overview', 82, 44.1, false, 'Strategies and actions'],
+  ['Action Agenda', 'Salmon topic: Implementation', 82, 20.1, false, 'Filtered results'],
+  ['Action Agenda', 'Salmon topic: Progress', 82, 22.5, false, 'Investment chart'],
+  ['Action Agenda', 'Previous Action Agendas', 80, 32.2, false, ''],
+  ['Vital Signs', 'Home', 82, 28.6, true, ''],
+  ['Vital Signs', 'All Indicators', 80, 20.2, false, 'Indicator list, links and status'],
+  ['Vital Signs', 'Goal: Healthy Human Population', 82, 26.0, false, 'Indicator list'],
+  ['Vital Signs', 'Vital sign: Orcas', 82, 27.0, false, 'Indicator list'],
+  ['Vital Signs', 'Vital sign: Beaches and Marine Vegetation', 82, 28.1, false, 'Indicator list'],
+  ['Vital Signs', 'Indicator: Eelgrass Area', 82, 25.6, false, 'Chart'],
+  ['Vital Signs', 'Indicator: Orca occupancy', 82, 24.1, false, 'Chart'],
+  ['Progress Indicators', 'Home', 73, 28.6, false, 'All 16 indicators and their links'],
+  ['Progress Indicators', 'Topic: Smart Growth', 82, 23.6, false, 'Indicator list'],
+  ['Progress Indicators', 'About', 82, 23.5, false, '']
+];
+
+const el = (tag, attrs = {}, text) => { const n = document.createElement(tag); for (const [k, v] of Object.entries(attrs)) n.setAttribute(k, v); if (text != null) n.textContent = text; return n; };
+const mark = (r) => r.asked === false ? el('span', { class: 'mark na' }, 'Sign-in required') : el('span', { class: r.cited ? 'mark yes' : 'mark no' }, r.cited ? 'Cites PS Info' : 'Other sources');
+
+const body = document.getElementById('matrix-body');
+QUESTIONS.forEach((item, i) => {
+  const tr = el('tr', { tabindex: '0' });
+  const th = el('th', { scope: 'row' });
+  th.append(el('button', { class: 'q-open', type: 'button' }, item.q));
+  tr.append(th);
+  for (const [key, label] of ENGINES) {
+    const r = item[key];
+    const td = el('td', { 'data-label': label });
+    td.append(mark(r));
+    if (r.asked !== false) td.append(el('span', { class: 'cell-src' }, r.cited ? r.psinfo[0] : r.other.slice(0, 2).join(', ')));
+    tr.append(td);
+  }
+  tr.addEventListener('click', () => openPanel(i));
+  tr.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openPanel(i); } });
+  body.append(tr);
+});
+
+const panel = document.getElementById('panel');
+function openPanel(i) {
+  const item = QUESTIONS[i];
+  document.getElementById('panel-title').textContent = item.q;
+  const pb = document.getElementById('panel-body');
+  pb.replaceChildren();
+  for (const [key, label] of ENGINES) {
+    const r = item[key];
+    const box = el('div', { class: 'engine' });
+    const top = el('div', { class: 'engine-top' });
+    top.append(el('h3', {}, label), mark(r));
+    box.append(top);
+    if (r.asked !== false) {
+      const dl = el('dl');
+      if (r.psinfo.length) { dl.append(el('dt', {}, 'PS Info Pages')); const dd = el('dd'); const ul = el('ul'); r.psinfo.forEach(p => ul.append(el('li', {}, p))); dd.append(ul); dl.append(dd); }
+      dl.append(el('dt', {}, 'Other Sources')); const dd2 = el('dd'); const ul2 = el('ul'); r.other.forEach(p => ul2.append(el('li', {}, p))); dd2.append(ul2); dl.append(dd2);
+      if (r.note) { dl.append(el('dt', {}, 'Note')); dl.append(el('dd', {}, r.note)); }
+      box.append(dl);
+    }
+    pb.append(box);
+  }
+  panel.showModal();
+}
+document.getElementById('panel-close').addEventListener('click', () => panel.close());
+panel.addEventListener('click', (e) => { if (e.target === panel) panel.close(); });
+
+const pagesBody = document.getElementById('pages-body');
+function renderPages(site) {
+  pagesBody.replaceChildren();
+  PAGES.filter(p => site === 'all' || p[0] === site).forEach(([s, name, seo, lcp, desc, js]) => {
+    const tr = el('tr');
+    const td = el('td'); td.append(document.createTextNode(name)); td.append(el('span', { class: 'site' }, s));
+    tr.append(td, el('td', { class: 'n' }, String(seo)), el('td', { class: 'n' }, lcp.toFixed(1) + ' s'), el('td', {}, desc ? 'Yes' : 'None'), el('td', {}, js || 'Nothing significant'));
+    pagesBody.append(tr);
+  });
+}
+renderPages('all');
+document.querySelectorAll('.filter').forEach(b => b.addEventListener('click', () => {
+  document.querySelectorAll('.filter').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+  renderPages(b.dataset.site);
+}));
+
+const NO_DESC = 'No summary. The search engine fills this space with text it picks, often navigation labels.';
+const SERP = {
+  eelgrass: {
+    name: 'Puget Sound Vital Signs',
+    today: { url: 'https://vitalsigns.pugetsoundinfo.wa.gov > VitalSignIndicator > Detail > 10', title: 'Vital Signs  | Eelgrass Area', desc: null,
+      notes: ['The title leads with the site name and carries a double space.', 'No summary.', 'The address is a number.'] },
+    improved: { url: 'https://vitalsigns.pugetsoundinfo.wa.gov > eelgrass-area', title: 'Eelgrass Area | Puget Sound Vital Signs', desc: 'Puget Sound has about 51,700 acres of eelgrass (2021 to 2023 average). See the target, trend and data behind this Vital Signs indicator.',
+      notes: ['Topic first, site second.', 'Summary written from the figure already on the page.', 'Readable address, for the next platform.'] }
+  },
+  salmon: {
+    name: 'Puget Sound Action Agenda',
+    today: { url: 'https://actionagenda.pugetsoundinfo.wa.gov > 2026-2030 > Topic > 01 > Progress', title: '2026 AA Explorer | Abundant and Harvestable Salmon', desc: null,
+      notes: ['The Overview, Implementation and Progress tabs share this exact title.', '"AA Explorer" is an internal name searchers won\'t use.', 'No summary.'] },
+    improved: { url: 'https://actionagenda.pugetsoundinfo.wa.gov > 2026-2030 > salmon > progress', title: 'Salmon Progress | 2026-2030 Puget Sound Action Agenda', desc: 'How the 2026-2030 Action Agenda is tracking toward abundant and harvestable salmon, with investments and progress by strategy.',
+      notes: ['Each tab has its own title.', 'Uses the name people search for.', 'Summary states what the page covers.'] }
+  },
+  urban: {
+    name: 'Puget Sound Info',
+    today: { url: 'https://www.pugetsoundinfo.wa.gov > Indicator > Detail > 186', title: 'PS Info | Urban growth', desc: null,
+      notes: ['"PS Info" says little to someone who doesn\'t know the site.', 'No summary.', 'The slowest page reviewed on a phone.'] },
+    improved: { url: 'https://www.pugetsoundinfo.wa.gov > indicators > urban-growth', title: 'Urban Growth Indicator | Puget Sound Info', desc: 'Tracks the share of new Puget Sound housing built inside Urban Growth Areas, toward the 2030 target of increasing that share in 8 of 12 counties.',
+      notes: ['Says what the indicator measures and whose site it is.', 'Summary written from the description and target already on the page.', 'Readable address, for the next platform.'] }
+  }
+};
+const serpState = { page: 'eelgrass', ver: 'today' };
+function renderSerp() {
+  const s = SERP[serpState.page], v = s[serpState.ver];
+  document.getElementById('serp-name').textContent = s.name;
+  document.getElementById('serp-url').textContent = v.url;
+  document.getElementById('serp-title').textContent = v.title;
+  const d = document.getElementById('serp-desc');
+  d.textContent = v.desc || NO_DESC; d.classList.toggle('empty', !v.desc);
+  document.getElementById('serp-notes-head').textContent = serpState.ver === 'today' ? "What's Happening" : 'What Changed';
+  const ul = document.getElementById('serp-notes'); ul.replaceChildren(); v.notes.forEach(n => ul.append(el('li', {}, n)));
+}
+for (const [id, key] of [['serp-page', 'page'], ['serp-ver', 'ver']]) {
+  document.querySelectorAll('#' + id + ' button').forEach(b => b.addEventListener('click', () => {
+    document.querySelectorAll('#' + id + ' button').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+    serpState[key] = b.dataset.v; renderSerp();
+  }));
+}
+renderSerp();
+
+const links = [...document.querySelectorAll('.toc a')];
+const io = new IntersectionObserver((entries) => {
+  entries.forEach(en => { if (en.isIntersecting) links.forEach(a => a.setAttribute('aria-current', String(a.getAttribute('href') === '#' + en.target.id))); });
+}, { rootMargin: '-40% 0px -55% 0px' });
+document.querySelectorAll('main section').forEach(s => io.observe(s));
+</script>
+</body>
+</html>
