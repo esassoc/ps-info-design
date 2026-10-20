@@ -579,10 +579,12 @@ export const SHI_BY_SLUG = Object.fromEntries(
 //    its standalone page) ──────────────────────────────────────────────────
 /** Indicators with an in-prototype Vital Sign Indicator page. */
 export const VSI_DETAIL_SLUGS = ['eelgrass-area', 'floodplain-function', 'summer-low-flow'] as const;
-/** SHI indicators with an in-prototype standalone page (all of them). */
+/** SHI indicators with an in-prototype standalone page (all of them). The
+ *  standalone page is itself in the Complete Indicator Report layout (PSP
+ *  mock-up, 2026-10-19), so these have no separate report. */
 export const STANDALONE_SLUGS = ['stream-structure', 'sediment'] as const;
 /** Indicators with an in-prototype Complete Indicator Report. */
-export const REPORT_SLUGS = [...VSI_DETAIL_SLUGS, ...STANDALONE_SLUGS] as const;
+export const REPORT_SLUGS = [...VSI_DETAIL_SLUGS] as const;
 
 const builtHere = (list: readonly string[], slug: string) => list.includes(slug);
 
@@ -602,9 +604,11 @@ export const shiHref = (i: SalmonHabitatIndicator): string =>
 
 /** The Complete Indicator Report: in-prototype when built, else prod. */
 export const completeReportHref = (i: PugetSoundIndicator): string =>
-  builtHere(REPORT_SLUGS, i.slug) || !i.vitalSignIndicator
-    ? shiRoutes.report(i.slug)
-    : `${PSINFO_SITE}/Indicator/Detail/${i.vitalSignIndicator.id}`;
+  !i.vitalSignIndicator
+    ? shiRoutes.standalone(i.slug)
+    : builtHere(REPORT_SLUGS, i.slug)
+      ? shiRoutes.report(i.slug)
+      : `${PSINFO_SITE}/Indicator/Detail/${i.vitalSignIndicator.id}`;
 
 /** Status and trend: the VSI's for VSI and VSI+, the SHI's own for SHI. */
 export const shiStatus = (i: SalmonHabitatIndicator): { progress: ProgressLabel; targetStatus?: TargetStatusLabel } =>
@@ -651,11 +655,28 @@ export const SHI_GRID_ROWS: ShiGridRow[] = SALMON_HABITAT_INDICATORS.map((i) => 
   progressIcon: PROGRESS_ICON[shiStatus(i).progress],
 }));
 
-// ── Landing About text (placeholder copy) ──────────────────────────────────────
-export const SHI_ABOUT: string[] = [
-  'Salmon Habitat Indicators measure the condition of the places Puget Sound salmon depend on, from mountain headwaters to the open waters of the Sound. Most are Vital Sign Indicators already reported here; some add an analysis focused on salmon, and a few are new.',
-  'The indicators were chosen with salmon recovery and monitoring partners to track the habitats salmon use at each stage of their life cycle. They are reported on the same schedule as the Vital Signs, and each one nests under the Vital Sign it measures.',
+// ── Landing page copy (PSP's draft from the mock-up deck, slides 6 and 7,
+//    2026-10-19; PSP will still wordsmith it) ───────────────────────────────
+/** A paragraph as runs of text, some of them links. */
+export type ShiTextRun = string | { text: string; href: string };
+
+const SALMON_VS_HREF = `${VS_SITE}/VitalSign/Detail/32`;
+
+export const SHI_ABOUT: ShiTextRun[][] = [
+  ['Salmon are a cultural icon of the Pacific Northwest. They are highly prized by anglers and commercial fishermen, are guaranteed to be available to Indian Tribes by treaties signed with the federal government, and are a favorite food of Southern Resident orcas.'],
+  ['Many Puget Sound salmon populations are threatened under the Endangered Species Act. The ', { text: 'Salmon Vital Sign', href: SALMON_VS_HREF }, ' tells us about the health of salmon populations.'],
+  ['Salmon use many different habitats during their life cycle. They move from rivers to estuaries to the ocean, and back again. Healthy habitats along the way help salmon to feed, grow, rest, avoid predators, and spawn. Natural changes and human activities impact the quality and quantity of healthy habitat.'],
+  ['Puget Sound Salmon Habitat Indicators measure the health of habitats across Puget Sound that are important to salmon.'],
 ];
+
+/** Under the indicator table, ahead of the related Progress Indicators. */
+export const SHI_HABITAT_USE =
+  'Throughout their life cycle, salmon depend on a wide variety of freshwater, estuary, nearshore, and marine habitats. This leaves salmon vulnerable to many forms of human activities.';
+
+export const SHI_PI_HEADING = 'Related Progress Indicators';
+/** Progress Indicator topics PSP named on slide 7 that exist on prod. Fish
+ *  Passage, also named, is not developed yet and has no card. */
+export const SHI_PI_TOPIC_TITLES = ['Floodplains, Estuaries, Nearshore, and Riparian Areas'];
 
 // ── Vital Sign Indicator detail pages (prod content, fetched 2026-10-12) ──
 const PARTNER_ECOLOGY = {
@@ -825,6 +846,33 @@ export const STANDALONE_DETAILS: VsiDetail[] = [
     lastUpdated: '03/12/2026',
     partners: [PARTNER_NWIFC, PARTNER_WDFW],
     measurementUnit: 'Count (pieces per 100 meters)',
+    monitoringProgram: 'Stream habitat surveys, Northwest Indian Fisheries Commission member tribes',
+    methods: [
+      'Survey crews walk salmon-bearing reaches at summer low flow and count every piece of large wood and every log jam in or over the active channel, then measure the length and depth of each pool. Counts are reported per 100 meters of channel and summarized by watershed.',
+    ],
+    criticalDefinitions: [
+      'Large wood: a log at least 10 centimeters across and 2 meters long, lying in or over the active channel.',
+      'Pool: a slow, deep channel unit at least as long as the channel is wide.',
+      'Reference condition: the median count for unmanaged forested streams of similar size and gradient.',
+    ],
+    interpretation: [
+      'Low wood counts reflect a century of stream cleaning, splash damming, and riparian logging. Wood recruited from young riparian forests is small and moves downstream in floods, so counts recover slowly even where the riparian forest has grown back.',
+    ],
+    causesForChange: [
+      'Placed wood from restoration projects raises counts locally within a few years. Natural recruitment from riparian forest takes decades.',
+    ],
+    references: [
+      'Fox, M., and S. Bolton. 2007. A regional and geomorphic reference for quantities and volumes of instream wood in unmanaged forested basins of Washington State. North American Journal of Fisheries Management 27: 342 to 359.',
+    ],
+    datasets: [
+      { name: 'Stream habitat survey reaches and counts, 2024', steward: 'Northwest Indian Fisheries Commission' },
+    ],
+    reportingGuidance: [
+      'Methods are in development. Report survey results by watershed until a soundwide sampling design is adopted.',
+    ],
+    subcategories: [
+      { name: 'Watershed', options: ['Dungeness', 'Elwha', 'Skagit', 'Nooksack', 'Stillaguamish', 'Snohomish', 'Puyallup', 'Lake Washington'] },
+    ],
   },
   {
     indicatorSlug: 'sediment',
@@ -856,6 +904,29 @@ export const STANDALONE_DETAILS: VsiDetail[] = [
     measurementUnit: 'Percent (%)',
     methods: [
       'At each site, freeze cores or McNeil samples are taken from riffle crests used for spawning. Samples are dried and sieved, and the share of material finer than 0.85 millimeters is reported by weight.',
+    ],
+    criticalDefinitions: [
+      'Fine sediment: particles smaller than 0.85 millimeters.',
+      'Egg survival threshold: 12 percent fine sediment by weight, above which egg-to-fry survival drops in published field studies.',
+    ],
+    interpretation: [
+      'Fine sediment is highest downstream of dense forest road networks and recently logged steep slopes, and lowest where headwaters are protected. Year-to-year changes follow winter storms more closely than land use, which is why the regional trend is flat.',
+    ],
+    causesForChange: [
+      'Road maintenance and abandonment under forest practices rules reduce sediment delivery over time. Large storms and landslides raise fine sediment for one to three years.',
+    ],
+    references: [
+      'Jensen, D. W., E. A. Steel, A. H. Fullerton, and G. R. Pess. 2009. Impact of fine sediment on egg-to-fry survival of Pacific salmon: a meta-analysis of published studies. Reviews in Fisheries Science 17: 348 to 359.',
+    ],
+    datasets: [
+      { name: 'Spawning gravel sediment samples, 2018 to 2024', steward: 'Northwest Indian Fisheries Commission' },
+      { name: 'Forest road sediment delivery inventory', steward: 'Washington State Department of Natural Resources' },
+    ],
+    reportingGuidance: [
+      'Report the median for each watershed with the number of sites sampled. Do not compare watersheds sampled with different methods.',
+    ],
+    subcategories: [
+      { name: 'Watershed', options: ['Lake Washington', 'Puyallup', 'Snohomish', 'Stillaguamish', 'Nooksack', 'Skagit', 'Dungeness', 'Elwha'] },
     ],
   },
 ];

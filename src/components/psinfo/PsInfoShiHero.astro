@@ -10,6 +10,7 @@
 // because its wordmark repeats the h1 beside it. psinfo-shi-hero is the
 // reusable home.
 import { withBase } from '../../lib/base';
+import type { ShiTextRun } from '../../data/pages/salmon-habitat-indicators';
 
 interface Props {
   /** Program name, the page h1. */
@@ -18,8 +19,9 @@ interface Props {
    *  (VS: "Measures of ecosystem health…"; SHI: from the deck). */
   subtitle: string;
   logo: { src: string; width: number; height: number };
-  /** PSP-authored About content stored on the landing-page record. */
-  aboutParagraphs: string[];
+  /** PSP-authored About content stored on the landing-page record; a run is
+   *  plain text or an inline link. */
+  aboutParagraphs: ShiTextRun[][];
 }
 const { name, subtitle, logo, aboutParagraphs } = Astro.props;
 ---
@@ -33,7 +35,9 @@ const { name, subtitle, logo, aboutParagraphs } = Astro.props;
   </div>
   {aboutParagraphs.length > 0 && (
     <div class="shihero__about">
-      {aboutParagraphs.map((p) => <p>{p}</p>)}
+      {aboutParagraphs.map((p) => (
+        <p>{p.map((run) => (typeof run === 'string' ? run : <a href={run.href}>{run.text}</a>))}</p>
+      ))}
     </div>
   )}
 </header>
@@ -63,6 +67,8 @@ const { name, subtitle, logo, aboutParagraphs } = Astro.props;
     font-size: var(--ps-info-text-body); line-height: 1.6; color: var(--color-text-primary);
   }
   .shihero__about p { margin: 0; }
+  .shihero__about a { color: var(--color-text-link); text-decoration: underline; text-underline-offset: 2px; }
+  .shihero__about a:focus-visible { outline: 2px solid var(--focus-ring-color); outline-offset: 2px; }
 
   @media (max-width: 640px) {
     .shihero__lockup { gap: var(--spacing-300); }

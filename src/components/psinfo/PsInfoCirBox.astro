@@ -8,16 +8,31 @@
 // esa-collapsible (prod's boxes are always open, never collapsible). The bar
 // is prod's section header: 16px+, white on blue-800 (11:1). The uppercase
 // is prod's own report heading style, kept for fidelity.
-// psinfo-cir-box is the reusable home.
+// psinfo-cir-box is the reusable home. `help` adds prod's "?" beside the
+// title, an esa-tooltip over a real button so keyboard and screen readers get
+// the text too.
+import EsaIcon from '@esa/ecology/esa-icon.astro';
+
 interface Props {
   title: string;
   /** Section id; the heading id derives from it. */
   id: string;
+  /** Text behind the "?" beside the title. */
+  help?: string;
 }
-const { title, id } = Astro.props;
+const { title, id, help } = Astro.props;
 ---
 <section class="cirbox" id={id} aria-labelledby={`${id}-title`}>
-  <h2 class="cirbox__bar" id={`${id}-title`}>{title}</h2>
+  <div class="cirbox__bar">
+    <h2 class="cirbox__title" id={`${id}-title`}>{title}</h2>
+    {help && (
+      <esa-tooltip text={help} position="below" align="start">
+        <button type="button" class="cirbox__help" aria-label={help}>
+          <EsaIcon name="circle-question-mark" size="sm" />
+        </button>
+      </esa-tooltip>
+    )}
+  </div>
   <div class="cirbox__body">
     <slot />
   </div>
@@ -26,18 +41,30 @@ const { title, id } = Astro.props;
 <style>
   .cirbox { border: 1px solid var(--color-border); background: var(--color-surface); min-width: 0; scroll-margin-top: var(--spacing-500); }
   .cirbox__bar {
+    display: flex; align-items: center; gap: var(--spacing-200);
     margin: 0;
     padding: var(--spacing-250) var(--spacing-400);
     background: var(--ps-info-blue-800); color: #ffffff;
     font-size: 1.125rem; font-weight: var(--font-weight-semibold);
     text-transform: uppercase; letter-spacing: 0.01em;
   }
+  .cirbox__title { margin: 0; font: inherit; letter-spacing: inherit; }
+  .cirbox__help {
+    display: inline-flex; align-items: center; justify-content: center;
+    min-width: 1.5rem; min-height: 1.5rem; padding: 0;
+    background: none; border: 0; border-radius: 50%; color: #ffffff; cursor: help;
+  }
+  /* The bar's uppercase must not reach the tooltip text. esa-tooltip never
+     wraps, so lift its 240px cap and let the one line run its full length. */
+  .cirbox__bar esa-tooltip { text-transform: none; letter-spacing: normal; font-weight: var(--font-weight-regular); --tooltip-max-width: none; }
+  .cirbox__help:focus-visible { outline: 2px solid #ffffff; outline-offset: 2px; }
   .cirbox__body {
     display: flex; flex-direction: column; gap: var(--spacing-400);
     padding: var(--spacing-500);
     font-size: var(--ps-info-text-body); line-height: 1.6; color: var(--color-text-primary);
   }
   .cirbox__body :global(p) { margin: 0; }
+  .cirbox__body :global(h3) { margin: 0; font-size: 1.0625rem; font-weight: var(--font-weight-semibold); color: var(--ps-info-blue-800); }
   .cirbox__body :global(ul) { margin: 0; padding-left: 1.25rem; display: flex; flex-direction: column; gap: var(--spacing-200); }
   .cirbox__body :global(a) { color: var(--color-text-link); text-decoration: underline; text-underline-offset: 2px; }
   .cirbox__body :global(a:focus-visible) { outline: 2px solid var(--focus-ring-color); outline-offset: 2px; }
@@ -45,3 +72,7 @@ const { title, id } = Astro.props;
   .cirbox__body :global(figure) { margin: 0; display: flex; flex-direction: column; gap: var(--spacing-200); }
   .cirbox__body :global(figcaption) { font-size: var(--ps-info-text-meta-lg); line-height: 1.5; color: var(--color-text-secondary); }
 </style>
+
+<script>
+  import '@esa/ecology/esa-tooltip';
+</script>

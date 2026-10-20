@@ -24,16 +24,16 @@
       {
         "src": "/epic-shots/delta-1337/delta-1344/salmon-habitat-indicators-indicator-reports-summer-low-flow-1.jpg",
         "width": 1204,
-        "height": 2642,
+        "height": 2594,
         "marks": [
           {
             "n": 1,
             "label": "Salmon Habitat Indicator field",
             "badge": "start",
             "x": 5.23,
-            "y": 1.16,
+            "y": 1.18,
             "w": 92.19,
-            "h": 97.64
+            "h": 97.59
           }
         ]
       }
@@ -43,33 +43,33 @@
     "/prototypes/salmon-habitat-indicators/indicators/stream-structure": [
       {
         "src": "/epic-shots/delta-1337/delta-1345/salmon-habitat-indicators-indicators-stream-structure-1.jpg",
-        "width": 720,
-        "height": 171,
+        "width": 1204,
+        "height": 333,
         "marks": [
           {
             "n": 1,
             "label": "Salmon Habitat Indicator mark",
             "badge": "start",
-            "x": 11.81,
-            "y": 59.88,
-            "w": 32.77,
-            "h": 25.73
+            "x": 5.23,
+            "y": 34.53,
+            "w": 92.19,
+            "h": 12.01
           }
         ]
       },
       {
         "src": "/epic-shots/delta-1337/delta-1345/salmon-habitat-indicators-indicators-stream-structure-2.jpg",
-        "width": 867,
-        "height": 375,
+        "width": 1204,
+        "height": 387,
         "marks": [
           {
             "n": 2,
             "label": "Importance to Salmon section",
             "badge": "start",
-            "x": 7.27,
-            "y": 33.13,
-            "w": 89.18,
-            "h": 37.79
+            "x": 5.23,
+            "y": 27.32,
+            "w": 92.19,
+            "h": 38.29
           }
         ]
       }
@@ -99,31 +99,38 @@
     "/prototypes/salmon-habitat-indicators": [
       {
         "src": "/epic-shots/delta-1337/delta-1347/salmon-habitat-indicators-1.jpg",
-        "width": 1280,
-        "height": 1195,
+        "width": 1204,
+        "height": 514,
         "marks": [
           {
             "n": 1,
             "label": "Logo and About",
             "badge": "start",
-            "x": 6.64,
-            "y": 2.59,
-            "w": 86.72,
-            "h": 27.29
-          },
-          {
-            "n": 2,
-            "label": "Habitat diorama",
-            "badge": "above",
-            "x": 0,
-            "y": 33.9,
-            "w": 100,
-            "h": 63.52
+            "x": 5.23,
+            "y": 6.03,
+            "w": 92.19,
+            "h": 88.02
           }
         ]
       },
       {
         "src": "/epic-shots/delta-1337/delta-1347/salmon-habitat-indicators-2.jpg",
+        "width": 1280,
+        "height": 897,
+        "marks": [
+          {
+            "n": 2,
+            "label": "Habitat diorama",
+            "badge": "above",
+            "x": 0,
+            "y": 11.98,
+            "w": 100,
+            "h": 84.62
+          }
+        ]
+      },
+      {
+        "src": "/epic-shots/delta-1337/delta-1347/salmon-habitat-indicators-3.jpg",
         "width": 1204,
         "height": 1321,
         "marks": [
@@ -132,7 +139,7 @@
             "label": "Indicator table",
             "badge": "start",
             "x": 5.23,
-            "y": 4.55,
+            "y": 4.58,
             "w": 92.19,
             "h": 93.11
           }

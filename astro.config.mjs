@@ -15,16 +15,19 @@ const base = process.env.NODE_ENV === 'production' ? '/ps-info-design/' : '/';
 const SHI = 'prototypes/salmon-habitat-indicators';
 const movedReports = {
   'fish-passage': SHI,
-  'large-wood': `${SHI}/indicator-reports/stream-structure`,
+  'large-wood': `${SHI}/indicators/stream-structure`,
   'summer-low-flow': `${SHI}/indicator-reports/summer-low-flow`,
   'estuary-area': SHI,
   'stream-temperature': SHI,
 };
 // The two placeholder SHIs PSP's official list replaced (2026-10-19): Large
-// wood became Stream Structure; Fish passage has no SHI page.
+// wood became Stream Structure; Fish passage has no SHI page. A standalone
+// SHI's page is its report, so its old report URL forwards there too.
 const replacedShis = {
   [`${SHI}/indicators/large-wood`]: `${SHI}/indicators/stream-structure`,
-  [`${SHI}/indicator-reports/large-wood`]: `${SHI}/indicator-reports/stream-structure`,
+  [`${SHI}/indicator-reports/large-wood`]: `${SHI}/indicators/stream-structure`,
+  [`${SHI}/indicator-reports/stream-structure`]: `${SHI}/indicators/stream-structure`,
+  [`${SHI}/indicator-reports/sediment`]: `${SHI}/indicators/sediment`,
   [`${SHI}/indicators/fish-passage`]: SHI,
   [`${SHI}/indicator-reports/fish-passage`]: SHI,
 };

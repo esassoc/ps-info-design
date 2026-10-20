@@ -227,4 +227,14 @@ export interface VsiDetail {
   importance?: string[];
   monitoringProgram?: string;
   methods?: string[];
+  /** The rest of prod's report boxes, used by standalone SHI pages (PSP
+   *  mock-up slides 8 to 10: same panels and subfields as a VSI's report). */
+  criticalDefinitions?: string[];
+  interpretation?: string[];
+  causesForChange?: string[];
+  references?: string[];
+  externalLinks?: { label: string; href: string }[];
+  datasets?: ShiDataset[];
+  reportingGuidance?: string[];
+  subcategories?: { name: string; options: string[] }[];
 }

@@ -2,6 +2,8 @@
 // PsInfoCirTitle — the head of prod's Complete Indicator Report: the
 // "Vital Sign Indicators" chevron chip, the indicator name as the page h1,
 // and "View in Vital Signs" at right (to the indicator's Vital Signs page).
+// A standalone Salmon Habitat Indicator swaps that link for "View all Salmon
+// Habitat Indicators" with the SHI logo (PSP mock-up, slide 8).
 //
 // bcn-lego-checked: checked esa-breadcrumbs (separator trail, no filled
 // chevron chip) and esa-page-header (title/actions; no chip or brand bar).
@@ -14,9 +16,12 @@ interface Props {
   /** The chip: the indicator collection, linking to its list. */
   collection: { label: string; href: string };
   /** The indicator's page on the Vital Signs site. */
-  vitalSignsHref: string;
+  vitalSignsHref?: string;
+  /** Replaces "View in Vital Signs" (the SHI landing link). */
+  endLink?: { label: string; href: string; icon?: { src: string; width: number; height: number } };
 }
-const { name, collection, vitalSignsHref } = Astro.props;
+const { name, collection, vitalSignsHref, endLink } = Astro.props;
+const end = endLink ?? (vitalSignsHref ? { label: 'View in Vital Signs', href: vitalSignsHref } : undefined);
 const href = (h: string) => (/^https?:/.test(h) ? h : withBase(h));
 ---
 <header class="cirtitle">
@@ -24,7 +29,12 @@ const href = (h: string) => (/^https?:/.test(h) ? h : withBase(h));
     <a class="cirtitle__chip" href={href(collection.href)}>{collection.label}</a>
     <h1 class="cirtitle__name">{name}</h1>
   </div>
-  <a class="cirtitle__vs" href={href(vitalSignsHref)}>View in Vital Signs</a>
+  {end && (
+    <a class="cirtitle__vs" href={href(end.href)}>
+      {end.icon && <img class="cirtitle__icon" src={withBase(end.icon.src)} alt="" width={end.icon.width} height={end.icon.height} />}
+      {end.label}
+    </a>
+  )}
 </header>
 
 <style>
@@ -49,8 +59,10 @@ const href = (h: string) => (/^https?:/.test(h) ? h : withBase(h));
     text-transform: uppercase; color: var(--ps-info-blue-800);
   }
   .cirtitle__vs {
+    display: inline-flex; align-items: center; gap: var(--spacing-200);
     font-size: var(--ps-info-text-body); color: var(--color-text-link);
     text-decoration: underline; text-underline-offset: 2px;
   }
+  .cirtitle__icon { width: 2rem; height: auto; }
   .cirtitle__vs:focus-visible { outline: 2px solid var(--focus-ring-color); outline-offset: 2px; }
 </style>

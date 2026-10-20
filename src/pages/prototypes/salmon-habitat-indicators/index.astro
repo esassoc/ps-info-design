@@ -13,11 +13,16 @@ import PsInfoShiHero from '../../../components/psinfo/PsInfoShiHero.astro';
 import PsInfoShiHabitatExplorer from '../../../components/psinfo/PsInfoShiHabitatExplorer.astro';
 import PsInfoSectionTitle from '../../../components/psinfo/PsInfoSectionTitle.astro';
 import PsInfoShiIndicatorsGrid from '../../../components/psinfo/PsInfoShiIndicatorsGrid.astro';
+import PsInfoPiTopicCards from '../../../components/psinfo/PsInfoPiTopicCards.astro';
+import { TOPIC_CARDS, TOPIC_CARDS_LABEL } from '../../../data/pages/progress-indicators';
 import {
   HABITAT_CATEGORIES,
   SHI_ABOUT,
   SHI_GRID_HEADING,
   SHI_GRID_ROWS,
+  SHI_HABITAT_USE,
+  SHI_PI_HEADING,
+  SHI_PI_TOPIC_TITLES,
   SHI_LOGO,
   SHI_SITE_NAME,
   SHI_SUBTITLE,
@@ -25,6 +30,8 @@ import {
   shiRoutes,
 } from '../../../data/pages/salmon-habitat-indicators';
 import { withBase } from '../../../lib/base';
+
+const piTopics = TOPIC_CARDS.filter((t) => SHI_PI_TOPIC_TITLES.includes(t.title));
 ---
 <!-- manifest:
   layout: PsInfoVsProdChrome > stack(2xl) spine
@@ -33,6 +40,7 @@ import { withBase } from '../../../lib/base';
     - life-cycle graphic + habitat buttons -> ps-info-epic-mark > ps-info-shi-habitat-explorer
     - table heading            -> ps-info-section-title
     - indicator table          -> ps-info-epic-mark > ps-info-shi-indicators-grid
+    - habitat use + PI topics  -> ps-info-section-title > ps-info-pi-topic-cards
 -->
 <PsInfoVsProdChrome
   title="Salmon Habitat Indicators"
@@ -54,6 +62,10 @@ import { withBase } from '../../../lib/base';
       <PsInfoEpicMark story="DELTA-1347" label="Indicator table">
         <PsInfoShiIndicatorsGrid rows={SHI_GRID_ROWS} categories={HABITAT_CATEGORIES} label="All Salmon Habitat Indicators" />
       </PsInfoEpicMark>
+    </div>
+    <div class="stack" data-gap="md">
+      <PsInfoSectionTitle title={SHI_PI_HEADING} note={SHI_HABITAT_USE} size="lg" />
+      <PsInfoPiTopicCards topics={piTopics} label={TOPIC_CARDS_LABEL} />
     </div>
   </div>
 </PsInfoVsProdChrome>
