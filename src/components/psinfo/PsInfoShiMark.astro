@@ -45,15 +45,15 @@ const icons = SHI_ICON.map((src) => withBase(src)).join(' ');
   // Escape from the tip's link: esa-popover hides and hands focus back to the
   // icon, and in hover mode that focus reopens it. Swallow that one focus, so
   // Escape dismisses the tip (SC 1.4.13).
-  document.querySelectorAll<HTMLElement & { open: boolean }>('esa-popover.shimark').forEach((pop) => {
-    const btn = pop.querySelector('button')!;
-    let closing = false;
-    // On window, capture: it must run before esa-popover's own document listener.
-    window.addEventListener('keydown', (e) => {
-      if (e.key !== 'Escape' || !pop.open) return;
-      closing = true;
-      setTimeout(() => { closing = false; });
-    }, true);
+  // Remove once esa-popover ignores the focus its own hide() restores.
+  let closing = false;
+  // On window, capture: it must run before esa-popover's own document listener.
+  window.addEventListener('keydown', (e) => {
+    if (e.key !== 'Escape') return;
+    closing = true;
+    setTimeout(() => { closing = false; });
+  }, true);
+  document.querySelectorAll<HTMLButtonElement>('esa-popover.shimark > button').forEach((btn) => {
     btn.addEventListener('focusin', (e) => { if (closing) e.stopPropagation(); });
   });
 
