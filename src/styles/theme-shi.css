@@ -8,8 +8,12 @@
  * Text on each fill is chosen for WCAG 1.4.3: white clears 4.5:1 on the purple
  * (#8228bf, 7.0:1) and the blue (#0e59aa, 6.9:1); on the green (#31b6a3) white
  * measures 2.5:1, so it carries the deepest brand navy instead (6.7:1).
+ *
+ * The selector is html[data-theme] so it outranks theme-ps-info's
+ * [data-theme] whatever order the build bundles the two sheets in (the
+ * production bundle put theme-ps-info last and its Lora won).
  */
-[data-theme="ps-info"] {
+html[data-theme="ps-info"] {
   --shi-category-purple:    #8228bf;
   --shi-category-green:     #31b6a3;
   --shi-category-blue:      #0e59aa;
