@@ -8,8 +8,7 @@
 // Report.
 //
 // The icon is the designer's full-colour icon-only mark (S2), Andy's pick
-// 2026-10-20. For review, `?icon=2|3` swaps in the teal or purple one, and
-// `?size=24` draws the icon at 24px instead of 20px.
+// 2026-10-20, at 24px. For review, `?icon=2|3` swaps in the teal or purple one.
 //
 // bcn-lego-checked: the tip is esa-popover in hover mode (hover with delay,
 // focus, Escape from anywhere, stays open while the pointer is over the
@@ -56,9 +55,6 @@ const icons = SHI_ICON.map((src) => withBase(src)).join(' ');
     btn.addEventListener('focusin', (e) => { if (closing) e.stopPropagation(); });
   });
 
-  // Review switch: ?size=24 draws the icon at 24px.
-  if (new URLSearchParams(location.search).get('size') === '24') document.documentElement.dataset.shiIconSize = '24';
-
   // Review switch: ?icon=1|2|3 swaps every SHI icon on the page.
   const pick = Number(new URLSearchParams(location.search).get('icon'));
   if (pick >= 1) {
@@ -78,14 +74,13 @@ const icons = SHI_ICON.map((src) => withBase(src)).join(' ');
   }
   .shimark__btn {
     display: inline-flex; align-items: center; justify-content: center;
-    /* 24px target (SC 2.5.8) around a 20px icon. */
-    width: 1.5rem; height: 1.5rem; padding: 0.125rem;
+    /* A 24px icon in a 28px target (SC 2.5.8); the negative margin keeps it
+       from growing the line it sits on. */
+    width: 1.75rem; height: 1.75rem; padding: 0.125rem; margin-block: -0.25rem;
     border: 0; border-radius: 50%;
     background: none; cursor: pointer;
   }
   .shimark__btn:focus-visible { outline: 2px solid var(--focus-ring-color); outline-offset: 2px; }
   .shimark__icon { display: block; width: 100%; height: 100%; }
-  /* ?size=24: the icon fills the 24px target; the row's height doesn't change. */
-  :global([data-shi-icon-size='24']) .shimark__btn { width: 1.75rem; height: 1.75rem; padding: 0.125rem; margin-block: -0.25rem; }
   .shimark__link { white-space: nowrap; line-height: 1.5; text-decoration: underline; text-underline-offset: 3px; }
 </style>
