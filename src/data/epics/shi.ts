@@ -50,7 +50,7 @@ export const SHI_EPIC: Epic = {
       title: 'Build the SHI landing page',
       pages: [
         { title: 'Puget Sound Salmon Habitat Indicators', route: SHI, example: true },
-        { title: 'All Salmon Habitat Indicators as a List', route: `${SHI}/list` },
+        { title: 'Puget Sound Salmon Habitat Indicators, isometric scene', route: `${SHI}/isometric` },
       ],
     },
   ],

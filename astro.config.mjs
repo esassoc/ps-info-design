@@ -28,6 +28,8 @@ const replacedShis = {
   [`${SHI}/indicator-reports/large-wood`]: `${SHI}/indicators/stream-structure`,
   [`${SHI}/indicator-reports/stream-structure`]: `${SHI}/indicators/stream-structure`,
   [`${SHI}/indicator-reports/sediment`]: `${SHI}/indicators/sediment`,
+  // The list view is gone (2026-10-20); the landing page's table is the list.
+  [`${SHI}/list`]: SHI,
   [`${SHI}/indicators/fish-passage`]: SHI,
   [`${SHI}/indicator-reports/fish-passage`]: SHI,
 };

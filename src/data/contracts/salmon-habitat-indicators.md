@@ -57,10 +57,14 @@ Reproduced from the live site at 1440 and 390 widths:
    graphic is replaced by an original, museum-style cross-section from a
    headwater stream to the open Sound, the way the fish go
    (`shi-diorama-art.svg`, geometry in `src/data/shi-diorama.ts`). It runs the
-   full window width above 760px; the buttons keep the page column. A life
-   cycle loop above the scene (`src/data/shi-lifecycle.ts`) sets each stage
+   window width less a 24px gutter each side above 760px, with no frame; the
+   buttons keep the page column. A slim white life cycle loop over the sky (`src/data/shi-lifecycle.ts`) sets each stage
    over its habitat: eggs and alevins, fry and parr, smolts and ocean adults on
-   the downstream lane, adults returning to spawn on the upstream lane.
+   the downstream lane, adults returning to spawn on the upstream lane. A
+   small fish swims the loop once every 48 seconds, mirrored so it never swims
+   belly up; reduced motion parks it. The isometric model (`isometric.astro`,
+   `shi-iso-art.svg`, `src/data/shi-iso.ts`) is a second landing page for
+   review; its pale sky takes the loop in navy.
    All 18 indicators appear as labelled landmarks in the scene, each linking
    where its table row links. Each habitat is a traced region. Hover outlines
    it; selecting it outlines and tints it and labels it with its indicator

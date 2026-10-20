@@ -33,15 +33,37 @@ import {
   SHI_DIORAMA_REGIONS,
   SHI_DIORAMA_WIDTH,
 } from '../../data/shi-diorama';
+import { SHI_ISO_HEIGHT, SHI_ISO_LANDMARKS, SHI_ISO_REGIONS, SHI_ISO_WIDTH } from '../../data/shi-iso';
 import { SHI_LIFECYCLE_STAGES, SHI_LIFECYCLE_SUMMARY } from '../../data/shi-lifecycle';
-import art from './shi-diorama-art.svg?raw';
+import dioramaArt from './shi-diorama-art.svg?raw';
+import isoArt from './shi-iso-art.svg?raw';
 
 interface Props {
   categories: HabitatCategory[];
-  /** The plain list view: the same indicators and links without the graphic. */
-  listHref: string;
+  /** 'diorama': the flat museum cross-section; 'isometric': the terraced 2.5D model. */
+  scene?: 'diorama' | 'isometric';
 }
-const { categories, listHref } = Astro.props;
+const { categories, scene = 'diorama' } = Astro.props;
+
+const SCENES = {
+  diorama: { width: SHI_DIORAMA_WIDTH, height: SHI_DIORAMA_HEIGHT, regions: SHI_DIORAMA_REGIONS, landmarks: SHI_DIORAMA_LANDMARKS, art: dioramaArt },
+  isometric: { width: SHI_ISO_WIDTH, height: SHI_ISO_HEIGHT, regions: SHI_ISO_REGIONS, landmarks: SHI_ISO_LANDMARKS, art: isoArt },
+};
+const SCENE_DESC = {
+  diorama:
+    'A diorama cross-section from a headwater stream below the Cascades on the left to the open Sound on the right, ' +
+    'cut away beneath the waterline. Adult chinook, coho and chum spawn over gravel in the headwaters among log jams, ' +
+    'below a road culvert. Fry with parr marks migrate downstream through streams and floodplains and freshwater pools, ' +
+    'smolt in the estuary, and enter the Sound past beaches with eelgrass meadows and bull kelp. After years in marine ' +
+    'water the adults return through the estuary and up the river to spawn.',
+  isometric:
+    'A tabletop model of six habitat terraces stepping down from the headwaters below the Cascades at the back left to ' +
+    'the open Sound at the front right, one river running through them over small falls. Spawners and a log jam sit ' +
+    'below a road culvert in the headwaters; fry move down through freshwater and a floodplain with an oxbow; smolts ' +
+    'gather in the estuary marsh beside a pocket estuary; the river crosses a beach below a feeder bluff into the Sound, ' +
+    'cut away to show kelp, eelgrass and fish. Adults swim back up the river to spawn.',
+};
+const { width: SCENE_W, height: SCENE_H, regions: REGIONS, landmarks: LANDMARKS, art } = SCENES[scene];
 
 const bySlug = Object.fromEntries(categories.map((c) => [c.slug, c])) as Record<string, HabitatCategory>;
 const CHECK = '<path d="M20 6 9 17l-5-5"/>';
@@ -50,23 +72,32 @@ const catStyle = (slug: HabitatCategorySlug) =>
   `--cat: ${SHI_CATEGORY_FILL[bySlug[slug].colorGroup]}; --cat-on: ${SHI_CATEGORY_ON_FILL[bySlug[slug].colorGroup]}`;
 
 // Buttons sit under the scene in its own order, headwaters to open Sound.
-const buttons = SHI_DIORAMA_REGIONS.map((r) => bySlug[r.slug]).filter(Boolean);
+const buttons = REGIONS.map((r) => bySlug[r.slug]).filter(Boolean);
 
 const rowBySlug = Object.fromEntries(SHI_GRID_ROWS.map((r) => [r.slug, r]));
 const indicatorHref = (h: string) => (/^https?:/.test(h) ? h : withBase(h));
-const landmarks = SHI_DIORAMA_LANDMARKS.map((l) => ({ ...l, href: indicatorHref(rowBySlug[l.slug].href) }));
-// Life cycle loop: a racetrack over the full scene width. The lower lane runs downstream
-// (left to right), the upper lane back upstream; chevrons mark the heading of each lane.
-const LC_H = 104, LC_TOP = 34, LC_BOT = 70, LC_R = (LC_BOT - LC_TOP) / 2, LC_L = 40 + LC_R, LC_RT = SHI_DIORAMA_WIDTH - 40 - LC_R;
+const landmarks = LANDMARKS.map((l) => ({ ...l, href: indicatorHref(rowBySlug[l.slug].href) }));
+// Life cycle loop: a slim racetrack laid over the scene's sky in white. The lower lane runs
+// downstream (left to right), the upper lane back upstream; chevrons mark each lane's heading,
+// and a fish swims the loop (psinfo-shi-habitat-explorer's script keeps it upright).
+const LC_TOP = 26, LC_BOT = 50, LC_R = (LC_BOT - LC_TOP) / 2, LC_L = 40 + LC_R, LC_RT = SCENE_W - 40 - LC_R;
 const lcLoop = `M${LC_L} ${LC_BOT} L${LC_RT} ${LC_BOT} A${LC_R} ${LC_R} 0 0 0 ${LC_RT} ${LC_TOP} L${LC_L} ${LC_TOP} A${LC_R} ${LC_R} 0 0 0 ${LC_L} ${LC_BOT} Z`;
+// A stage sits over the middle of its habitat's region (the horizontal extent of its traced shape).
+const regionX = Object.fromEntries(
+  REGIONS.map((r) => {
+    const xs = [...r.d.matchAll(/[ML]?\s*(-?[\d.]+)[ ,](-?[\d.]+)/g)].map((m) => parseFloat(m[1]));
+    return [r.slug, (Math.min(...xs) + Math.max(...xs)) / 2];
+  }),
+);
+const lcStages = SHI_LIFECYCLE_STAGES.map((st) => ({ ...st, x: st.lane === 'out' ? regionX[st.habitat] : SCENE_W / 2 }));
+const outX = lcStages.filter((st) => st.lane === 'out').map((st) => st.x).sort((a, b) => a - b);
 const lcChevrons = [
-  ...[230, 508, 836].map((x) => ({ x, y: LC_BOT, dir: 1 })),
-  ...[300, 820].map((x) => ({ x, y: LC_TOP, dir: -1 })),
+  ...outX.slice(1).map((x, k) => ({ x: (x + outX[k]) / 2, y: LC_BOT, dir: 1 })),
+  ...[0.27, 0.73].map((t) => ({ x: SCENE_W * t, y: LC_TOP, dir: -1 })),
 ];
 const countFor = (slug: HabitatCategorySlug) => SHI_GRID_ROWS.filter((r) => r.category === slug).length;
 ---
-<div class="shix" data-shi-explorer>
-  <p class="shix__alt"><a href={withBase(listHref)}>View as a List</a></p>
+<div class="shix" data-shi-explorer data-scene={scene} style={`--shix-scene-w: ${SCENE_W}px`}>
   <ul class="shix__buttons" role="list">
     {buttons.map((c) => (
       <li>
@@ -80,38 +111,37 @@ const countFor = (slug: HabitatCategorySlug) => SHI_GRID_ROWS.filter((r) => r.ca
 
   <div class="shix__strip" role="region" aria-label="Salmon habitat diorama" data-shi-strip>
     <div class="shix__pan">
-      <svg class="shix__cycle" viewBox={`0 0 ${SHI_DIORAMA_WIDTH} ${LC_H}`} role="img" aria-label={SHI_LIFECYCLE_SUMMARY}>
-        <path class="cycle__loop" d={lcLoop} />
-        {lcChevrons.map((c) => (
-          <path class="cycle__chev" d={`M${c.x - 5 * c.dir} ${c.y - 6} L${c.x + 4 * c.dir} ${c.y} L${c.x - 5 * c.dir} ${c.y + 6}`} />
-        ))}
-        {SHI_LIFECYCLE_STAGES.map((st) => {
-          const y = st.lane === 'out' ? LC_BOT : LC_TOP;
-          return (
-            <g transform={`translate(${st.x} ${y})`}>
-              <circle class="cycle__node" r="6" />
-              <text class="cycle__label" text-anchor="middle" y={st.lane === 'out' ? 28 : -16}>{st.label}</text>
-            </g>
-          );
-        })}
-      </svg>
       <div class="shix__frame">
-        <svg class="shix__art" viewBox={`0 0 ${SHI_DIORAMA_WIDTH} ${SHI_DIORAMA_HEIGHT}`} width={SHI_DIORAMA_WIDTH} height={SHI_DIORAMA_HEIGHT}>
+        <svg class="shix__art" viewBox={`0 0 ${SCENE_W} ${SCENE_H}`} width={SCENE_W} height={SCENE_H}>
           <g role="img" aria-labelledby="shix-title shix-desc">
             <title id="shix-title">Salmon habitats from the headwaters to Puget Sound</title>
-            <desc id="shix-desc">
-              A diorama cross-section from a headwater stream below the Cascades on the left to the open Sound on
-              the right, cut away beneath the waterline. Adult chinook, coho and chum spawn over gravel in the
-              headwaters among log jams, below a road culvert. Fry with parr marks migrate downstream through
-              streams and floodplains and freshwater pools, smolt in the estuary, and enter the Sound past beaches
-              with eelgrass meadows and bull kelp. After years in marine water the adults return through the
-              estuary and up the river to spawn.
-            </desc>
+            <desc id="shix-desc">{SCENE_DESC[scene]}</desc>
             <Fragment set:html={art} />
           </g>
 
+          <g class="shix__cycle" role="img" aria-label={SHI_LIFECYCLE_SUMMARY}>
+            <path class="cycle__loop" d={lcLoop} data-shi-cycle-path />
+            {lcChevrons.map((c) => (
+              <path class="cycle__chev" d={`M${c.x - 4 * c.dir} ${c.y - 5} L${c.x + 3 * c.dir} ${c.y} L${c.x - 4 * c.dir} ${c.y + 5}`} />
+            ))}
+            {lcStages.map((st) => {
+              const y = st.lane === 'out' ? LC_BOT : LC_TOP;
+              return (
+                <g transform={`translate(${st.x} ${y})`}>
+                  <circle class="cycle__node" r="4" />
+                  <text class="cycle__label" text-anchor="middle" y={st.lane === 'out' ? 22 : -11}>{st.label}</text>
+                </g>
+              );
+            })}
+            <g class="cycle__fish" data-shi-cycle-fish aria-hidden="true">
+              <path d="M11 0 C6 -5 -4 -5.5 -9 -1.5 L-14 -5 L-13 0 L-14 5 L-9 1.5 C-4 5.5 6 5 11 0 Z" />
+              <path class="cycle__fin" d="M2 -4.2 L-1 -7.5 L-4 -4.6 Z" />
+              <circle class="cycle__eye" cx="7" cy="-1" r="1" />
+            </g>
+          </g>
+
           <g class="shix__zones">
-            {SHI_DIORAMA_REGIONS.map((r) => (
+            {REGIONS.map((r) => (
               <g class="zone" data-shi-cat-zone={r.slug} style={catStyle(r.slug)}>
                 <path class="zone__halo" d={r.d} />
                 <path class="zone__line" d={r.d}><title>{bySlug[r.slug].label}</title></path>
@@ -120,7 +150,7 @@ const countFor = (slug: HabitatCategorySlug) => SHI_GRID_ROWS.filter((r) => r.ca
           </g>
 
           <g class="shix__exhibits" aria-hidden="true">
-            {SHI_DIORAMA_REGIONS.map((r) => (
+            {REGIONS.map((r) => (
               <g class="exhibit" data-shi-exhibit={r.slug} style={catStyle(r.slug)}>
                 <line class="exhibit__lead" x1={r.pin.x} y1={r.pin.y} x2={r.label.x} y2={r.label.y} />
                 <circle class="exhibit__pin" cx={r.pin.x} cy={r.pin.y} r="3" />
@@ -284,8 +314,8 @@ const countFor = (slug: HabitatCategorySlug) => SHI_GRID_ROWS.filter((r) => r.ca
     sizePlaques();
     document.fonts?.ready.then(sizePlaques);
 
-    // Wide viewports: the strip bleeds to the window's edges. 100vw counts a classic scrollbar,
-    // so its width comes off the bleed or the page would scroll sideways.
+    // Wide viewports: the strip runs nearly the window's width, inset by the page gutter. 100vw
+    // counts a classic scrollbar, so its width comes off or the page would scroll sideways.
     const fitBleed = () => root.style.setProperty('--shix-sbw', `${window.innerWidth - document.documentElement.clientWidth}px`);
     fitBleed();
     window.addEventListener('resize', fitBleed);
@@ -301,15 +331,44 @@ const countFor = (slug: HabitatCategorySlug) => SHI_GRID_ROWS.filter((r) => r.ca
       fitScroller();
       window.addEventListener('resize', fitScroller);
     }
+    // The life cycle fish swims the loop slowly: downstream along the lower lane, home along the
+    // upper. It is mirrored, never rotated past upright, so it never swims belly up. Reduced
+    // motion parks it at the start of the loop.
+    const loop = root.querySelector<SVGPathElement>('[data-shi-cycle-path]');
+    const fish = root.querySelector<SVGGElement>('[data-shi-cycle-fish]');
+    if (loop && fish) {
+      const total = loop.getTotalLength();
+      const LAP_MS = 48000;
+      const place = (t: number) => {
+        const d = (t % 1) * total;
+        const p = loop.getPointAtLength(d);
+        const q = loop.getPointAtLength(Math.min(d + 1, total));
+        const deg = (Math.atan2(q.y - p.y, q.x - p.x) * 180) / Math.PI;
+        const heading = Math.abs(deg) <= 90 ? `rotate(${deg})` : `rotate(${deg - 180}) scale(-1 1)`;
+        fish.setAttribute('transform', `translate(${p.x} ${p.y}) ${heading}`);
+      };
+      const still = window.matchMedia('(prefers-reduced-motion: reduce)');
+      let raf = 0;
+      let start = 0;
+      const tick = (now: number) => {
+        if (!start) start = now;
+        place((now - start) / LAP_MS);
+        raf = requestAnimationFrame(tick);
+      };
+      const run = () => {
+        cancelAnimationFrame(raf);
+        if (still.matches) place(0.04);
+        else raf = requestAnimationFrame(tick);
+      };
+      still.addEventListener('change', run);
+      run();
+    }
     render();
   }
 </script>
 
 <style>
   .shix { display: flex; flex-direction: column; gap: var(--spacing-400); }
-  .shix__alt { order: 0; margin: 0; align-self: flex-end; font-size: var(--ps-info-text-body); }
-  .shix__alt a { color: var(--color-text-link); text-decoration: underline; text-underline-offset: 3px; }
-  .shix__alt a:focus-visible { outline: 2px solid var(--focus-ring-color); outline-offset: 2px; }
   /* Magnify on hover (kickoff 2026-10-13): the hovered or focused landmark and
      its plaque scale up in place; transform only, so nothing reflows. */
   .lm__zoom { transform-box: fill-box; transform-origin: center; transition: transform 160ms ease-out; }
@@ -319,32 +378,36 @@ const countFor = (slug: HabitatCategorySlug) => SHI_GRID_ROWS.filter((r) => r.ca
   .shix__strip { order: 1; position: relative; }
   .shix__strip:focus-visible { outline: 3px solid var(--focus-ring-color); outline-offset: 4px; }
   .shix__pan { position: relative; width: 100%; }
-  .shix__frame {
-    position: relative; padding: 7px; border-radius: 3px;
-    background: var(--shi-art-frame);
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25), 0 10px 28px rgba(5, 31, 51, 0.22);
-  }
-  .shix__frame::after {
-    content: ''; position: absolute; inset: 7px; pointer-events: none;
-    border: 1px solid var(--shi-art-frame-line); opacity: 0.55;
-  }
+  .shix__frame { position: relative; border-radius: var(--radius-100); overflow: hidden; }
   .shix__art { display: block; width: 100%; height: auto; }
 
-  /* Life cycle loop over the scene: navy ink on the page, no category color (stages are not habitats). */
-  .shix__cycle { display: block; width: 100%; height: auto; padding: 0 7px; box-sizing: border-box; overflow: visible; }
-  .cycle__loop { fill: none; stroke: var(--ps-info-blue-800); stroke-width: 2; stroke-opacity: 0.55; }
-  .cycle__chev { fill: none; stroke: var(--ps-info-blue-800); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-  .cycle__node { fill: var(--ps-info-blue-800); stroke: var(--color-surface); stroke-width: 3; }
-  .cycle__label { font-family: var(--font-display); font-size: 16px; font-weight: var(--font-weight-semibold); fill: var(--ps-info-blue-800); }
+  /* Life cycle loop laid over the sky: white strokes and type, each with a soft navy halo so the
+     labels hold 4.5:1 over pale sky and dark trees alike. a11y-checked: halo-backed white text. */
+  .shix__cycle { pointer-events: none; }
+  .cycle__loop { fill: none; stroke: #ffffff; stroke-width: 1.5; stroke-opacity: 0.85; }
+  .cycle__chev { fill: none; stroke: #ffffff; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+  .cycle__node { fill: #ffffff; stroke: rgba(5, 31, 51, 0.45); stroke-width: 1.5; }
+  .cycle__label {
+    font-family: var(--font-display); font-size: 14px; font-weight: var(--font-weight-semibold); fill: #ffffff;
+    stroke: rgba(5, 31, 51, 0.7); stroke-width: 3px; stroke-linejoin: round; paint-order: stroke;
+  }
+  .cycle__fish path { fill: #ffffff; stroke: rgba(5, 31, 51, 0.5); stroke-width: 1; }
+  .cycle__fish .cycle__eye { fill: rgba(5, 31, 51, 0.8); }
+  /* The isometric model's sky is near white, where white fails: the loop takes navy ink there. */
+  [data-scene='isometric'] .cycle__loop, [data-scene='isometric'] .cycle__chev { stroke: var(--ps-info-blue-800); stroke-opacity: 0.7; }
+  [data-scene='isometric'] .cycle__node { fill: var(--ps-info-blue-800); stroke: #ffffff; }
+  [data-scene='isometric'] .cycle__label { fill: var(--ps-info-blue-800); stroke: none; }
+  [data-scene='isometric'] .cycle__fish path { fill: var(--ps-info-blue-800); stroke: none; }
+  [data-scene='isometric'] .cycle__fish .cycle__eye { fill: #ffffff; }
 
-  /* Wide: the scene and its loop run the full window width; the buttons keep the page column. */
+  /* Wide: the scene runs the window's width less a gutter on each side; the buttons keep the
+     page column. */
   @media (min-width: 761px) {
     .shix__strip {
-      --shix-bleed: calc(100vw - var(--shix-sbw, 0px));
+      --shix-bleed: calc(100vw - var(--shix-sbw, 0px) - 2 * var(--spacing-500));
       width: var(--shix-bleed);
       margin-inline: calc((100% - var(--shix-bleed)) / 2);
     }
-    .shix__frame { border-radius: 0; }
   }
 
   /* Habitat regions: the traced shape outlines on hover, outlines and tints when selected. */
@@ -445,7 +508,7 @@ const countFor = (slug: HabitatCategorySlug) => SHI_GRID_ROWS.filter((r) => r.ca
       overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: thin;
       margin: 0 calc(-1 * var(--spacing-400)); padding: var(--spacing-200) var(--spacing-400) var(--spacing-400);
     }
-    .shix__pan { width: 1110px; }
+    .shix__pan { width: var(--shix-scene-w); }
     .shix__buttons { grid-template-columns: 1fr 1fr; }
   }
   @media (prefers-reduced-motion: reduce) {

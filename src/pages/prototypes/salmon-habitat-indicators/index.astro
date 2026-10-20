@@ -2,8 +2,8 @@
 // Salmon Habitat Indicators — landing page, inside today's Vital Signs site.
 // Built from PSP's SHI mock-up (v29, 2026-08-28), revised after the
 // 2026-10-13 kickoff (DELTA-1347): logo lockup and About text, the life cycle
-// loop over a full-width habitat graphic that follows the fish, landmarks that
-// magnify on hover, a link to the plain list view, and the table of all
+// loop laid over the sky of a habitat graphic that follows the fish, landmarks
+// that magnify on hover, and the table of all
 // Salmon Habitat Indicators with status and no Type column. Buttons and
 // graphic zones filter the table.
 // Contract: src/data/contracts/salmon-habitat-indicators.md
@@ -55,7 +55,7 @@ const piTopics = TOPIC_CARDS.filter((t) => SHI_PI_TOPIC_TITLES.includes(t.title)
       <PsInfoShiHero name={SHI_SITE_NAME} subtitle={SHI_SUBTITLE} logo={SHI_LOGO} aboutParagraphs={SHI_ABOUT} />
     </PsInfoEpicMark>
     <PsInfoEpicMark story="DELTA-1347" label="Habitat diorama">
-      <PsInfoShiHabitatExplorer categories={HABITAT_CATEGORIES} listHref={shiRoutes.list} />
+      <PsInfoShiHabitatExplorer categories={HABITAT_CATEGORIES} />
     </PsInfoEpicMark>
     <div class="stack" data-gap="md">
       <PsInfoSectionTitle title={SHI_GRID_HEADING} size="lg" />

@@ -36,7 +36,6 @@ export const PSINFO_SITE = 'https://www.pugetsoundinfo.wa.gov';
 
 export const shiRoutes = {
   landing: SHI_BASE,
-  list: `${SHI_BASE}/list`,
   allIndicators: `${SHI_BASE}/all-indicators`,
   goal: (slug: string) => `${SHI_BASE}/vital-sign-goals/${slug}`,
   vsi: (slug: string) => `${SHI_BASE}/vital-sign-indicators/${slug}`,
@@ -957,14 +956,3 @@ export const SHI_GOALS: GoalDetail[] = GOALS.map((goal) => ({
 
 /** Indicator hrefs (as SHI_GOALS carries them) that get the SHI mark. */
 export const SHI_MARKED_HREFS: string[] = SALMON_HABITAT_INDICATORS.map(shiHref);
-
-// ── List view (DELTA-1347): the grid rows grouped by habitat, in the
-//    graphic's order from headwaters to the open Sound ───────────────────────
-const LIST_ORDER: HabitatCategorySlug[] = [
-  'stream-structure', 'freshwater', 'streams-floodplains', 'estuaries', 'beaches-marine-vegetation', 'marine-water',
-];
-export const SHI_LIST_GROUPS = LIST_ORDER.map((slug) => ({
-  slug,
-  label: CATEGORY_BY_SLUG[slug].label,
-  rows: SHI_GRID_ROWS.filter((r) => r.category === slug),
-}));
