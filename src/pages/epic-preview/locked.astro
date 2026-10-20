@@ -1,0 +1,31 @@
+---
+// The password gate in front of an epic page: the SHI epic page behind
+// psinfo-password-gate with a throwaway password. SHI itself sets no password;
+// an epic that sets one gets this on its epic page and every page it walks,
+// through psinfo-epic-gate in the base layout.
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import EsaPageHeader from '@esa/ecology/esa-page-header.astro';
+import EsaBreadcrumbs from '@esa/ecology/esa-breadcrumbs.astro';
+import PsInfoPasswordGate from '../../components/psinfo/PsInfoPasswordGate.astro';
+import PsInfoEpicIndex from '../../components/psinfo/PsInfoEpicIndex.astro';
+import { SHI_EPIC } from '../../data/epics/shi';
+import { withBase } from '../../lib/base';
+
+const SPECIMEN_PASSWORD = 'chinook';
+---
+<!-- manifest:
+  layout: BaseLayout > center spine
+  sections:
+    - lock screen        -> ps-info-password-gate (unlocked: ps-info-epic-index, header slot: esa-page-header + esa-breadcrumbs)
+-->
+<BaseLayout title={SHI_EPIC.title}>
+  <PsInfoPasswordGate password={SPECIMEN_PASSWORD} storageKey="epic-unlocked:specimen" title={SHI_EPIC.title}>
+    <main id="main-content" class="center">
+      <PsInfoEpicIndex epic={SHI_EPIC}>
+        <EsaPageHeader slot="header" title={SHI_EPIC.title}>
+          <EsaBreadcrumbs slot="breadcrumbs" items={[{ label: 'Home', href: withBase('/') }, { label: SHI_EPIC.title }]} size="md" />
+        </EsaPageHeader>
+      </PsInfoEpicIndex>
+    </main>
+  </PsInfoPasswordGate>
+</BaseLayout>

@@ -1,0 +1,52 @@
+---
+// PsInfoShiMark — the SHI mark: the Salmon Habitat Indicators logo beside the
+// words "Salmon Habitat Indicator", never the icon alone (DELTA-1346). One
+// component for every place an indicator is marked: the top of a VSI page
+// (linking to its Importance to Salmon section), indicator table rows, the
+// Indicator Type field of a Complete Indicator Report, and the list view.
+//
+// bcn-lego-checked: checked esa-badge and esa-pill (text-only chips, no image
+// slot; the mark is the program's logo, not a status) and esa-icon-link (an
+// svg glyph, not a raster logo). The logo is decorative (alt="") because the
+// label carries the name. psinfo-shi-mark is the reusable home.
+import { withBase } from '../../lib/base';
+import { SHI_MARK_LABEL } from '../../data/shi-domain';
+import { SHI_LOGO } from '../../data/pages/salmon-habitat-indicators';
+import { epicMarkAttrs } from '../../data/epics/index';
+
+interface Props {
+  /** When set, the whole mark is a link (e.g. to the Importance to Salmon section). */
+  href?: string;
+  /** sm: table rows and fields; md: the top of an indicator page. */
+  size?: 'sm' | 'md';
+  /** Jira key of the story that adds this mark here; marks it for the epic preview. */
+  epicStory?: string;
+}
+const { href, size = 'sm', epicStory } = Astro.props;
+const target = href && (href.startsWith('#') || /^https?:/.test(href) ? href : withBase(href));
+const Tag = target ? 'a' : 'span';
+const epicAttrs = epicStory ? epicMarkAttrs(epicStory, `${SHI_MARK_LABEL} mark`) : {};
+---
+<Tag class:list={['shimark', `shimark--${size}`]} href={target} {...epicAttrs}>
+  <img class="shimark__logo" src={withBase(SHI_LOGO.src)} alt="" width={SHI_LOGO.width} height={SHI_LOGO.height} />
+  <span class="shimark__label">{SHI_MARK_LABEL}</span>
+</Tag>
+
+<style>
+  .shimark {
+    display: inline-flex; align-items: center; gap: var(--spacing-200);
+    color: var(--ps-info-blue-800);
+    font-weight: var(--font-weight-semibold);
+    line-height: 1.25;
+    text-decoration: none;
+    /* As wide as its content inside a flex column (the indicator header), not the column. */
+    align-self: flex-start;
+  }
+  .shimark--sm { font-size: var(--ps-info-text-meta-lg); }
+  .shimark--md { font-size: var(--ps-info-text-body); gap: var(--spacing-300); }
+  .shimark__logo { flex: none; width: auto; height: 1.75rem; }
+  .shimark--md .shimark__logo { height: 2.75rem; }
+  a.shimark .shimark__label { text-decoration: underline; text-underline-offset: 3px; }
+  a.shimark:hover .shimark__label { text-decoration-thickness: 2px; }
+  a.shimark:focus-visible { outline: 2px solid var(--focus-ring-color); outline-offset: 2px; }
+</style>

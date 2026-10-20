@@ -1,0 +1,111 @@
+---
+// PsInfoGroup: a titled group, Linear's grouped list as the Radial skin ports
+// it (radial-design src/components/RdSection.astro and the record-list rules
+// in src/styles/theme-skin.css). A band carries the group's heading and its
+// actions; under it a body, then rows. The band is the sunken neutral for a
+// top-level group (h2); a group nested in another's body takes a plain band
+// and an h3, so the two levels never look alike.
+//
+// Rows are the things to open: each a whole-row link with a title and an
+// optional quiet badge. No box per row, a hairline between rows, and the hover
+// fill takes the hairline's place. Measured from Linear: rows 40px at least
+// (--rd-row-h), 8px corners.
+//
+// Slots: "title" (the heading's content), "actions" (right of the band), and
+// a body under the band, above any rows.
+//
+// bcn-lego-checked: esa-collapsible folds its body away and heads with a label, where a group stays open under a real h2; esa-link-column heads with a span; esa-card boxes each record, where Linear's rows share one surface. Checked Beacon shared ui components (no grouped list). psinfo-group is the reusable home.
+import EsaBadge from '@esa/ecology/esa-badge.astro';
+import '@esa/tokens/typography.css';
+import '@esa/tokens/layouts.css';
+
+interface Row {
+  href: string;
+  title: string;
+  /** A short case label shown as a quiet badge (VSI, VSI+, SHI). */
+  label?: string;
+}
+
+interface Props {
+  /** The heading's id; the section is labelled by it, and links can land on it. */
+  id: string;
+  /** Rows under the band and body, in order. */
+  rows?: Row[];
+  /** 2 (default): a top-level group on a sunken band. 3: a group nested in
+      another's body, on a plain band. */
+  level?: 2 | 3;
+}
+const { id, rows = [], level = 2 } = Astro.props;
+const Heading = level === 3 ? 'h3' : 'h2';
+---
+<section class="group stack" data-gap="xs" data-level={level} aria-labelledby={id}>
+  <div class="group__band">
+    <Heading id={id} class="group__title typography-label-md-strong"><slot name="title" /></Heading>
+    {Astro.slots.has('actions') && <div class="group__actions cluster" data-gap="sm"><slot name="actions" /></div>}
+  </div>
+  <slot />
+  {rows.length > 0 && (
+    <ul class="group__rows" role="list">
+      {rows.map((row) => (
+        <li>
+          <a class="group__row" href={row.href}>
+            <span class="typography-body-md">{row.title}</span>
+            {row.label && <EsaBadge value={row.label} variant="neutral" size="sm" />}
+          </a>
+        </li>
+      ))}
+    </ul>
+  )}
+</section>
+
+<style>
+  /* The actions keep the band's right edge at every width; the heading wraps
+     beside them. */
+  .group__band {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: var(--spacing-200) var(--spacing-400);
+    min-block-size: calc(var(--spacing-650) + var(--spacing-100));
+    box-sizing: border-box;
+    padding-block: var(--spacing-150);
+    padding-inline: var(--spacing-300) var(--spacing-150);
+    border-radius: var(--radius-200);
+    background: var(--color-surface-sunken);
+  }
+  [data-level='3'] > .group__band { background: none; }
+  .group__title {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: var(--spacing-100) var(--spacing-300);
+    margin: 0;
+    color: var(--color-text-primary);
+    scroll-margin-block-start: var(--spacing-400);
+  }
+
+  .group__rows { list-style: none; margin: 0; padding: 0; }
+  .group__row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--spacing-200);
+    min-block-size: var(--spacing-650);
+    box-sizing: border-box;
+    padding-block: var(--spacing-200);
+    padding-inline: var(--spacing-300);
+    border-radius: var(--radius-200);
+    color: var(--color-text-primary);
+    text-decoration: none;
+  }
+  /* The hairline sits above every row but the first; a hovered row's fill takes
+     its own and the next row's, so the fill never sits between two lines. */
+  .group__rows > li + li > .group__row { box-shadow: 0 calc(-1 * var(--border-width-100)) 0 var(--color-border); }
+  .group__row:hover { background: var(--color-primary-subtle); }
+  .group__rows > li:has(> .group__row:hover) + li > .group__row,
+  .group__rows > li + li > .group__row:hover { box-shadow: none; }
+  .group__row:focus-visible {
+    outline: 2px solid var(--focus-ring-color);
+    outline-offset: -2px;
+  }
+</style>

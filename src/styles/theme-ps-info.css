@@ -107,6 +107,14 @@
   --color-text-link:       var(--ps-info-blue-600);
   --color-text-link-hover: var(--ps-info-blue-800);
   --color-surface-inverse: var(--ps-info-blue-950);
+  /* The hub's components read the tier-2 brand roles, not the names above,
+     and fell back to the hub's green (white on it is 2.95:1). */
+  --color-background-brand:        var(--ps-info-blue-800);
+  --color-background-brand-hover:  var(--ps-info-blue-900);
+  --color-background-brand-active: var(--ps-info-blue-900);
+  --color-border-brand:            var(--ps-info-blue-800);
+  --color-content-brand:           var(--ps-info-blue-800);
+  --color-content-on-brand:        var(--ps-info-gray-0);
 
   /* ===== (2) NEUTRAL CHAIN ===== */
   --color-text-primary:   var(--ps-info-gray-900);
@@ -133,6 +141,14 @@
   --font-weight-medium:   500;
   --font-weight-semibold: 600;
   --font-weight-bold:     700;
+  /* The hub's composites and legos read the current names, not the ones
+     above, and fell back to DM Sans (never loaded here). Point them at the
+     declarations above; theme-shi's --font-sans flows through on SHI pages. */
+  --typography-font-family-sans:     var(--font-sans);
+  --typography-font-weight-regular:  var(--font-weight-regular);
+  --typography-font-weight-medium:   var(--font-weight-medium);
+  --typography-font-weight-semibold: var(--font-weight-semibold);
+  --typography-font-weight-bold:     var(--font-weight-bold);
 
   /* ===== (4) FEEDBACK — conventional green/amber/red, a distinct axis from goal hues.
      Always paired with a text label, so never confused with a goal color. ===== */
@@ -165,4 +181,11 @@
 
   /* ===== (6) --button-on-warning ===== */
   --button-on-warning: #ffffff;
+
+  /* ===== (9) EPIC PREVIEW — the outlines and numbers that point at what a
+     story adds (psinfo-epic-bar live, psinfo-epic-shot on story pages).
+     Orange-600 holds 3.2:1 on white for the outline; the number sits on it
+     in the deepest navy (5.1:1). ===== */
+  --epic-mark-color: var(--ps-info-orange-600);
+  --epic-mark-ink:   var(--ps-info-blue-950);
 }

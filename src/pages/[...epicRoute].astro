@@ -1,0 +1,41 @@
+---
+// Epic pages, one per epic in src/data/epics/, at the route its file names, in
+// the epic frame. Every story on one page to scroll: its band, its annotated
+// example page (screenshots from scripts/epic-shots.mjs) and the pages to
+// review. Each story's heading is its anchor (/shi#delta-1343).
+// prose-prop-checked: `epic` is a Jira epic record (key, title, stories), never page copy
+import BaseLayout from '../layouts/BaseLayout.astro';
+import EsaPageHeader from '@esa/ecology/esa-page-header.astro';
+import EsaBreadcrumbs from '@esa/ecology/esa-breadcrumbs.astro';
+import EsaButton from '@esa/ecology/esa-button.astro';
+import PsInfoEpicFrame from '../components/psinfo/PsInfoEpicFrame.astro';
+import PsInfoEpicIndex from '../components/psinfo/PsInfoEpicIndex.astro';
+import type { Epic } from '../data/epics/types';
+import { EPICS, jiraHref } from '../data/epics/index';
+import { withBase } from '../lib/base';
+
+export function getStaticPaths() {
+  return EPICS.map((epic) => ({ params: { epicRoute: epic.route.replace(/^\//, '') }, props: { epic } }));
+}
+
+interface Props {
+  epic: Epic;
+}
+const { epic } = Astro.props;
+const home = { label: 'Home', href: withBase('/') };
+---
+<!-- manifest:
+  layout: BaseLayout > psinfo-epic-frame
+  sections:
+    - head bar -> esa-breadcrumbs, esa-button (the Jira key)
+    - stories  -> psinfo-epic-index (header slot: esa-page-header; per story: psinfo-group > psinfo-epic-story)
+-->
+<BaseLayout title={epic.title}>
+  <PsInfoEpicFrame>
+    <EsaBreadcrumbs slot="head" items={[home, { label: epic.title }]} size="sm" />
+    <EsaButton slot="tools" variant="ghost" size="sm" href={jiraHref(epic.key)} iconRight="external-link">{epic.key}</EsaButton>
+    <PsInfoEpicIndex {epic}>
+      <EsaPageHeader slot="header" title={epic.title} />
+    </PsInfoEpicIndex>
+  </PsInfoEpicFrame>
+</BaseLayout>

@@ -1,13 +1,17 @@
 // salmon-habitat-indicators.ts — data for the Salmon Habitat Indicator (SHI)
 // pages, typed by src/data/shi-domain.ts.
 //
-// Vital Sign and Vital Sign Indicator names, ids, progress labels, and the two
-// VSI detail pages (Eelgrass Area, Summer low flow) are public prod content
-// from vitalsigns.pugetsoundinfo.wa.gov (fetched 2026-10-12). Which VSIs are
-// SHIs, their relationship types, the two SHI indicators, all salmon
-// narrative, and every gauge value in the SHI chart are invented for the
-// prototype.
+// Vital Sign and Vital Sign Indicator names, ids, progress labels, and the
+// three VSI detail records (Eelgrass Area, Summer low flow, Floodplain
+// function) are public prod content from vitalsigns.pugetsoundinfo.wa.gov and
+// www.pugetsoundinfo.wa.gov (fetched 2026-10-12 and 2026-10-16). The list of
+// 18 SHIs and which of them are also VSIs is PSP's official list (email,
+// 2026-10-19). Which VSIs are VSI+, each SHI's habitat, everything on the two
+// standalone SHI pages, all salmon narrative, the gauge coordinates and every
+// gauge value in the SHI chart are invented for the prototype.
 
+import type { GoalDetail, ProgressLabel, TargetStatusLabel } from './goals';
+import { GOALS } from './goals';
 import type {
   HabitatCategory,
   HabitatCategorySlug,
@@ -15,11 +19,13 @@ import type {
   SalmonHabitatIndicator,
   SalmonHabitatIndicatorField,
   ShiGauge,
+  ShiMapPoint,
   ShiSubfield,
   VitalSignRef,
   VsiDetail,
+  VsiPartner,
 } from '../shi-domain';
-import { SHI_RELATIONSHIP_LABEL, isShi } from '../shi-domain';
+import { isShi } from '../shi-domain';
 
 // ── Routing ────────────────────────────────────────────────────────────────
 // The whole route group hangs off one base so moving SHI to its own subdomain
@@ -31,8 +37,32 @@ export const PSINFO_SITE = 'https://www.pugetsoundinfo.wa.gov';
 export const shiRoutes = {
   landing: SHI_BASE,
   allIndicators: `${SHI_BASE}/all-indicators`,
+  goal: (slug: string) => `${SHI_BASE}/vital-sign-goals/${slug}`,
   vsi: (slug: string) => `${SHI_BASE}/vital-sign-indicators/${slug}`,
-  report: (slug: string) => `${SHI_BASE}/reports/${slug}`,
+  /** Complete Indicator Report (prod Indicator/Detail). */
+  report: (slug: string) => `${SHI_BASE}/indicator-reports/${slug}`,
+  /** SHI standalone page. */
+  standalone: (slug: string) => `${SHI_BASE}/indicators/${slug}`,
+};
+
+/** Anchor of the Salmon Habitat Indicator field on a Complete Indicator Report. */
+export const SHI_FIELD_ANCHOR = 'salmon-habitat-indicator';
+/** Anchor of the Importance to Salmon section on a VSI page. */
+export const SHI_IMPORTANCE_ANCHOR = 'importance-to-salmon';
+
+/** Prod's trend and target-status icon files (public/photos/vital-signs/icons). */
+export const PROGRESS_ICON: Record<string, string> = {
+  'Getting Better': 'progress-gettingbetter.png',
+  'Mixed Results': 'progress-mixedresults.png',
+  'No Trend': 'progress-notrend.png',
+  'Getting Worse': 'progress-gettingworse.png',
+  'Limited Data': 'progress-limiteddata.png',
+  'Indicator To Be Developed': 'progress-status-tobedeveloped.png',
+};
+
+export const TARGET_ICON: Record<TargetStatusLabel, string> = {
+  'Near Or At Target': 'status-neartarget.png',
+  'Below Target': 'status-belowtarget.png',
 };
 
 export const SHI_SITE_NAME = 'Puget Sound Salmon Habitat Indicators';
@@ -68,6 +98,7 @@ const VS: Record<'beaches' | 'estuaries' | 'streams' | 'freshwater' | 'marine', 
 // ── Subfield switches ─────────────────────────────────────────────────────
 const switches = (...on: ShiSubfield[]): Record<ShiSubfield, boolean> => ({
   importanceToSalmon: on.includes('importanceToSalmon'),
+  map: on.includes('map'),
   chart: on.includes('chart'),
   description: on.includes('description'),
   keyResults: on.includes('keyResults'),
@@ -138,9 +169,35 @@ function lowFlowSeries(gaugeIndex: number, source: ShiGauge['source']): number[]
   });
 }
 
+/** Approximate gauge locations for the SHI Map (invented to the nearest
+ *  hundredth of a degree; good enough to place each river, not to survey it). */
+const GAUGE_COORDS: Record<string, [number, number]> = {
+  '12052210': [48.03, -122.78], '12073500': [47.39, -122.67], '12112600': [47.31, -122.17],
+  '12108500': [47.27, -122.06], '12121600': [47.46, -122.0], '12117000': [47.39, -121.84],
+  '12201500': [48.55, -122.34], '12155300': [47.94, -122.07], '12079000': [46.85, -122.67],
+  '12167000': [48.26, -122.05], '12161000': [48.1, -121.95], '12142000': [47.61, -121.71],
+  '12147500': [47.71, -121.79], '12061500': [47.31, -123.18], '12056500': [47.51, -123.33],
+  '12115500': [47.35, -121.66], '12115000': [47.37, -121.62], '12141300': [47.49, -121.65],
+  '12143400': [47.42, -121.59], '12209000': [48.68, -122.17], '12134500': [47.84, -121.67],
+  '12054000': [47.68, -123.01], '12082500': [46.75, -122.08], '12097500': [47.15, -121.66],
+  '12093500': [46.9, -122.03], '12186000': [48.25, -121.57], '12189500': [48.27, -121.6],
+  '12048000': [48.01, -123.13], '12205000': [48.91, -121.84], '12175500': [48.65, -121.07],
+};
+
+/** Route of the embedded map page (the mock ArcGIS web app). */
+export const LOW_FLOW_MAP_EMBED = '/prototypes/salmon-habitat-indicators/embeds/summer-low-flow-map';
+
 export const LOW_FLOW_GAUGES: ShiGauge[] = GAUGE_LIST.map((g, i) => ({
   ...g,
   pctBelowNormal: lowFlowSeries(i, g.source),
+}));
+
+/** Points for the embedded SHI Map. */
+export const LOW_FLOW_MAP_POINTS: ShiMapPoint[] = LOW_FLOW_GAUGES.map((g) => ({
+  name: g.name,
+  lat: GAUGE_COORDS[g.station][0],
+  lon: GAUGE_COORDS[g.station][1],
+  set: g.inVsi ? 'shared' : 'added',
 }));
 
 const lastYearIndex = LAST_YEAR - FIRST_YEAR;
@@ -151,20 +208,28 @@ const addedRainGauges = LOW_FLOW_GAUGES.filter((g) => !g.inVsi && g.source === '
 
 const SUMMER_LOW_FLOW_FIELD: SalmonHabitatIndicatorField = {
   enabled: switches(
-    'importanceToSalmon', 'chart', 'description', 'keyResults', 'methods',
+    'importanceToSalmon', 'map', 'chart', 'description', 'keyResults', 'methods',
     'interpretation', 'additionalInformation', 'datasets', 'reportingGuidance',
   ),
   importanceToSalmon: [
     'Juvenile coho, steelhead, and stream-type Chinook spend one or more summers in freshwater, and adult Chinook and sockeye hold in rivers through late summer before spawning. When summer flows drop, riffles go shallow, side channels disconnect from the main stem, and the area of usable rearing habitat shrinks.',
     'Low flows also warm faster and hold less dissolved oxygen. Crowding into the pools that remain raises competition and predation, and shallow riffles can block adult migration to upstream spawning grounds.',
   ],
+  map: {
+    mode: 'embeddedUrl',
+    // Stands in for the ArcGIS web app PSP would paste here.
+    url: LOW_FLOW_MAP_EMBED,
+    title: 'Summer low flow salmon analysis streamgages',
+    caption: `Unregulated streamgages in the salmon analysis: ${sharedGauges} shared with the Vital Sign Indicator and ${addedGauges} added on lowland streams with mapped coho and steelhead rearing reaches.`,
+  },
   chart: {
-    kind: 'gauge-grid',
-    gauges: LOW_FLOW_GAUGES,
-    firstYear: FIRST_YEAR,
-    lastYear: LAST_YEAR,
+    mode: 'image',
+    src: '/photos/shi/summer-low-flow-salmon-chart.svg',
+    alt: `Stacked column chart, ${FIRST_YEAR} to ${LAST_YEAR}: the number of the ${LOW_FLOW_GAUGES.length} salmon analysis gauges with a below-normal summer rises from 0 in ${FIRST_YEAR} to ${belowNormalLastYear} in ${LAST_YEAR}, split between Vital Sign Indicator gauges and gauges added for salmon.`,
+    width: 960,
+    height: 480,
     caption:
-      'Share of summer days (July 15 to October 31) when the 7-day mean daily flow was below the 1948 to 1998 baseline 25th percentile, by streamgage and year. Gauges are grouped by flow source and ordered from lowest to highest basin elevation.',
+      'Gauges with a below-normal summer: 50 percent or more of days from July 15 to October 31 with a 7-day mean daily flow below the 1948 to 1998 baseline 25th percentile.',
   },
   description: `The salmon habitat version of the summer low flow indicator applies the Vital Sign method to ${LOW_FLOW_GAUGES.length} streamgages instead of ${sharedGauges}. The ${addedGauges} added gauges sit on lowland, rain-fed streams that carry most of the region's coho and steelhead rearing habitat and are under-represented in the Vital Sign gauge set.`,
   keyResults: [
@@ -194,7 +259,7 @@ const SUMMER_LOW_FLOW_FIELD: SalmonHabitatIndicatorField = {
   ],
 };
 
-// ── The 16 Salmon Habitat Indicators ──────────────────────────────────────
+// ── The 18 Salmon Habitat Indicators ──────────────────────────────────────
 export const SALMON_HABITAT_INDICATORS: SalmonHabitatIndicator[] = [
   // Beaches & Marine Vegetation
   {
@@ -213,6 +278,20 @@ export const SALMON_HABITAT_INDICATORS: SalmonHabitatIndicator[] = [
     },
   },
   {
+    slug: 'eelgrass-sites',
+    name: 'Short and long-term change at eelgrass sites',
+    summary: 'Share of monitored eelgrass sites where bed area is increasing, stable, or declining.',
+    vitalSign: VS.beaches,
+    vitalSignIndicator: { id: 61, progress: 'Mixed Results' },
+    salmonHabitatIndicator: {
+      relationship: 'same',
+      category: 'beaches-marine-vegetation',
+      field: importanceOnly([
+        'Site-level declines show where juvenile salmon may be losing shoreline cover and feeding grounds along their migration routes, even when the soundwide total holds steady.',
+      ]),
+    },
+  },
+  {
     slug: 'floating-kelp-bed-area',
     name: 'Floating kelp bed area',
     summary: 'Extent of bull kelp and giant kelp canopy along Puget Sound and Strait of Juan de Fuca shorelines.',
@@ -223,6 +302,20 @@ export const SALMON_HABITAT_INDICATORS: SalmonHabitatIndicator[] = [
       category: 'beaches-marine-vegetation',
       field: importanceOnly([
         'Kelp forests provide refuge and foraging habitat for juvenile salmon as they move into deeper nearshore waters.',
+      ]),
+    },
+  },
+  {
+    slug: 'understory-kelp',
+    name: 'Understory kelp abundance and condition',
+    summary: 'Abundance and health of kelp growing below the surface on rocky reefs.',
+    vitalSign: VS.beaches,
+    vitalSignIndicator: { id: 82, progress: 'Indicator To Be Developed' },
+    salmonHabitatIndicator: {
+      relationship: 'same',
+      category: 'beaches-marine-vegetation',
+      field: importanceOnly([
+        'Understory kelp shelters the small fish and invertebrates that juvenile salmon feed on as they move along rocky shorelines.',
       ]),
     },
   },
@@ -355,20 +448,6 @@ export const SALMON_HABITAT_INDICATORS: SalmonHabitatIndicator[] = [
       },
     },
   },
-  {
-    slug: 'freshwater-bibi',
-    name: 'Freshwater Benthic Index of Biotic Integrity',
-    summary: 'Stream health scored from the insects and other invertebrates living on the streambed.',
-    vitalSign: VS.freshwater,
-    vitalSignIndicator: { id: 16, progress: 'Getting Better' },
-    salmonHabitatIndicator: {
-      relationship: 'same',
-      category: 'freshwater',
-      field: importanceOnly([
-        'Streambed invertebrates are the main food of juvenile salmon in freshwater, so a healthy benthic community means more food for rearing fish.',
-      ]),
-    },
-  },
   // Streams & Floodplains
   {
     slug: 'summer-low-flow',
@@ -411,6 +490,20 @@ export const SALMON_HABITAT_INDICATORS: SalmonHabitatIndicator[] = [
     },
   },
   {
+    slug: 'flood-events',
+    name: 'Frequency of flood events',
+    summary: 'How often streams and rivers rise above flood stage each year.',
+    vitalSign: VS.streams,
+    vitalSignIndicator: { id: 85, progress: 'Indicator To Be Developed' },
+    salmonHabitatIndicator: {
+      relationship: 'same',
+      category: 'streams-floodplains',
+      field: importanceOnly([
+        'Large floods scour spawning gravel and the eggs buried in it. More frequent winter floods lower egg-to-fry survival, most of all in channels cut off from their floodplains.',
+      ]),
+    },
+  },
+  {
     slug: 'hydrologic-regime',
     name: 'Changes in hydrologic regime in streams and rivers',
     summary: 'Shifts in the timing and size of high and low flows across the year.',
@@ -424,22 +517,24 @@ export const SALMON_HABITAT_INDICATORS: SalmonHabitatIndicator[] = [
       ]),
     },
   },
-  // Stream Structure (no Vital Sign analog yet; nests under Streams and Floodplains)
+  // Stream Structure: the two SHIs that are not Vital Sign Indicators. Neither
+  // has a Vital Sign analog yet; both nest under Streams and Floodplains.
   {
-    slug: 'large-wood',
-    name: 'Large wood in streams',
-    summary: 'Pieces of large wood per stream length in salmon-bearing reaches.',
+    slug: 'stream-structure',
+    name: 'Stream Structure',
+    summary: 'Pools, large wood, and side channels per stream length in salmon-bearing reaches.',
     vitalSign: VS.streams,
     salmonHabitatIndicator: {
       relationship: 'independent',
       category: 'stream-structure',
+      standalone: { progress: 'Limited Data' },
       field: {
         enabled: switches('importanceToSalmon', 'description', 'reportingGuidance'),
         importanceToSalmon: [
-          'Logs and jams create the pools, gravel bars, and cover that spawning adults and rearing juveniles need. Many Puget Sound streams hold a fraction of the wood they carried historically.',
+          'Logs, jams, and deep pools create the cover and resting water that spawning adults and rearing juveniles need. Many Puget Sound streams hold a fraction of the wood and pools they had historically.',
         ],
         description:
-          'Counts of large wood pieces and jams per 100 meters of channel in salmon-bearing reaches, summarized by watershed.',
+          'Counts of large wood pieces and pools per 100 meters of channel in salmon-bearing reaches, summarized by watershed.',
         reportingGuidance: [
           'Methods are in development. Report survey results by watershed until a soundwide sampling design is adopted.',
         ],
@@ -447,20 +542,29 @@ export const SALMON_HABITAT_INDICATORS: SalmonHabitatIndicator[] = [
     },
   },
   {
-    slug: 'fish-passage',
-    name: 'Fish passage at road crossings',
-    summary: 'Stream habitat opened upstream of culverts and other barriers that have been corrected.',
+    slug: 'sediment',
+    name: 'Sediment',
+    summary: 'Share of fine sediment in spawning gravel in salmon-bearing streams.',
     vitalSign: VS.streams,
     salmonHabitatIndicator: {
       relationship: 'independent',
       category: 'stream-structure',
+      standalone: { progress: 'No Trend' },
       field: {
-        enabled: switches('importanceToSalmon', 'description'),
+        enabled: switches('importanceToSalmon', 'description', 'keyResults', 'datasets'),
         importanceToSalmon: [
-          'Culverts that are too steep, too small, or perched above the stream keep adults from spawning grounds and juveniles from upstream rearing habitat.',
+          'Salmon eggs need clean gravel with cold, oxygen-rich water moving through it. Fine sediment from roads, logging, and eroding banks fills the spaces between stones and smothers eggs before they hatch.',
         ],
         description:
-          'Miles of potential salmon habitat upstream of corrected barriers, compared with the miles still blocked.',
+          'Percent of fine sediment (smaller than 0.85 millimeters) in spawning gravel, sampled in late summer before spawning.',
+        keyResults: [
+          'Fine sediment exceeded 12 percent, the level linked to lower egg survival, at 9 of the 24 sampled sites.',
+          'Sites downstream of dense forest road networks held the most fine sediment.',
+        ],
+        datasets: [
+          { name: 'Spawning gravel sediment samples', steward: 'Northwest Indian Fisheries Commission' },
+          { name: 'Forest road sediment delivery inventory', steward: 'Washington State Department of Natural Resources' },
+        ],
       },
     },
   },
@@ -470,27 +574,47 @@ export const SHI_BY_SLUG = Object.fromEntries(
   SALMON_HABITAT_INDICATORS.map((i) => [i.slug, i]),
 ) as Record<string, SalmonHabitatIndicator>;
 
-// ── Link targets (per the deck: VSI goes to the VSI page, the other
-//    two types go to the SHI report) ──────────────────────────────────────
+// ── Link targets (DELTA-1347: VSI and VSI+ open their VSI page, SHI
+//    its standalone page) ──────────────────────────────────────────────────
 /** Indicators with an in-prototype Vital Sign Indicator page. */
-export const VSI_DETAIL_SLUGS = ['eelgrass-area', 'summer-low-flow'] as const;
+export const VSI_DETAIL_SLUGS = ['eelgrass-area', 'floodplain-function', 'summer-low-flow'] as const;
+/** SHI indicators with an in-prototype standalone page (all of them). The
+ *  standalone page is itself in the Complete Indicator Report layout (PSP
+ *  mock-up, 2026-10-19), so these have no separate report. */
+export const STANDALONE_SLUGS = ['stream-structure', 'sediment'] as const;
+/** Indicators with an in-prototype Complete Indicator Report. */
+export const REPORT_SLUGS = [...VSI_DETAIL_SLUGS] as const;
+
+const builtHere = (list: readonly string[], slug: string) => list.includes(slug);
 
 export const vsiHref = (i: PugetSoundIndicator): string | undefined => {
   if (!i.vitalSignIndicator) return undefined;
-  return (VSI_DETAIL_SLUGS as readonly string[]).includes(i.slug)
+  return builtHere(VSI_DETAIL_SLUGS, i.slug)
     ? shiRoutes.vsi(i.slug)
     : `${VS_SITE}/VitalSignIndicator/Detail/${i.vitalSignIndicator.id}`;
 };
 
-export const hasShiReport = (i: SalmonHabitatIndicator): boolean =>
-  i.salmonHabitatIndicator.relationship !== 'same';
+export const isStandalone = (i: SalmonHabitatIndicator): boolean =>
+  i.salmonHabitatIndicator.relationship === 'independent';
 
+/** Where an SHI's name links: its VSI page (VSI and VSI+) or its standalone page (SHI). */
 export const shiHref = (i: SalmonHabitatIndicator): string =>
-  hasShiReport(i) ? shiRoutes.report(i.slug) : vsiHref(i)!;
+  isStandalone(i) ? shiRoutes.standalone(i.slug) : vsiHref(i)!;
+
+/** The Complete Indicator Report: in-prototype when built, else prod. */
+export const completeReportHref = (i: PugetSoundIndicator): string =>
+  !i.vitalSignIndicator
+    ? shiRoutes.standalone(i.slug)
+    : builtHere(REPORT_SLUGS, i.slug)
+      ? shiRoutes.report(i.slug)
+      : `${PSINFO_SITE}/Indicator/Detail/${i.vitalSignIndicator.id}`;
+
+/** Status and trend: the VSI's for VSI and VSI+, the SHI's own for SHI. */
+export const shiStatus = (i: SalmonHabitatIndicator): { progress: ProgressLabel; targetStatus?: TargetStatusLabel } =>
+  i.salmonHabitatIndicator.standalone ?? { progress: i.vitalSignIndicator!.progress };
 
 export const vitalSignHref = (v: VitalSignRef) => `${VS_SITE}/VitalSign/Detail/${v.id}`;
 export const goalHref = (v: VitalSignRef) => `${VS_SITE}/VitalSignGoal/Detail/${v.goalId}`;
-export const completeReportHref = (vsiId: number) => `${PSINFO_SITE}/Indicator/Detail/${vsiId}`;
 
 /** Salmon relationship for a prod VSI id (drives the All Indicators marker). */
 export const SHI_BY_VSI_ID: Record<number, SalmonHabitatIndicator> = Object.fromEntries(
@@ -512,7 +636,9 @@ export interface ShiGridRow {
   categoryLabel: string;
   vitalSign: string;
   vitalSignHref: string;
-  relationship: string;
+  /** Indicator trend (prod's progress label) and its icon file. */
+  progress: ProgressLabel;
+  progressIcon: string;
 }
 
 export const SHI_GRID_ROWS: ShiGridRow[] = SALMON_HABITAT_INDICATORS.map((i) => ({
@@ -524,14 +650,32 @@ export const SHI_GRID_ROWS: ShiGridRow[] = SALMON_HABITAT_INDICATORS.map((i) => 
   categoryLabel: CATEGORY_BY_SLUG[i.salmonHabitatIndicator.category].label,
   vitalSign: i.vitalSign.name,
   vitalSignHref: vitalSignHref(i.vitalSign),
-  relationship: SHI_RELATIONSHIP_LABEL[i.salmonHabitatIndicator.relationship],
+  progress: shiStatus(i).progress,
+  progressIcon: PROGRESS_ICON[shiStatus(i).progress],
 }));
 
-// ── Landing About text (placeholder copy) ──────────────────────────────────────
-export const SHI_ABOUT: string[] = [
-  'Salmon Habitat Indicators measure the condition of the places Puget Sound salmon depend on, from mountain headwaters to the open waters of the Sound. Most are Vital Sign Indicators already reported here; some add an analysis focused on salmon, and a few are new.',
-  'The indicators were chosen with salmon recovery and monitoring partners to track the habitats salmon use at each stage of their life cycle. They are reported on the same schedule as the Vital Signs, and each one nests under the Vital Sign it measures.',
+// ── Landing page copy (PSP's draft from the mock-up deck, slides 6 and 7,
+//    2026-10-19; PSP will still wordsmith it) ───────────────────────────────
+/** A paragraph as runs of text, some of them links. */
+export type ShiTextRun = string | { text: string; href: string };
+
+const SALMON_VS_HREF = `${VS_SITE}/VitalSign/Detail/32`;
+
+export const SHI_ABOUT: ShiTextRun[][] = [
+  ['Salmon are a cultural icon of the Pacific Northwest. They are highly prized by anglers and commercial fishermen, are guaranteed to be available to Indian Tribes by treaties signed with the federal government, and are a favorite food of Southern Resident orcas.'],
+  ['Many Puget Sound salmon populations are threatened under the Endangered Species Act. The ', { text: 'Salmon Vital Sign', href: SALMON_VS_HREF }, ' tells us about the health of salmon populations.'],
+  ['Salmon use many different habitats during their life cycle. They move from rivers to estuaries to the ocean, and back again. Healthy habitats along the way help salmon to feed, grow, rest, avoid predators, and spawn. Natural changes and human activities impact the quality and quantity of healthy habitat.'],
+  ['Puget Sound Salmon Habitat Indicators measure the health of habitats across Puget Sound that are important to salmon.'],
 ];
+
+/** Under the indicator table, ahead of the related Progress Indicators. */
+export const SHI_HABITAT_USE =
+  'Throughout their life cycle, salmon depend on a wide variety of freshwater, estuary, nearshore, and marine habitats. This leaves salmon vulnerable to many forms of human activities.';
+
+export const SHI_PI_HEADING = 'Related Progress Indicators';
+/** Progress Indicator topics PSP named on slide 7 that exist on prod. Fish
+ *  Passage, also named, is not developed yet and has no card. */
+export const SHI_PI_TOPIC_TITLES = ['Floodplains, Estuaries, Nearshore, and Riparian Areas'];
 
 // ── Vital Sign Indicator detail pages (prod content, fetched 2026-10-12) ──
 const PARTNER_ECOLOGY = {
@@ -573,6 +717,7 @@ export const VSI_DETAILS: VsiDetail[] = [
     },
     lastUpdated: '12/30/2024',
     partners: [PARTNER_DNR],
+    measurementUnit: 'Acre (acres)',
   },
   {
     indicatorSlug: 'summer-low-flow',
@@ -604,6 +749,59 @@ export const VSI_DETAILS: VsiDetail[] = [
     },
     lastUpdated: '04/14/2025',
     partners: [PARTNER_ECOLOGY],
+    measurementUnit: 'Percent (%)',
+    importance: [
+      'When flows in streams and rivers diminish, it places pressure on municipal, residential, industrial, and agricultural water supplies. Keeping track of flows in the summer, the driest and warmest time of year, helps resource managers and communities create strategies that help to minimize or mitigate declining flows where possible and respond to climate change.',
+      'Below normal summer flows also adversely affect fish and wildlife habitats. During the period of summer low flows, there are several salmon and other species at various life stages in Puget Sound streams and rivers. Low flows have the potential to impact habitat capacity for rearing juvenile salmon and can prevent access to, and reduce the availability of, adult spawning areas.',
+    ],
+    monitoringProgram: 'Streamflow Monitoring Program, Washington Department of Ecology',
+    methods: [
+      'Summer flows in streams and rivers occur at the time of year characterized by warm temperatures, little rainfall, and depleted snowpacks. This coincides with the time when water demands are greatest, despite that supply is lowest. The USGS Groundwater and Streamflow Information Program collects streamflow data through a network of streamgages that continuously monitor streams, which report mean daily flows year-round and are available online. From these streamflow records, 7-day mean daily streamflows were computed and serves as the basis for this analysis.',
+      'This indicator reports on the number of days during the summer period (July 15 through October 31) that a stream’s 7-day mean daily flow falls below “normal” relative to the baseline data for that river. Normal flows are defined by conditions observed over a 50-year baseline, from 1948 to 1998.',
+    ],
+  },
+  {
+    indicatorSlug: 'floodplain-function',
+    description:
+      'This indicator measures the amount (acres and percent) of floodplain area in functional condition in Puget Sound’s 17 major rivers. Floodplain function is assessed at a regional scale using river connectivity and land use and cover. Areas that have natural land cover and unrestricted river flow are expected to be the most functional and provide the most ecosystem services. Floodplain function is impaired in areas with non-natural land cover or restricted river flow due to constraints or barriers (for example, roads, railroads, and levees).',
+    chart: {
+      src: '/photos/shi/floodplain-function-chart.svg',
+      alt: 'Bar chart of floodplain area in acres by condition category, 2011 baseline beside the circa 2021 update. Connected natural land cover rises from 158,160 to 166,294 acres; connected not natural falls from 60,852 to 56,285; disconnected natural rises from 55,122 to 57,052; disconnected not natural falls from 168,300 to 163,374.',
+      width: 960,
+      height: 480,
+      caption:
+        'Floodplain condition assessment across Puget Sound’s 17 major rivers. Total area in acres for the four categories of floodplain condition at two time periods: 2011 baseline and circa 2021 update.',
+    },
+    keyResults: [
+      'Puget Sound’s 17 major rivers include more than 440,000 acres of floodplain. Over half (55 percent) of the region’s floodplain area is found in three of the 17 major rivers: Skagit, Snohomish, and Nooksack Rivers.',
+      'Across the region, 38 percent (166,294 acres) of the total floodplain area is highly functional (Category A - Connected Natural Land Cover). The remaining 62 percent has reduced floodplain function. This includes 163,374 acres (37 percent of the total floodplain area) where the floodplain is disconnected and classified as developed, cultivated, or other non-natural land cover (Category D - Disconnected Not Natural Land Cover).',
+      'A comparison of floodplain conditions between 2011 and circa 2021, showed the greatest change occurred in Category A (connected natural land cover), with an increase of 8,134 acres. This includes changes in connectivity, land cover, or both. The total area of Category D (disconnected non-natural land cover) declined by 4,925 acres.',
+      'Connected floodplain area [including natural (Category A) and non-natural land cover (Category B)] increased by 3,567 acres since the 2011 assessment. While this points to improving progress in floodplain function, the change in connectivity affects less than 1 percent of the total floodplain area and extensive portions of historical habitat remain lost or degraded across Puget Sound.',
+      'Changes in connectivity between the two time periods largely reflect reconnection projects, including areas associated with the Nisqually Delta Restoration, Dungeness River Reconnection, and Smith Island Estuarine Restoration in the Snohomish River.',
+    ],
+    target: 'No targets are currently set for this indicator.',
+    dataSource: 'Floodplains Conditions Assessment (Environmental Science Associates and Puget Sound Partnership 2023)',
+    reporter: {
+      name: 'Kenna Kuhn',
+      email: 'kenna.kuhn@psp.wa.gov',
+      organization: 'Puget Sound Partnership',
+      organizationHref: `${PSINFO_SITE}/Organization/Detail/2`,
+    },
+    lastUpdated: '09/11/2023',
+    partners: [
+      { name: 'Environmental Science Associates', href: `${PSINFO_SITE}/Organization/Detail/1` },
+      { name: 'Puget Sound Partnership', href: `${PSINFO_SITE}/Organization/Detail/2` },
+    ],
+    measurementUnit: 'Acre (acres)',
+    importance: [
+      'Floodplains are an important part of the Puget Sound landscape, particularly in the lowlands along large rivers. They are used by people for cities, farms, and transportation. Floodplains provide critical habitat for fish and wildlife, which in turn play a role in human wellbeing, meeting economic, cultural, and recreational needs.',
+      'During floods, a wide, connected floodplain allows the river to move and reduces damage to nearby areas by absorbing stormwater and routing water through river corridors while also holding some water to recharge groundwater reserves.',
+    ],
+    monitoringProgram:
+      'The Puget Sound Partnership and its partners are responsible for developing, maintaining, and updating these data in coordination with Lead Entities.',
+    methods: [
+      'This indicator describes floodplain function in Puget Sound’s 17 major river watersheds based on river connectivity and categories of land use and land cover. We assessed floodplain conditions at two time periods: a 2011 baseline and a circa 2021 update. The update allows for a more recent assessment of floodplain status and supports the analysis of trends in Puget Sound floodplain function.',
+    ],
   },
 ];
 
@@ -611,12 +809,150 @@ export const VSI_DETAIL_BY_SLUG = Object.fromEntries(
   VSI_DETAILS.map((d) => [d.indicatorSlug, d]),
 ) as Record<string, VsiDetail>;
 
-/** Prod help text for the trend icon (Indicator Trend "?" popup). */
-export const PROGRESS_ICON: Record<string, string> = {
-  'Getting Better': 'progress-gettingbetter.png',
-  'Mixed Results': 'progress-mixedresults.png',
-  'No Trend': 'progress-notrend.png',
-  'Getting Worse': 'progress-gettingworse.png',
-  'Limited Data': 'progress-limiteddata.png',
-  'Indicator To Be Developed': 'progress-status-tobedeveloped.png',
-};
+// ── SHI standalone pages (everything below is invented) ────────────────
+// The panel set for a standalone page is still open with PSP (asked
+// 2026-10-16). These records fill the Vital Sign Indicator page's panels so
+// the layout can be judged; none of it is a decided panel list.
+const PARTNER_WDFW: VsiPartner = { name: 'Washington Department of Fish and Wildlife', href: `${PSINFO_SITE}/Organization/Detail/14` };
+const PARTNER_NWIFC: VsiPartner = { name: 'Northwest Indian Fisheries Commission', href: `${PSINFO_SITE}/Organization/Detail/33` };
+
+export const STANDALONE_DETAILS: VsiDetail[] = [
+  {
+    indicatorSlug: 'stream-structure',
+    description:
+      'This indicator counts pieces of large wood and pools per 100 meters of channel in salmon-bearing reaches, summarized by watershed. Large wood is a log at least 10 centimeters across and 2 meters long lying in or over the active channel; a pool is a slow, deep unit at least as long as the channel is wide.',
+    chart: {
+      src: '/photos/shi/stream-structure-chart.svg',
+      alt: 'Bar chart of large wood pieces per 100 meters of channel in eight watersheds surveyed in 2024, ranging from 6 in the Lake Washington basin to 31 in the Dungeness, against a reference condition of about 40 pieces.',
+      width: 960,
+      height: 480,
+      caption:
+        'Pieces of large wood per 100 meters of channel in salmon-bearing reaches of eight watersheds surveyed in 2024. The dashed line marks the reference condition for unmanaged forested streams of similar size.',
+    },
+    keyResults: [
+      'All eight surveyed watersheds hold less large wood than the reference condition for unmanaged forested streams.',
+      'Watersheds with large areas of protected forest in their headwaters, such as the Dungeness and Elwha, hold the most wood and the most pools per 100 meters.',
+      'Results are limited to the reaches surveyed in 2024 and cannot yet be compared over time.',
+    ],
+    target: 'No targets are currently set for this indicator.',
+    dataSource: 'Stream habitat surveys compiled by the Northwest Indian Fisheries Commission',
+    reporter: {
+      name: 'Marisol Ortega',
+      email: 'mortega@example.org',
+      organization: 'Northwest Indian Fisheries Commission',
+      organizationHref: PARTNER_NWIFC.href,
+    },
+    lastUpdated: '03/12/2026',
+    partners: [PARTNER_NWIFC, PARTNER_WDFW],
+    measurementUnit: 'Count (pieces per 100 meters)',
+    monitoringProgram: 'Stream habitat surveys, Northwest Indian Fisheries Commission member tribes',
+    methods: [
+      'Survey crews walk salmon-bearing reaches at summer low flow and count every piece of large wood and every log jam in or over the active channel, then measure the length and depth of each pool. Counts are reported per 100 meters of channel and summarized by watershed.',
+    ],
+    criticalDefinitions: [
+      'Large wood: a log at least 10 centimeters across and 2 meters long, lying in or over the active channel.',
+      'Pool: a slow, deep channel unit at least as long as the channel is wide.',
+      'Reference condition: the median count for unmanaged forested streams of similar size and gradient.',
+    ],
+    interpretation: [
+      'Low wood counts reflect a century of stream cleaning, splash damming, and riparian logging. Wood recruited from young riparian forests is small and moves downstream in floods, so counts recover slowly even where the riparian forest has grown back.',
+    ],
+    causesForChange: [
+      'Placed wood from restoration projects raises counts locally within a few years. Natural recruitment from riparian forest takes decades.',
+    ],
+    references: [
+      'Fox, M., and S. Bolton. 2007. A regional and geomorphic reference for quantities and volumes of instream wood in unmanaged forested basins of Washington State. North American Journal of Fisheries Management 27: 342 to 359.',
+    ],
+    datasets: [
+      { name: 'Stream habitat survey reaches and counts, 2024', steward: 'Northwest Indian Fisheries Commission' },
+    ],
+    reportingGuidance: [
+      'Methods are in development. Report survey results by watershed until a soundwide sampling design is adopted.',
+    ],
+    subcategories: [
+      { name: 'Watershed', options: ['Dungeness', 'Elwha', 'Skagit', 'Nooksack', 'Stillaguamish', 'Snohomish', 'Puyallup', 'Lake Washington'] },
+    ],
+  },
+  {
+    indicatorSlug: 'sediment',
+    description:
+      'This indicator measures the share of fine sediment, particles smaller than 0.85 millimeters, in the spawning gravel of salmon-bearing streams. Samples are taken in late summer, before adults spawn, at fixed sites in each watershed.',
+    chart: {
+      src: '/photos/shi/sediment-chart.svg',
+      alt: 'Bar chart of percent fine sediment in spawning gravel at sites in eight watersheds sampled in 2024, ranging from 6 percent in the Elwha to 17 percent in the Lake Washington basin, against a 12 percent threshold for egg survival.',
+      width: 960,
+      height: 480,
+      caption:
+        'Median percent fine sediment (smaller than 0.85 millimeters) in spawning gravel, eight watersheds sampled in 2024. The dashed line marks 12 percent, above which egg-to-fry survival drops.',
+    },
+    keyResults: [
+      'Fine sediment exceeded 12 percent, the level linked to lower egg survival, at 9 of the 24 sampled sites.',
+      'Sites downstream of dense forest road networks held the most fine sediment. The Elwha, where the dams came out and the channel is rebuilding, held the least.',
+      'Results from 2018 to 2024 show no clear trend across the region.',
+    ],
+    target: 'No targets are currently set for this indicator.',
+    dataSource: 'Spawning gravel sediment samples compiled by the Northwest Indian Fisheries Commission',
+    reporter: {
+      name: 'Tom Halvorsen',
+      email: 'thalvorsen@example.org',
+      organization: 'Northwest Indian Fisheries Commission',
+      organizationHref: PARTNER_NWIFC.href,
+    },
+    lastUpdated: '05/02/2026',
+    partners: [PARTNER_NWIFC, PARTNER_DNR],
+    measurementUnit: 'Percent (%)',
+    methods: [
+      'At each site, freeze cores or McNeil samples are taken from riffle crests used for spawning. Samples are dried and sieved, and the share of material finer than 0.85 millimeters is reported by weight.',
+    ],
+    criticalDefinitions: [
+      'Fine sediment: particles smaller than 0.85 millimeters.',
+      'Egg survival threshold: 12 percent fine sediment by weight, above which egg-to-fry survival drops in published field studies.',
+    ],
+    interpretation: [
+      'Fine sediment is highest downstream of dense forest road networks and recently logged steep slopes, and lowest where headwaters are protected. Year-to-year changes follow winter storms more closely than land use, which is why the regional trend is flat.',
+    ],
+    causesForChange: [
+      'Road maintenance and abandonment under forest practices rules reduce sediment delivery over time. Large storms and landslides raise fine sediment for one to three years.',
+    ],
+    references: [
+      'Jensen, D. W., E. A. Steel, A. H. Fullerton, and G. R. Pess. 2009. Impact of fine sediment on egg-to-fry survival of Pacific salmon: a meta-analysis of published studies. Reviews in Fisheries Science 17: 348 to 359.',
+    ],
+    datasets: [
+      { name: 'Spawning gravel sediment samples, 2018 to 2024', steward: 'Northwest Indian Fisheries Commission' },
+      { name: 'Forest road sediment delivery inventory', steward: 'Washington State Department of Natural Resources' },
+    ],
+    reportingGuidance: [
+      'Report the median for each watershed with the number of sites sampled. Do not compare watersheds sampled with different methods.',
+    ],
+    subcategories: [
+      { name: 'Watershed', options: ['Lake Washington', 'Puyallup', 'Snohomish', 'Stillaguamish', 'Nooksack', 'Skagit', 'Dungeness', 'Elwha'] },
+    ],
+  },
+];
+
+/** Every detail record by indicator slug (VSI pages, reports, standalone pages). */
+export const DETAIL_BY_SLUG = Object.fromEntries(
+  [...VSI_DETAILS, ...STANDALONE_DETAILS].map((d) => [d.indicatorSlug, d]),
+) as Record<string, VsiDetail>;
+
+// ── Indicator tables (DELTA-1346): the prod goal tree with SHIs marked ────
+/** The prod goal data, with SHI rows pointing at their prototype pages and
+ *  each SHI SHI added under its Vital Sign (SHIs appear on All Vital Sign
+ *  Indicators, 2026-10-16). */
+export const SHI_GOALS: GoalDetail[] = GOALS.map((goal) => ({
+  ...goal,
+  vitalSigns: goal.vitalSigns.map((vsign) => {
+    const indicators = vsign.indicators.map((ind) => {
+      const id = Number(ind.href.match(/VitalSignIndicator\/Detail\/(\d+)/)?.[1]);
+      const shi = SHI_BY_VSI_ID[id];
+      return shi ? { ...ind, href: vsiHref(shi)! } : ind;
+    });
+    const standalones = SALMON_HABITAT_INDICATORS.filter(
+      (i) => isStandalone(i) && vitalSignHref(i.vitalSign) === vsign.href,
+    ).map((i) => ({ name: i.name, href: shiRoutes.standalone(i.slug), ...shiStatus(i) }));
+    return { ...vsign, indicators: [...indicators, ...standalones].sort((a, b) => a.name.localeCompare(b.name)) };
+  }),
+}));
+
+/** Indicator hrefs (as SHI_GOALS carries them) that get the SHI mark. */
+export const SHI_MARKED_HREFS: string[] = SALMON_HABITAT_INDICATORS.map(shiHref);

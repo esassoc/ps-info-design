@@ -41,9 +41,4 @@
   --shi-art-ivory:      #f4ecd4;
   --shi-art-ivory-ink:  var(--ps-info-blue-800);   /* 8.6:1 on the ivory */
 
-  /* Summer low flow gauge grid (psinfo-shi-gauge-grid): prod's two cell
-     classes, sampled from the Vital Sign chart image. */
-  --shi-chart-below:  #6b1f6e;   /* 50% or more of days below normal */
-  --shi-chart-normal: #a9cbe9;   /* fewer than 50% */
-  --shi-chart-added:  var(--ps-info-orange-700);
 }

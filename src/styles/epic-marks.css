@@ -1,0 +1,74 @@
+/* Epic preview marks: the numbered outline psinfo-epic-bar draws live over a
+   prototype page and psinfo-epic-shot draws over its screenshot, and the
+   number psinfo-epic-story repeats beside each label. One copy, so the three
+   always match. Colors come from the theme (--epic-mark-color, --epic-mark-ink).
+
+   The number sits outside the outline, never over the page: placeBadges
+   (src/data/epics/index.ts) picks the side clear of text and sets data-side,
+   and its geometry mirrors the sizes here. A screenshot scales every size with
+   its image by setting the --epic-* overrides below.
+
+   bcn-lego-checked: no esa- lego draws a numbered annotation over content
+   (esa-badge is a status chip in flow, not an overlay; checked Beacon shared
+   ui components, none); ledgered as an esa-annotation candidate. These global
+   classes are the reusable home: the bar builds its overlay at runtime, so
+   scoped styles cannot reach it. */
+
+.epic-outline {
+  --_width: var(--epic-outline-width, var(--border-width-300));
+  --_offset: var(--epic-outline-offset, var(--spacing-100));
+  /* From the part's box to its number: the outline, then a space as wide as its offset. */
+  --_gap: calc(var(--_offset) + var(--_width) + var(--_offset));
+  --_edge: calc(-1 * (var(--_offset) + var(--_width)));
+  position: absolute;
+  outline: var(--_width) solid var(--epic-mark-color);
+  outline-offset: var(--_offset);
+  border-radius: var(--epic-outline-radius, var(--radius-100));
+  pointer-events: none;
+}
+
+.epic-num {
+  flex: none;
+  display: grid;
+  place-items: center;
+  box-sizing: border-box;
+  inline-size: var(--epic-num-size, 1.75rem);
+  block-size: var(--epic-num-size, 1.75rem);
+  border-radius: var(--radius-full);
+  background: var(--epic-mark-color);
+  color: var(--epic-mark-ink);
+  font-variant-numeric: tabular-nums;
+  box-shadow: 0 0 0 var(--epic-num-halo, var(--border-width-200)) var(--color-surface);
+}
+
+/* On an outline: beside it, top-aligned with its outer edge, or over or under it. */
+.epic-outline > .epic-num { position: absolute; }
+.epic-outline > .epic-num[data-side='start'] {
+  inset-inline-end: calc(100% + var(--_gap));
+  inset-block-start: var(--_edge);
+}
+.epic-outline > .epic-num[data-side='end'] {
+  inset-inline-start: calc(100% + var(--_gap));
+  inset-block-start: var(--_edge);
+}
+.epic-outline > .epic-num[data-side='above'] {
+  inset-inline-start: 0;
+  inset-block-end: calc(100% + var(--_gap));
+}
+.epic-outline > .epic-num[data-side='below'] {
+  inset-inline-start: 0;
+  inset-block-start: calc(100% + var(--_gap));
+}
+.epic-outline > .epic-num[data-side='inside'] {
+  inset-inline-start: var(--_offset);
+  inset-block-start: var(--_offset);
+}
+
+/* A part that runs to the window's edges: the outline sits inside its box, so
+   it stays on screen. */
+.epic-outline--flush { outline-offset: calc(-1 * var(--_width)); }
+
+/* Forced colors drop the fill and the halo; a border keeps the number a mark. */
+@media (forced-colors: active) {
+  .epic-num { border: var(--border-width-100) solid CanvasText; }
+}

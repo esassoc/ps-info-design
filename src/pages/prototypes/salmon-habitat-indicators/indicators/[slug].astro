@@ -1,0 +1,167 @@
+---
+// Standalone Salmon Habitat Indicator (SHI, DELTA-1345) — prod's Complete
+// Indicator Report layout with the same panels and subfields a Vital Sign
+// Indicator's report carries, renamed for salmon (PSP mock-up slides 8 to 10,
+// 2026-10-19): "View all Salmon Habitat Indicators" with the SHI logo at top
+// right, Salmon Habitat Indicator Chart, Importance to Salmon with its "?",
+// Key Salmon Habitat Indicator Results, Methods (Monitoring Program, Data
+// Source, Methods, Critical Definitions), Interpretation of Results (Causes
+// for Change), Additional Information, Datasets, Reporting Guidance and
+// Subcategories. No Map box: neither standalone SHI has a map yet.
+// Contract: src/data/contracts/salmon-habitat-indicators.md
+import PsInfoVsProdChrome from '../../../../layouts/PsInfoVsProdChrome.astro';
+import PsInfoCirTitle from '../../../../components/psinfo/PsInfoCirTitle.astro';
+import PsInfoCirBox from '../../../../components/psinfo/PsInfoCirBox.astro';
+import PsInfoCirBasics from '../../../../components/psinfo/PsInfoCirBasics.astro';
+import PsInfoCirChart from '../../../../components/psinfo/PsInfoCirChart.astro';
+import PsInfoEpicMark from '../../../../components/psinfo/PsInfoEpicMark.astro';
+import {
+  PROGRESS_ICON,
+  SHI_BY_SLUG,
+  SHI_IMPORTANCE_ANCHOR,
+  SHI_LOGO,
+  STANDALONE_DETAILS,
+  TARGET_ICON,
+  shiRoutes,
+  shiStatus,
+  vitalSignHref,
+} from '../../../../data/pages/salmon-habitat-indicators';
+import type { VsiDetail } from '../../../../data/shi-domain';
+
+export function getStaticPaths() {
+  return STANDALONE_DETAILS.map((detail) => ({ params: { slug: detail.indicatorSlug }, props: { detail } }));
+}
+
+interface Props {
+  detail: VsiDetail;
+}
+const { detail } = Astro.props;
+const indicator = SHI_BY_SLUG[detail.indicatorSlug];
+const vs = indicator.vitalSign;
+const field = indicator.salmonHabitatIndicator.field;
+const status = shiStatus(indicator);
+const importance = field.enabled.importanceToSalmon ? field.importanceToSalmon : undefined;
+const IMPORTANCE_HELP = 'Why is this measure important for tracking progress toward Puget Sound salmon recovery?';
+---
+<!-- manifest:
+  layout: PsInfoVsProdChrome(site ps-info) > stack(xl) spine > grid split for the first row
+  sections:
+    - report title chip + h1 + SHI link -> ps-info-cir-title
+    - basics                     -> ps-info-cir-box > ps-info-cir-basics
+    - description                -> ps-info-cir-box
+    - indicator chart            -> ps-info-cir-box > ps-info-cir-chart
+    - importance to salmon       -> ps-info-epic-mark > ps-info-cir-box
+    - key results                -> ps-info-cir-box
+    - methods                    -> ps-info-cir-box
+    - interpretation of results  -> ps-info-cir-box
+    - additional information     -> ps-info-cir-box
+    - datasets                   -> ps-info-cir-box
+    - reporting guidance         -> ps-info-cir-box
+    - subcategories              -> ps-info-cir-box
+-->
+<PsInfoVsProdChrome title={`PS Info | ${indicator.name}`} site="ps-info">
+  <div class="stack" data-gap="xl">
+    <PsInfoEpicMark story="DELTA-1345" label="Salmon Habitat Indicator mark">
+      <PsInfoCirTitle
+        name={indicator.name}
+        collection={{ label: 'Salmon Habitat Indicators', href: shiRoutes.landing }}
+        endLink={{ label: 'View all Salmon Habitat Indicators', href: shiRoutes.landing, icon: SHI_LOGO }}
+      />
+    </PsInfoEpicMark>
+    <div class="grid" style="--grid-min: 26rem">
+      <PsInfoCirBox title="Basics" id="basics">
+        <PsInfoCirBasics
+          goal={vs.goalName}
+          vitalSign={{ name: vs.name, href: vitalSignHref(vs) }}
+          indicator={indicator.name}
+          isShi={true}
+          shiMarkStory="DELTA-1346"
+          measurementUnit={detail.measurementUnit}
+          trend={{ label: status.progress, icon: PROGRESS_ICON[status.progress] }}
+          targetStatus={status.targetStatus && { label: status.targetStatus, icon: TARGET_ICON[status.targetStatus] }}
+          target={detail.target}
+          reporterLabel="Salmon Habitat Indicator Reporter"
+          reporter={detail.reporter}
+          partners={detail.partners}
+          lastUpdated={detail.lastUpdated}
+        />
+      </PsInfoCirBox>
+      <PsInfoCirBox title="Description" id="description">
+        <p>{detail.description}</p>
+      </PsInfoCirBox>
+    </div>
+    <PsInfoCirBox title="Salmon Habitat Indicator Chart" id="chart">
+      <PsInfoCirChart chart={{ mode: 'image', ...detail.chart }} />
+    </PsInfoCirBox>
+    {importance && (
+      <PsInfoEpicMark story="DELTA-1345" label="Importance to Salmon section">
+        <PsInfoCirBox title="Importance to Salmon" id={SHI_IMPORTANCE_ANCHOR} help={IMPORTANCE_HELP}>
+          {importance.map((p) => <p>{p}</p>)}
+        </PsInfoCirBox>
+      </PsInfoEpicMark>
+    )}
+    <PsInfoCirBox title="Key Salmon Habitat Indicator Results" id="key-results">
+      <ul>{detail.keyResults.map((r) => <li>{r}</li>)}</ul>
+    </PsInfoCirBox>
+    <PsInfoCirBox title="Methods" id="methods">
+      {detail.monitoringProgram && <p><strong>Monitoring Program:</strong> {detail.monitoringProgram}</p>}
+      <p><strong>Data Source:</strong> {detail.dataSource}</p>
+      {detail.methods && (
+        <>
+          <h3>Methods</h3>
+          {detail.methods.map((p) => <p>{p}</p>)}
+        </>
+      )}
+      {detail.criticalDefinitions && (
+        <>
+          <h3>Critical Definitions</h3>
+          <ul>{detail.criticalDefinitions.map((d) => <li>{d}</li>)}</ul>
+        </>
+      )}
+    </PsInfoCirBox>
+    {(detail.interpretation || detail.causesForChange) && (
+      <PsInfoCirBox title="Interpretation of Results" id="interpretation">
+        {detail.interpretation?.map((p) => <p>{p}</p>)}
+        {detail.causesForChange && (
+          <>
+            <h3>Causes for Change</h3>
+            {detail.causesForChange.map((p) => <p>{p}</p>)}
+          </>
+        )}
+      </PsInfoCirBox>
+    )}
+    {(detail.references || detail.externalLinks) && (
+      <PsInfoCirBox title="Additional Information" id="additional-information">
+        {detail.references && (
+          <>
+            <h3>References</h3>
+            {detail.references.map((r) => <p>{r}</p>)}
+          </>
+        )}
+        {detail.externalLinks && (
+          <>
+            <h3>External Links</h3>
+            <ul>{detail.externalLinks.map((l) => <li><a href={l.href}>{l.label}</a></li>)}</ul>
+          </>
+        )}
+      </PsInfoCirBox>
+    )}
+    {detail.datasets && (
+      <PsInfoCirBox title="Datasets" id="datasets">
+        <ul>{detail.datasets.map((d) => <li>{d.name} ({d.steward})</li>)}</ul>
+      </PsInfoCirBox>
+    )}
+    {detail.reportingGuidance && (
+      <PsInfoCirBox title="Reporting Guidance" id="reporting-guidance">
+        {detail.reportingGuidance.map((p) => <p>{p}</p>)}
+      </PsInfoCirBox>
+    )}
+    {detail.subcategories && (
+      <PsInfoCirBox title="Subcategories" id="subcategories">
+        {detail.subcategories.map((c) => (
+          <p><strong>{c.name}:</strong> {c.options.join(', ')}</p>
+        ))}
+      </PsInfoCirBox>
+    )}
+  </div>
+</PsInfoVsProdChrome>

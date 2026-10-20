@@ -1,0 +1,51 @@
+---
+// PsInfoEpicIndex: the body of an epic page, every story on one page to scroll.
+// One psinfo-group per story: the band carries the story's key (linked to
+// Jira) and its Jira title, and its heading carries the story's anchor
+// (/shi#delta-1343) so a story can still be linked; under it,
+// psinfo-epic-story's annotated example and the pages to review. Nothing here
+// knows which epic it shows. The page header comes in the header slot.
+// prose-prop-checked: `epic` is a Jira epic record (key, title, stories), never page copy
+import '@esa/tokens/typography.css';
+import '@esa/tokens/layouts.css';
+import type { Epic } from '../../data/epics/types';
+import { jiraHref, storySlug } from '../../data/epics/index';
+import PsInfoEpicStory from './PsInfoEpicStory.astro';
+import PsInfoGroup from './PsInfoGroup.astro';
+
+interface Props {
+  epic: Epic;
+}
+const { epic } = Astro.props;
+---
+<div class="stack" data-gap="2xl">
+  <slot name="header" />
+  <div class="epicindex stack">
+    {epic.stories.map((story) => (
+      <PsInfoGroup id={storySlug(story)}>
+        <Fragment slot="title">
+          <a class="epicindex__key typography-label-md" href={jiraHref(story.key)}>{story.key}</a>
+          <span>{story.title}</span>
+        </Fragment>
+        <PsInfoEpicStory {epic} {story} />
+      </PsInfoGroup>
+    ))}
+  </div>
+</div>
+
+<style>
+  /* Stories sit well apart: each is a band, an example and its pages. */
+  .epicindex { --gap: var(--spacing-800); }
+
+  /* The key is a link inside the band's heading: underlined at rest, a step
+     quieter than the title it keys. */
+  .epicindex__key {
+    color: var(--color-text-secondary);
+    font-variant-numeric: tabular-nums;
+    text-decoration: underline;
+    text-decoration-thickness: var(--border-width-100);
+    text-underline-offset: 0.2em;
+  }
+  .epicindex__key:hover { color: var(--color-text-primary); }
+  .epicindex__key:focus-visible { outline: 2px solid var(--focus-ring-color); outline-offset: 2px; }
+</style>

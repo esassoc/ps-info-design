@@ -1,0 +1,161 @@
+---
+// PsInfoShiMap — the mock web map behind the Summer low flow SHI Map's
+// embedded frame. It stands in for the ArcGIS web app PSP would build and
+// paste into the report's Map box: monitoring sites (streamgages) across
+// Puget Sound, telling apart sites shared with the Vital Sign Indicator from
+// sites added for the salmon metric. It fills its document; the caption lives
+// on the report, outside the frame. Points ride to the client in a JSON data
+// island; the client script mounts every [data-shi-map] element.
+//
+// bcn-lego-checked: no esa- lego renders an interactive slippy map (walked
+// the catalog — esa-card/esa-container are static surfaces, nothing
+// map-shaped); checked Beacon shared ui components (no map wrapper exists
+// there); leaflet (node_modules) is composed directly, mirroring
+// PsInfoNepAtlasMap, and this component is the reusable home for the SHI
+// site map mount + its a11y contract.
+import type { ShiMapPoint } from '../../data/shi-domain';
+
+interface Props {
+  points: ShiMapPoint[];
+  /** Unique DOM id for the map mount (more than one map could share a page). */
+  mapId: string;
+  /** Accessible name, e.g. "Summer low flow streamgages, salmon habitat analysis". */
+  label: string;
+}
+
+const { points, mapId, label } = Astro.props;
+const keysId = `${mapId}-keys`;
+const dataId = `${mapId}-data`;
+---
+<div class="shi-map">
+  <p class="shi-map__sr-only" id={keysId}>
+    Arrow keys pan the map; plus and minus keys zoom.
+  </p>
+  <ul class="shi-map__legend" role="list">
+    <li class="shi-map__legenditem">
+      <span class="shi-marker__shape shi-marker__shape--shared" aria-hidden="true"></span>
+      Shared with the Vital Sign Indicator
+    </li>
+    <li class="shi-map__legenditem">
+      <span class="shi-marker__shape shi-marker__shape--added" aria-hidden="true"></span>
+      Added for salmon
+    </li>
+  </ul>
+  <div
+    id={mapId}
+    class="shi-map__mount"
+    data-shi-map
+    data-shi-map-data={dataId}
+    role="application"
+    aria-label={label}
+    aria-describedby={keysId}
+  ></div>
+  <script type="application/json" id={dataId} set:html={JSON.stringify(points)}></script>
+</div>
+
+<script>
+  import L from 'leaflet';
+  import 'leaflet/dist/leaflet.css';
+  import type { ShiMapPoint } from '../../data/shi-domain';
+
+  function mount(el: HTMLElement) {
+    if (el.dataset.mapReady) return;
+    el.dataset.mapReady = 'true';
+    const dataEl = el.dataset.shiMapData ? document.getElementById(el.dataset.shiMapData) : null;
+    const points = JSON.parse(dataEl?.textContent ?? '[]') as ShiMapPoint[];
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    const map = L.map(el, {
+      scrollWheelZoom: false,
+      zoomSnap: 0.25,
+      zoomAnimation: !reduceMotion,
+      fadeAnimation: !reduceMotion,
+      markerZoomAnimation: !reduceMotion,
+    });
+    // Esri's light gray canvas: grayscale and keyless (CARTO's tiles now ask
+    // for an API key from local and preview origins).
+    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}', {
+      maxZoom: 16,
+      attribution: 'Tiles &copy; Esri, HERE, Garmin, &copy; OpenStreetMap contributors',
+    }).addTo(map);
+
+    const latLngs: [number, number][] = [];
+    for (const point of points) {
+      const coords: [number, number] = [point.lat, point.lon];
+      latLngs.push(coords);
+      // Shape + color come from the stylesheet (token-driven), so no literal
+      // colors cross into Leaflet. Markers are display-only: thirty gauges in
+      // one basin overlap at any zoom that fits the region, so they cannot be
+      // spaced as 24px targets (WCAG 2.2 2.5.8).
+      const icon = L.divIcon({
+        className: `shi-marker shi-marker--${point.set}`,
+        html: `<span class="shi-marker__shape shi-marker__shape--${point.set}"></span>`,
+        iconSize: [24, 24],
+        iconAnchor: [12, 12],
+      });
+      L.marker(coords, { icon, interactive: false, keyboard: false }).addTo(map);
+    }
+
+    if (latLngs.length) {
+      map.fitBounds(L.latLngBounds(latLngs), { padding: [32, 32], maxZoom: 11 });
+    } else {
+      map.setView([47.6, -122.4], 8);
+    }
+    // The frame can resize (fullscreen); keep tiles in sync.
+    window.addEventListener('resize', () => map.invalidateSize());
+  }
+
+  document.querySelectorAll<HTMLElement>('[data-shi-map]').forEach(mount);
+</script>
+
+<style is:global>
+/* bcn-lego-checked: Leaflet runtime DOM (markers, popups, controls) is created client-side and cannot take Astro scoped attributes; global rules are namespace-scoped under .shi-map / .shi-marker. No esa- lego provides a slippy map. */
+.shi-map {
+  isolation: isolate;
+  height: 100vh;
+  padding: var(--spacing-300);
+  display: flex; flex-direction: column; gap: var(--spacing-300);
+}
+.shi-map .shi-map__legend.shi-map__legend {
+  list-style: none; margin: 0; padding: 0;
+  display: flex; flex-wrap: wrap; gap: var(--spacing-300) var(--spacing-500);
+}
+.shi-map__legenditem {
+  display: flex; align-items: center; gap: var(--spacing-200);
+  font-size: var(--ps-info-text-body); color: var(--color-text-secondary);
+}
+.shi-map__mount {
+  width: 100%;
+  flex: 1;
+  min-height: 0;
+}
+.shi-map__mount:focus-visible { outline: 2px solid var(--focus-ring-color); outline-offset: 2px; }
+
+/* Marker shapes — circle (shared) vs diamond (added): told apart by shape as
+   well as color (WCAG 1.4.1). Same classes draw the legend keys. */
+.shi-marker__shape {
+  --_shi-marker-shared: var(--ps-info-blue-800, #0a3b5c);
+  --_shi-marker-added: var(--ps-info-goal-habitat, #8228bf);
+  display: block; flex: none;
+  width: var(--spacing-400); height: var(--spacing-400);
+  border: 2px solid var(--color-surface, #ffffff);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--color-text-primary) 55%, transparent);
+}
+.shi-marker__shape--shared {
+  background: var(--_shi-marker-shared);
+  border-radius: 50%;
+}
+.shi-marker__shape--added {
+  background: var(--_shi-marker-added);
+  /* A 1rem square rotated 45° reads as a diamond about 22px across. */
+  transform: rotate(45deg) scale(0.85);
+  border-radius: var(--radius-050);
+}
+.leaflet-marker-icon.shi-marker {
+  display: flex; align-items: center; justify-content: center;
+}
+.shi-map__sr-only {
+  position: absolute; width: 1px; height: 1px; margin: -1px;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap;
+}
+</style>

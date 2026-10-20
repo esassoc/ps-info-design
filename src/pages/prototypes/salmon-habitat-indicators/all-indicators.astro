@@ -1,47 +1,26 @@
 ---
-// All Indicators — prod's VitalSignIndicator/ViewAll tree in the live Vital
-// Signs chrome, with a Salmon Habitat column: every Vital Sign Indicator that
-// is also a Salmon Habitat Indicator carries the SHI mark and its type as
-// a text link (to the VSI page for VSI, to the SHI report for VSI+).
+// All Vital Sign Indicators — prod's VitalSignIndicator/ViewAll tree in the
+// live Vital Signs chrome, with Salmon Habitat Indicators marked (DELTA-1346):
+// each SHI row carries the SHI mark, icon plus label, under its name, and
+// SHI standalone SHIs appear as rows under their Vital Sign (2026-10-16).
+// No Type column. SHI rows link to their prototype pages.
 // Contract: src/data/contracts/salmon-habitat-indicators.md
 import PsInfoVsProdChrome from '../../../layouts/PsInfoVsProdChrome.astro';
 import PsInfoVsFancyTree from '../../../components/psinfo/PsInfoVsFancyTree.astro';
-import { GOALS } from '../../../data/pages/goals';
-import {
-  SALMON_HABITAT_INDICATORS,
-  SHI_LOGO,
-  VS_SITE,
-  shiHref,
-} from '../../../data/pages/salmon-habitat-indicators';
-import { SHI_RELATIONSHIP_LABEL } from '../../../data/shi-domain';
-
-const salmonMarks = Object.fromEntries(
-  SALMON_HABITAT_INDICATORS.filter((i) => i.vitalSignIndicator).map((i) => [
-    `${VS_SITE}/VitalSignIndicator/Detail/${i.vitalSignIndicator!.id}`,
-    { label: SHI_RELATIONSHIP_LABEL[i.salmonHabitatIndicator.relationship], href: shiHref(i) },
-  ]),
-);
+import { SHI_GOALS, SHI_MARKED_HREFS, VS_SITE } from '../../../data/pages/salmon-habitat-indicators';
 ---
 <!-- manifest:
   layout: PsInfoVsProdChrome > stack spine
   sections:
-    - all indicators tree with salmon column -> ps-info-vs-fancy-tree
+    - all indicators tree with SHI marks -> ps-info-vs-fancy-tree
 -->
 <PsInfoVsProdChrome
   title="All Indicators"
   hiddenHeading="All Indicators"
-  headerImage="/photos/vital-signs/headers/vs-home-banner.jpg"
   trail={[
     { label: 'About the Vital Signs', href: `${VS_SITE}/About` },
     { label: 'All Indicators' },
   ]}
 >
-  <PsInfoVsFancyTree
-    goals={GOALS}
-    colorCoded={true}
-    expandedLevels={2}
-    treeId="tree-all-shi"
-    {salmonMarks}
-    salmonMarkSrc={SHI_LOGO.src}
-  />
+  <PsInfoVsFancyTree goals={SHI_GOALS} colorCoded={true} expandedLevels={2} treeId="tree-all-shi" salmonMarked={SHI_MARKED_HREFS} shiMarkStory="DELTA-1346" />
 </PsInfoVsProdChrome>

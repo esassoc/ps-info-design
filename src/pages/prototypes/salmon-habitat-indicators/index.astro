@@ -1,19 +1,28 @@
 ---
 // Salmon Habitat Indicators — landing page, inside today's Vital Signs site.
-// Built from PSP's SHI mock-up (v29, 2026-08-28): title band and logo, About
-// text, the life-cycle graphic with six habitat buttons, and the table of all
-// Salmon Habitat Indicators. Buttons and graphic zones filter the table.
+// Built from PSP's SHI mock-up (v29, 2026-08-28), revised after the
+// 2026-10-13 kickoff (DELTA-1347): logo lockup and About text, the life cycle
+// loop laid over the sky of a habitat graphic that follows the fish, landmarks
+// that magnify on hover, and the table of all
+// Salmon Habitat Indicators with status and no Type column. Buttons and
+// graphic zones filter the table.
 // Contract: src/data/contracts/salmon-habitat-indicators.md
 import PsInfoVsProdChrome from '../../../layouts/PsInfoVsProdChrome.astro';
+import PsInfoEpicMark from '../../../components/psinfo/PsInfoEpicMark.astro';
 import PsInfoShiHero from '../../../components/psinfo/PsInfoShiHero.astro';
 import PsInfoShiHabitatExplorer from '../../../components/psinfo/PsInfoShiHabitatExplorer.astro';
 import PsInfoSectionTitle from '../../../components/psinfo/PsInfoSectionTitle.astro';
 import PsInfoShiIndicatorsGrid from '../../../components/psinfo/PsInfoShiIndicatorsGrid.astro';
+import PsInfoPiTopicCards from '../../../components/psinfo/PsInfoPiTopicCards.astro';
+import { TOPIC_CARDS, TOPIC_CARDS_LABEL } from '../../../data/pages/progress-indicators';
 import {
   HABITAT_CATEGORIES,
   SHI_ABOUT,
   SHI_GRID_HEADING,
   SHI_GRID_ROWS,
+  SHI_HABITAT_USE,
+  SHI_PI_HEADING,
+  SHI_PI_TOPIC_TITLES,
   SHI_LOGO,
   SHI_SITE_NAME,
   SHI_SUBTITLE,
@@ -21,18 +30,20 @@ import {
   shiRoutes,
 } from '../../../data/pages/salmon-habitat-indicators';
 import { withBase } from '../../../lib/base';
+
+const piTopics = TOPIC_CARDS.filter((t) => SHI_PI_TOPIC_TITLES.includes(t.title));
 ---
 <!-- manifest:
   layout: PsInfoVsProdChrome > stack(2xl) spine
   sections:
-    - title band, logo, About  -> ps-info-shi-hero
-    - life-cycle graphic + habitat buttons -> ps-info-shi-habitat-explorer
+    - title band, logo, About  -> ps-info-epic-mark > ps-info-shi-hero
+    - life-cycle graphic + habitat buttons -> ps-info-epic-mark > ps-info-shi-habitat-explorer
     - table heading            -> ps-info-section-title
-    - indicator table          -> ps-info-shi-indicators-grid
+    - indicator table          -> ps-info-epic-mark > ps-info-shi-indicators-grid
+    - habitat use + PI topics  -> ps-info-section-title > ps-info-pi-topic-cards
 -->
 <PsInfoVsProdChrome
   title="Salmon Habitat Indicators"
-  headerImage="/photos/vital-signs/headers/vs-home-banner.jpg"
   trail={[
     { label: 'About the Vital Signs', href: `${VS_SITE}/About` },
     { label: 'All Indicators', href: withBase(shiRoutes.allIndicators) },
@@ -40,11 +51,21 @@ import { withBase } from '../../../lib/base';
   ]}
 >
   <div class="stack" data-gap="2xl">
-    <PsInfoShiHero name={SHI_SITE_NAME} subtitle={SHI_SUBTITLE} logo={SHI_LOGO} aboutParagraphs={SHI_ABOUT} />
-    <PsInfoShiHabitatExplorer categories={HABITAT_CATEGORIES} />
+    <PsInfoEpicMark story="DELTA-1347" label="Logo and About">
+      <PsInfoShiHero name={SHI_SITE_NAME} subtitle={SHI_SUBTITLE} logo={SHI_LOGO} aboutParagraphs={SHI_ABOUT} />
+    </PsInfoEpicMark>
+    <PsInfoEpicMark story="DELTA-1347" label="Habitat diorama">
+      <PsInfoShiHabitatExplorer categories={HABITAT_CATEGORIES} />
+    </PsInfoEpicMark>
     <div class="stack" data-gap="md">
       <PsInfoSectionTitle title={SHI_GRID_HEADING} size="lg" />
-      <PsInfoShiIndicatorsGrid rows={SHI_GRID_ROWS} categories={HABITAT_CATEGORIES} label="All Salmon Habitat Indicators" />
+      <PsInfoEpicMark story="DELTA-1347" label="Indicator table">
+        <PsInfoShiIndicatorsGrid rows={SHI_GRID_ROWS} categories={HABITAT_CATEGORIES} label="All Salmon Habitat Indicators" />
+      </PsInfoEpicMark>
+    </div>
+    <div class="stack" data-gap="md">
+      <PsInfoSectionTitle title={SHI_PI_HEADING} note={SHI_HABITAT_USE} size="lg" />
+      <PsInfoPiTopicCards topics={piTopics} label={TOPIC_CARDS_LABEL} />
     </div>
   </div>
 </PsInfoVsProdChrome>

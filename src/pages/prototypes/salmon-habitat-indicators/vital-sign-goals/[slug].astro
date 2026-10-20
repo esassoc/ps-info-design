@@ -1,0 +1,48 @@
+---
+// Vital Sign Goal — prod's VitalSignGoal/Detail page in the live Vital Signs
+// chrome: the goal statement, then its indicator table with Salmon Habitat
+// Indicators marked (DELTA-1346), icon plus label on each SHI row, and the
+// goal's SHI standalone SHIs listed under their Vital Sign. Built for the
+// two goals that hold SHIs.
+// Contract: src/data/contracts/salmon-habitat-indicators.md
+import PsInfoVsProdChrome from '../../../../layouts/PsInfoVsProdChrome.astro';
+import PsInfoVsGoalIntro from '../../../../components/psinfo/PsInfoVsGoalIntro.astro';
+import PsInfoVsFancyTree from '../../../../components/psinfo/PsInfoVsFancyTree.astro';
+import { SHI_GOALS, SHI_MARKED_HREFS, VS_SITE, shiRoutes } from '../../../../data/pages/salmon-habitat-indicators';
+import type { GoalDetail } from '../../../../data/pages/goals';
+import { withBase } from '../../../../lib/base';
+
+export function getStaticPaths() {
+  return SHI_GOALS.filter((g) => g.vitalSigns.some((v) => v.indicators.some((i) => SHI_MARKED_HREFS.includes(i.href)))).map(
+    (goal) => ({ params: { slug: goal.slug }, props: { goal } }),
+  );
+}
+
+interface Props {
+  goal: GoalDetail;
+}
+const { goal } = Astro.props;
+---
+<!-- manifest:
+  layout: PsInfoVsProdChrome > stack(xl) spine
+  sections:
+    - goal statement               -> ps-info-vs-goal-intro
+    - goal indicator table, marked -> ps-info-vs-fancy-tree
+-->
+<PsInfoVsProdChrome
+  title={goal.name}
+  hiddenHeading={goal.name}
+  headerImage={`/photos/vital-signs/headers/vs-goal${goal.sourceGoalId}-header.jpg`}
+  hueVar={goal.hueVar}
+  activeGoal={goal.slug}
+  trail={[
+    { label: 'About the Vital Signs', href: `${VS_SITE}/About` },
+    { label: 'All Indicators', href: withBase(shiRoutes.allIndicators) },
+    { label: goal.name },
+  ]}
+>
+  <div class="stack" data-gap="xl">
+    <PsInfoVsGoalIntro statement={goal.statement} narrative={goal.narrative} />
+    <PsInfoVsFancyTree goals={[goal]} frameHueVar={goal.hueVar} expandedLevels={2} treeId={`tree-${goal.slug}`} salmonMarked={SHI_MARKED_HREFS} shiMarkStory="DELTA-1346" />
+  </div>
+</PsInfoVsProdChrome>

@@ -1,0 +1,120 @@
+---
+// Complete Indicator Report — prod's Indicator/Detail page on
+// www.pugetsoundinfo.wa.gov, with the new Salmon Habitat Indicator field
+// (DELTA-1344) after the report's existing boxes. VSI+ (Summer low flow)
+// switches on the full set of subfields; VSI (Floodplain function,
+// Eelgrass Area) holds only Importance to Salmon; SHI reports carry the
+// standalone indicator's own record. Indicator Type shows the SHI mark
+// (DELTA-1346). Prod's own Map box is left out: no map exists for these
+// indicators in the prototype (the SHI field's map is a separate subfield).
+// Contract: src/data/contracts/salmon-habitat-indicators.md
+import PsInfoVsProdChrome from '../../../../layouts/PsInfoVsProdChrome.astro';
+import PsInfoCirTitle from '../../../../components/psinfo/PsInfoCirTitle.astro';
+import PsInfoCirBox from '../../../../components/psinfo/PsInfoCirBox.astro';
+import PsInfoCirBasics from '../../../../components/psinfo/PsInfoCirBasics.astro';
+import PsInfoCirChart from '../../../../components/psinfo/PsInfoCirChart.astro';
+import PsInfoShiReportField from '../../../../components/psinfo/PsInfoShiReportField.astro';
+import PsInfoEpicMark from '../../../../components/psinfo/PsInfoEpicMark.astro';
+import {
+  DETAIL_BY_SLUG,
+  PROGRESS_ICON,
+  REPORT_SLUGS,
+  SHI_BY_SLUG,
+  SHI_FIELD_ANCHOR,
+  TARGET_ICON,
+  isStandalone,
+  shiHref,
+  shiRoutes,
+  shiStatus,
+  vitalSignHref,
+} from '../../../../data/pages/salmon-habitat-indicators';
+import type { SalmonHabitatIndicator, VsiDetail } from '../../../../data/shi-domain';
+
+export function getStaticPaths() {
+  return REPORT_SLUGS.map((slug) => ({
+    params: { slug },
+    props: { indicator: SHI_BY_SLUG[slug], detail: DETAIL_BY_SLUG[slug] },
+  }));
+}
+
+interface Props {
+  indicator: SalmonHabitatIndicator;
+  detail: VsiDetail;
+}
+const { indicator, detail } = Astro.props;
+const vs = indicator.vitalSign;
+const shi = indicator.salmonHabitatIndicator;
+const standalone = isStandalone(indicator);
+const status = shiStatus(indicator);
+const kind = standalone ? 'Salmon Habitat Indicator' : 'Vital Sign Indicator';
+---
+<!-- manifest:
+  layout: PsInfoVsProdChrome(site ps-info) > stack(xl) spine > grid split for the first row
+  sections:
+    - report title chip + h1     -> ps-info-cir-title
+    - basics                     -> ps-info-cir-box > ps-info-cir-basics
+    - description                -> ps-info-cir-box
+    - indicator chart            -> ps-info-cir-box > ps-info-cir-chart
+    - importance                 -> ps-info-cir-box
+    - key results                -> ps-info-cir-box
+    - methods                    -> ps-info-cir-box
+    - salmon habitat indicator   -> ps-info-epic-mark > ps-info-shi-report-field
+-->
+<PsInfoVsProdChrome title={`PS Info | ${indicator.name}`} site="ps-info">
+  <div class="stack" data-gap="xl">
+    <PsInfoCirTitle
+      name={indicator.name}
+      collection={standalone
+        ? { label: 'Salmon Habitat Indicators', href: shiRoutes.landing }
+        : { label: 'Vital Sign Indicators', href: shiRoutes.allIndicators }}
+      vitalSignsHref={shiHref(indicator)}
+    />
+    <div class="grid" style="--grid-min: 26rem">
+      <PsInfoCirBox title="Basics" id="basics">
+        <PsInfoCirBasics
+          goal={vs.goalName}
+          vitalSign={{ name: vs.name, href: vitalSignHref(vs) }}
+          indicator={indicator.name}
+          indicatorType={standalone ? undefined : 'Vital Sign Indicator'}
+          isShi={true}
+          shiMarkStory="DELTA-1346"
+          measurementUnit={detail.measurementUnit}
+          trend={{ label: status.progress, icon: PROGRESS_ICON[status.progress] }}
+          targetStatus={status.targetStatus && { label: status.targetStatus, icon: TARGET_ICON[status.targetStatus] }}
+          target={detail.target}
+          reporterLabel={`${kind} Reporter`}
+          reporter={detail.reporter}
+          partners={detail.partners}
+          lastUpdated={detail.lastUpdated}
+        />
+      </PsInfoCirBox>
+      <PsInfoCirBox title="Description" id="description">
+        <p>{detail.description}</p>
+      </PsInfoCirBox>
+    </div>
+    <PsInfoCirBox title={`${kind} Chart`} id="chart">
+      <PsInfoCirChart chart={{ mode: 'image', ...detail.chart }} />
+    </PsInfoCirBox>
+    {detail.importance && (
+      <PsInfoCirBox title="Importance" id="importance">
+        {detail.importance.map((p) => <p>{p}</p>)}
+      </PsInfoCirBox>
+    )}
+    <PsInfoCirBox title={`Key ${kind} Results`} id="key-results">
+      <ul>{detail.keyResults.map((r) => <li>{r}</li>)}</ul>
+    </PsInfoCirBox>
+    {detail.methods && (
+      <PsInfoCirBox title="Methods" id="methods">
+        {detail.monitoringProgram && <p><strong>Monitoring Program:</strong> {detail.monitoringProgram}</p>}
+        <p><strong>Data Source:</strong> {detail.dataSource}</p>
+        {detail.methods.map((p) => <p>{p}</p>)}
+      </PsInfoCirBox>
+    )}
+    <PsInfoEpicMark story="DELTA-1344" label="Salmon Habitat Indicator field">
+      <PsInfoShiReportField
+        field={shi.field}
+        id={SHI_FIELD_ANCHOR}
+      />
+    </PsInfoEpicMark>
+  </div>
+</PsInfoVsProdChrome>

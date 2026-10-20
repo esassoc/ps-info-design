@@ -50,12 +50,25 @@ Reproduced from the live site at 1440 and 390 widths:
    verbatim). The deck's navy title band is dropped.
 2. Type: Fira Sans throughout, the live Vital Signs site's only face, on every
    SHI route.
-3. About paragraphs. Placeholder copy of similar length; PSP's text is not used.
+3. About paragraphs: PSP's draft from deck slide 6 (why salmon matter, the
+   Salmon Vital Sign with its link, the life cycle and habitats, the SHI
+   definition). PSP will still wordsmith it.
 4. Habitat diorama with the six buttons. The deck's watercolor life-cycle
-   graphic is replaced by an original, museum-style cross-section from the
-   open Sound to a headwater stream (`shi-diorama-art.svg`, geometry in
-   `src/data/shi-diorama.ts`). The deck's four life-cycle stages are dropped.
-   All 16 indicators appear as labelled landmarks in the scene, each linking
+   graphic is replaced by an original, museum-style cross-section from a
+   headwater stream to the open Sound, the way the fish go
+   (`shi-diorama-art.svg`, geometry in `src/data/shi-diorama.ts`). It runs the
+   window width less a 24px gutter each side above 760px, with no frame; the
+   buttons keep the page column. A slim white life cycle loop over the sky (`src/data/shi-lifecycle.ts`) sets each stage
+   over its habitat: eggs and alevins, fry and parr, smolts and ocean adults on
+   the downstream lane, adults returning to spawn on the upstream lane. A
+   small fish swims the loop once every 48 seconds, mirrored so it never swims
+   belly up; reduced motion parks it. The basin map (`isometric.astro`,
+   `shi-basin-art.svg`, `src/data/shi-basin.ts`, after the c-basin-map
+   specimen in the diorama's palette) is a second landing page for review: the
+   river basin as a tilted tabletop under the Cascades, and the life cycle as
+   a dashed white route on the map, down the river, out into the Sound and
+   back up, with the same fish.
+   All 18 indicators appear as labelled landmarks in the scene, each linking
    where its table row links. Each habitat is a traced region. Hover outlines
    it; selecting it outlines and tints it and labels it with its indicator
    count, and the rest of the scene is not dimmed. The buttons sit under the
@@ -67,6 +80,25 @@ Reproduced from the live site at 1440 and 390 widths:
    Salmon Habitat Indicator · Description · Habitat · Vital Sign · Type.
    Row links follow the deck's notes: VSI opens the VSI page, VSI+ and
    SHI open the SHI report.
+6. "Related Progress Indicators" (deck slide 7): the habitat-use sentence as
+   the section note, then the Progress Indicators home page's topic card for
+   Floodplains, Estuaries, Nearshore, and Riparian Areas. Fish Passage, also
+   named, is not developed yet and has no card. The deck's Salmon Recovery
+   Plan and Salmon Hub line is still a placeholder and is not built.
+
+## Standalone SHI page
+
+Prod's Complete Indicator Report layout with the same panels and subfields a
+Vital Sign Indicator's report carries (deck slides 8 to 10): "View all Salmon
+Habitat Indicators" with the SHI logo in place of "View in Vital Signs";
+Basics; Description; Salmon Habitat Indicator Chart; Importance to Salmon,
+whose "?" reads "Why is this measure important for tracking progress toward
+Puget Sound salmon recovery?"; Key Salmon Habitat Indicator Results; Methods
+(Monitoring Program, Data Source, Methods, Critical Definitions);
+Interpretation of Results (Causes for Change); Additional Information;
+Datasets; Reporting Guidance; Subcategories. No Map box until a standalone
+SHI has a map. The page is the indicator's report, so it has no separate
+SHI report.
 
 ## Vital Sign Indicator detail
 
@@ -93,7 +125,9 @@ Prod's ViewAll tree (`PsInfoVsFancyTree`) with a Salmon Habitat column: SHI mark
 ## Data provenance
 
 Public, from prod: Vital Sign and VSI names, ids, progress labels, both VSI
-pages' text, chart images and partner logos. Invented for the prototype: which
-VSIs are SHIs and their types, the two SHI indicators (Large wood in
-streams, Fish passage at road crossings), all salmon narrative, the About
-text, table descriptions, and every gauge value.
+pages' text, chart images and partner logos. From PSP's official SHI list
+(email, 2026-10-19): the 18 SHIs, which 16 are also VSIs, and the two that
+are not (Stream Structure, Sediment). Invented for the prototype: which VSIs
+are VSI+, each SHI's habitat, everything on the Stream Structure and
+Sediment pages, all salmon narrative, table descriptions,
+and every gauge value.
