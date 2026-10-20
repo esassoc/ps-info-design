@@ -33,21 +33,24 @@ import {
   SHI_DIORAMA_REGIONS,
   SHI_DIORAMA_WIDTH,
 } from '../../data/shi-diorama';
-import { SHI_ISO_HEIGHT, SHI_ISO_LANDMARKS, SHI_ISO_REGIONS, SHI_ISO_WIDTH } from '../../data/shi-iso';
+import { SHI_BASIN_CYCLE, SHI_BASIN_HEIGHT, SHI_BASIN_LANDMARKS, SHI_BASIN_REGIONS, SHI_BASIN_WIDTH } from '../../data/shi-basin';
+import type { SceneCycle } from '../../data/shi-basin';
 import { SHI_LIFECYCLE_STAGES, SHI_LIFECYCLE_SUMMARY } from '../../data/shi-lifecycle';
 import dioramaArt from './shi-diorama-art.svg?raw';
-import isoArt from './shi-iso-art.svg?raw';
+import basinArt from './shi-basin-art.svg?raw';
 
 interface Props {
   categories: HabitatCategory[];
-  /** 'diorama': the flat museum cross-section; 'isometric': the terraced 2.5D model. */
-  scene?: 'diorama' | 'isometric';
+  /** 'diorama': the flat museum cross-section; 'basin': the river basin as a tilted tabletop map. */
+  scene?: 'diorama' | 'basin';
 }
 const { categories, scene = 'diorama' } = Astro.props;
 
-const SCENES = {
+// A scene with its own `cycle` draws the life cycle as a route on the map; one without gets the
+// racetrack over its sky.
+const SCENES: Record<'diorama' | 'basin', { width: number; height: number; regions: typeof SHI_DIORAMA_REGIONS; landmarks: typeof SHI_DIORAMA_LANDMARKS; art: string; cycle?: SceneCycle }> = {
   diorama: { width: SHI_DIORAMA_WIDTH, height: SHI_DIORAMA_HEIGHT, regions: SHI_DIORAMA_REGIONS, landmarks: SHI_DIORAMA_LANDMARKS, art: dioramaArt },
-  isometric: { width: SHI_ISO_WIDTH, height: SHI_ISO_HEIGHT, regions: SHI_ISO_REGIONS, landmarks: SHI_ISO_LANDMARKS, art: isoArt },
+  basin: { width: SHI_BASIN_WIDTH, height: SHI_BASIN_HEIGHT, regions: SHI_BASIN_REGIONS, landmarks: SHI_BASIN_LANDMARKS, art: basinArt, cycle: SHI_BASIN_CYCLE },
 };
 const SCENE_DESC = {
   diorama:
@@ -56,14 +59,16 @@ const SCENE_DESC = {
     'below a road culvert. Fry with parr marks migrate downstream through streams and floodplains and freshwater pools, ' +
     'smolt in the estuary, and enter the Sound past beaches with eelgrass meadows and bull kelp. After years in marine ' +
     'water the adults return through the estuary and up the river to spawn.',
-  isometric:
-    'A tabletop model of six habitat terraces stepping down from the headwaters below the Cascades at the back left to ' +
-    'the open Sound at the front right, one river running through them over small falls. Spawners and a log jam sit ' +
-    'below a road culvert in the headwaters; fry move down through freshwater and a floodplain with an oxbow; smolts ' +
-    'gather in the estuary marsh beside a pocket estuary; the river crosses a beach below a feeder bluff into the Sound, ' +
-    'cut away to show kelp, eelgrass and fish. Adults swim back up the river to spawn.',
+  basin:
+    'A map of one river basin laid out like a tabletop, the Cascades behind it. Headwater streams run out of ' +
+    'the conifer forest at the back, past a gravel bar and a log jam where adults spawn, and a tributary with a ' +
+    'temperature logger joins them. The river winds through a floodplain valley with an oxbow lake, a side channel, ' +
+    'flow gauges, alders along its banks and a flooded pasture, then braids through a delta marsh to the beach. A ' +
+    'feeder bluff with forest on top stands on the left shore and a pocket estuary sits behind a spit on the right. ' +
+    'Eelgrass and kelp grow in the shallows; the Sound along the front is cut away to show the water column, with ' +
+    'a buoy and a moored sensor. The life cycle route runs down the river, out into the Sound and back up to spawn.',
 };
-const { width: SCENE_W, height: SCENE_H, regions: REGIONS, landmarks: LANDMARKS, art } = SCENES[scene];
+const { width: SCENE_W, height: SCENE_H, regions: REGIONS, landmarks: LANDMARKS, art, cycle: ROUTE } = SCENES[scene];
 
 const bySlug = Object.fromEntries(categories.map((c) => [c.slug, c])) as Record<string, HabitatCategory>;
 const CHECK = '<path d="M20 6 9 17l-5-5"/>';
@@ -120,19 +125,34 @@ const countFor = (slug: HabitatCategorySlug) => SHI_GRID_ROWS.filter((r) => r.ca
           </g>
 
           <g class="shix__cycle" role="img" aria-label={SHI_LIFECYCLE_SUMMARY}>
-            <path class="cycle__loop" d={lcLoop} data-shi-cycle-path />
-            {lcChevrons.map((c) => (
-              <path class="cycle__chev" d={`M${c.x - 4 * c.dir} ${c.y - 5} L${c.x + 3 * c.dir} ${c.y} L${c.x - 4 * c.dir} ${c.y + 5}`} />
-            ))}
-            {lcStages.map((st) => {
-              const y = st.lane === 'out' ? LC_BOT : LC_TOP;
-              return (
-                <g transform={`translate(${st.x} ${y})`}>
-                  <circle class="cycle__node" r="4" />
-                  <text class="cycle__label" text-anchor="middle" y={st.lane === 'out' ? 22 : -11}>{st.label}</text>
-                </g>
-              );
-            })}
+            {ROUTE ? (
+              <>
+                <path class="cycle__halo" d={ROUTE.d} />
+                <path class="cycle__loop cycle__loop--route" d={ROUTE.d} data-shi-cycle-path />
+                {ROUTE.nodes.map((n, k) => (
+                  <g transform={`translate(${n.x} ${n.y})`}>
+                    <circle class="cycle__node" r="4" />
+                    <text class="cycle__label" text-anchor={n.label.anchor} x={n.label.dx} y={n.label.dy}>{SHI_LIFECYCLE_STAGES[k].label}</text>
+                  </g>
+                ))}
+              </>
+            ) : (
+              <>
+                <path class="cycle__loop" d={lcLoop} data-shi-cycle-path />
+                {lcChevrons.map((c) => (
+                  <path class="cycle__chev" d={`M${c.x - 4 * c.dir} ${c.y - 5} L${c.x + 3 * c.dir} ${c.y} L${c.x - 4 * c.dir} ${c.y + 5}`} />
+                ))}
+                {lcStages.map((st) => {
+                  const y = st.lane === 'out' ? LC_BOT : LC_TOP;
+                  return (
+                    <g transform={`translate(${st.x} ${y})`}>
+                      <circle class="cycle__node" r="4" />
+                      <text class="cycle__label" text-anchor="middle" y={st.lane === 'out' ? 22 : -11}>{st.label}</text>
+                    </g>
+                  );
+                })}
+              </>
+            )}
             <g class="cycle__fish" data-shi-cycle-fish aria-hidden="true">
               <path d="M11 0 C6 -5 -4 -5.5 -9 -1.5 L-14 -5 L-13 0 L-14 5 L-9 1.5 C-4 5.5 6 5 11 0 Z" />
               <path class="cycle__fin" d="M2 -4.2 L-1 -7.5 L-4 -4.6 Z" />
@@ -158,7 +178,7 @@ const countFor = (slug: HabitatCategorySlug) => SHI_GRID_ROWS.filter((r) => r.ca
                   <rect class="exhibit__plaque" rx="2" />
                   <text class="exhibit__text" text-anchor="middle" y="6">
                     <tspan class="exhibit__name">{bySlug[r.slug].label}</tspan>
-                    <tspan class="exhibit__count" dx="8">{countFor(r.slug)} indicators</tspan>
+                    <tspan class="exhibit__count" dx="8">{countFor(r.slug)} {countFor(r.slug) === 1 ? 'indicator' : 'indicators'}</tspan>
                   </text>
                 </g>
               </g>
@@ -320,7 +340,7 @@ const countFor = (slug: HabitatCategorySlug) => SHI_GRID_ROWS.filter((r) => r.ca
     fitBleed();
     window.addEventListener('resize', fitBleed);
 
-    // Narrow viewports: the strip scrolls; the headwaters, where the story starts, sit at its left edge.
+    // Narrow viewports: the strip scrolls; in the diorama the headwaters, where the story starts, sit at its left edge.
     if (scroller) {
       const fitScroller = () => {
         const scrolls = scroller.scrollWidth > scroller.clientWidth + 2;
@@ -328,7 +348,8 @@ const countFor = (slug: HabitatCategorySlug) => SHI_GRID_ROWS.filter((r) => r.ca
         else scroller.removeAttribute('tabindex');
         return scrolls;
       };
-      fitScroller();
+      // The basin map has no left-to-right story: it opens on the river, mid-board.
+      if (fitScroller() && root.dataset.scene === 'basin') scroller.scrollLeft = (scroller.scrollWidth - scroller.clientWidth) / 2;
       window.addEventListener('resize', fitScroller);
     }
     // The life cycle fish swims the loop slowly: downstream along the lower lane, home along the
@@ -393,12 +414,9 @@ const countFor = (slug: HabitatCategorySlug) => SHI_GRID_ROWS.filter((r) => r.ca
   }
   .cycle__fish path { fill: #ffffff; stroke: rgba(5, 31, 51, 0.5); stroke-width: 1; }
   .cycle__fish .cycle__eye { fill: rgba(5, 31, 51, 0.8); }
-  /* The isometric model's sky is near white, where white fails: the loop takes navy ink there. */
-  [data-scene='isometric'] .cycle__loop, [data-scene='isometric'] .cycle__chev { stroke: var(--ps-info-blue-800); stroke-opacity: 0.7; }
-  [data-scene='isometric'] .cycle__node { fill: var(--ps-info-blue-800); stroke: #ffffff; }
-  [data-scene='isometric'] .cycle__label { fill: var(--ps-info-blue-800); stroke: none; }
-  [data-scene='isometric'] .cycle__fish path { fill: var(--ps-info-blue-800); stroke: none; }
-  [data-scene='isometric'] .cycle__fish .cycle__eye { fill: #ffffff; }
+  /* On the basin map the loop is a dashed route over the land and water, on a soft navy halo. */
+  .cycle__halo { fill: none; stroke: rgba(5, 31, 51, 0.35); stroke-width: 4; stroke-linejoin: round; }
+  .cycle__loop--route { stroke-width: 1.8; stroke-opacity: 1; stroke-dasharray: 6 5; stroke-linejoin: round; }
 
   /* Wide: the scene runs the window's width less a gutter on each side; the buttons keep the
      page column. */

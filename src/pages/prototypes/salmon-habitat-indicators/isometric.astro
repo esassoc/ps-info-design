@@ -1,7 +1,8 @@
 ---
-// Salmon Habitat Indicators — landing page with the isometric habitat model in
-// place of the diorama, for side-by-side review (2026-10-20). Everything else
-// matches index.astro.
+// Salmon Habitat Indicators — landing page with the basin map (after the
+// c-basin-map specimen, in the diorama's palette) in place of the diorama, for
+// side-by-side review (2026-10-20). The life cycle runs as a route on the map.
+// Everything else matches index.astro.
 // Built from PSP's SHI mock-up (v29, 2026-08-28), revised after the
 // 2026-10-13 kickoff (DELTA-1347): logo lockup and About text, the life cycle
 // loop laid over the sky of a habitat graphic that follows the fish, landmarks
@@ -57,7 +58,7 @@ const piTopics = TOPIC_CARDS.filter((t) => SHI_PI_TOPIC_TITLES.includes(t.title)
       <PsInfoShiHero name={SHI_SITE_NAME} subtitle={SHI_SUBTITLE} logo={SHI_LOGO} aboutParagraphs={SHI_ABOUT} />
     </PsInfoEpicMark>
     <PsInfoEpicMark story="DELTA-1347" label="Habitat diorama">
-      <PsInfoShiHabitatExplorer categories={HABITAT_CATEGORIES} scene="isometric" />
+      <PsInfoShiHabitatExplorer categories={HABITAT_CATEGORIES} scene="basin" />
     </PsInfoEpicMark>
     <div class="stack" data-gap="md">
       <PsInfoSectionTitle title={SHI_GRID_HEADING} size="lg" />
