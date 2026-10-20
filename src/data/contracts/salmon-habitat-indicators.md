@@ -123,7 +123,8 @@ Prod's ViewAll tree (`PsInfoVsFancyTree`), no Type column: each SHI row carries
 the SHI icon right of its name, alone. Hover, focus or tap opens a tip naming
 it, linked to the SHI landing page (Phase 9 check-in 2026-10-20; the logo plus
 label it replaced dominated the table). The same icon marks the Indicator Type
-field of a Complete Indicator Report. The icon is the designer's full-colour
+field of a Complete Indicator Report; on a standalone SHI, which has no other
+type, the field holds the icon alone (Andy, 2026-10-20). The icon is the designer's full-colour
 icon-only mark (SHI Logo-S2) at 24px; `?icon=2|3` swaps in the teal or purple
 one, for review.
 
