@@ -80,16 +80,16 @@
       {
         "src": "/epic-shots/delta-1337/delta-1346/salmon-habitat-indicators-all-indicators-1.jpg",
         "width": 720,
-        "height": 372,
+        "height": 373,
         "marks": [
           {
             "n": 1,
-            "label": "Salmon Habitat Indicator mark",
-            "badge": "start",
-            "x": 24.31,
-            "y": 44.49,
-            "w": 27.84,
-            "h": 7.53
+            "label": "Salmon Habitat Indicator icon",
+            "badge": "end",
+            "x": 38.41,
+            "y": 44.37,
+            "w": 3.33,
+            "h": 7.77
           }
         ]
       }

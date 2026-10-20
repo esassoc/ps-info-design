@@ -1,52 +1,87 @@
 ---
-// PsInfoShiMark — the SHI mark: the Salmon Habitat Indicators logo beside the
-// words "Salmon Habitat Indicator", never the icon alone (DELTA-1346). One
-// component for every place an indicator is marked: the top of a VSI page
-// (linking to its Importance to Salmon section), indicator table rows, the
-// Indicator Type field of a Complete Indicator Report, and the list view.
+// PsInfoShiMark — the SHI mark: the Salmon Habitat Indicators icon, alone,
+// right of an indicator's name (DELTA-1346, revised at the Phase 9 check-in
+// 2026-10-20: the logo plus "Salmon Habitat Indicator" label dominated the
+// table). Hover, focus or tap opens a tip naming the program, linked to the
+// SHI landing page. One component for every place an indicator is marked:
+// indicator table rows and the Indicator Type field of a Complete Indicator
+// Report.
 //
-// bcn-lego-checked: checked esa-badge and esa-pill (text-only chips, no image
-// slot; the mark is the program's logo, not a status) and esa-icon-link (an
-// svg glyph, not a raster logo). The logo is decorative (alt="") because the
-// label carries the name. psinfo-shi-mark is the reusable home.
+// The icon is one of the designer's three icon-only marks; `?icon=1|2|3` on
+// any page swaps all of them for review (1 full colour, 2 teal, 3 purple).
+// Default 3: one flat colour holds the fish at 20px, and its purple is
+// 5.9:1 on white where the teal is 2.8:1 (SC 1.4.11 asks 3:1).
+//
+// bcn-lego-checked: the tip is esa-popover in hover mode (hover with delay,
+// focus, Escape from anywhere, stays open while the pointer is over the
+// panel; the panel sits flush against the trigger so crossing to it never
+// leaves the anchor). esa-tooltip holds plain text only, and the tip carries a
+// link. The trigger is a native button holding the raster icon:
+// esa-button iconOnly and esa-icon-button render a Lucide glyph, not an image.
+// psinfo-shi-mark is the reusable home.
 import { withBase } from '../../lib/base';
 import { SHI_MARK_LABEL } from '../../data/shi-domain';
-import { SHI_LOGO } from '../../data/pages/salmon-habitat-indicators';
+import { SHI_ICON, SHI_ICON_DEFAULT, shiRoutes } from '../../data/pages/salmon-habitat-indicators';
 import { epicMarkAttrs } from '../../data/epics/index';
 
 interface Props {
-  /** When set, the whole mark is a link (e.g. to the Importance to Salmon section). */
-  href?: string;
-  /** sm: table rows and fields; md: the top of an indicator page. */
-  size?: 'sm' | 'md';
   /** Jira key of the story that adds this mark here; marks it for the epic preview. */
   epicStory?: string;
 }
-const { href, size = 'sm', epicStory } = Astro.props;
-const target = href && (href.startsWith('#') || /^https?:/.test(href) ? href : withBase(href));
-const Tag = target ? 'a' : 'span';
-const epicAttrs = epicStory ? epicMarkAttrs(epicStory, `${SHI_MARK_LABEL} mark`) : {};
+const { epicStory } = Astro.props;
+const epicAttrs = epicStory ? epicMarkAttrs(epicStory, `${SHI_MARK_LABEL} icon`) : {};
+const icons = SHI_ICON.map((src) => withBase(src)).join(' ');
 ---
-<Tag class:list={['shimark', `shimark--${size}`]} href={target} {...epicAttrs}>
-  <img class="shimark__logo" src={withBase(SHI_LOGO.src)} alt="" width={SHI_LOGO.width} height={SHI_LOGO.height} />
-  <span class="shimark__label">{SHI_MARK_LABEL}</span>
-</Tag>
+<esa-popover class="shimark" trigger="hover" position="bottom" has-arrow="false" offset="0" {...epicAttrs}>
+  <button class="shimark__btn" type="button" aria-label={SHI_MARK_LABEL}>
+    <img class="shimark__icon" src={withBase(SHI_ICON[SHI_ICON_DEFAULT - 1])} data-shi-icons={icons} alt="" width="96" height="96" />
+  </button>
+  <a slot="content" class="shimark__link" href={withBase(shiRoutes.landing)}>{SHI_MARK_LABEL}</a>
+</esa-popover>
+
+<script>
+  import '@esa/ecology/esa-popover';
+
+  // Escape from the tip's link: esa-popover hides and hands focus back to the
+  // icon, and in hover mode that focus reopens it. Swallow that one focus, so
+  // Escape dismisses the tip (SC 1.4.13).
+  document.querySelectorAll<HTMLElement & { open: boolean }>('esa-popover.shimark').forEach((pop) => {
+    const btn = pop.querySelector('button')!;
+    let closing = false;
+    // On window, capture: it must run before esa-popover's own document listener.
+    window.addEventListener('keydown', (e) => {
+      if (e.key !== 'Escape' || !pop.open) return;
+      closing = true;
+      setTimeout(() => { closing = false; });
+    }, true);
+    btn.addEventListener('focusin', (e) => { if (closing) e.stopPropagation(); });
+  });
+
+  // Review switch: ?icon=1|2|3 swaps every SHI icon on the page.
+  const pick = Number(new URLSearchParams(location.search).get('icon'));
+  if (pick >= 1) {
+    document.querySelectorAll<HTMLImageElement>('img[data-shi-icons]').forEach((img) => {
+      const src = img.dataset.shiIcons!.split(' ')[pick - 1];
+      if (src) img.src = src;
+    });
+  }
+</script>
 
 <style>
   .shimark {
-    display: inline-flex; align-items: center; gap: var(--spacing-200);
-    color: var(--ps-info-blue-800);
-    font-weight: var(--font-weight-semibold);
-    line-height: 1.25;
-    text-decoration: none;
-    /* As wide as its content inside a flex column (the indicator header), not the column. */
-    align-self: flex-start;
+    /* line-height 0 shrinks the host to the button, so middle centres the icon on the name's x-height. */
+    line-height: 0;
+    vertical-align: middle;
+    --popover-max-width: 16rem;
   }
-  .shimark--sm { font-size: var(--ps-info-text-meta-lg); }
-  .shimark--md { font-size: var(--ps-info-text-body); gap: var(--spacing-300); }
-  .shimark__logo { flex: none; width: auto; height: 1.75rem; }
-  .shimark--md .shimark__logo { height: 2.75rem; }
-  a.shimark .shimark__label { text-decoration: underline; text-underline-offset: 3px; }
-  a.shimark:hover .shimark__label { text-decoration-thickness: 2px; }
-  a.shimark:focus-visible { outline: 2px solid var(--focus-ring-color); outline-offset: 2px; }
+  .shimark__btn {
+    display: inline-flex; align-items: center; justify-content: center;
+    /* 24px target (SC 2.5.8) around a 20px icon. */
+    width: 1.5rem; height: 1.5rem; padding: 0.125rem;
+    border: 0; border-radius: 50%;
+    background: none; cursor: pointer;
+  }
+  .shimark__btn:focus-visible { outline: 2px solid var(--focus-ring-color); outline-offset: 2px; }
+  .shimark__icon { display: block; width: 100%; height: 100%; }
+  .shimark__link { white-space: nowrap; line-height: 1.5; text-decoration: underline; text-underline-offset: 3px; }
 </style>

@@ -35,7 +35,7 @@ interface Props {
   /** Unique id when multiple trees share a page. */
   treeId?: string;
   /** Indicator hrefs that are Salmon Habitat Indicators: each gets the SHI
-   *  mark (icon plus label, never the icon alone) under its name. */
+   *  icon right of its name. */
   salmonMarked?: string[];
   /** Jira key of the story that adds those SHI marks (epic preview). */
   shiMarkStory?: string;
@@ -373,7 +373,9 @@ const uid = (...parts: (string | number)[]) =>
   .vstree__link:focus-visible { outline: 2px solid var(--focus-ring-color); outline-offset: 2px; }
   .vstree__link--goal { font-weight: var(--font-weight-semibold); }
   .vstree__cell { display: flex; justify-content: center; }
-  .vstree__name { display: flex; flex-direction: column; align-items: flex-start; gap: var(--spacing-150); }
+  /* Inline, so a marked row's SHI icon follows the name's last word when it wraps. */
+  .vstree__name { min-width: 0; }
+  .vstree__name :global(.shimark) { margin-inline-start: var(--spacing-050); }
   .vstree__cell img { width: 64px; height: 64px; }
 
   @media (max-width: 720px) {

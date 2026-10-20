@@ -119,8 +119,12 @@ Other reports turn on fewer subfields, so the toggle shows.
 
 ## All Indicators
 
-Prod's ViewAll tree (`PsInfoVsFancyTree`) with a Salmon Habitat column: SHI mark
-+ the type as a text link. Never the icon alone.
+Prod's ViewAll tree (`PsInfoVsFancyTree`), no Type column: each SHI row carries
+the SHI icon right of its name, alone. Hover, focus or tap opens a tip naming
+it, linked to the SHI landing page (Phase 9 check-in 2026-10-20; the logo plus
+label it replaced dominated the table). The same icon marks the Indicator Type
+field of a Complete Indicator Report. `?icon=1|2|3` swaps the designer's three
+icon-only marks for review.
 
 ## Data provenance
 
