@@ -31,8 +31,8 @@ export const SHI_EPIC: Epic = {
       key: 'DELTA-1345',
       title: 'Build standalone SHI pages',
       pages: [
-        { title: 'Fish Passage at Road Crossings', label: 'SHI', route: `${SHI}/indicators/fish-passage`, example: true },
-        { title: 'Large Wood in Streams', label: 'SHI', route: `${SHI}/indicators/large-wood` },
+        { title: 'Stream Structure', label: 'SHI', route: `${SHI}/indicators/stream-structure`, example: true },
+        { title: 'Sediment', label: 'SHI', route: `${SHI}/indicators/sediment` },
       ],
     },
     {

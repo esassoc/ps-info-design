@@ -14,18 +14,27 @@ const base = process.env.NODE_ENV === 'production' ? '/ps-info-design/' : '/';
 // page anymore forward to the SHI landing page.
 const SHI = 'prototypes/salmon-habitat-indicators';
 const movedReports = {
-  'fish-passage': `${SHI}/indicator-reports/fish-passage`,
-  'large-wood': `${SHI}/indicator-reports/large-wood`,
+  'fish-passage': SHI,
+  'large-wood': `${SHI}/indicator-reports/stream-structure`,
   'summer-low-flow': `${SHI}/indicator-reports/summer-low-flow`,
   'estuary-area': SHI,
   'stream-temperature': SHI,
+};
+// The two placeholder SHIs PSP's official list replaced (2026-10-19): Large
+// wood became Stream Structure; Fish passage has no SHI page.
+const replacedShis = {
+  [`${SHI}/indicators/large-wood`]: `${SHI}/indicators/stream-structure`,
+  [`${SHI}/indicator-reports/large-wood`]: `${SHI}/indicator-reports/stream-structure`,
+  [`${SHI}/indicators/fish-passage`]: SHI,
+  [`${SHI}/indicator-reports/fish-passage`]: SHI,
 };
 
 export default defineConfig({
   site: 'https://esassoc.github.io',
   base,
   server: { port: 4330 },
-  redirects: Object.fromEntries(
-    Object.entries(movedReports).map(([slug, to]) => [`/${SHI}/reports/${slug}`, `${base}${to}`]),
-  ),
+  redirects: Object.fromEntries([
+    ...Object.entries(movedReports).map(([slug, to]) => [`/${SHI}/reports/${slug}`, `${base}${to}`]),
+    ...Object.entries(replacedShis).map(([from, to]) => [`/${from}`, `${base}${to}`]),
+  ]),
 });

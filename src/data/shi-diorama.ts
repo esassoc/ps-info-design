@@ -4,7 +4,7 @@
 //
 // Regions are each habitat's traced shape in the scene (the water body, plus
 // the land it owns), in scene order from the headwaters to the open Sound, the way the fish go.
-// Landmarks are the 16 indicators drawn into the scene, each with the plaque
+// Landmarks are the 18 indicators drawn into the scene, each with the plaque
 // position its label hangs from.
 import type { HabitatCategorySlug } from './shi-domain';
 
@@ -44,11 +44,11 @@ export const SHI_DIORAMA_REGIONS: DioramaRegion[] = [
 ];
 
 export const SHI_DIORAMA_LANDMARKS: DioramaLandmark[] = [
-  { slug: 'fish-passage', category: 'stream-structure', label: 'Fish passage at road crossings', x: 28, y: 174, plaque: { x: 120, y: 122 } },
-  { slug: 'large-wood', category: 'stream-structure', label: 'Large wood in streams', x: 120, y: 206, plaque: { x: 160, y: 158 } },
-  { slug: 'freshwater-bibi', category: 'freshwater', label: 'Freshwater B-IBI', x: 230, y: 262, plaque: { x: 185, y: 330 } },
+  { slug: 'sediment', category: 'stream-structure', label: 'Sediment', x: 60, y: 240, plaque: { x: 60, y: 122 } },
+  { slug: 'stream-structure', category: 'stream-structure', label: 'Stream structure', x: 120, y: 206, plaque: { x: 160, y: 158 } },
   { slug: 'stream-temperature', category: 'freshwater', label: 'Stream temperature', x: 318, y: 258, plaque: { x: 330, y: 330 } },
   { slug: 'freshwater-riparian-forest', category: 'streams-floodplains', label: 'Freshwater riparian forest', x: 394, y: 164, plaque: { x: 470, y: 86 } },
+  { slug: 'flood-events', category: 'streams-floodplains', label: 'Flood events', x: 412, y: 248, plaque: { x: 480, y: 336 } },
   { slug: 'floodplain-function', category: 'streams-floodplains', label: 'Floodplain function', x: 434, y: 220, plaque: { x: 354, y: 122 } },
   { slug: 'hydrologic-regime', category: 'streams-floodplains', label: 'Hydrologic regime', x: 484, y: 220, plaque: { x: 474, y: 158 } },
   { slug: 'summer-low-flow', category: 'streams-floodplains', label: 'Summer low flow', x: 538, y: 204, plaque: { x: 514, y: 122 } },
@@ -56,7 +56,9 @@ export const SHI_DIORAMA_LANDMARKS: DioramaLandmark[] = [
   { slug: 'pocket-estuaries', category: 'estuaries', label: 'Pocket estuaries', x: 658, y: 210, plaque: { x: 690, y: 112 } },
   { slug: 'nearshore-riparian-forest', category: 'beaches-marine-vegetation', label: 'Nearshore riparian forest', x: 730, y: 116, plaque: { x: 730, y: 80 } },
   { slug: 'feeder-bluffs', category: 'beaches-marine-vegetation', label: 'Feeder bluffs', x: 732, y: 188, plaque: { x: 820, y: 150 } },
+  { slug: 'eelgrass-sites', category: 'beaches-marine-vegetation', label: 'Eelgrass sites', x: 772, y: 284, plaque: { x: 772, y: 122 } },
   { slug: 'eelgrass-area', category: 'beaches-marine-vegetation', label: 'Eelgrass area', x: 814, y: 300, plaque: { x: 810, y: 372 } },
+  { slug: 'understory-kelp', category: 'beaches-marine-vegetation', label: 'Understory kelp', x: 854, y: 330, plaque: { x: 935, y: 372 } },
   { slug: 'floating-kelp-bed-area', category: 'beaches-marine-vegetation', label: 'Floating kelp bed area', x: 892, y: 262, plaque: { x: 892, y: 196 } },
   { slug: 'dissolved-oxygen', category: 'marine-water', label: 'Dissolved oxygen', x: 970, y: 334, plaque: { x: 960, y: 410 } },
   { slug: 'marine-water-temperature', category: 'marine-water', label: 'Marine water temperature', x: 1040, y: 206, plaque: { x: 1005, y: 158 } },

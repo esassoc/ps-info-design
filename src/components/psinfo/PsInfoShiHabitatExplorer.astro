@@ -2,7 +2,7 @@
 // PsInfoShiHabitatExplorer — the SHI landing page's habitat picker: a museum
 // diorama of salmon habitat from the headwaters to the open Sound (the way the
 // fish go), under a life cycle loop whose stages sit over their habitats, with the
-// 16 Salmon Habitat Indicators drawn into the scene as landmarks, and the six
+// 18 Salmon Habitat Indicators drawn into the scene as landmarks, and the six
 // habitat category buttons beneath it. A button or a habitat's region in the
 // scene filters the indicator table (psinfo-shi-indicators-grid) to that
 // category; selecting it again clears the filter. Each landmark is a link to
@@ -379,7 +379,7 @@ const countFor = (slug: HabitatCategorySlug) => SHI_GRID_ROWS.filter((r) => r.ca
   .lm { transition: opacity 160ms ease; }
   .lm:focus-visible { outline: none; }
   .lm:focus:not(:focus-visible) { outline: none; } /* a11y-checked: pointer and touch focus only; keyboard focus keeps the drawn ring above */
-  /* Labels stay hidden at rest, so the scene reads as sixteen medallions. A plaque and its leader appear for
+  /* Labels stay hidden at rest, so the scene reads as eighteen medallions. A plaque and its leader appear for
      the landmark under the pointer or keyboard focus, for every landmark of the selected habitat, and for a
      landmark opened by a first tap on touch. The text is hidden visually only, so each link keeps its name.
      A hidden plaque or leader is not a hit target; only the medallion wakes it. */

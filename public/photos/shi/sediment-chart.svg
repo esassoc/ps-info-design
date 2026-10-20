@@ -1,0 +1,19 @@
+<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 960 480' width='960' height='480' font-family='Fira Sans, Arial, sans-serif'>
+<rect width='960' height='480' fill='#ffffff'/>
+<text x='88' y='30' font-size='19' font-weight='600' fill='#1d2a36'>Fine sediment in spawning gravel by watershed</text>
+<line x1='88' x2='936' y1='384.0' y2='384.0' stroke='#d5dbe1'/><text x='78' y='389.0' font-size='14' text-anchor='end' fill='#3f4b57'>0</text>
+<line x1='88' x2='936' y1='302.0' y2='302.0' stroke='#d5dbe1'/><text x='78' y='307.0' font-size='14' text-anchor='end' fill='#3f4b57'>5</text>
+<line x1='88' x2='936' y1='220.0' y2='220.0' stroke='#d5dbe1'/><text x='78' y='225.0' font-size='14' text-anchor='end' fill='#3f4b57'>10</text>
+<line x1='88' x2='936' y1='138.0' y2='138.0' stroke='#d5dbe1'/><text x='78' y='143.0' font-size='14' text-anchor='end' fill='#3f4b57'>15</text>
+<line x1='88' x2='936' y1='56.0' y2='56.0' stroke='#d5dbe1'/><text x='78' y='61.0' font-size='14' text-anchor='end' fill='#3f4b57'>20</text>
+<text transform='translate(22 220) rotate(-90)' font-size='14' text-anchor='middle' fill='#3f4b57'>Percent fine sediment</text>
+<rect x='109.2' y='105.19999999999999' width='63.6' height='278.8' fill='#8a7350'/><text x='141' y='99.19999999999999' font-size='13' text-anchor='middle' fill='#1d2a36'>17</text><text x='141' y='406' font-size='14' text-anchor='middle' fill='#1d2a36'>Lake Washington</text>
+<rect x='215.2' y='138.0' width='63.6' height='246.0' fill='#8a7350'/><text x='247' y='132.0' font-size='13' text-anchor='middle' fill='#1d2a36'>15</text><text x='247' y='406' font-size='14' text-anchor='middle' fill='#1d2a36'>Puyallup</text>
+<rect x='321.2' y='154.4' width='63.6' height='229.6' fill='#8a7350'/><text x='353' y='148.4' font-size='13' text-anchor='middle' fill='#1d2a36'>14</text><text x='353' y='406' font-size='14' text-anchor='middle' fill='#1d2a36'>Snohomish</text>
+<rect x='427.2' y='170.8' width='63.6' height='213.2' fill='#8a7350'/><text x='459' y='164.8' font-size='13' text-anchor='middle' fill='#1d2a36'>13</text><text x='459' y='406' font-size='14' text-anchor='middle' fill='#1d2a36'>Stillaguamish</text>
+<rect x='533.2' y='236.4' width='63.6' height='147.6' fill='#8a7350'/><text x='565' y='230.4' font-size='13' text-anchor='middle' fill='#1d2a36'>9</text><text x='565' y='406' font-size='14' text-anchor='middle' fill='#1d2a36'>Nooksack</text>
+<rect x='639.2' y='252.8' width='63.6' height='131.2' fill='#8a7350'/><text x='671' y='246.8' font-size='13' text-anchor='middle' fill='#1d2a36'>8</text><text x='671' y='406' font-size='14' text-anchor='middle' fill='#1d2a36'>Skagit</text>
+<rect x='745.2' y='269.2' width='63.6' height='114.8' fill='#8a7350'/><text x='777' y='263.2' font-size='13' text-anchor='middle' fill='#1d2a36'>7</text><text x='777' y='406' font-size='14' text-anchor='middle' fill='#1d2a36'>Dungeness</text>
+<rect x='851.2' y='285.6' width='63.6' height='98.4' fill='#8a7350'/><text x='883' y='279.6' font-size='13' text-anchor='middle' fill='#1d2a36'>6</text><text x='883' y='406' font-size='14' text-anchor='middle' fill='#1d2a36'>Elwha</text>
+<line x1='88' x2='936' y1='187.2' y2='187.2' stroke='#1d2a36' stroke-width='2' stroke-dasharray='8 6'/><text x='936' y='179.2' font-size='14' text-anchor='end' fill='#1d2a36'>Egg survival threshold (12)</text>
+<text x='524' y='440' font-size='14' text-anchor='middle' fill='#3f4b57'>Watershed, 2024 samples</text></svg>

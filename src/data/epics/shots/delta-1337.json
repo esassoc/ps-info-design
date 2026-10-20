@@ -40,9 +40,9 @@
     ]
   },
   "DELTA-1345": {
-    "/prototypes/salmon-habitat-indicators/indicators/fish-passage": [
+    "/prototypes/salmon-habitat-indicators/indicators/stream-structure": [
       {
-        "src": "/epic-shots/delta-1337/delta-1345/salmon-habitat-indicators-indicators-fish-passage-1.jpg",
+        "src": "/epic-shots/delta-1337/delta-1345/salmon-habitat-indicators-indicators-stream-structure-1.jpg",
         "width": 720,
         "height": 171,
         "marks": [
@@ -58,18 +58,18 @@
         ]
       },
       {
-        "src": "/epic-shots/delta-1337/delta-1345/salmon-habitat-indicators-indicators-fish-passage-2.jpg",
+        "src": "/epic-shots/delta-1337/delta-1345/salmon-habitat-indicators-indicators-stream-structure-2.jpg",
         "width": 867,
-        "height": 401,
+        "height": 375,
         "marks": [
           {
             "n": 2,
             "label": "Importance to Salmon section",
             "badge": "start",
             "x": 7.27,
-            "y": 37.37,
+            "y": 33.13,
             "w": 89.18,
-            "h": 35.34
+            "h": 37.79
           }
         ]
       }
@@ -125,16 +125,16 @@
       {
         "src": "/epic-shots/delta-1337/delta-1347/salmon-habitat-indicators-2.jpg",
         "width": 1204,
-        "height": 1205,
+        "height": 1321,
         "marks": [
           {
             "n": 3,
             "label": "Indicator table",
             "badge": "start",
             "x": 5.23,
-            "y": 4.99,
+            "y": 4.55,
             "w": 92.19,
-            "h": 92.45
+            "h": 93.11
           }
         ]
       }

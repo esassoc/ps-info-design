@@ -4,11 +4,11 @@
 // Vital Sign and Vital Sign Indicator names, ids, progress labels, and the
 // three VSI detail records (Eelgrass Area, Summer low flow, Floodplain
 // function) are public prod content from vitalsigns.pugetsoundinfo.wa.gov and
-// www.pugetsoundinfo.wa.gov (fetched 2026-10-12 and 2026-10-16). Which VSIs
-// are SHIs, their types, the two standalone SHIs and everything on their
-// pages, all salmon narrative, the gauge coordinates and every gauge value in
-// the SHI chart are invented for the prototype. The official SHI list is
-// still owed by PSP; these 16 are placeholders.
+// www.pugetsoundinfo.wa.gov (fetched 2026-10-12 and 2026-10-16). The list of
+// 18 SHIs and which of them are also VSIs is PSP's official list (email,
+// 2026-10-19). Which VSIs are VSI+, each SHI's habitat, everything on the two
+// standalone SHI pages, all salmon narrative, the gauge coordinates and every
+// gauge value in the SHI chart are invented for the prototype.
 
 import type { GoalDetail, ProgressLabel, TargetStatusLabel } from './goals';
 import { GOALS } from './goals';
@@ -260,7 +260,7 @@ const SUMMER_LOW_FLOW_FIELD: SalmonHabitatIndicatorField = {
   ],
 };
 
-// ── The 16 Salmon Habitat Indicators ──────────────────────────────────────
+// ── The 18 Salmon Habitat Indicators ──────────────────────────────────────
 export const SALMON_HABITAT_INDICATORS: SalmonHabitatIndicator[] = [
   // Beaches & Marine Vegetation
   {
@@ -279,6 +279,20 @@ export const SALMON_HABITAT_INDICATORS: SalmonHabitatIndicator[] = [
     },
   },
   {
+    slug: 'eelgrass-sites',
+    name: 'Short and long-term change at eelgrass sites',
+    summary: 'Share of monitored eelgrass sites where bed area is increasing, stable, or declining.',
+    vitalSign: VS.beaches,
+    vitalSignIndicator: { id: 61, progress: 'Mixed Results' },
+    salmonHabitatIndicator: {
+      relationship: 'same',
+      category: 'beaches-marine-vegetation',
+      field: importanceOnly([
+        'Site-level declines show where juvenile salmon may be losing shoreline cover and feeding grounds along their migration routes, even when the soundwide total holds steady.',
+      ]),
+    },
+  },
+  {
     slug: 'floating-kelp-bed-area',
     name: 'Floating kelp bed area',
     summary: 'Extent of bull kelp and giant kelp canopy along Puget Sound and Strait of Juan de Fuca shorelines.',
@@ -289,6 +303,20 @@ export const SALMON_HABITAT_INDICATORS: SalmonHabitatIndicator[] = [
       category: 'beaches-marine-vegetation',
       field: importanceOnly([
         'Kelp forests provide refuge and foraging habitat for juvenile salmon as they move into deeper nearshore waters.',
+      ]),
+    },
+  },
+  {
+    slug: 'understory-kelp',
+    name: 'Understory kelp abundance and condition',
+    summary: 'Abundance and health of kelp growing below the surface on rocky reefs.',
+    vitalSign: VS.beaches,
+    vitalSignIndicator: { id: 82, progress: 'Indicator To Be Developed' },
+    salmonHabitatIndicator: {
+      relationship: 'same',
+      category: 'beaches-marine-vegetation',
+      field: importanceOnly([
+        'Understory kelp shelters the small fish and invertebrates that juvenile salmon feed on as they move along rocky shorelines.',
       ]),
     },
   },
@@ -421,20 +449,6 @@ export const SALMON_HABITAT_INDICATORS: SalmonHabitatIndicator[] = [
       },
     },
   },
-  {
-    slug: 'freshwater-bibi',
-    name: 'Freshwater Benthic Index of Biotic Integrity',
-    summary: 'Stream health scored from the insects and other invertebrates living on the streambed.',
-    vitalSign: VS.freshwater,
-    vitalSignIndicator: { id: 16, progress: 'Getting Better' },
-    salmonHabitatIndicator: {
-      relationship: 'same',
-      category: 'freshwater',
-      field: importanceOnly([
-        'Streambed invertebrates are the main food of juvenile salmon in freshwater, so a healthy benthic community means more food for rearing fish.',
-      ]),
-    },
-  },
   // Streams & Floodplains
   {
     slug: 'summer-low-flow',
@@ -477,6 +491,20 @@ export const SALMON_HABITAT_INDICATORS: SalmonHabitatIndicator[] = [
     },
   },
   {
+    slug: 'flood-events',
+    name: 'Frequency of flood events',
+    summary: 'How often streams and rivers rise above flood stage each year.',
+    vitalSign: VS.streams,
+    vitalSignIndicator: { id: 85, progress: 'Indicator To Be Developed' },
+    salmonHabitatIndicator: {
+      relationship: 'same',
+      category: 'streams-floodplains',
+      field: importanceOnly([
+        'Large floods scour spawning gravel and the eggs buried in it. More frequent winter floods lower egg-to-fry survival, most of all in channels cut off from their floodplains.',
+      ]),
+    },
+  },
+  {
     slug: 'hydrologic-regime',
     name: 'Changes in hydrologic regime in streams and rivers',
     summary: 'Shifts in the timing and size of high and low flows across the year.',
@@ -490,11 +518,12 @@ export const SALMON_HABITAT_INDICATORS: SalmonHabitatIndicator[] = [
       ]),
     },
   },
-  // Stream Structure (no Vital Sign analog yet; nests under Streams and Floodplains)
+  // Stream Structure: the two SHIs that are not Vital Sign Indicators. Neither
+  // has a Vital Sign analog yet; both nest under Streams and Floodplains.
   {
-    slug: 'large-wood',
-    name: 'Large wood in streams',
-    summary: 'Pieces of large wood per stream length in salmon-bearing reaches.',
+    slug: 'stream-structure',
+    name: 'Stream Structure',
+    summary: 'Pools, large wood, and side channels per stream length in salmon-bearing reaches.',
     vitalSign: VS.streams,
     salmonHabitatIndicator: {
       relationship: 'independent',
@@ -503,10 +532,10 @@ export const SALMON_HABITAT_INDICATORS: SalmonHabitatIndicator[] = [
       field: {
         enabled: switches('importanceToSalmon', 'description', 'reportingGuidance'),
         importanceToSalmon: [
-          'Logs and jams create the pools, gravel bars, and cover that spawning adults and rearing juveniles need. Many Puget Sound streams hold a fraction of the wood they carried historically.',
+          'Logs, jams, and deep pools create the cover and resting water that spawning adults and rearing juveniles need. Many Puget Sound streams hold a fraction of the wood and pools they had historically.',
         ],
         description:
-          'Counts of large wood pieces and jams per 100 meters of channel in salmon-bearing reaches, summarized by watershed.',
+          'Counts of large wood pieces and pools per 100 meters of channel in salmon-bearing reaches, summarized by watershed.',
         reportingGuidance: [
           'Methods are in development. Report survey results by watershed until a soundwide sampling design is adopted.',
         ],
@@ -514,28 +543,28 @@ export const SALMON_HABITAT_INDICATORS: SalmonHabitatIndicator[] = [
     },
   },
   {
-    slug: 'fish-passage',
-    name: 'Fish passage at road crossings',
-    summary: 'Stream habitat opened upstream of culverts and other barriers that have been corrected.',
+    slug: 'sediment',
+    name: 'Sediment',
+    summary: 'Share of fine sediment in spawning gravel in salmon-bearing streams.',
     vitalSign: VS.streams,
     salmonHabitatIndicator: {
       relationship: 'independent',
       category: 'stream-structure',
-      standalone: { progress: 'Getting Better', targetStatus: 'Below Target' },
+      standalone: { progress: 'No Trend' },
       field: {
         enabled: switches('importanceToSalmon', 'description', 'keyResults', 'datasets'),
         importanceToSalmon: [
-          'Culverts that are too steep, too small, or perched above the stream keep adults from spawning grounds and juveniles from upstream rearing habitat.',
+          'Salmon eggs need clean gravel with cold, oxygen-rich water moving through it. Fine sediment from roads, logging, and eroding banks fills the spaces between stones and smothers eggs before they hatch.',
         ],
         description:
-          'Miles of potential salmon habitat upstream of corrected barriers, compared with the miles still blocked.',
+          'Percent of fine sediment (smaller than 0.85 millimeters) in spawning gravel, sampled in late summer before spawning.',
         keyResults: [
-          'Corrections since 2013 have reopened about 1,140 miles of potential salmon habitat, more than half of it on state highway crossings.',
-          'Roughly 6,800 known barriers remain on salmon-bearing streams in Puget Sound, most on county and private roads.',
+          'Fine sediment exceeded 12 percent, the level linked to lower egg survival, at 9 of the 24 sampled sites.',
+          'Sites downstream of dense forest road networks held the most fine sediment.',
         ],
         datasets: [
-          { name: 'Fish Passage and Diversion Screening Inventory', steward: 'Washington Department of Fish and Wildlife' },
-          { name: 'Fish passage correction projects, state highways', steward: 'Washington State Department of Transportation' },
+          { name: 'Spawning gravel sediment samples', steward: 'Northwest Indian Fisheries Commission' },
+          { name: 'Forest road sediment delivery inventory', steward: 'Washington State Department of Natural Resources' },
         ],
       },
     },
@@ -551,7 +580,7 @@ export const SHI_BY_SLUG = Object.fromEntries(
 /** Indicators with an in-prototype Vital Sign Indicator page. */
 export const VSI_DETAIL_SLUGS = ['eelgrass-area', 'floodplain-function', 'summer-low-flow'] as const;
 /** SHI indicators with an in-prototype standalone page (all of them). */
-export const STANDALONE_SLUGS = ['large-wood', 'fish-passage'] as const;
+export const STANDALONE_SLUGS = ['stream-structure', 'sediment'] as const;
 /** Indicators with an in-prototype Complete Indicator Report. */
 export const REPORT_SLUGS = [...VSI_DETAIL_SLUGS, ...STANDALONE_SLUGS] as const;
 
@@ -765,49 +794,15 @@ export const VSI_DETAIL_BY_SLUG = Object.fromEntries(
 // 2026-10-16). These records fill the Vital Sign Indicator page's panels so
 // the layout can be judged; none of it is a decided panel list.
 const PARTNER_WDFW: VsiPartner = { name: 'Washington Department of Fish and Wildlife', href: `${PSINFO_SITE}/Organization/Detail/14` };
-const PARTNER_WSDOT: VsiPartner = { name: 'Washington State Department of Transportation', href: `${PSINFO_SITE}/Organization/Detail/21` };
 const PARTNER_NWIFC: VsiPartner = { name: 'Northwest Indian Fisheries Commission', href: `${PSINFO_SITE}/Organization/Detail/33` };
 
 export const STANDALONE_DETAILS: VsiDetail[] = [
   {
-    indicatorSlug: 'fish-passage',
+    indicatorSlug: 'stream-structure',
     description:
-      'This indicator tracks how many miles of potential salmon habitat have been reopened by correcting fish passage barriers at road crossings, and how many miles remain blocked. A barrier is any culvert, dam, or other structure that keeps adult or juvenile salmon from moving up or down a stream.',
+      'This indicator counts pieces of large wood and pools per 100 meters of channel in salmon-bearing reaches, summarized by watershed. Large wood is a log at least 10 centimeters across and 2 meters long lying in or over the active channel; a pool is a slow, deep unit at least as long as the channel is wide.',
     chart: {
-      src: '/photos/shi/fish-passage-chart.svg',
-      alt: 'Bar chart of cumulative miles of potential salmon habitat reopened by barrier corrections, 2013 to 2024, rising from 60 miles in 2013 to about 1,140 miles in 2024, with the steepest gains after 2019.',
-      width: 960,
-      height: 480,
-      caption:
-        'Cumulative miles of potential salmon habitat upstream of corrected fish passage barriers in Puget Sound watersheds, 2013 to 2024, all road owners combined.',
-    },
-    keyResults: [
-      'Barrier corrections since 2013 have reopened about 1,140 miles of potential salmon habitat. Gains accelerated after 2019, when correction work on state highway crossings expanded.',
-      'Roughly 6,800 known barriers remain on salmon-bearing streams in Puget Sound. Most sit on county roads, city streets, and private roads, where corrections have moved more slowly.',
-      'Corrections are uneven across watersheds. The Snohomish, Stillaguamish, and Skagit account for nearly half of the miles reopened.',
-    ],
-    target: 'By 2030, reopen 2,000 miles of potential salmon habitat blocked by road crossings.',
-    dataSource: 'Fish Passage and Diversion Screening Inventory, Washington Department of Fish and Wildlife',
-    reporter: {
-      name: 'Dana Whitcomb',
-      email: 'dana.whitcomb@example.org',
-      organization: 'Washington Department of Fish and Wildlife',
-      organizationHref: PARTNER_WDFW.href,
-    },
-    lastUpdated: '06/30/2026',
-    partners: [PARTNER_WDFW, PARTNER_WSDOT],
-    measurementUnit: 'Mile (miles)',
-    monitoringProgram: 'Fish Passage Program, Washington Department of Fish and Wildlife',
-    methods: [
-      'Barriers are inventoried and assessed in the field against state passability criteria. When a barrier is corrected, the miles of potential habitat upstream, up to the next barrier or natural limit, are credited in the year the project is completed.',
-    ],
-  },
-  {
-    indicatorSlug: 'large-wood',
-    description:
-      'This indicator counts pieces of large wood and log jams per 100 meters of channel in salmon-bearing reaches, summarized by watershed. Large wood is a log at least 10 centimeters across and 2 meters long lying in or over the active channel.',
-    chart: {
-      src: '/photos/shi/large-wood-chart.svg',
+      src: '/photos/shi/stream-structure-chart.svg',
       alt: 'Bar chart of large wood pieces per 100 meters of channel in eight watersheds surveyed in 2024, ranging from 6 in the Lake Washington basin to 31 in the Dungeness, against a reference condition of about 40 pieces.',
       width: 960,
       height: 480,
@@ -816,7 +811,7 @@ export const STANDALONE_DETAILS: VsiDetail[] = [
     },
     keyResults: [
       'All eight surveyed watersheds hold less large wood than the reference condition for unmanaged forested streams.',
-      'Watersheds with large areas of protected forest in their headwaters, such as the Dungeness and Elwha, hold the most wood per 100 meters.',
+      'Watersheds with large areas of protected forest in their headwaters, such as the Dungeness and Elwha, hold the most wood and the most pools per 100 meters.',
       'Results are limited to the reaches surveyed in 2024 and cannot yet be compared over time.',
     ],
     target: 'No targets are currently set for this indicator.',
@@ -830,6 +825,38 @@ export const STANDALONE_DETAILS: VsiDetail[] = [
     lastUpdated: '03/12/2026',
     partners: [PARTNER_NWIFC, PARTNER_WDFW],
     measurementUnit: 'Count (pieces per 100 meters)',
+  },
+  {
+    indicatorSlug: 'sediment',
+    description:
+      'This indicator measures the share of fine sediment, particles smaller than 0.85 millimeters, in the spawning gravel of salmon-bearing streams. Samples are taken in late summer, before adults spawn, at fixed sites in each watershed.',
+    chart: {
+      src: '/photos/shi/sediment-chart.svg',
+      alt: 'Bar chart of percent fine sediment in spawning gravel at sites in eight watersheds sampled in 2024, ranging from 6 percent in the Elwha to 17 percent in the Lake Washington basin, against a 12 percent threshold for egg survival.',
+      width: 960,
+      height: 480,
+      caption:
+        'Median percent fine sediment (smaller than 0.85 millimeters) in spawning gravel, eight watersheds sampled in 2024. The dashed line marks 12 percent, above which egg-to-fry survival drops.',
+    },
+    keyResults: [
+      'Fine sediment exceeded 12 percent, the level linked to lower egg survival, at 9 of the 24 sampled sites.',
+      'Sites downstream of dense forest road networks held the most fine sediment. The Elwha, where the dams came out and the channel is rebuilding, held the least.',
+      'Results from 2018 to 2024 show no clear trend across the region.',
+    ],
+    target: 'No targets are currently set for this indicator.',
+    dataSource: 'Spawning gravel sediment samples compiled by the Northwest Indian Fisheries Commission',
+    reporter: {
+      name: 'Tom Halvorsen',
+      email: 'thalvorsen@example.org',
+      organization: 'Northwest Indian Fisheries Commission',
+      organizationHref: PARTNER_NWIFC.href,
+    },
+    lastUpdated: '05/02/2026',
+    partners: [PARTNER_NWIFC, PARTNER_DNR],
+    measurementUnit: 'Percent (%)',
+    methods: [
+      'At each site, freeze cores or McNeil samples are taken from riffle crests used for spawning. Samples are dried and sieved, and the share of material finer than 0.85 millimeters is reported by weight.',
+    ],
   },
 ];
 

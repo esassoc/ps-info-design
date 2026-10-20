@@ -59,7 +59,7 @@ Reproduced from the live site at 1440 and 390 widths:
    cycle loop above the scene (`src/data/shi-lifecycle.ts`) sets each stage
    over its habitat: eggs and alevins, fry and parr, smolts and ocean adults on
    the downstream lane, adults returning to spawn on the upstream lane.
-   All 16 indicators appear as labelled landmarks in the scene, each linking
+   All 18 indicators appear as labelled landmarks in the scene, each linking
    where its table row links. Each habitat is a traced region. Hover outlines
    it; selecting it outlines and tints it and labels it with its indicator
    count, and the rest of the scene is not dimmed. The buttons sit under the
@@ -97,7 +97,9 @@ Prod's ViewAll tree (`PsInfoVsFancyTree`) with a Salmon Habitat column: SHI mark
 ## Data provenance
 
 Public, from prod: Vital Sign and VSI names, ids, progress labels, both VSI
-pages' text, chart images and partner logos. Invented for the prototype: which
-VSIs are SHIs and their types, the two SHI indicators (Large wood in
-streams, Fish passage at road crossings), all salmon narrative, the About
-text, table descriptions, and every gauge value.
+pages' text, chart images and partner logos. From PSP's official SHI list
+(email, 2026-10-19): the 18 SHIs, which 16 are also VSIs, and the two that
+are not (Stream Structure, Sediment). Invented for the prototype: which VSIs
+are VSI+, each SHI's habitat, everything on the Stream Structure and
+Sediment pages, all salmon narrative, the About text, table descriptions,
+and every gauge value.
