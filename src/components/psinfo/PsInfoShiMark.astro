@@ -7,10 +7,9 @@
 // indicator table rows and the Indicator Type field of a Complete Indicator
 // Report.
 //
-// The icon is one of the designer's three icon-only marks; `?icon=1|2|3` on
-// any page swaps all of them for review (1 full colour, 2 teal, 3 purple).
-// Default 3: one flat colour holds the fish at 20px, and its purple is
-// 5.9:1 on white where the teal is 2.8:1 (SC 1.4.11 asks 3:1).
+// The icon is the designer's full-colour icon-only mark (S2), Andy's pick
+// 2026-10-20. For review, `?icon=2|3` swaps in the teal or purple one, and
+// `?size=24` draws the icon at 24px instead of 20px.
 //
 // bcn-lego-checked: the tip is esa-popover in hover mode (hover with delay,
 // focus, Escape from anywhere, stays open while the pointer is over the
@@ -57,6 +56,9 @@ const icons = SHI_ICON.map((src) => withBase(src)).join(' ');
     btn.addEventListener('focusin', (e) => { if (closing) e.stopPropagation(); });
   });
 
+  // Review switch: ?size=24 draws the icon at 24px.
+  if (new URLSearchParams(location.search).get('size') === '24') document.documentElement.dataset.shiIconSize = '24';
+
   // Review switch: ?icon=1|2|3 swaps every SHI icon on the page.
   const pick = Number(new URLSearchParams(location.search).get('icon'));
   if (pick >= 1) {
@@ -83,5 +85,7 @@ const icons = SHI_ICON.map((src) => withBase(src)).join(' ');
   }
   .shimark__btn:focus-visible { outline: 2px solid var(--focus-ring-color); outline-offset: 2px; }
   .shimark__icon { display: block; width: 100%; height: 100%; }
+  /* ?size=24: the icon fills the 24px target; the row's height doesn't change. */
+  :global([data-shi-icon-size='24']) .shimark__btn { width: 1.75rem; height: 1.75rem; padding: 0.125rem; margin-block: -0.25rem; }
   .shimark__link { white-space: nowrap; line-height: 1.5; text-decoration: underline; text-underline-offset: 3px; }
 </style>

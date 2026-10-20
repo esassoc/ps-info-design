@@ -69,9 +69,9 @@ export const SHI_SITE_NAME = 'Puget Sound Salmon Habitat Indicators';
 export const SHI_SUBTITLE = 'Measures of ecosystem conditions in salmon habitats';
 export const SHI_LOGO = { src: '/photos/shi/shi-logo.png', alt: 'Salmon Habitat Indicators', width: 640, height: 546 };
 /** The designer's icon-only marks, for the SHI mark in indicator tables:
-    1 full colour, 2 teal, 3 purple. `?icon=` picks one for review. */
+    1 full colour (Andy's pick, 2026-10-20), 2 teal, 3 purple. `?icon=` swaps for review. */
 export const SHI_ICON = ['/photos/shi/shi-icon-1.png', '/photos/shi/shi-icon-2.png', '/photos/shi/shi-icon-3.png'];
-export const SHI_ICON_DEFAULT = 3;
+export const SHI_ICON_DEFAULT = 1;
 
 // ── Habitat categories (deck order: left column, then right column) ───────
 export const HABITAT_CATEGORIES: HabitatCategory[] = [
