@@ -4,8 +4,8 @@
 // work on the front door and each module's landing header.
 //
 // bcn-lego-checked: the text block IS the esa-page-header lego — this component
-// only adds the photographic band under it, re-pointing the lego's public
-// --page-header-*-color hooks for legibility on the photo (color is the
+// only adds the photographic band under it, re-pointing the semantic
+// --color-content-* tokens the lego reads for legibility on the photo (color is the
 // consumer's job per the lego's own contract). No esa- lego renders a photo
 // band (esa-page-header is a transparent text container; esa-card is a content
 // card); checked Beacon (no photo-header pattern). psinfo-photo-header is the
@@ -79,11 +79,11 @@ const { title, eyebrow, lede, image, focus = '50% 45%', size = 'band' } = Astro.
     position: relative; z-index: 1;
     width: 100%;
     padding: var(--spacing-600);
-    /* Re-point the lego's public color hooks for photo legibility; the orange
-       eyebrow is the logo's blue/orange pairing doing the identity work. */
-    --page-header-title-color: #ffffff;
-    --page-header-lede-color: rgba(255, 255, 255, 0.9);
-    --page-header-eyebrow-color: var(--ps-info-orange-300);
+    /* Re-point the semantic content tokens the lego reads, scoped to the photo,
+       for legibility; the orange eyebrow is the logo's blue/orange pairing
+       doing the identity work. */
+    --color-content-default: #ffffff;
+    --color-content-default-secondary: var(--ps-info-orange-300);
   }
 
   /* Optional band across the hero foot (e.g. the front door's section nav) —
