@@ -486,9 +486,9 @@ const countFor = (slug: HabitatCategorySlug) => SHI_GRID_ROWS.filter((r) => r.ca
   @media (prefers-reduced-motion: reduce) { .cycle__size, .cycle__fish path, .cycle__fish ellipse, .cycle__fish circle { transition: none; } }
   /* On the basin map the route is a fine dotted trail on a faint navy halo; the wake behind the
      fish is the bright part, so the eye reads the path as travel, not a game waypoint line. */
-  .cycle__halo { fill: none; stroke: rgba(5, 31, 51, 0.32); stroke-width: 4; stroke-linejoin: round; }
-  .cycle__loop--route { stroke-width: 2.8; stroke-opacity: 1; stroke-dasharray: 0.01 4.6; stroke-linecap: round; stroke-linejoin: round; }
-  .cycle__wake { fill: none; stroke: #ffffff; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 0 100000; }
+  .cycle__halo { fill: none; stroke: rgba(5, 31, 51, 0.16); stroke-width: 2.6; stroke-linejoin: round; }
+  .cycle__loop--route { stroke-width: 1.7; stroke-opacity: 0.8; stroke-dasharray: 0.01 5.2; stroke-linecap: round; stroke-linejoin: round; }
+  .cycle__wake { fill: none; stroke: #ffffff; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 0 100000; }
   .cycle__wake[data-shi-cycle-wake='60'] { stroke-opacity: 0.18; }
   .cycle__wake[data-shi-cycle-wake='34'] { stroke-opacity: 0.3; }
   .cycle__wake[data-shi-cycle-wake='16'] { stroke-opacity: 0.45; }
