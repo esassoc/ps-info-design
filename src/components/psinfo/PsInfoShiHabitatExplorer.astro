@@ -129,6 +129,7 @@ const countFor = (slug: HabitatCategorySlug) => SHI_GRID_ROWS.filter((r) => r.ca
               <>
                 <path class="cycle__halo" d={ROUTE.d} />
                 <path class="cycle__loop cycle__loop--route" d={ROUTE.d} data-shi-cycle-path data-shi-cycle-nodes={JSON.stringify(ROUTE.nodes.map((n) => [n.x, n.y]))} />
+                <path class="cycle__flow" d={ROUTE.d} data-shi-cycle-flow />
                 {[60, 34, 16].map((len) => (
                   <path class="cycle__wake" d={ROUTE.d} data-shi-cycle-wake={len} />
                 ))}
@@ -382,6 +383,11 @@ const countFor = (slug: HabitatCategorySlug) => SHI_GRID_ROWS.filter((r) => r.ca
       const tail = fish.querySelector<SVGGElement>('[data-shi-fish-tail]');
       const wakes = [...root.querySelectorAll<SVGPathElement>('[data-shi-cycle-wake]')];
       wakes.forEach((w) => (w.style.strokeDasharray = `${w.dataset.shiCycleWake} ${total}`));
+      // The current: a few soft swells glide round the circuit, slower than the fish.
+      const flow = root.querySelector<SVGPathElement>('[data-shi-cycle-flow]');
+      const SWELLS = 5;
+      flow?.style.setProperty('stroke-dasharray', `34 ${total / SWELLS - 34}`);
+      const flowAnim = flow?.animate([{ strokeDashoffset: 0 }, { strokeDashoffset: -total / SWELLS }], { duration: 22000, iterations: Infinity });
       // Where each stage node sits along the route, found by sampling the path.
       const nodes: [number, number][] = JSON.parse(loop.dataset.shiCycleNodes ?? '[]');
       const samples = Array.from({ length: Math.ceil(total / 2) + 1 }, (_, k) => {
@@ -430,8 +436,13 @@ const countFor = (slug: HabitatCategorySlug) => SHI_GRID_ROWS.filter((r) => r.ca
       const run = () => {
         cancelAnimationFrame(raf);
         last = 0;
-        if (still.matches) place(0.04 * total, 0);
-        else raf = requestAnimationFrame(tick);
+        if (still.matches) {
+          place(0.04 * total, 0);
+          flowAnim?.pause();
+        } else {
+          flowAnim?.play();
+          raf = requestAnimationFrame(tick);
+        }
       };
       still.addEventListener('change', run);
       run();
@@ -487,7 +498,10 @@ const countFor = (slug: HabitatCategorySlug) => SHI_GRID_ROWS.filter((r) => r.ca
   /* On the basin map the route is a fine dotted trail on a faint navy halo; the wake behind the
      fish is the bright part, so the eye reads the path as travel, not a game waypoint line. */
   .cycle__halo { fill: none; stroke: rgba(5, 31, 51, 0.16); stroke-width: 2.6; stroke-linejoin: round; }
-  .cycle__loop--route { stroke-width: 1.7; stroke-opacity: 0.8; stroke-dasharray: 0.01 5.2; stroke-linecap: round; stroke-linejoin: round; }
+  .cycle__loop--route { stroke-width: 1.7; stroke-opacity: 0.8; stroke-dasharray: 0.01 5.2; stroke-linecap: round; stroke-linejoin: round; animation: cycle-drift 2.6s linear infinite; }
+  @keyframes cycle-drift { to { stroke-dashoffset: -5.21; } }
+  .cycle__flow { fill: none; stroke: #ffffff; stroke-width: 3.6; stroke-opacity: 0.38; stroke-linecap: round; stroke-linejoin: round; filter: blur(1px); }
+  @media (prefers-reduced-motion: reduce) { .cycle__loop--route { animation: none; } .cycle__flow { display: none; } }
   .cycle__wake { fill: none; stroke: #ffffff; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 0 100000; }
   .cycle__wake[data-shi-cycle-wake='60'] { stroke-opacity: 0.18; }
   .cycle__wake[data-shi-cycle-wake='34'] { stroke-opacity: 0.3; }
