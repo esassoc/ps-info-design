@@ -128,7 +128,11 @@ const countFor = (slug: HabitatCategorySlug) => SHI_GRID_ROWS.filter((r) => r.ca
             {ROUTE ? (
               <>
                 <path class="cycle__halo" d={ROUTE.d} />
-                <path class="cycle__loop cycle__loop--route" d={ROUTE.d} data-shi-cycle-path />
+                <path class="cycle__loop cycle__loop--route" d={ROUTE.d} data-shi-cycle-path data-shi-cycle-nodes={JSON.stringify(ROUTE.nodes.map((n) => [n.x, n.y]))} />
+                <path class="cycle__flow" d={ROUTE.d} data-shi-cycle-flow />
+                {[60, 34, 16].map((len) => (
+                  <path class="cycle__wake" d={ROUTE.d} data-shi-cycle-wake={len} />
+                ))}
                 {ROUTE.nodes.map((n, k) => (
                   <g transform={`translate(${n.x} ${n.y})`}>
                     <circle class="cycle__node" r="4" />
@@ -153,10 +157,24 @@ const countFor = (slug: HabitatCategorySlug) => SHI_GRID_ROWS.filter((r) => r.ca
                 })}
               </>
             )}
-            <g class="cycle__fish" data-shi-cycle-fish aria-hidden="true">
-              <path d="M11 0 C6 -5 -4 -5.5 -9 -1.5 L-14 -5 L-13 0 L-14 5 L-9 1.5 C-4 5.5 6 5 11 0 Z" />
-              <path class="cycle__fin" d="M2 -4.2 L-1 -7.5 L-4 -4.6 Z" />
-              <circle class="cycle__eye" cx="7" cy="-1" r="1" />
+            <g class="cycle__fish" data-shi-cycle-fish data-stage="smolt" aria-hidden="true">
+              <g class="cycle__size">
+                <g class="cycle__tail" data-shi-fish-tail>
+                  <path class="cycle__fin" d="M-9.5 0 C-11 -1 -12.5 -3 -14.6 -5.2 C-14 -2.6 -13.6 -1 -13.4 0 C-13.6 1 -14 2.6 -14.6 5.2 C-12.5 3 -11 1 -9.5 0 Z" />
+                </g>
+                <path class="cycle__fin" d="M1 -3.7 C0 -4.7 -1.6 -5 -3.2 -4.8 C-2.8 -4.3 -2.6 -3.9 -2.6 -3.4 Z" />
+                <path class="cycle__fin" d="M-6 -2.5 L-7.3 -4 L-7.8 -2.2 Z" />
+                <path class="cycle__body" d="M12.6 0.2 C11.2 -1.6 8.6 -3.4 4.6 -3.8 C0.6 -4.2 -4.8 -3 -8.4 -1.3 C-9.4 -0.8 -10 -0.3 -10.2 0 C-10 0.4 -9.4 0.9 -8.4 1.4 C-4.8 3 0.6 4 4.6 3.7 C8.4 3.3 11.2 1.8 12.6 0.2 Z" />
+                <path class="cycle__back" d="M12.4 -0.1 C11 -1.7 8.4 -3.4 4.6 -3.8 C0.6 -4.2 -4.8 -3 -8.4 -1.3 C-9.4 -0.8 -10 -0.3 -10.2 0 C-6 -0.6 -1 -1.2 4 -1 C7 -0.9 10 -0.5 12.4 -0.1 Z" />
+                <g class="cycle__marks">
+                  <ellipse cx="-4.5" cy="0.2" rx="1" ry="1.9" /><ellipse cx="-1" cy="0.1" rx="1.1" ry="2.1" /><ellipse cx="2.6" cy="0" rx="1.1" ry="2" /><ellipse cx="6" cy="0" rx="0.9" ry="1.6" />
+                </g>
+                <g class="cycle__spots">
+                  <circle cx="-7" cy="-1.4" r=".45" /><circle cx="-4.6" cy="-2.2" r=".45" /><circle cx="-2" cy="-2.6" r=".45" /><circle cx="0.8" cy="-2.7" r=".45" /><circle cx="-5.8" cy="-0.4" r=".4" /><circle cx="-3" cy="-1.1" r=".4" />
+                </g>
+                <path class="cycle__pec" d="M5.6 1.8 C4.2 3.4 2.6 4.2 1.4 4.3 C2.4 3.2 3.4 2.4 4.2 1.7 Z" />
+                <circle class="cycle__eye" cx="8.4" cy="-0.6" r=".85" />
+              </g>
             </g>
           </g>
 
@@ -352,34 +370,79 @@ const countFor = (slug: HabitatCategorySlug) => SHI_GRID_ROWS.filter((r) => r.ca
       if (fitScroller() && root.dataset.scene === 'basin') scroller.scrollLeft = (scroller.scrollWidth - scroller.clientWidth) / 2;
       window.addEventListener('resize', fitScroller);
     }
-    // The life cycle fish swims the loop slowly: downstream along the lower lane, home along the
-    // upper. It is mirrored, never rotated past upright, so it never swims belly up. Reduced
-    // motion parks it at the start of the loop.
+    // The life cycle fish swims the loop: downstream along the lower lane, home along the
+    // upper. It is mirrored, never rotated past upright, so it never swims belly up, and its
+    // tail beats as it goes. On a route with stage nodes (the basin map) it grows up on the way:
+    // parr-marked fry in the river, a silver smolt to the estuary, a spotted ocean adult at sea,
+    // and a red spawner on the run home, swimming upstream in bursts. A fading wake trails it.
+    // Reduced motion parks it near the start of the loop, tail still.
     const loop = root.querySelector<SVGPathElement>('[data-shi-cycle-path]');
     const fish = root.querySelector<SVGGElement>('[data-shi-cycle-fish]');
     if (loop && fish) {
       const total = loop.getTotalLength();
-      const LAP_MS = 48000;
-      const place = (t: number) => {
-        const d = (t % 1) * total;
+      const tail = fish.querySelector<SVGGElement>('[data-shi-fish-tail]');
+      const wakes = [...root.querySelectorAll<SVGPathElement>('[data-shi-cycle-wake]')];
+      wakes.forEach((w) => (w.style.strokeDasharray = `${w.dataset.shiCycleWake} ${total}`));
+      // The current: a few soft swells glide round the circuit, slower than the fish.
+      const flow = root.querySelector<SVGPathElement>('[data-shi-cycle-flow]');
+      const SWELLS = 5;
+      flow?.style.setProperty('stroke-dasharray', `34 ${total / SWELLS - 34}`);
+      const flowAnim = flow?.animate([{ strokeDashoffset: 0 }, { strokeDashoffset: -total / SWELLS }], { duration: 22000, iterations: Infinity });
+      // Where each stage node sits along the route, found by sampling the path.
+      const nodes: [number, number][] = JSON.parse(loop.dataset.shiCycleNodes ?? '[]');
+      const samples = Array.from({ length: Math.ceil(total / 2) + 1 }, (_, k) => {
+        const p = loop.getPointAtLength(Math.min(k * 2, total));
+        return { d: k * 2, x: p.x, y: p.y };
+      });
+      const at = nodes
+        .map(([x, y], i) => ({ i, d: samples.reduce((a, b) => (Math.hypot(b.x - x, b.y - y) < Math.hypot(a.x - x, a.y - y) ? b : a)).d }))
+        .sort((a, b) => a.d - b.d);
+      const STAGE_AFTER = ['fry', 'fry', 'smolt', 'ocean', 'spawner'];
+      const stageAt = (d: number) => {
+        if (!at.length) return 'smolt';
+        const last = [...at].reverse().find((n) => n.d <= d) ?? at[at.length - 1];
+        return STAGE_AFTER[last.i] ?? 'smolt';
+      };
+      const PACE: Record<string, number> = { fry: 1, smolt: 1.25, ocean: 0.9, spawner: 0.75 };
+      const BASE = total / 48; // units per second: about a 48 second lap
+      const place = (d: number, beat: number) => {
         const p = loop.getPointAtLength(d);
-        const q = loop.getPointAtLength(Math.min(d + 1, total));
-        const deg = (Math.atan2(q.y - p.y, q.x - p.x) * 180) / Math.PI;
+        const a = loop.getPointAtLength(Math.max(d - 3, 0));
+        const b = loop.getPointAtLength(Math.min(d + 3, total));
+        const deg = (Math.atan2(b.y - a.y, b.x - a.x) * 180) / Math.PI;
         const heading = Math.abs(deg) <= 90 ? `rotate(${deg})` : `rotate(${deg - 180}) scale(-1 1)`;
         fish.setAttribute('transform', `translate(${p.x} ${p.y}) ${heading}`);
+        tail?.setAttribute('transform', `rotate(${beat} -9.5 0)`);
+        fish.dataset.stage = stageAt(d);
+        wakes.forEach((w) => (w.style.strokeDashoffset = String(Number(w.dataset.shiCycleWake) - d)));
       };
       const still = window.matchMedia('(prefers-reduced-motion: reduce)');
       let raf = 0;
-      let start = 0;
+      let last = 0;
+      let dist = 0.04 * total;
+      let clock = 0;
       const tick = (now: number) => {
-        if (!start) start = now;
-        place((now - start) / LAP_MS);
+        const dt = last ? Math.min((now - last) / 1000, 0.1) : 0;
+        last = now;
+        clock += dt;
+        const stage = stageAt(dist);
+        // upstream the spawner pushes in bursts and rests between them
+        const burst = stage === 'spawner' ? 0.45 + 1.1 * Math.max(0, Math.sin(clock * 2.6)) : 1;
+        dist = (dist + BASE * PACE[stage] * burst * dt) % total;
+        const hz = stage === 'fry' ? 3.4 : 2.2;
+        place(dist, Math.sin(clock * hz * Math.PI * 2) * 14 * Math.min(1.3, burst));
         raf = requestAnimationFrame(tick);
       };
       const run = () => {
         cancelAnimationFrame(raf);
-        if (still.matches) place(0.04);
-        else raf = requestAnimationFrame(tick);
+        last = 0;
+        if (still.matches) {
+          place(0.04 * total, 0);
+          flowAnim?.pause();
+        } else {
+          flowAnim?.play();
+          raf = requestAnimationFrame(tick);
+        }
       };
       still.addEventListener('change', run);
       run();
@@ -412,11 +475,37 @@ const countFor = (slug: HabitatCategorySlug) => SHI_GRID_ROWS.filter((r) => r.ca
     font-family: var(--font-display); font-size: 14px; font-weight: var(--font-weight-semibold); fill: #ffffff;
     stroke: rgba(5, 31, 51, 0.7); stroke-width: 3px; stroke-linejoin: round; paint-order: stroke;
   }
-  .cycle__fish path { fill: #ffffff; stroke: rgba(5, 31, 51, 0.5); stroke-width: 1; }
-  .cycle__fish .cycle__eye { fill: rgba(5, 31, 51, 0.8); }
-  /* On the basin map the loop is a dashed route over the land and water, on a soft navy halo. */
-  .cycle__halo { fill: none; stroke: rgba(5, 31, 51, 0.35); stroke-width: 4; stroke-linejoin: round; }
-  .cycle__loop--route { stroke-width: 1.8; stroke-opacity: 1; stroke-dasharray: 6 5; stroke-linejoin: round; }
+  /* The fish takes its colours from its life stage (data-stage, set by the script): a fine navy
+     edge keeps it legible over trees, water and sky. */
+  .cycle__fish {
+    --fish-body: #dfe7e6; --fish-back: #6f8a8c; --fish-fin: #9fb0ae; --fish-marks: transparent; --fish-spots: transparent;
+    --fish-size: 0.62;
+  }
+  .cycle__fish[data-stage='fry'] { --fish-body: #d9d3a6; --fish-back: #7b7a45; --fish-fin: #b3aa78; --fish-marks: rgba(60, 64, 50, 0.55); --fish-size: 0.5; }
+  .cycle__fish[data-stage='smolt'] { --fish-body: #eef3f2; --fish-back: #5f7f86; --fish-fin: #b7c4c2; --fish-size: 0.58; }
+  .cycle__fish[data-stage='ocean'] { --fish-body: #e8eef0; --fish-back: #3f6178; --fish-fin: #9db0ba; --fish-spots: #1d2b33; --fish-size: 0.72; opacity: 0.82; }
+  .cycle__fish[data-stage='spawner'] { --fish-body: #c4473a; --fish-back: #4f5a33; --fish-fin: #7d3a2e; --fish-spots: #2a2620; --fish-size: 0.7; }
+  .cycle__size { transform: scale(var(--fish-size)); transition: transform 1.2s ease; }
+  .cycle__fish path, .cycle__fish ellipse, .cycle__fish circle { transition: fill 1.2s ease; }
+  .cycle__body { fill: var(--fish-body); stroke: rgba(5, 31, 51, 0.55); stroke-width: 0.7; }
+  .cycle__back { fill: var(--fish-back); }
+  .cycle__fin { fill: var(--fish-fin); stroke: rgba(5, 31, 51, 0.45); stroke-width: 0.5; }
+  .cycle__pec { fill: var(--fish-fin); opacity: 0.85; }
+  .cycle__marks ellipse { fill: var(--fish-marks); }
+  .cycle__spots circle { fill: var(--fish-spots); }
+  .cycle__fish .cycle__eye { fill: #10202a; }
+  @media (prefers-reduced-motion: reduce) { .cycle__size, .cycle__fish path, .cycle__fish ellipse, .cycle__fish circle { transition: none; } }
+  /* On the basin map the route is a fine dotted trail on a faint navy halo; the wake behind the
+     fish is the bright part, so the eye reads the path as travel, not a game waypoint line. */
+  .cycle__halo { fill: none; stroke: rgba(5, 31, 51, 0.16); stroke-width: 2.6; stroke-linejoin: round; }
+  .cycle__loop--route { stroke-width: 1.7; stroke-opacity: 0.8; stroke-dasharray: 0.01 5.2; stroke-linecap: round; stroke-linejoin: round; animation: cycle-drift 2.6s linear infinite; }
+  @keyframes cycle-drift { to { stroke-dashoffset: -5.21; } }
+  .cycle__flow { fill: none; stroke: #ffffff; stroke-width: 3.6; stroke-opacity: 0.38; stroke-linecap: round; stroke-linejoin: round; filter: blur(1px); }
+  @media (prefers-reduced-motion: reduce) { .cycle__loop--route { animation: none; } .cycle__flow { display: none; } }
+  .cycle__wake { fill: none; stroke: #ffffff; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 0 100000; }
+  .cycle__wake[data-shi-cycle-wake='60'] { stroke-opacity: 0.18; }
+  .cycle__wake[data-shi-cycle-wake='34'] { stroke-opacity: 0.3; }
+  .cycle__wake[data-shi-cycle-wake='16'] { stroke-opacity: 0.45; }
 
   /* Wide: the scene runs the window's width less a gutter on each side; the buttons keep the
      page column. */
