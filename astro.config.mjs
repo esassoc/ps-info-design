@@ -32,6 +32,8 @@ const replacedShis = {
   [`${SHI}/list`]: SHI,
   [`${SHI}/indicators/fish-passage`]: SHI,
   [`${SHI}/indicator-reports/fish-passage`]: SHI,
+  // The basin map won the landing page review (2026-11-04); its review page is gone.
+  [`${SHI}/isometric`]: SHI,
 };
 
 export default defineConfig({
