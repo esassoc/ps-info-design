@@ -1,0 +1,47 @@
+---
+// PsInfoShiVitalSignNote — the small margin note on the SHI landing page that
+// points visitors to the Salmon Vital Sign: population numbers and their
+// recovery target live there, not in the habitat indicators (PSP, 2026-11-03).
+// esa-alert-box's info variant is the box, as in psinfo-lios-callout; this
+// maps the note's data into its slot. An <aside> so screen reader users can
+// find it as a labelled complementary region.
+import EsaAlertBox from '@esa/ecology/esa-alert-box.astro';
+
+interface Props {
+  title: string;
+  text: string;
+  link: { text: string; href: string };
+}
+const { title, text, link } = Astro.props;
+---
+<aside class="shinote" aria-label={title}>
+  <EsaAlertBox variant="info" title={title}>
+    <p class="shinote__text">{text}</p>
+    <a class="shinote__link" href={link.href}>{link.text}</a>
+  </EsaAlertBox>
+</aside>
+
+<style>
+  /* Tinted to the Thriving Species and Food Web goal, home of the Salmon
+     Vital Sign: the info roles the lego reads are re-pointed on this note
+     only. The ink is the goal hue darkened as in psinfo-vs-subnav (6.4:1 on
+     the tint); the goal hue itself is 4.4:1 there, short of AA for the
+     small title. Body copy uses the lego's own text hook. */
+  .shinote {
+    --_shinote-ink: color-mix(in srgb, var(--ps-info-goal-species) 78%, #000000);
+    --color-background-utility-info-subtle: color-mix(in srgb, var(--ps-info-goal-species) 6%, var(--color-background-default));
+    --color-border-utility-info: color-mix(in srgb, var(--ps-info-goal-species) 30%, var(--color-background-default));
+    --color-content-utility-info: var(--_shinote-ink);
+    --alert-box-text-color: var(--color-text-primary);
+  }
+  .shinote__text { margin: 0 0 var(--spacing-200) 0; }
+  .shinote__link {
+    color: var(--_shinote-ink);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+  .shinote__link:focus-visible {
+    outline: var(--focus-ring-width) solid var(--focus-ring-color);
+    outline-offset: var(--focus-ring-offset);
+  }
+</style>
