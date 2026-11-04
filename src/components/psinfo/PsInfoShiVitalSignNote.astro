@@ -22,11 +22,21 @@ const { title, text, link } = Astro.props;
 </aside>
 
 <style>
-  /* The lego's own hook for its body copy: darken as the text shrinks. */
-  .shinote { --alert-box-text-color: var(--color-text-primary); }
+  /* Tinted to the Thriving Species and Food Web goal, home of the Salmon
+     Vital Sign: the info roles the lego reads are re-pointed on this note
+     only. The ink is the goal hue darkened as in psinfo-vs-subnav (6.4:1 on
+     the tint); the goal hue itself is 4.4:1 there, short of AA for the
+     small title. Body copy uses the lego's own text hook. */
+  .shinote {
+    --_shinote-ink: color-mix(in srgb, var(--ps-info-goal-species) 78%, #000000);
+    --color-background-utility-info-subtle: color-mix(in srgb, var(--ps-info-goal-species) 6%, var(--color-background-default));
+    --color-border-utility-info: color-mix(in srgb, var(--ps-info-goal-species) 30%, var(--color-background-default));
+    --color-content-utility-info: var(--_shinote-ink);
+    --alert-box-text-color: var(--color-text-primary);
+  }
   .shinote__text { margin: 0 0 var(--spacing-200) 0; }
   .shinote__link {
-    color: var(--color-text-link);
+    color: var(--_shinote-ink);
     text-decoration: underline;
     text-underline-offset: 2px;
   }
