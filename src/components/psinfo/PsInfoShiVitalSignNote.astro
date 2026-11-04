@@ -1,0 +1,37 @@
+---
+// PsInfoShiVitalSignNote — the small margin note on the SHI landing page that
+// points visitors to the Salmon Vital Sign: population numbers and their
+// recovery target live there, not in the habitat indicators (PSP, 2026-11-03).
+// esa-alert-box's info variant is the box, as in psinfo-lios-callout; this
+// maps the note's data into its slot. An <aside> so screen reader users can
+// find it as a labelled complementary region.
+import EsaAlertBox from '@esa/ecology/esa-alert-box.astro';
+
+interface Props {
+  title: string;
+  text: string;
+  link: { text: string; href: string };
+}
+const { title, text, link } = Astro.props;
+---
+<aside class="shinote" aria-label={title}>
+  <EsaAlertBox variant="info" title={title}>
+    <p class="shinote__text">{text}</p>
+    <a class="shinote__link" href={link.href}>{link.text}</a>
+  </EsaAlertBox>
+</aside>
+
+<style>
+  /* The lego's own hook for its body copy: darken as the text shrinks. */
+  .shinote { --alert-box-text-color: var(--color-text-primary); }
+  .shinote__text { margin: 0 0 var(--spacing-200) 0; }
+  .shinote__link {
+    color: var(--color-text-link);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+  .shinote__link:focus-visible {
+    outline: var(--focus-ring-width) solid var(--focus-ring-color);
+    outline-offset: var(--focus-ring-offset);
+  }
+</style>

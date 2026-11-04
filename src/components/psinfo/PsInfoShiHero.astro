@@ -9,6 +9,10 @@
 // lego pairs a logo with a heading. The logo is decorative here (alt="")
 // because its wordmark repeats the h1 beside it. psinfo-shi-hero is the
 // reusable home.
+//
+// Optional `aside` slot: a short margin note. Wide screens set it in the
+// right margin beside the About text (which stops at 50rem), so it adds no
+// height; narrow screens stack it between the title and the About text.
 import { withBase } from '../../lib/base';
 import type { ShiTextRun } from '../../data/pages/salmon-habitat-indicators';
 
@@ -24,8 +28,9 @@ interface Props {
   aboutParagraphs: ShiTextRun[][];
 }
 const { name, subtitle, logo, aboutParagraphs } = Astro.props;
+const hasAside = Astro.slots.has('aside');
 ---
-<header class="shihero">
+<header class={hasAside ? 'shihero shihero--aside' : 'shihero'}>
   <div class="shihero__lockup">
     <img class="shihero__logo" src={withBase(logo.src)} alt="" width={logo.width} height={logo.height} />
     <div class="shihero__text">
@@ -33,6 +38,7 @@ const { name, subtitle, logo, aboutParagraphs } = Astro.props;
       <p class="shihero__subtitle">{subtitle}</p>
     </div>
   </div>
+  {hasAside && <div class="shihero__aside"><slot name="aside" /></div>}
   {aboutParagraphs.length > 0 && (
     <div class="shihero__about">
       {aboutParagraphs.map((p) => (
@@ -67,6 +73,25 @@ const { name, subtitle, logo, aboutParagraphs } = Astro.props;
     font-size: var(--ps-info-text-body); line-height: 1.6; color: var(--color-text-primary);
   }
   .shihero__about p { margin: 0; }
+
+  .shihero--aside {
+    display: grid;
+    grid-template-columns: minmax(0, 50rem) minmax(15rem, 18rem);
+    grid-template-areas: "lockup lockup" "about aside";
+    column-gap: var(--spacing-600);
+    row-gap: var(--spacing-500);
+    align-items: start;
+  }
+  .shihero--aside .shihero__lockup { grid-area: lockup; }
+  .shihero--aside .shihero__about { grid-area: about; }
+  .shihero__aside { grid-area: aside; }
+  @media (max-width: 64rem) {
+    .shihero--aside {
+      grid-template-columns: minmax(0, 1fr);
+      grid-template-areas: "lockup" "aside" "about";
+    }
+    .shihero__aside { max-width: 36rem; }
+  }
   .shihero__about a { color: var(--color-text-link); text-decoration: underline; text-underline-offset: 2px; }
   .shihero__about a:focus-visible { outline: 2px solid var(--focus-ring-color); outline-offset: 2px; }
 

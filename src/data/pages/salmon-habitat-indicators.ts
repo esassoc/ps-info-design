@@ -668,6 +668,15 @@ export const SHI_ABOUT: ShiTextRun[][] = [
   ['Puget Sound Salmon Habitat Indicators measure the health of habitats across Puget Sound that are important to salmon.'],
 ];
 
+/** Margin note beside the About text: visitors take the salmon vital sign
+ *  (population numbers and their recovery target) for one of these habitat
+ *  indicators (PSP, 2026-11-03). Placeholder wording; PSP will edit it. */
+export const SHI_VS_NOTE = {
+  title: 'Salmon Populations',
+  text: 'Salmon population numbers and their recovery target are reported in the Salmon Vital Sign, separate from these habitat indicators.',
+  link: { text: 'Go to the Salmon Vital Sign', href: SALMON_VS_HREF },
+};
+
 /** Under the indicator table, ahead of the related Progress Indicators. */
 export const SHI_HABITAT_USE =
   'Throughout their life cycle, salmon depend on a wide variety of freshwater, estuary, nearshore, and marine habitats. This leaves salmon vulnerable to many forms of human activities.';
