@@ -62,9 +62,9 @@ Reproduced from the live site at 1440 and 390 widths:
    over its habitat: eggs and alevins, fry and parr, smolts and ocean adults on
    the downstream lane, adults returning to spawn on the upstream lane. A
    small fish swims the loop once every 48 seconds, mirrored so it never swims
-   belly up; reduced motion parks it. The basin map (`isometric.astro`,
-   `shi-basin-art.svg`, `src/data/shi-basin.ts`, after the c-basin-map
-   specimen in the diorama's palette) is a second landing page for review: the
+   belly up; reduced motion parks it. The basin map (`shi-basin-art.svg`, `src/data/shi-basin.ts`, after the
+   c-basin-map specimen in the diorama's palette) is the landing page's scene
+   (chosen over the diorama, 2026-11-04): the
    river basin as a tilted tabletop under the Cascades, and the life cycle as
    a dashed white route on the map, down the river, out into the Sound and
    back up, with the same fish.
