@@ -1,15 +1,15 @@
-import{i as r,A as s,b as i,t as d,a as l}from"./typography.C7xuE2z_.js";const n=new Set(["false","0","off","no"]),h={fromAttribute:t=>t!==null&&!n.has(t.trim().toLowerCase()),toAttribute:t=>t?"":null};class g extends r{constructor(){super(),this.onNativeClose=()=>{this.close()},this.onLightDismiss=o=>{const e=this.dialogEl;if(!e||!this.open||o.composedPath()[0]!==e)return;const a=e.getBoundingClientRect();a.top<=o.clientY&&o.clientY<=a.top+a.height&&a.left<=o.clientX&&o.clientX<=a.left+a.width||this.close()},this.open=!1,this.heading="",this.showCloseButton=!0,this.size="md"}static{this.properties={open:{type:Boolean,reflect:!0},heading:{type:String},showCloseButton:{type:Boolean,attribute:"show-close-button",converter:h},size:{type:String,reflect:!0}}}get dialogEl(){return this.renderRoot.querySelector("dialog")}updated(o){if(!o.has("open"))return;const e=this.dialogEl;e&&(this.open?e.open||e.showModal():e.close())}show(){this.open=!0}close(){this.open&&(this.open=!1,this.dispatchEvent(new CustomEvent("close",{bubbles:!0,composed:!0})))}connectedCallback(){super.connectedCallback(),"closedBy"in HTMLDialogElement.prototype||this.addEventListener("click",this.onLightDismiss)}disconnectedCallback(){super.disconnectedCallback(),this.removeEventListener("click",this.onLightDismiss)}render(){const o=this.heading||this.showCloseButton||!!this.querySelector('[slot="header"]'),e=this.querySelector('[slot="header"]')?.textContent?.trim(),a=!!this.heading;return i`
+import{i as s,A as i,b as t,t as r,a as d}from"./typography.C7xuE2z_.js";import{b as l}from"./boolish.DOQu-9JQ.js";class n extends s{constructor(){super(),this.onNativeClose=()=>{this.close()},this.onLightDismiss=o=>{const e=this.dialogEl;if(!e||!this.open||o.composedPath()[0]!==e)return;const a=e.getBoundingClientRect();a.top<=o.clientY&&o.clientY<=a.top+a.height&&a.left<=o.clientX&&o.clientX<=a.left+a.width||this.close()},this.open=!1,this.heading="",this.showCloseButton=!0,this.size="md"}static{this.properties={open:{type:Boolean,reflect:!0},heading:{type:String},showCloseButton:{type:Boolean,attribute:"show-close-button",converter:l},size:{type:String,reflect:!0}}}get dialogEl(){return this.renderRoot.querySelector("dialog")}updated(o){if(!o.has("open"))return;const e=this.dialogEl;e&&(this.open?e.open||e.showModal():e.close())}show(){this.open=!0}close(){this.open&&(this.open=!1,this.dispatchEvent(new CustomEvent("close",{bubbles:!0,composed:!0})))}connectedCallback(){super.connectedCallback(),"closedBy"in HTMLDialogElement.prototype||this.addEventListener("click",this.onLightDismiss)}disconnectedCallback(){super.disconnectedCallback(),this.removeEventListener("click",this.onLightDismiss)}render(){const o=this.heading||this.showCloseButton||!!this.querySelector('[slot="header"]'),e=this.querySelector('[slot="header"]')?.textContent?.trim(),a=!!this.heading;return t`
       <dialog
         class="esa-dialog"
         closedby="any"
-        aria-labelledby=${a?"esa-dialog-title":s}
-        aria-label=${a?s:e||"Dialog"}
+        aria-labelledby=${a?"esa-dialog-title":i}
+        aria-label=${a?i:e||"Dialog"}
         @close=${this.onNativeClose}
       >
-        ${o?i`
+        ${o?t`
               <div class="esa-dialog__header typography-title">
                 <slot name="header"><h2 id="esa-dialog-title" class="esa-dialog__title typography-title">${this.heading}</h2></slot>
-                ${this.showCloseButton?i`
+                ${this.showCloseButton?t`
                       <button class="esa-dialog__close" @click=${this.close} aria-label="Close dialog">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
                       </button>
@@ -19,7 +19,7 @@ import{i as r,A as s,b as i,t as d,a as l}from"./typography.C7xuE2z_.js";const n
         <div class="esa-dialog__body typography-body-md"><slot></slot></div>
         <div class="esa-dialog__footer typography-label-md"><slot name="footer"></slot></div>
       </dialog>
-    `}static{this.styles=[d,l`
+    `}static{this.styles=[r,d`
     :host {
       --_dialog-bg: var(--color-background-elevation-floating, #fcfcfc);
       --_dialog-border-radius: var(--radius-lg, 0.75rem);
@@ -164,4 +164,4 @@ import{i as r,A as s,b as i,t as d,a as l}from"./typography.C7xuE2z_.js";const n
     @media (forced-colors: active) {
       dialog.esa-dialog { border: 1px solid CanvasText; }
     }
-  `]}}customElements.get("esa-dialog")||customElements.define("esa-dialog",g);const c=document.querySelector("[data-vsd-help]"),p=document.querySelector("[data-vsd-dialog]");c?.addEventListener("click",()=>p?.show());
+  `]}}customElements.get("esa-dialog")||customElements.define("esa-dialog",n);const h=document.querySelector("[data-vsd-help]"),g=document.querySelector("[data-vsd-dialog]");h?.addEventListener("click",()=>g?.show());
