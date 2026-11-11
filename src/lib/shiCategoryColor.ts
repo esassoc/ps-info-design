@@ -3,13 +3,11 @@
 import type { HabitatColorGroup } from '../data/shi-domain';
 
 export const SHI_CATEGORY_FILL: Record<HabitatColorGroup, string> = {
-  purple: 'var(--shi-category-purple)',
-  green: 'var(--shi-category-green)',
-  blue: 'var(--shi-category-blue)',
+  'functioning-habitat': 'var(--shi-category-habitat)',
+  'healthy-water-quality': 'var(--shi-category-water)',
 };
 
 export const SHI_CATEGORY_ON_FILL: Record<HabitatColorGroup, string> = {
-  purple: 'var(--shi-category-purple-on)',
-  green: 'var(--shi-category-green-on)',
-  blue: 'var(--shi-category-blue-on)',
+  'functioning-habitat': 'var(--shi-category-habitat-on)',
+  'healthy-water-quality': 'var(--shi-category-water-on)',
 };

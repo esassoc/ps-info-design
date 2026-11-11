@@ -24,8 +24,11 @@ proposal.
 - `ShiRelationship`: `same` (VSI), `extended` (VSI+), `independent`
   (SHI). Every SHI has a parent `VitalSignRef`.
 - `HabitatCategorySlug`: the deck's six buttons. Each category stores a
-  `colorGroup` (`purple` | `green` | `blue`) named for the color only; meaning
-  is undefined, and fills come from `--shi-category-*` in `src/styles/theme-shi.css`.
+  `colorGroup`, the Vital Sign goal it rolls up to (`functioning-habitat` |
+  `healthy-water-quality`); fills come from `--shi-category-*` in
+  `src/styles/theme-shi.css`, which point at the prod goal hues so the buttons
+  and table squares match the Vital Signs icon. Squares have square corners,
+  like the icon's (2026-11-11).
 - `SalmonHabitatIndicatorField`: the single new report section (deck slide 4,
   PSP's preferred option). Nine subfields in deck order, each switched on or
   off per indicator in `enabled`; a subfield renders only when on and filled.
@@ -119,8 +122,13 @@ Other reports turn on fewer subfields, so the toggle shows.
 
 ## All Indicators
 
-Prod's ViewAll tree (`PsInfoVsFancyTree`) with a Salmon Habitat column: SHI mark
-+ the type as a text link. Never the icon alone.
+Prod's ViewAll tree (`PsInfoVsFancyTree`), no Type column: each SHI row
+carries the SHI mark under its name, the designer's textless icon (SHI
+Logo-S2) beside the bold words "Salmon Habitat Indicator". Hover, focus or tap
+on the mark opens a popover with the definition and a link to the SHI landing
+page; Escape closes it. The same mark sits in the Indicator Type field of a
+Complete Indicator Report. Typing "salmon" or "salmon habitat indicators" into
+the tree's search shows the SHI rows ("SHI questions", 2026-11-10 and 11).
 
 ## Data provenance
 

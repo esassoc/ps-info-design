@@ -17,6 +17,7 @@
 // alt text; search input is labeled.
 import EsaIcon from '@esa/ecology/esa-icon.astro';
 import PsInfoShiMark from './PsInfoShiMark.astro';
+import { SHI_SEARCH_TERMS } from '../../data/shi-domain';
 import { withBase } from '../../lib/base';
 import { isExternalHref } from '../../lib/psinfoExternalLink';
 import type { GoalDetail, GoalVitalSign, ProgressLabel, TargetStatusLabel } from '../../data/pages/goals';
@@ -70,6 +71,11 @@ const PLUS = '<path d="M5 12h14"/><path d="M12 5v14"/>';
 const MINUS = '<path d="M5 12h14"/>';
 const uid = (...parts: (string | number)[]) =>
   [treeId, ...parts].join('-').toLowerCase().replace(/[^a-z0-9-]+/g, '');
+// A marked row also answers to the SHI search words (shi-domain), so typing
+// "Salmon Habitat Indicators" into the search shows every SHI.
+const searchText = (ind: { name: string; href: string }) =>
+  salmonMarked.includes(ind.href) ? `${ind.name.toLowerCase()} ${SHI_SEARCH_TERMS}` : ind.name.toLowerCase();
+
 ---
 <div class="vstree" id={treeId} style={`--frame: var(${frameHueVar ?? '--ps-info-blue-800'})`}>
   <div class="vstree__toolbar">
@@ -114,7 +120,7 @@ const uid = (...parts: (string | number)[]) =>
           </div>
           <ul class="vstree__l1" role="list" id={uid(vsign.name)} hidden={expandedLevels < 1}>
             {vsign.indicators.map((ind) => (
-              <li data-tree-row data-level="1" data-text={ind.name.toLowerCase()}>
+              <li data-tree-row data-level="1" data-text={searchText(ind)}>
                 <div class="vstree__row vstree__row--ind vstree__row--ind-shallow">
                   <a class="vstree__link vstree__link--ind" href={ind.href} {...(isExternalHref(ind.href) ? { target: '_blank', rel: 'noopener' } : {})}>{ind.name}</a>
                   <span class="vstree__cell">
@@ -185,7 +191,7 @@ const uid = (...parts: (string | number)[]) =>
               </div>
               <ul class="vstree__l2" role="list" id={uid(goal.slug, vsign.name)} hidden={expandedLevels < 2}>
                 {vsign.indicators.map((ind) => (
-                  <li data-tree-row data-level="2" data-text={ind.name.toLowerCase()}>
+                  <li data-tree-row data-level="2" data-text={searchText(ind)}>
                     <div class="vstree__row vstree__row--ind">
                       <span class="vstree__name">
                         <a class="vstree__link vstree__link--ind" href={indHref(ind.href)} {...(isExternalHref(ind.href) ? { target: '_blank', rel: 'noopener' } : {})}>{ind.name}</a>

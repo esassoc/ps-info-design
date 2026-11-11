@@ -68,15 +68,18 @@ export const TARGET_ICON: Record<TargetStatusLabel, string> = {
 export const SHI_SITE_NAME = 'Puget Sound Salmon Habitat Indicators';
 export const SHI_SUBTITLE = 'Measures of ecosystem conditions in salmon habitats';
 export const SHI_LOGO = { src: '/photos/shi/shi-logo.png', alt: 'Salmon Habitat Indicators', width: 640, height: 546 };
+/** The designer's textless icon (SHI Logo-S2), for the SHI mark in indicator tables:
+    the full logo's words are illegible at table size (Megan, 2026-11-10). */
+export const SHI_ICON = { src: '/photos/shi/shi-icon-s2.png', width: 96, height: 96 };
 
 // ── Habitat categories (deck order: left column, then right column) ───────
 export const HABITAT_CATEGORIES: HabitatCategory[] = [
-  { slug: 'beaches-marine-vegetation', label: 'Beaches & Marine Vegetation', colorGroup: 'purple' },
-  { slug: 'estuaries', label: 'Estuaries', colorGroup: 'purple' },
-  { slug: 'marine-water', label: 'Marine Water', colorGroup: 'purple' },
-  { slug: 'freshwater', label: 'Freshwater', colorGroup: 'green' },
-  { slug: 'streams-floodplains', label: 'Streams & Floodplains', colorGroup: 'green' },
-  { slug: 'stream-structure', label: 'Stream Structure', colorGroup: 'blue' },
+  { slug: 'beaches-marine-vegetation', label: 'Beaches & Marine Vegetation', colorGroup: 'functioning-habitat' },
+  { slug: 'estuaries', label: 'Estuaries', colorGroup: 'functioning-habitat' },
+  { slug: 'marine-water', label: 'Marine Water', colorGroup: 'healthy-water-quality' },
+  { slug: 'freshwater', label: 'Freshwater', colorGroup: 'healthy-water-quality' },
+  { slug: 'streams-floodplains', label: 'Streams & Floodplains', colorGroup: 'functioning-habitat' },
+  { slug: 'stream-structure', label: 'Stream Structure', colorGroup: 'functioning-habitat' },
 ];
 
 export const CATEGORY_BY_SLUG = Object.fromEntries(

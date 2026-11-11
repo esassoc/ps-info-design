@@ -1,25 +1,26 @@
 /* theme-shi.css — Salmon Habitat Indicator tokens, layered on theme-ps-info.
  *
- * The three category fills are the deck's own colors (SHI_PSInfo_MockUp v29,
- * slide 7). What each color group means is not defined yet, so the tokens are
- * named for the color, not a meaning; re-point a group here and every button,
- * graphic region, and table chip follows.
+ * The habitat category fills are the Vital Sign goal hues each habitat rolls
+ * up to, so the landing buttons, graphic regions and table squares match the
+ * Vital Signs icon (Megan and Wessyl, "SHI questions", 2026-11-10; regrouped
+ * by goal, Andy 2026-11-11): Functioning Habitat purple, Healthy Water
+ * Quality teal. Both point at theme-ps-info's exact prod goal values.
  *
- * Text on each fill is chosen for WCAG 1.4.3: white clears 4.5:1 on the purple
- * (#8228bf, 7.0:1) and the blue (#0e59aa, 6.9:1); on the green (#31b6a3) white
- * measures 2.5:1, so it carries the deepest brand navy instead (6.7:1).
+ * White text clears WCAG 1.4.3 on both: 7.0:1 on the purple (#8228bf) and
+ * 4.6:1 on the teal (#018470).
  *
  * The selector is html[data-theme] so it outranks theme-ps-info's
  * [data-theme] whatever order the build bundles the two sheets in (the
  * production bundle put theme-ps-info last and its Lora won).
  */
 html[data-theme="ps-info"] {
-  --shi-category-purple:    #8228bf;
-  --shi-category-green:     #31b6a3;
-  --shi-category-blue:      #0e59aa;
-  --shi-category-purple-on: #ffffff;
-  --shi-category-green-on:  var(--ps-info-blue-950);
-  --shi-category-blue-on:   #ffffff;
+  --shi-category-habitat:    var(--ps-info-goal-habitat);
+  --shi-category-water:      var(--ps-info-goal-water);
+  --shi-category-habitat-on: #ffffff;
+  --shi-category-water-on:   #ffffff;
+  /* Square corners, like the tiles of the Vital Signs icon: the habitat
+     buttons and the table's habitat squares. */
+  --shi-category-radius:     0;
 
   /* theme-ps-info never re-points the hub's tier-2 brand roles, so esa-button
      variant="primary" falls back to the hub's default green. Mapped to PSP

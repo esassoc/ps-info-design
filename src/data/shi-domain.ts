@@ -25,8 +25,18 @@ import type { ProgressLabel, TargetStatusLabel } from './pages/goals';
  *  2026-10-13 ("I don't think they need to know type"). */
 export type ShiRelationship = 'same' | 'extended' | 'independent';
 
-/** The label the SHI mark carries everywhere it appears (never the icon alone). */
+/** The label the SHI mark carries beside its icon everywhere it appears. */
 export const SHI_MARK_LABEL = 'Salmon Habitat Indicator';
+
+/** The definition the SHI mark's popover states (Megan, "SHI questions",
+ *  2026-11-10; "heath" corrected to "health", Andy 2026-11-11). */
+export const SHI_DEFINITION =
+  'Salmon Habitat Indicators measure the health of habitats across Puget Sound that are important to salmon. They are a subset of Vital Sign Indicators.';
+
+/** Words a marked indicator also answers to in a table search, so typing
+ *  "Salmon Habitat Indicators" (or "salmon", or "SHI") finds every SHI,
+ *  whatever its name ("SHI questions", 2026-11-10). Lower case. */
+export const SHI_SEARCH_TERMS = 'salmon habitat indicators shi';
 
 // ── Habitat categories (the six landing-page buttons) ──────────────────────
 export type HabitatCategorySlug =
@@ -37,10 +47,10 @@ export type HabitatCategorySlug =
   | 'streams-floodplains'
   | 'stream-structure';
 
-/** The deck groups the six buttons into three colors whose meaning PSP has not
- *  defined yet. The group is stored as its color name only; the fill comes
- *  from a --shi-category-* token so a decision is a one-line theme change. */
-export type HabitatColorGroup = 'purple' | 'green' | 'blue';
+/** The Vital Sign goal a habitat rolls up to, which sets its color so the
+ *  six buttons match the Vital Signs icon (2026-11-11). The fill comes from a
+ *  --shi-category-* token in theme-shi.css. */
+export type HabitatColorGroup = 'functioning-habitat' | 'healthy-water-quality';
 
 export interface HabitatCategory {
   slug: HabitatCategorySlug;
