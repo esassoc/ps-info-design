@@ -3,18 +3,17 @@
 // Logo-S2) beside the bold words "Salmon Habitat Indicator" (DELTA-1346).
 // The full logo's words were illegible at table size, so the icon replaced it
 // (Megan, "SHI questions", 2026-11-10). Hover, keyboard focus or tap on the
-// mark opens a popover stating what a Salmon Habitat Indicator is, with a link
-// to the SHI landing page; Enter or Space opens and closes it, Escape closes
-// it. One component for every place an indicator is marked: indicator table
+// mark opens a popover stating what a Salmon Habitat Indicator is; clicking or
+// tapping the mark goes to the SHI landing page, and Escape closes the popover.
+// One component for every place an indicator is marked: indicator table
 // rows and the Indicator Type field of a Complete Indicator Report.
 //
 // bcn-lego-checked: the popover is esa-popover in hover mode (opens on hover
 // with a delay and on focus, closes on Escape from anywhere, stays open while
 // the pointer is over the panel, so SC 1.4.13 holds); esa-tooltip holds plain
-// text only and this panel carries a link. The trigger is a native button
-// because esa-popover sets aria-expanded on its slotted node, and esa-button
-// renders a wrapper span around its button, so the state would land on the
-// span; esa-icon-button renders a Lucide glyph, not the raster logo.
+// text only and this panel carries a link. The trigger is a native link to the
+// landing page because esa-popover sets aria-expanded on its slotted node, and
+// esa-icon-link renders a Lucide glyph, not the raster logo.
 // psinfo-shi-mark is the reusable home.
 import { withBase } from '../../lib/base';
 import { SHI_MARK_LABEL, SHI_DEFINITION } from '../../data/shi-domain';
@@ -29,11 +28,11 @@ const { epicStory } = Astro.props;
 const epicAttrs = epicStory ? epicMarkAttrs(epicStory, `${SHI_MARK_LABEL} mark`) : {};
 ---
 <esa-popover class="shimark" trigger="hover" position="bottom" offset="4" has-arrow="false" label={SHI_MARK_LABEL} {...epicAttrs}>
-  <button class="shimark__btn typography-label-sm-strong" type="button">
+  <a class="shimark__btn typography-label-sm-strong" href={withBase(shiRoutes.landing)}>
     <img class="shimark__icon" src={withBase(SHI_ICON.src)} alt="" width={SHI_ICON.width} height={SHI_ICON.height} />
     <span class="shimark__label">{SHI_MARK_LABEL}</span>
-  </button>
-  <div slot="content" class="shimark__tip typography-body-lg">
+  </a>
+  <div slot="content" class="shimark__tip typography-body-md">
     <p class="shimark__def">{SHI_DEFINITION}</p>
     <a class="shimark__link" href={withBase(shiRoutes.landing)}>About Salmon Habitat Indicators</a>
   </div>
@@ -42,9 +41,9 @@ const epicAttrs = epicStory ? epicMarkAttrs(epicStory, `${SHI_MARK_LABEL} mark`)
 <script>
   import '@esa/ecology/esa-popover';
 
-  // Stopgaps for three esa-popover hover-mode gaps (docs/system-improvement-ledger.md,
+  // Stopgaps for two esa-popover hover-mode gaps (docs/system-improvement-ledger.md,
   // 2026-11-11). Remove each once the hub ships its fix.
-  type Popover = HTMLElement & { open: boolean; show(): void; hide(): void };
+  type Popover = HTMLElement;
   const GUTTER = 16;
 
   // 1. Escape from the tip's link: esa-popover hides and hands focus back to the
@@ -59,20 +58,11 @@ const epicAttrs = epicStory ? epicMarkAttrs(epicStory, `${SHI_MARK_LABEL} mark`)
   }, true);
 
   document.querySelectorAll<Popover>('esa-popover.shimark').forEach((pop) => {
-    const btn = pop.querySelector<HTMLButtonElement>(':scope > button');
+    const btn = pop.querySelector<HTMLAnchorElement>(':scope > a');
     if (!btn) return;
     btn.addEventListener('focusin', (e) => { if (closing) e.stopPropagation(); });
 
-    // 2. Hover mode ignores activation, so after Escape the keyboard could not
-    //    reopen the tip. Enter and Space toggle it, as aria-haspopup promises.
-    //    Keys only: a tap's focus already opens it, and its click must not close it.
-    btn.addEventListener('keydown', (e) => {
-      if (e.key !== 'Enter' && e.key !== ' ') return;
-      e.preventDefault();
-      if (pop.open) pop.hide(); else pop.show();
-    });
-
-    // 3. The panel centres on the trigger and has no viewport collision handling,
+    // 2. The panel centres on the trigger and has no viewport collision handling,
     //    so near the left edge of a phone it ran off screen (SC 1.4.10). Nudge it
     //    back inside a 16px gutter whenever it renders.
     const clamp = () => {
@@ -103,17 +93,20 @@ const epicAttrs = epicStory ? epicMarkAttrs(epicStory, `${SHI_MARK_LABEL} mark`)
     min-height: 1.75rem; padding: 0;
     border: 0; background: none; cursor: pointer;
     color: var(--ps-info-blue-800);
-    text-align: start;
+    text-align: start; text-decoration: none;
   }
+  .shimark__btn:hover .shimark__label { text-decoration: underline; text-underline-offset: 3px; }
   .shimark__btn:focus-visible { outline: 2px solid var(--focus-ring-color); outline-offset: 2px; }
   .shimark__icon { flex: none; width: 1.5rem; height: 1.5rem; }
   /* A set width, not --popover-max-width: the panel's min-width: max-content
      outranks its max-width, so a long sentence never wraps without it. */
   .shimark__tip {
     display: flex; flex-direction: column; gap: var(--spacing-200);
-    width: min(18rem, calc(100vw - 2 * var(--spacing-400) - 2rem));
-    /* body-lg's fluid size dips to 14px on phones; prose keeps a 16px floor. */
-    font-size: max(1rem, var(--typography-body-lg-font-size));
+    width: min(16rem, calc(100vw - 2 * var(--spacing-400) - 2rem));
+    /* body-md's fluid size tops out at 15px; prose keeps a 16px floor, set
+       tighter than body text since it is a short popover. */
+    font-size: 1rem;
+    line-height: var(--line-height-tight);
   }
   .shimark__def { margin: 0; }
   .shimark__link { text-decoration: underline; text-underline-offset: 3px; }
