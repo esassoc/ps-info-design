@@ -1,8 +1,8 @@
 // vs-sound-sites.ts: where each Vital Sign Indicator sits on the whole-Sound scene
 // (psinfo-vs-sound-explorer, Indicators view), with the real place it stands for and
 // the kind of illustrated object drawn under its dot.
-// GENERATED from docs/private/briefs/vs-home-rollup/scene/indicator-sites.py; the art
-// generator (vs-sound-gen.py) rewrites it with positions lifted onto the relief.
+// GENERATED from docs/private/briefs/vs-home-rollup/scene/indicator-sites.py by the art
+// generator (vs-sound-gen.py), with positions lifted onto the relief; edit those, not this file.
 
 export interface SoundSite { indicator: string; vitalSign: string; place: string; kind: string; x: number; y: number }
 export const VS_SOUND_SITES: SoundSite[] = [
@@ -20,7 +20,7 @@ export const VS_SOUND_SITES: SoundSite[] = [
     "place": "Clover Creek aquifer",
     "kind": "well",
     "x": 810.4,
-    "y": 606.7
+    "y": 605.1
   },
   {
     "indicator": "Nitrate concentration in source water",
@@ -28,7 +28,7 @@ export const VS_SOUND_SITES: SoundSite[] = [
     "place": "Cedar River intake",
     "kind": "intake",
     "x": 1075.6,
-    "y": 516.7
+    "y": 515.1
   },
   {
     "indicator": "Bivalve harvest for personal use",
@@ -52,7 +52,7 @@ export const VS_SOUND_SITES: SoundSite[] = [
     "place": "Snoqualmie Valley farms",
     "kind": "harvest",
     "x": 1061.3,
-    "y": 416.7
+    "y": 409.7
   },
   {
     "indicator": "Condition of swimming beaches",
@@ -76,7 +76,7 @@ export const VS_SOUND_SITES: SoundSite[] = [
     "place": "Shelton timber and oysters",
     "kind": "boat-work",
     "x": 195.4,
-    "y": 578.3
+    "y": 576.7
   },
   {
     "indicator": "Area of harvestable shellfish beds",
@@ -91,8 +91,8 @@ export const VS_SOUND_SITES: SoundSite[] = [
     "vitalSign": "Cultural Wellbeing",
     "place": "Tulalip Bay canoe landing",
     "kind": "canoe",
-    "x": 867.3,
-    "y": 296.7
+    "x": 864.4,
+    "y": 295.8
   },
   {
     "indicator": "Employment in natural resource industries",
@@ -116,7 +116,7 @@ export const VS_SOUND_SITES: SoundSite[] = [
     "place": "Port Townsend boatyard",
     "kind": "boatyard",
     "x": 512.0,
-    "y": 280.0
+    "y": 279.4
   },
   {
     "indicator": "Good Governance Index",
@@ -124,7 +124,7 @@ export const VS_SOUND_SITES: SoundSite[] = [
     "place": "Capitol campus, Olympia",
     "kind": "capitol",
     "x": 363.4,
-    "y": 630.0
+    "y": 628.4
   },
   {
     "indicator": "Overall life satisfaction",
@@ -132,7 +132,7 @@ export const VS_SOUND_SITES: SoundSite[] = [
     "place": "Bainbridge Island",
     "kind": "house",
     "x": 698.2,
-    "y": 433.3
+    "y": 431.7
   },
   {
     "indicator": "Psychological Wellbeing Index",
@@ -140,23 +140,23 @@ export const VS_SOUND_SITES: SoundSite[] = [
     "place": "Kitsap trails",
     "kind": "bench-view",
     "x": 517.2,
-    "y": 450.0
+    "y": 448.4
   },
   {
     "indicator": "Sense of Place Index",
     "vitalSign": "Sense of Place",
     "place": "Seattle waterfront",
     "kind": "needle",
-    "x": 846.8,
-    "y": 440.7
+    "x": 847.1,
+    "y": 436.5
   },
   {
     "indicator": "Engagement in stewardship activities",
     "vitalSign": "Sound Stewardship",
     "place": "Whidbey restoration planting",
     "kind": "volunteers",
-    "x": 736.7,
-    "y": 326.7
+    "x": 747.0,
+    "y": 324.9
   },
   {
     "indicator": "Sound Behavior Index",
@@ -164,7 +164,7 @@ export const VS_SOUND_SITES: SoundSite[] = [
     "place": "Edmonds neighborhoods",
     "kind": "rain-garden",
     "x": 828.8,
-    "y": 380.0
+    "y": 378.4
   },
   {
     "indicator": "Abundance of marine bird populations",
@@ -180,7 +180,7 @@ export const VS_SOUND_SITES: SoundSite[] = [
     "place": "Kitsap forest",
     "kind": "songbird",
     "x": 430.0,
-    "y": 490.0
+    "y": 488.4
   },
   {
     "indicator": "Estuarine birds",
@@ -203,8 +203,8 @@ export const VS_SOUND_SITES: SoundSite[] = [
     "vitalSign": "Forage Fish",
     "place": "Port Gamble Bay",
     "kind": "fish-school",
-    "x": 654.8,
-    "y": 370.0
+    "x": 654.6,
+    "y": 364.0
   },
   {
     "indicator": "Abundance and biomass of benthic marine invertebrates",
@@ -252,7 +252,7 @@ export const VS_SOUND_SITES: SoundSite[] = [
     "place": "Green River",
     "kind": "coho",
     "x": 1041.7,
-    "y": 550.0
+    "y": 548.4
   },
   {
     "indicator": "Number of natural-origin Puget Sound steelhead on spawning grounds",
@@ -260,7 +260,7 @@ export const VS_SOUND_SITES: SoundSite[] = [
     "place": "Puyallup River",
     "kind": "steelhead",
     "x": 953.9,
-    "y": 593.3
+    "y": 591.7
   },
   {
     "indicator": "Number of natural-origin summer chum salmon on spawning grounds",
@@ -275,8 +275,8 @@ export const VS_SOUND_SITES: SoundSite[] = [
     "vitalSign": "Zooplankton",
     "place": "Saratoga Passage",
     "kind": "plankton-net",
-    "x": 703.4,
-    "y": 290.0
+    "x": 700.1,
+    "y": 290.6
   },
   {
     "indicator": "Seasonal average zooplankton biomass",
@@ -307,15 +307,15 @@ export const VS_SOUND_SITES: SoundSite[] = [
     "vitalSign": "Beaches and Marine Vegetation",
     "place": "Port Susan flats",
     "kind": "eelgrass",
-    "x": 802.2,
-    "y": 260.0
+    "x": 800.4,
+    "y": 260.2
   },
   {
     "indicator": "Extent of forest cover in nearshore marine riparian areas",
     "vitalSign": "Beaches and Marine Vegetation",
     "place": "Hood Canal shoreline",
     "kind": "shore-trees",
-    "x": 250.7,
+    "x": 253.0,
     "y": 493.3
   },
   {
@@ -347,8 +347,8 @@ export const VS_SOUND_SITES: SoundSite[] = [
     "vitalSign": "Beaches and Marine Vegetation",
     "place": "Case Inlet",
     "kind": "eelgrass",
-    "x": 442.0,
-    "y": 540.0
+    "x": 448.8,
+    "y": 539.5
   },
   {
     "indicator": "Understory kelp abundance and condition",
@@ -371,8 +371,8 @@ export const VS_SOUND_SITES: SoundSite[] = [
     "vitalSign": "Estuaries",
     "place": "Liberty Bay",
     "kind": "pocket-estuary",
-    "x": 608.1,
-    "y": 410.0
+    "x": 616.7,
+    "y": 414.2
   },
   {
     "indicator": "Extent of forest cover in the upper, middle, and lower areas of watersheds",
@@ -380,15 +380,15 @@ export const VS_SOUND_SITES: SoundSite[] = [
     "place": "Olympic foothills",
     "kind": "forest",
     "x": 179.7,
-    "y": 443.3
+    "y": 416.8
   },
   {
     "indicator": "Forest condition",
     "vitalSign": "Forests and Wetlands",
     "place": "Tiger Mountain",
     "kind": "forest-stand",
-    "x": 1095.7,
-    "y": 498.3
+    "x": 1094.9,
+    "y": 481.8
   },
   {
     "indicator": "Wetlands extent and condition",
@@ -396,7 +396,7 @@ export const VS_SOUND_SITES: SoundSite[] = [
     "place": "Snohomish wetlands",
     "kind": "wetland",
     "x": 959.1,
-    "y": 306.7
+    "y": 305.1
   },
   {
     "indicator": "Changes in hydrologic regime in streams and rivers",
@@ -427,16 +427,16 @@ export const VS_SOUND_SITES: SoundSite[] = [
     "vitalSign": "Streams and Floodplains",
     "place": "Snoqualmie floodplain",
     "kind": "flood",
-    "x": 1086.2,
-    "y": 443.3
+    "x": 1077.5,
+    "y": 441.1
   },
   {
     "indicator": "Summer low flow in streams and rivers",
     "vitalSign": "Streams and Floodplains",
     "place": "Deschutes River",
     "kind": "low-flow",
-    "x": 413.9,
-    "y": 635.0
+    "x": 416.0,
+    "y": 631.7
   },
   {
     "indicator": "Freshwater Benthic Index of Biotic Integrity",
@@ -444,7 +444,7 @@ export const VS_SOUND_SITES: SoundSite[] = [
     "place": "Bear Creek",
     "kind": "kick-net",
     "x": 1030.9,
-    "y": 423.3
+    "y": 421.7
   },
   {
     "indicator": "Nutrient concentration in streams and rivers",
@@ -452,23 +452,23 @@ export const VS_SOUND_SITES: SoundSite[] = [
     "place": "Clover Creek",
     "kind": "water-sample",
     "x": 764.0,
-    "y": 600.0
+    "y": 596.2
   },
   {
     "indicator": "Water temperature in streams and rivers",
     "vitalSign": "Freshwater",
     "place": "Issaquah Creek",
     "kind": "thermometer",
-    "x": 1093.9,
-    "y": 466.7
+    "x": 1085.0,
+    "y": 462.2
   },
   {
     "indicator": "Dissolved oxygen in marine water",
     "vitalSign": "Marine Water",
     "place": "Lynch Cove, Hood Canal",
     "kind": "buoy",
-    "x": 367.5,
-    "y": 510.0
+    "x": 367.0,
+    "y": 513.0
   },
   {
     "indicator": "Marine Benthic Index",
@@ -499,15 +499,15 @@ export const VS_SOUND_SITES: SoundSite[] = [
     "vitalSign": "Marine Water",
     "place": "Budd Inlet",
     "kind": "water-sample",
-    "x": 352.7,
-    "y": 608.3
+    "x": 424.0,
+    "y": 603.7
   },
   {
     "indicator": "Ocean acidification",
     "vitalSign": "Marine Water",
     "place": "Port Madison",
     "kind": "acid-buoy",
-    "x": 680.6,
+    "x": 682.7,
     "y": 410.0
   },
   {
@@ -531,8 +531,8 @@ export const VS_SOUND_SITES: SoundSite[] = [
     "vitalSign": "Toxics in Aquatic Life",
     "place": "Duwamish River mouth",
     "kind": "salmon",
-    "x": 845.6,
-    "y": 458.3
+    "x": 844.7,
+    "y": 454.3
   },
   {
     "indicator": "Contaminants in caged mussels",
@@ -563,7 +563,7 @@ export const VS_SOUND_SITES: SoundSite[] = [
     "vitalSign": "Toxics in Aquatic Life",
     "place": "Squaxin Passage",
     "kind": "herring",
-    "x": 373.6,
-    "y": 590.0
+    "x": 410.6,
+    "y": 592.5
   }
 ];
