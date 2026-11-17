@@ -111,10 +111,11 @@ const DESC =
 <div class="vss" data-vss-explorer data-view="goals" style={`--vss-scene-w: ${VS_SOUND_WIDTH}px`}>
   <div class="vss__bar">
     <esa-button-toggle class="vss__view" size="sm" label="View by" value="goals" data-vss-view></esa-button-toggle>
-    {/* WCAG 2.2.2: the scene moves for longer than five seconds, so it can be paused. */}
-    <div class="vss__controls">
-      <EsaButton variant="secondary" size="sm" data-vss-pause>Pause animation</EsaButton>
-    </div>
+  </div>
+  <div class="vss__stage">
+  {/* WCAG 2.2.2: the ferries, orcas and water move for longer than five seconds, so the scene needs a pause; it sits quietly in the corner, as on a video. */}
+  <div class="vss__controls">
+    <EsaButton variant="chrome" size="sm" data-vss-pause>Pause</EsaButton>
   </div>
   <div class="vss__strip" role="region" aria-label="Puget Sound Vital Signs map" tabindex="-1">
     <div class="vss__pan">
@@ -137,10 +138,10 @@ const DESC =
                 {...(m.ext ? { target: '_blank', rel: 'noopener' } : {})}
               >
                 <g transform={`translate(${m.x} ${m.y})`}>
-                  <circle class="vm__hit" r={m.view === 'goals' ? 20 : 12} />
-                  <ellipse class="vm__shadow" cx="1.5" cy="3" rx={m.view === 'goals' ? 11 : 7.5} ry={m.view === 'goals' ? 5 : 3.5} />
-                  <circle class="vm__ring" r={m.view === 'goals' ? 11 : 7.5} />
-                  <circle class="vm__dot" r={m.view === 'goals' ? 4.6 : 3.2} />
+                  {/* The illustrated object is the landmark; the pin is a small anchor at its base. Hit area stays 24px+ (WCAG 2.5.8). */}
+                  <circle class="vm__hit" r="14" />
+                  <ellipse class="vm__shadow" cx="1" cy="2" rx={m.view === 'goals' ? 6 : 4.5} ry={m.view === 'goals' ? 2.6 : 2} />
+                  <circle class="vm__ring" r={m.view === 'goals' ? 5.5 : 4} />
                 </g>
               </a>
             ))}
@@ -149,7 +150,7 @@ const DESC =
           <g class="vss__labels" aria-hidden="true">
             {pins.map((m) => (
               <g transform={`translate(${m.x} ${m.y})`} style={`--goal: ${GOAL_FILL[m.goal]}`}>
-                <g class="vm__label" data-dy={m.view === 'goals' ? -32 : -26} transform={`translate(0 ${m.view === 'goals' ? -32 : -26})`}>
+                <g class="vm__label" data-dy="-22" transform="translate(0 -22)">
                   <rect class="vm__plaque" rx="3" />
                   <text class="vm__text" text-anchor="middle" y="-3">{m.title}</text>
                   {m.sub && <text class="vm__sub" text-anchor="middle" y="11">{m.sub}</text>}
@@ -165,6 +166,7 @@ const DESC =
         </svg>
       </div>
     </div>
+  </div>
   </div>
 
   <ul class="vss__buttons" role="list" aria-label="Show one goal on the map">
@@ -228,8 +230,15 @@ const DESC =
     pauseBtn?.addEventListener('click', () => {
       const paused = root.classList.toggle('is-paused');
       const label = pauseBtn.querySelector('.esa-button__label') ?? pauseBtn;
-      label.textContent = paused ? 'Play animation' : 'Pause animation';
+      label.textContent = paused ? 'Play' : 'Pause';
+      pauseBtn.setAttribute('aria-label', paused ? 'Play the map animation' : 'Pause the map animation');
     });
+    pauseBtn?.setAttribute('aria-label', 'Pause the map animation');
+    // Wide viewports: the scene runs nearly the window's width (as psinfo-shi-habitat-explorer);
+    // 100vw counts a classic scrollbar, so its width comes off or the page would scroll sideways.
+    const fitBleed = () => root.style.setProperty('--vss-sbw', `${window.innerWidth - document.documentElement.clientWidth}px`);
+    fitBleed();
+    window.addEventListener('resize', fitBleed);
     // WCAG 1.4.13: Escape dismisses an open plaque.
     document.addEventListener('keydown', (e) => { if (e.key === 'Escape') labels.forEach((l) => l.classList.remove('is-on')); });
 
@@ -258,7 +267,21 @@ const DESC =
 
 <style>
   .vss { position: relative; width: 100%; }
-  .vss__bar { display: flex; align-items: flex-end; justify-content: space-between; gap: var(--spacing-300); margin-bottom: var(--spacing-250); }
+  .vss__bar { display: flex; align-items: flex-end; gap: var(--spacing-300); margin-bottom: var(--spacing-250); }
+  .vss__stage { position: relative; }
+  .vss__controls {
+    position: absolute; z-index: 1; right: var(--spacing-250); bottom: var(--spacing-250);
+    background: color-mix(in srgb, var(--shi-art-ivory) 88%, transparent); color: var(--shi-art-ivory-ink);
+    border-radius: var(--radius-100);
+  }
+  /* Wide: the scene runs the window's width less a gutter each side; the bar and buttons keep the page column. */
+  @media (min-width: 761px) {
+    .vss__stage {
+      --vss-bleed: min(1680px, calc(100vw - var(--vss-sbw, 0px) - 2 * var(--spacing-500)));
+      width: var(--vss-bleed);
+      margin-inline: calc((100% - var(--vss-bleed)) / 2);
+    }
+  }
   .vss__buttons[hidden] { display: none; }
   .vss__live { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
   .vss.is-paused :global(:is(.vss-ferry, .vss-orca use, .vss-glint, .vss-clouds, .vss-gulls)) { animation-play-state: paused; }
@@ -273,25 +296,25 @@ const DESC =
   .vm:focus { outline: none; }
   .vm__hit { fill: transparent; }
   .vm__shadow { fill: #1d2a22; opacity: 0.28; }
-  .vm__ring { fill: var(--shi-art-ivory); stroke: var(--goal); stroke-width: 4; transition: r 160ms ease, stroke-width 160ms ease, opacity 160ms ease; }
+  .vm__ring { fill: var(--goal); stroke: var(--shi-art-ivory); stroke-width: 1.8; transition: r 160ms ease, stroke-width 160ms ease, opacity 160ms ease; }
   .vm__dot { transition: opacity 160ms ease; }
   /* The view decides which pins, plaques and art layer are on the map. */
   .vss[data-view='goals'] .vm--indicators, .vss[data-view='indicators'] .vm--goals { display: none; }
   .vss[data-view='goals'] :global(.vss-layer--indicators), .vss[data-view='indicators'] :global(.vss-layer--goals) { display: none; }
   .vss[data-view='goals'] [data-vss-for-view='indicators'], .vss[data-view='indicators'] [data-vss-for-view='goals'] { display: none; }
   .vm__sub { font-family: var(--font-sans); font-size: 11.5px; fill: var(--shi-art-ivory-ink); }
-  .vm--indicators .vm__ring { stroke-width: 3; }
-  .vm--indicators:hover .vm__ring, .vm--indicators:focus-visible .vm__ring { r: 10; stroke-width: 3.6; }
+  .vm--indicators .vm__ring { stroke-width: 1.5; }
+  .vm--indicators:hover .vm__ring, .vm--indicators:focus-visible .vm__ring { r: 6.5; }
   .vm__dot { fill: var(--goal); }
   .vm__label { opacity: 0; pointer-events: none; transition: opacity 160ms ease; }
   .vm__plaque { fill: var(--shi-art-ivory); stroke: var(--goal); stroke-width: 2; }
   .vm__text { font-family: var(--font-display); font-size: 13px; font-weight: var(--font-weight-semibold); fill: var(--shi-art-ivory-ink); }
   .vm__label.is-on { opacity: 1; }
-  .vm:hover .vm__ring, .vm:focus-visible .vm__ring { r: 13.5; stroke-width: 4.5; }
-  .vm:focus-visible .vm__ring { stroke: var(--focus-ring-color); stroke-width: 5; }
-  .vm.is-muted .vm__ring { r: 6; stroke: var(--shi-art-ivory-ink); stroke-width: 2; opacity: 0.55; }
+  .vm:hover .vm__ring, .vm:focus-visible .vm__ring { r: 8; stroke-width: 2.2; }
+  .vm:focus-visible .vm__ring { stroke: var(--focus-ring-color); stroke-width: 3; }
+  .vm.is-muted .vm__ring { r: 3; fill: var(--shi-art-ivory-ink); stroke-width: 1; opacity: 0.45; }
   .vm.is-muted .vm__dot, .vm.is-muted .vm__shadow { opacity: 0; }
-  .vm.is-muted:hover .vm__ring, .vm.is-muted:focus-visible .vm__ring { r: 11; opacity: 1; }
+  .vm.is-muted:hover .vm__ring, .vm.is-muted:focus-visible .vm__ring { r: 6.5; fill: var(--goal); opacity: 1; }
 
   /* Goal filter: the five goal colours, one pressed at a time. */
   .vss__buttons { list-style: none; margin: var(--spacing-300) 0 0; padding: 0; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: var(--spacing-200); }
