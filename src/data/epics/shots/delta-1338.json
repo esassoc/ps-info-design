@@ -1,44 +1,35 @@
 {
   "DELTA-912": {
-    "/prototypes/vital-signs/home": [
+    "/prototypes/vital-signs/home-sound": [
       {
-        "src": "/epic-shots/delta-1338/delta-912/vital-signs-home-1.jpg",
-        "width": 1214,
-        "height": 724,
+        "src": "/epic-shots/delta-1338/delta-912/vital-signs-home-sound-1.jpg",
+        "width": 1280,
+        "height": 864,
         "marks": [
           {
             "n": 1,
-            "label": "Indicator roll-up",
-            "badge": "start",
-            "x": 64.17,
-            "y": 36.68,
-            "w": 33.28,
-            "h": 54.7
-          },
-          {
-            "n": 2,
-            "label": "Wheel beside the roll-up",
-            "badge": "start",
-            "x": 5.19,
-            "y": 4.28,
-            "w": 54.53,
-            "h": 91.44
+            "label": "Illustrated map: Goals and Indicators views",
+            "badge": "above",
+            "x": 1.88,
+            "y": 7.29,
+            "w": 96.25,
+            "h": 89.11
           }
         ]
       },
       {
-        "src": "/epic-shots/delta-1338/delta-912/vital-signs-home-2.jpg",
-        "width": 1204,
-        "height": 1573,
+        "src": "/epic-shots/delta-1338/delta-912/vital-signs-home-sound-2.jpg",
+        "width": 720,
+        "height": 458,
         "marks": [
           {
-            "n": 3,
-            "label": "All Indicators with status filter",
+            "n": 2,
+            "label": "Indicator roll-up",
             "badge": "start",
-            "x": 5.23,
-            "y": 3.62,
-            "w": 92.19,
-            "h": 94.41
+            "x": 33.47,
+            "y": 6.87,
+            "w": 56.11,
+            "h": 86.46
           }
         ]
       }

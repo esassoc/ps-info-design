@@ -13,6 +13,7 @@ import PsInfoVsRollup from '../../../components/psinfo/PsInfoVsRollup.astro';
 import PsInfoSectionTitle from '../../../components/psinfo/PsInfoSectionTitle.astro';
 import PsInfoVsFancyTree from '../../../components/psinfo/PsInfoVsFancyTree.astro';
 import PsInfoVsPartners from '../../../components/psinfo/PsInfoVsPartners.astro';
+import PsInfoEpicMark from '../../../components/psinfo/PsInfoEpicMark.astro';
 import { GOALS, ABOUT_VITAL_SIGNS_URL, VITAL_SIGNS_SITE } from '../../../data/pages/goals';
 import { ESPANOL_LINK, INTRO_PARAGRAPHS } from '../../../data/pages/vital-signs';
 import { SHI_GOALS, SHI_MARKED_HREFS } from '../../../data/pages/salmon-habitat-indicators';
@@ -35,11 +36,15 @@ const TREE_ID = 'tree-home-sound';
   ]}
 >
   <div class="stack" data-gap="2xl">
-    <PsInfoVsSoundExplorer goals={GOALS} />
+    <PsInfoEpicMark story="DELTA-912" label="Illustrated map: Goals and Indicators views">
+      <PsInfoVsSoundExplorer goals={GOALS} />
+    </PsInfoEpicMark>
 
     <PsInfoVsHomeOverview label="Vital Sign Indicators">
       <PsInfoVitalSignsIntro slot="rail" espanolLink={ESPANOL_LINK} paragraphs={[INTRO_PARAGRAPHS[0]]} variant="margin" />
-      <PsInfoVsRollup slot="rail" goals={GOALS} treeId={TREE_ID} />
+      <PsInfoEpicMark slot="rail" story="DELTA-912" label="Indicator roll-up">
+        <PsInfoVsRollup goals={GOALS} treeId={TREE_ID} />
+      </PsInfoEpicMark>
       <div class="stack" data-gap="md">
         <PsInfoSectionTitle title="All Indicators" size="lg" />
         <PsInfoVsFancyTree
