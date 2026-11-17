@@ -43,8 +43,8 @@ export const VS_SOUND_SITES: SoundSite[] = [
     "vitalSign": "Local Foods",
     "place": "Port Susan",
     "kind": "crab-pot",
-    "x": 782.4,
-    "y": 273.3
+    "x": 780.2,
+    "y": 274.9
   },
   {
     "indicator": "Locally harvestable foods",
@@ -59,8 +59,8 @@ export const VS_SOUND_SITES: SoundSite[] = [
     "vitalSign": "Outdoor Activity",
     "place": "Alki Beach",
     "kind": "swim-beach",
-    "x": 799.6,
-    "y": 456.7
+    "x": 797.1,
+    "y": 459.5
   },
   {
     "indicator": "Nature-based recreation",
@@ -147,16 +147,16 @@ export const VS_SOUND_SITES: SoundSite[] = [
     "vitalSign": "Sense of Place",
     "place": "Seattle waterfront",
     "kind": "needle",
-    "x": 847.1,
-    "y": 436.5
+    "x": 848.0,
+    "y": 443.2
   },
   {
     "indicator": "Engagement in stewardship activities",
     "vitalSign": "Sound Stewardship",
     "place": "Whidbey restoration planting",
     "kind": "volunteers",
-    "x": 747.0,
-    "y": 324.9
+    "x": 744.3,
+    "y": 322.5
   },
   {
     "indicator": "Sound Behavior Index",
@@ -227,8 +227,8 @@ export const VS_SOUND_SITES: SoundSite[] = [
     "vitalSign": "Orcas",
     "place": "Main Basin off Kingston",
     "kind": "orca",
-    "x": 748.1,
-    "y": 363.3
+    "x": 735.8,
+    "y": 356.7
   },
   {
     "indicator": "Occupancy/residency of orcas in Puget Sound",
@@ -299,16 +299,16 @@ export const VS_SOUND_SITES: SoundSite[] = [
     "vitalSign": "Beaches and Marine Vegetation",
     "place": "Maxwelton beach, Whidbey",
     "kind": "drift-cell",
-    "x": 760.6,
-    "y": 336.7
+    "x": 763.3,
+    "y": 339.0
   },
   {
     "indicator": "Eelgrass Area",
     "vitalSign": "Beaches and Marine Vegetation",
     "place": "Port Susan flats",
     "kind": "eelgrass",
-    "x": 800.4,
-    "y": 260.2
+    "x": 799.5,
+    "y": 260.0
   },
   {
     "indicator": "Extent of forest cover in nearshore marine riparian areas",
@@ -475,8 +475,8 @@ export const VS_SOUND_SITES: SoundSite[] = [
     "vitalSign": "Marine Water",
     "place": "Elliott Bay floor",
     "kind": "sediment-grab",
-    "x": 822.8,
-    "y": 445.0
+    "x": 804.1,
+    "y": 439.2
   },
   {
     "indicator": "Marine water temperature",
@@ -531,24 +531,24 @@ export const VS_SOUND_SITES: SoundSite[] = [
     "vitalSign": "Toxics in Aquatic Life",
     "place": "Duwamish River mouth",
     "kind": "salmon",
-    "x": 844.7,
-    "y": 454.3
+    "x": 830.4,
+    "y": 455.0
   },
   {
     "indicator": "Contaminants in caged mussels",
     "vitalSign": "Toxics in Aquatic Life",
     "place": "Bremerton shipyard pier",
     "kind": "mussel-cage",
-    "x": 608.4,
-    "y": 465.0
+    "x": 609.7,
+    "y": 464.8
   },
   {
     "indicator": "Contaminants in English sole",
     "vitalSign": "Toxics in Aquatic Life",
     "place": "Sinclair Inlet",
     "kind": "sole",
-    "x": 583.2,
-    "y": 468.3
+    "x": 581.9,
+    "y": 468.5
   },
   {
     "indicator": "Contaminants in juvenile salmon",
@@ -563,7 +563,7 @@ export const VS_SOUND_SITES: SoundSite[] = [
     "vitalSign": "Toxics in Aquatic Life",
     "place": "Squaxin Passage",
     "kind": "herring",
-    "x": 410.6,
-    "y": 592.5
+    "x": 415.1,
+    "y": 590.7
   }
 ];
