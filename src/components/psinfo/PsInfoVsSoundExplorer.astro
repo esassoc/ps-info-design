@@ -1,0 +1,239 @@
+---
+// PsInfoVsSoundExplorer — the Vital Signs home's illustrated hero (direction B):
+// all of Puget Sound as a tilted tabletop, seen from the south (Olympics behind
+// on the left, Cascades and Mt Baker on the right, the South Sound inlets at the
+// front edge), with the 23 Vital Signs placed where each lives. A marker links
+// to its Vital Sign; hover or focus opens a plaque with its name and a bar of
+// its indicators' progress. Marker colours are the goal bands' colours in the
+// header above, so the scene needs no legend.
+//
+// The scene is generated art (vs-sound-art.svg, written by
+// docs/private/briefs/vs-home-rollup/scene/vs-sound-gen.py from the Census
+// 1:500k shoreline, together with data/vs-sound.ts). It shares the SHI basin
+// art's palette and tree, cloud and ferry symbols. Ferries run their real
+// routes, orcas surface, the water glints; prefers-reduced-motion stills all of it.
+//
+// bcn-lego-checked: no esa- lego renders an illustrated image map with linked markers; checked Beacon (no map illustration); psinfo-vs-sound-explorer is the reusable home.
+import EsaButton from '@esa/ecology/esa-button.astro';
+import art from './vs-sound-art.svg?raw';
+import { VS_SOUND_MARKS, VS_SOUND_WIDTH, VS_SOUND_HEIGHT, type SoundGoal } from '../../data/vs-sound';
+import type { GoalDetail, ProgressLabel } from '../../data/pages/goals';
+import { withBase } from '../../lib/base';
+import { isExternalHref } from '../../lib/psinfoExternalLink';
+
+interface Props {
+  goals: GoalDetail[];
+}
+const { goals } = Astro.props;
+
+const GOAL_SLUG: Record<SoundGoal, string> = {
+  population: 'healthy-human-population',
+  quality: 'vibrant-human-quality-of-life',
+  species: 'thriving-species-and-food-web',
+  habitat: 'functioning-habitat',
+  water: 'healthy-water-quality',
+};
+// Fills that hold white labels at 4.5:1 (the quality orange darkened, as the wheel does).
+const GOAL_FILL: Record<SoundGoal, string> = {
+  population: 'var(--ps-info-goal-population)',
+  quality: 'color-mix(in srgb, var(--ps-info-goal-quality) 88%, #000000)',
+  species: 'var(--ps-info-goal-species)',
+  habitat: 'var(--ps-info-goal-habitat)',
+  water: 'var(--ps-info-goal-water)',
+};
+const PROGRESS_FILL: Partial<Record<ProgressLabel, string>> = {
+  'Getting Better': 'var(--ps-info-progress-better)',
+  'Mixed Results': 'var(--ps-info-progress-mixed)',
+  'No Trend': 'var(--ps-info-progress-notrend)',
+  'Getting Worse': 'var(--ps-info-progress-worse)',
+  'Limited Data': 'var(--ps-info-progress-limited)',
+};
+const ORDER = Object.keys(PROGRESS_FILL) as ProgressLabel[];
+const INTERNAL_VS: Record<string, string> = {
+  Salmon: '/prototypes/vital-signs/chinook-salmon',
+  Orcas: '/prototypes/vital-signs/orcas',
+};
+
+// The art's top 40px is empty sky and its last 40px empty ground; the frame skips both.
+const SKY_CROP = 40;
+const GROUND_CROP = 40;
+const goalBySlug = Object.fromEntries(goals.map((g) => [g.slug, g]));
+const BAR_W = 96;
+const marks = VS_SOUND_MARKS.map((m) => {
+  const goal = goalBySlug[GOAL_SLUG[m.goal]];
+  const vs = goal?.vitalSigns.find((v) => v.name === m.name);
+  const href = INTERNAL_VS[m.name] ? withBase(INTERNAL_VS[m.name]) : vs?.href ?? '#';
+  const inds = vs?.indicators ?? [];
+  const counts = ORDER.map((p) => ({ p, n: inds.filter((i) => i.progress === p).length })).filter((c) => c.n > 0);
+  const total = counts.reduce((n, c) => n + c.n, 0);
+  let x = -BAR_W / 2;
+  const segs = counts.map((c) => {
+    const w = (c.n / total) * BAR_W;
+    const seg = { x, w, fill: PROGRESS_FILL[c.p]! };
+    x += w;
+    return seg;
+  });
+  const summary = counts.map((c) => `${c.n} ${c.p}`).join(', ');
+  return { ...m, goalName: goal?.name ?? '', href, segs, summary, ext: isExternalHref(href) };
+});
+const DESC =
+  'Puget Sound seen from the south as a tabletop map: the Olympic Mountains behind on the left, the Cascades and Mount Baker on the right. ' +
+  'Hood Canal runs down the left, the Main Basin past Seattle and Bainbridge Island in the middle, the Whidbey Basin at the back, and the South Sound inlets around Olympia at the front edge. ' +
+  'Rivers run from the mountains into the Sound, farms line the valleys, ferries cross to Bainbridge, Kingston, Clinton and Vashon, and a pod of orcas surfaces in the Main Basin. ' +
+  'Each of the 23 Vital Signs is marked where it lives.';
+---
+<div class="vss" data-vss-explorer style={`--vss-scene-w: ${VS_SOUND_WIDTH}px`}>
+  {/* WCAG 2.2.2: the scene moves for longer than five seconds, so it can be paused. */}
+  <div class="vss__controls">
+    <EsaButton variant="chrome" size="sm" data-vss-pause>Pause animation</EsaButton>
+  </div>
+  <div class="vss__strip" role="region" aria-label="Puget Sound Vital Signs map" tabindex="-1">
+    <div class="vss__pan">
+      <div class="vss__frame">
+        <svg class="vss__art" viewBox={`0 ${SKY_CROP} ${VS_SOUND_WIDTH} ${VS_SOUND_HEIGHT - SKY_CROP - GROUND_CROP}`}>
+          <g role="img" aria-labelledby="vss-title vss-desc">
+            <title id="vss-title">Puget Sound and its Vital Signs</title>
+            <desc id="vss-desc">{DESC}</desc>
+            <Fragment set:html={art} />
+          </g>
+          <g class="vss__marks">
+            {marks.map((m) => (
+              <a
+                class="vm"
+                href={m.href}
+                data-vss-goal={m.goal}
+                style={`--goal: ${GOAL_FILL[m.goal]}`}
+                aria-label={`${m.name}, ${m.goalName}: ${m.summary}`}
+                {...(m.ext ? { target: '_blank', rel: 'noopener' } : {})}
+              >
+                <g transform={`translate(${m.x} ${m.y})`}>
+                  <circle class="vm__hit" r="14" />
+                  <circle class="vm__ring" r="6.5" />
+                  <circle class="vm__dot" r="2.4" />
+                </g>
+              </a>
+            ))}
+          </g>
+          {/* Plaques in their own layer above every marker (SVG paints in DOM order). */}
+          <g class="vss__labels" aria-hidden="true">
+            {marks.map((m) => (
+              <g transform={`translate(${m.x} ${m.y})`} style={`--goal: ${GOAL_FILL[m.goal]}`}>
+                <g class="vm__label" transform="translate(0 -24)">
+                  <rect class="vm__plaque" rx="3" />
+                  <text class="vm__text" text-anchor="middle" y="-3">{m.name}</text>
+                  <g transform="translate(0 6)">
+                    {m.segs.map((s) => <rect x={s.x} y="0" width={Math.max(0, s.w - 1)} height="5" rx="1" fill={s.fill} />)}
+                  </g>
+                </g>
+              </g>
+            ))}
+          </g>
+        </svg>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.querySelectorAll<HTMLElement>('[data-vss-explorer]').forEach((root) => {
+    const marks = [...root.querySelectorAll<SVGAElement>('.vm')];
+    const labels = [...root.querySelectorAll<SVGGElement>('.vm__label')];
+    marks.forEach((m, i) => {
+      const on = () => labels[i].classList.add('is-on');
+      const off = () => labels[i].classList.remove('is-on');
+      m.addEventListener('pointerenter', on);
+      m.addEventListener('pointerleave', off);
+      m.addEventListener('focus', () => { if (m.matches(':focus-visible')) on(); });
+      m.addEventListener('blur', off);
+    });
+    const pause = root.querySelector<HTMLElement>('[data-vss-pause]');
+    const pauseBtn = pause?.matches('button') ? pause : pause?.querySelector('button');
+    pauseBtn?.addEventListener('click', () => {
+      const paused = root.classList.toggle('is-paused');
+      const label = pauseBtn.querySelector('.esa-button__label') ?? pauseBtn;
+      label.textContent = paused ? 'Play animation' : 'Pause animation';
+    });
+    // WCAG 1.4.13: Escape dismisses an open plaque.
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') labels.forEach((l) => l.classList.remove('is-on')); });
+
+    // Plaques size to their text once the fonts are in, and stay inside the scene.
+    const sceneW = root.querySelector<SVGSVGElement>('.vss__art')!.viewBox.baseVal.width;
+    const fit = () => {
+      labels.forEach((label, i) => {
+        const m = marks[i];
+        const text = label.querySelector<SVGTextElement>('.vm__text')!;
+        const rect = label.querySelector<SVGRectElement>('.vm__plaque')!;
+        const w = Math.max(text.getComputedTextLength(), 96) + 20;
+        rect.setAttribute('x', String(-w / 2));
+        rect.setAttribute('y', '-20');
+        rect.setAttribute('width', String(w));
+        rect.setAttribute('height', '34');
+        const cx = Number((m.querySelector('g')!.getAttribute('transform') ?? '').match(/translate\(([-\d.]+)/)?.[1] ?? 0);
+        const shift = cx - w / 2 < 6 ? 6 - (cx - w / 2) : cx + w / 2 > sceneW - 6 ? sceneW - 6 - (cx + w / 2) : 0;
+        label.setAttribute('transform', `translate(${shift} -24)`);
+      });
+    };
+    (document.fonts?.ready ?? Promise.resolve()).then(fit);
+  });
+</script>
+
+<style>
+  .vss { position: relative; width: 100%; }
+  .vss__controls {
+    position: absolute; z-index: 1; top: var(--spacing-200); right: var(--spacing-200);
+    background: var(--shi-art-ivory); color: var(--shi-art-ivory-ink); border-radius: var(--radius-100);
+  }
+  .vss.is-paused :global(:is(.vss-ferry, .vss-orca use, .vss-glint, .vss-clouds, .vss-gulls)) { animation-play-state: paused; }
+  .vss__strip { position: relative; }
+  .vss__pan { position: relative; width: 100%; }
+  .vss__frame { position: relative; border-radius: var(--radius-100); overflow: hidden; }
+  .vss__art { display: block; width: 100%; height: auto; }
+
+  /* Markers: an ivory ring in the goal's colour; the plaque opens on hover or focus. */
+  .vm { cursor: pointer; }
+  .vm:focus { outline: none; }
+  .vm__hit { fill: transparent; }
+  .vm__ring { fill: var(--shi-art-ivory); stroke: var(--goal); stroke-width: 2.6; transition: r 160ms ease, stroke-width 160ms ease; }
+  .vm__dot { fill: var(--goal); }
+  .vm__label { opacity: 0; pointer-events: none; transition: opacity 160ms ease; }
+  .vm__plaque { fill: var(--shi-art-ivory); stroke: var(--goal); stroke-width: 2; }
+  .vm__text { font-family: var(--font-display); font-size: 13px; font-weight: var(--font-weight-semibold); fill: var(--shi-art-ivory-ink); }
+  .vm__label.is-on { opacity: 1; }
+  .vm:hover .vm__ring, .vm:focus-visible .vm__ring { r: 8.5; stroke-width: 3.2; }
+  .vm:focus-visible .vm__ring { stroke: var(--focus-ring-color); stroke-width: 3.6; }
+
+
+  /* Life on the water. */
+  .vss :global(.vss-ferry) { offset-distance: 0%; animation: vss-ferry 40s ease-in-out infinite alternate; }
+  .vss :global([data-vss-ferry='edmonds-kingston']) { animation-duration: 34s; animation-delay: -12s; }
+  .vss :global([data-vss-ferry='mukilteo-clinton']) { animation-duration: 26s; animation-delay: -6s; }
+  .vss :global([data-vss-ferry='fauntleroy-vashon']) { animation-duration: 30s; animation-delay: -20s; }
+  @keyframes vss-ferry { 0%, 8% { offset-distance: 0%; } 92%, 100% { offset-distance: 100%; } }
+  .vss :global(.vss-orca use) { animation: vss-surface 9s ease-in-out infinite; }
+  .vss :global(.vss-orca--1 use) { animation-delay: -2.4s; }
+  .vss :global(.vss-orca--2 use) { animation-delay: -4.6s; }
+  @keyframes vss-surface { 0%, 100% { transform: translateY(3px); opacity: 0; } 20%, 55% { transform: translateY(0); opacity: 1; } 75% { transform: translateY(3px); opacity: 0; } }
+  .vss :global(.vss-glint) { animation: vss-glint 5s ease-in-out infinite; }
+  .vss :global(.vss-glint:nth-of-type(3n)) { animation-delay: -1.7s; }
+  .vss :global(.vss-glint:nth-of-type(3n+1)) { animation-delay: -3.3s; }
+  @keyframes vss-glint { 0%, 100% { opacity: 0.15; } 50% { opacity: 0.7; } }
+  .vss :global(.vss-clouds) { animation: vss-drift 70s ease-in-out infinite alternate; }
+  .vss :global(.vss-gulls) { animation: vss-drift 24s ease-in-out infinite alternate; }
+  @keyframes vss-drift { from { transform: translateX(-14px); } to { transform: translateX(14px); } }
+
+  /* Narrow: the scene keeps its size and scrolls sideways; buttons stack. */
+  @media (max-width: 760px) {
+    .vss__strip {
+      overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: thin;
+      margin: 0 calc(-1 * var(--spacing-400)); padding: 0 var(--spacing-400) var(--spacing-200);
+    }
+    .vss__pan { width: 900px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .vss__controls { display: none; }
+    .vss :global(.vss-ferry), .vss :global(.vss-orca use), .vss :global(.vss-glint), .vss :global(.vss-clouds), .vss :global(.vss-gulls) { animation: none; }
+    .vss :global(.vss-ferry) { offset-distance: 50%; }
+    .vss :global(.vss-orca use) { opacity: 1; transform: none; }
+    .vm__ring, .vm__label { transition: none; }
+  }
+</style>

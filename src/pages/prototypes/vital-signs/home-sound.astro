@@ -1,0 +1,58 @@
+---
+// Vital Signs home, direction B (DELTA-912, round 3): the illustrated hero.
+// All of Puget Sound as a tilted tabletop with the 23 Vital Signs placed where
+// they live, then the All Indicators tree with the roll-up in its margin. Same data and
+// wiring as direction A (/prototypes/vital-signs/home); the wheel gives way to
+// the scene.
+import PsInfoVsProdChrome from '../../../layouts/PsInfoVsProdChrome.astro';
+import PsInfoVsSoundExplorer from '../../../components/psinfo/PsInfoVsSoundExplorer.astro';
+import PsInfoVsHomeOverview from '../../../components/psinfo/PsInfoVsHomeOverview.astro';
+import PsInfoVitalSignsIntro from '../../../components/psinfo/PsInfoVitalSignsIntro.astro';
+import PsInfoVsRollup from '../../../components/psinfo/PsInfoVsRollup.astro';
+import PsInfoSectionTitle from '../../../components/psinfo/PsInfoSectionTitle.astro';
+import PsInfoVsFancyTree from '../../../components/psinfo/PsInfoVsFancyTree.astro';
+import PsInfoVsPartners from '../../../components/psinfo/PsInfoVsPartners.astro';
+import { GOALS, ABOUT_VITAL_SIGNS_URL, VITAL_SIGNS_SITE } from '../../../data/pages/goals';
+import { ESPANOL_LINK, INTRO_PARAGRAPHS } from '../../../data/pages/vital-signs';
+import { SHI_GOALS, SHI_MARKED_HREFS } from '../../../data/pages/salmon-habitat-indicators';
+
+const TREE_ID = 'tree-home-sound';
+---
+<!-- manifest:
+  layout: PsInfoVsProdChrome > stack(2xl) spine
+  sections:
+    - illustrated hero          -> psinfo-vs-sound-explorer (scene, 23 VS markers)
+    - intro + roll-up + tree    -> psinfo-vs-home-overview (rail: psinfo-vital-signs-intro, psinfo-vs-rollup; main: psinfo-section-title, psinfo-vs-fancy-tree)
+    - contributing partners     -> psinfo-vs-partners
+-->
+<PsInfoVsProdChrome
+  title="Vital Signs"
+  hiddenHeading="Puget Sound Vital Signs"
+  trail={[
+    { label: 'About the Vital Signs', href: ABOUT_VITAL_SIGNS_URL },
+    { label: 'All Indicators' },
+  ]}
+>
+  <div class="stack" data-gap="2xl">
+    <PsInfoVsSoundExplorer goals={GOALS} />
+
+    <PsInfoVsHomeOverview label="Vital Sign Indicators">
+      <PsInfoVitalSignsIntro slot="rail" espanolLink={ESPANOL_LINK} paragraphs={[INTRO_PARAGRAPHS[0]]} variant="margin" />
+      <PsInfoVsRollup slot="rail" goals={GOALS} treeId={TREE_ID} />
+      <div class="stack" data-gap="md">
+        <PsInfoSectionTitle title="All Indicators" size="lg" />
+        <PsInfoVsFancyTree
+          goals={SHI_GOALS}
+          colorCoded={true}
+          expandedLevels={1}
+          treeId={TREE_ID}
+          salmonMarked={SHI_MARKED_HREFS}
+          statusFilterable={true}
+          downloadHref={`${VITAL_SIGNS_SITE}/VitalSignIndicator/ViewAll`}
+        />
+      </div>
+    </PsInfoVsHomeOverview>
+
+    <PsInfoVsPartners />
+  </div>
+</PsInfoVsProdChrome>

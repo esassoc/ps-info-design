@@ -52,6 +52,16 @@ export const prototypes: Prototype[] = [
     status: 'in-progress',
   },
   {
+    slug: 'vital-signs-home-sound',
+    title: 'Vital Signs home, illustrated hero',
+    description:
+      'All of Puget Sound as an animated tabletop with the 23 Vital Signs placed where they live, then the All Indicators tree with the roll-up beside it.',
+    route: '/prototypes/vital-signs/home-sound',
+    createdAt: '2026-11-17',
+    ticket: 'DELTA-912',
+    status: 'in-progress',
+  },
+  {
     slug: 'action-agenda',
     title: 'Action Agenda — the regional recovery plan',
     description:
