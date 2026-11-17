@@ -5,11 +5,11 @@
 // front edge), with the 23 Vital Signs placed where each lives. A marker links
 // to its Vital Sign; hover or focus opens a plaque with its name and a bar of
 // its indicators' progress. A Goals / Indicators toggle (esa-button-toggle)
-// switches how the markers read: Goals colours each by its goal, with goal
-// buttons beneath that filter the map; Indicators turns each marker into a
-// ring split by its indicators' progress (the DELTA-912 roll-up, placed), with
-// progress buttons beneath that pick out the Vital Signs carrying that status.
-// Filtered-out markers fade back but stay links.
+// swaps what is on the map: Goals shows the 23 Vital Signs; Indicators shows
+// every Vital Sign Indicator (70) at a real place, each with the illustrated
+// object it measures (the art's .vss-layer--goals / --indicators layers swap
+// with the view). The goal buttons beneath filter either view; filtered-out
+// pins fade back but stay links.
 //
 // The scene is generated art (vs-sound-art.svg, written by
 // docs/private/briefs/vs-home-rollup/scene/vs-sound-gen.py from the Census
@@ -22,6 +22,7 @@ import EsaButton from '@esa/ecology/esa-button.astro';
 import EsaIcon from '@esa/ecology/esa-icon.astro';
 import art from './vs-sound-art.svg?raw';
 import { VS_SOUND_MARKS, VS_SOUND_WIDTH, VS_SOUND_HEIGHT, type SoundGoal } from '../../data/vs-sound';
+import { VS_SOUND_SITES } from '../../data/vs-sound-sites';
 import type { GoalDetail, ProgressLabel } from '../../data/pages/goals';
 import { withBase } from '../../lib/base';
 import { isExternalHref } from '../../lib/psinfoExternalLink';
@@ -64,8 +65,6 @@ const SKY_CROP = 90;
 const GROUND_CROP = 40;
 const goalBySlug = Object.fromEntries(goals.map((g) => [g.slug, g]));
 const BAR_W = 96;
-const RING_R = 11;
-const RING_C = 2 * Math.PI * RING_R;
 const marks = VS_SOUND_MARKS.map((m) => {
   const goal = goalBySlug[GOAL_SLUG[m.goal]];
   const vs = goal?.vitalSigns.find((v) => v.name === m.name);
@@ -81,31 +80,33 @@ const marks = VS_SOUND_MARKS.map((m) => {
     return seg;
   });
   const summary = counts.map((c) => `${c.n} ${c.p}`).join(', ') || 'no indicators reported yet';
-  // Indicators view: the ring split into arcs by progress, clockwise from 12 o'clock.
-  const gap = counts.length > 1 ? 1.6 : 0;
-  let at = 0;
-  const arcs = counts.map((c) => {
-    const len = (c.n / total) * RING_C;
-    const arc = { dash: `${Math.max(0.5, len - gap)} ${RING_C}`, offset: -at, stroke: PROGRESS_FILL[c.p]! };
-    at += len;
-    return arc;
-  });
-  return { ...m, goalName: goal?.name ?? '', href, segs, arcs, summary, statuses: counts.map((c) => c.p).join('|'), ext: isExternalHref(href) };
+  return { ...m, goalName: goal?.name ?? '', href, segs, summary, ext: isExternalHref(href) };
 });
+const goalOfVs = Object.fromEntries(marks.map((m) => [m.name, m.goal]));
+// Indicators view: one pin per indicator, at its place on the scene.
+const sites = VS_SOUND_SITES.map((st) => {
+  const goal = goalOfVs[st.vitalSign] as SoundGoal;
+  const ind = goalBySlug[GOAL_SLUG[goal]]?.vitalSigns.find((v) => v.name === st.vitalSign)?.indicators.find((i) => i.name === st.indicator);
+  const href = ind?.href ?? '#';
+  return { ...st, goal, href, ext: isExternalHref(href) };
+});
+type Pin = { view: 'goals' | 'indicators'; goal: SoundGoal; x: number; y: number; href: string; ext: boolean; title: string; sub?: string; segs?: { x: number; w: number; fill: string }[]; label: string };
+const pins: Pin[] = [
+  ...marks.map((m) => ({ view: 'goals' as const, goal: m.goal, x: m.x, y: m.y, href: m.href, ext: m.ext, title: m.name, segs: m.segs, label: `${m.name}, ${m.goalName}: ${m.summary}` })),
+  ...sites.map((st) => ({ view: 'indicators' as const, goal: st.goal, x: st.x, y: st.y, href: st.href, ext: st.ext, title: st.indicator, sub: st.place, label: `${st.indicator} (${st.vitalSign}), ${st.place}` })),
+];
 const buttons = (Object.keys(GOAL_SLUG) as SoundGoal[]).map((g) => ({
   goal: g,
   name: goalBySlug[GOAL_SLUG[g]]?.name ?? g,
   count: marks.filter((m) => m.goal === g).length,
+  indCount: sites.filter((st) => st.goal === g).length,
 }));
-// Indicators view buttons: indicator counts across all Vital Signs (the roll-up's numbers).
-const allInds = goals.flatMap((g) => g.vitalSigns.flatMap((v) => v.indicators));
-const statusButtons = ORDER.map((p) => ({ status: p, fill: PROGRESS_FILL[p]!, count: allInds.filter((i) => i.progress === p).length }));
 const CHECK = '<path d="M20 6 9 17l-5-5"/>';
 const DESC =
   'Puget Sound seen from the south as a tabletop relief map: the Olympic Mountains rise along the west side on the left, the forested Cascade foothills along the east side on the right. ' +
   'Hood Canal runs down the left, the Main Basin past Seattle and Bainbridge Island in the middle, the Whidbey Basin at the back, and the South Sound inlets around Olympia at the front edge. ' +
   'Rivers run from the mountains into the Sound, farms line the valleys, ferries cross to Bainbridge, Kingston, Clinton and Vashon, and a pod of orcas surfaces in the Main Basin. ' +
-  'Each of the 23 Vital Signs is marked where it lives.';
+  'Each of the 23 Vital Signs is marked where it lives; in the Indicators view, each of the 70 indicators is marked at a place it is measured.';
 ---
 <div class="vss" data-vss-explorer data-view="goals" style={`--vss-scene-w: ${VS_SOUND_WIDTH}px`}>
   <div class="vss__bar">
@@ -125,38 +126,38 @@ const DESC =
             <Fragment set:html={art} />
           </g>
           <g class="vss__marks">
-            {marks.map((m) => (
+            {pins.map((m) => (
               <a
-                class="vm"
+                class={`vm vm--${m.view}`}
                 href={m.href}
                 data-vss-goal={m.goal}
-                data-vss-statuses={m.statuses}
+                data-vss-pin={m.view}
                 style={`--goal: ${GOAL_FILL[m.goal]}`}
-                aria-label={`${m.name}, ${m.goalName}: ${m.summary}`}
+                aria-label={m.label}
                 {...(m.ext ? { target: '_blank', rel: 'noopener' } : {})}
               >
                 <g transform={`translate(${m.x} ${m.y})`}>
-                  <circle class="vm__hit" r="20" />
-                  <ellipse class="vm__shadow" cx="1.5" cy="3" rx="11" ry="5" />
-                  <circle class="vm__ring" r="11" />
-                  <g class="vm__arcs" transform="rotate(-90)">
-                    {m.arcs.map((a) => <circle r={RING_R} stroke={a.stroke} stroke-dasharray={a.dash} stroke-dashoffset={a.offset} />)}
-                  </g>
-                  <circle class="vm__dot" r="4.6" />
+                  <circle class="vm__hit" r={m.view === 'goals' ? 20 : 12} />
+                  <ellipse class="vm__shadow" cx="1.5" cy="3" rx={m.view === 'goals' ? 11 : 7.5} ry={m.view === 'goals' ? 5 : 3.5} />
+                  <circle class="vm__ring" r={m.view === 'goals' ? 11 : 7.5} />
+                  <circle class="vm__dot" r={m.view === 'goals' ? 4.6 : 3.2} />
                 </g>
               </a>
             ))}
           </g>
           {/* Plaques in their own layer above every marker (SVG paints in DOM order). */}
           <g class="vss__labels" aria-hidden="true">
-            {marks.map((m) => (
+            {pins.map((m) => (
               <g transform={`translate(${m.x} ${m.y})`} style={`--goal: ${GOAL_FILL[m.goal]}`}>
-                <g class="vm__label" transform="translate(0 -32)">
+                <g class="vm__label" data-dy={m.view === 'goals' ? -32 : -26} transform={`translate(0 ${m.view === 'goals' ? -32 : -26})`}>
                   <rect class="vm__plaque" rx="3" />
-                  <text class="vm__text" text-anchor="middle" y="-3">{m.name}</text>
-                  <g transform="translate(0 6)">
-                    {m.segs.map((s) => <rect x={s.x} y="0" width={Math.max(0, s.w - 1)} height="5" rx="1" fill={s.fill} />)}
-                  </g>
+                  <text class="vm__text" text-anchor="middle" y="-3">{m.title}</text>
+                  {m.sub && <text class="vm__sub" text-anchor="middle" y="11">{m.sub}</text>}
+                  {m.segs && (
+                    <g transform="translate(0 6)">
+                      {m.segs.map((sg) => <rect x={sg.x} y="0" width={Math.max(0, sg.w - 1)} height="5" rx="1" fill={sg.fill} />)}
+                    </g>
+                  )}
                 </g>
               </g>
             ))}
@@ -166,28 +167,19 @@ const DESC =
     </div>
   </div>
 
-  <ul class="vss__buttons" role="list" aria-label="Show Vital Signs for one goal" data-vss-for="goals">
+  <ul class="vss__buttons" role="list" aria-label="Show one goal on the map">
     {buttons.map((b) => (
       <li>
         <button type="button" class="vss__btn" style={`--goal: ${GOAL_FILL[b.goal]}`} aria-pressed="false" data-vss-goal-btn={b.goal}>
           <span class="vss__check" aria-hidden="true"><EsaIcon name="check" size="sm" paths={CHECK} /></span>
           <span class="vss__btn-name">{b.name}</span>
-          <span class="vss__btn-count">{b.count} Vital Signs</span>
+          <span class="vss__btn-count" data-vss-for-view="goals">{b.count} Vital Signs</span>
+          <span class="vss__btn-count" data-vss-for-view="indicators">{b.indCount} indicators</span>
         </button>
       </li>
     ))}
   </ul>
-  <ul class="vss__buttons" role="list" aria-label="Show Vital Signs with one indicator progress" data-vss-for="indicators" hidden>
-    {statusButtons.map((b) => (
-      <li>
-        <button type="button" class="vss__btn vss__btn--status" aria-pressed="false" data-vss-status-btn={b.status}>
-          <span class="vss__check" aria-hidden="true"><EsaIcon name="check" size="sm" paths={CHECK} /></span>
-          <span class="vss__btn-name"><span class="vss__swatch" style={`background:${b.fill}`} aria-hidden="true"></span>{b.status}</span>
-          <span class="vss__btn-count">{b.count} indicators</span>
-        </button>
-      </li>
-    ))}
-  </ul>
+
   <p class="vss__live" aria-live="polite" data-vss-live></p>
 </div>
 
@@ -204,22 +196,18 @@ const DESC =
       m.addEventListener('focus', () => { if (m.matches(':focus-visible')) on(); });
       m.addEventListener('blur', off);
     });
-    // One filter at a time: a goal (Goals view) or a progress status (Indicators view).
+    // Goal filter, one goal at a time, in either view.
     const live = root.querySelector<HTMLElement>('[data-vss-live]');
-    const filterBtns = [...root.querySelectorAll<HTMLButtonElement>('[data-vss-goal-btn], [data-vss-status-btn]')];
+    const filterBtns = [...root.querySelectorAll<HTMLButtonElement>('[data-vss-goal-btn]')];
     let current: HTMLButtonElement | null = null;
     const apply = (btn: HTMLButtonElement | null) => {
       current = btn;
       filterBtns.forEach((o) => o.setAttribute('aria-pressed', String(o === btn)));
-      marks.forEach((m) => {
-        let keep = true;
-        if (btn?.dataset.vssGoalBtn) keep = m.dataset.vssGoal === btn.dataset.vssGoalBtn;
-        if (btn?.dataset.vssStatusBtn) keep = (m.dataset.vssStatuses ?? '').split('|').includes(btn.dataset.vssStatusBtn);
-        m.classList.toggle('is-muted', !keep);
-      });
+      marks.forEach((m) => m.classList.toggle('is-muted', !!btn && m.dataset.vssGoal !== btn.dataset.vssGoalBtn));
       if (!live) return;
-      const kept = marks.filter((m) => !m.classList.contains('is-muted')).length;
-      live.textContent = btn ? `${kept} Vital Signs: ${btn.querySelector('.vss__btn-name')!.textContent}` : 'Showing all Vital Signs';
+      const inView = marks.filter((m) => m.dataset.vssPin === root.dataset.view && !m.classList.contains('is-muted')).length;
+      const noun = root.dataset.view === 'indicators' ? 'indicators' : 'Vital Signs';
+      live.textContent = btn ? `${inView} ${noun}: ${btn.querySelector('.vss__btn-name')!.textContent}` : `Showing all ${noun}`;
     };
     filterBtns.forEach((b) => b.addEventListener('click', () => apply(current === b ? null : b)));
 
@@ -229,8 +217,9 @@ const DESC =
       view.options = [{ label: 'Goals', value: 'goals' }, { label: 'Indicators', value: 'indicators' }];
       view.addEventListener('change', () => {
         root.dataset.view = view.value;
-        root.querySelectorAll<HTMLElement>('[data-vss-for]').forEach((l) => { l.hidden = l.dataset.vssFor !== view.value; });
-        apply(null);
+        labels.forEach((l) => l.classList.remove('is-on'));
+        apply(current);
+        fit();
       });
     }
 
@@ -249,16 +238,18 @@ const DESC =
     const fit = () => {
       labels.forEach((label, i) => {
         const m = marks[i];
+        if (m.dataset.vssPin !== root.dataset.view) return; // hidden pins measure 0; fit them when shown
         const text = label.querySelector<SVGTextElement>('.vm__text')!;
+        const sub = label.querySelector<SVGTextElement>('.vm__sub');
         const rect = label.querySelector<SVGRectElement>('.vm__plaque')!;
-        const w = Math.max(text.getComputedTextLength(), 96) + 20;
+        const w = Math.max(text.getComputedTextLength(), sub?.getComputedTextLength() ?? 0, 96) + 20;
         rect.setAttribute('x', String(-w / 2));
         rect.setAttribute('y', '-20');
         rect.setAttribute('width', String(w));
-        rect.setAttribute('height', '34');
+        rect.setAttribute('height', sub ? '38' : '34');
         const cx = Number((m.querySelector('g')!.getAttribute('transform') ?? '').match(/translate\(([-\d.]+)/)?.[1] ?? 0);
         const shift = cx - w / 2 < 6 ? 6 - (cx - w / 2) : cx + w / 2 > sceneW - 6 ? sceneW - 6 - (cx + w / 2) : 0;
-        label.setAttribute('transform', `translate(${shift} -32)`);
+        label.setAttribute('transform', `translate(${shift} ${label.dataset.dy})`);
       });
     };
     (document.fonts?.ready ?? Promise.resolve()).then(fit);
@@ -284,12 +275,13 @@ const DESC =
   .vm__shadow { fill: #1d2a22; opacity: 0.28; }
   .vm__ring { fill: var(--shi-art-ivory); stroke: var(--goal); stroke-width: 4; transition: r 160ms ease, stroke-width 160ms ease, opacity 160ms ease; }
   .vm__dot { transition: opacity 160ms ease; }
-  .vm__arcs { display: none; }
-  .vm__arcs circle { fill: none; stroke-width: 5; }
-  .vss[data-view='indicators'] .vm__arcs { display: inline; }
-  .vss[data-view='indicators'] .vm__ring { stroke: var(--ps-info-gray-300); }
-  .vss[data-view='indicators'] .vm__dot { fill: var(--shi-art-ivory-ink); }
-  .vss[data-view='indicators'] .vm.is-muted .vm__arcs { display: none; }
+  /* The view decides which pins, plaques and art layer are on the map. */
+  .vss[data-view='goals'] .vm--indicators, .vss[data-view='indicators'] .vm--goals { display: none; }
+  .vss[data-view='goals'] :global(.vss-layer--indicators), .vss[data-view='indicators'] :global(.vss-layer--goals) { display: none; }
+  .vss[data-view='goals'] [data-vss-for-view='indicators'], .vss[data-view='indicators'] [data-vss-for-view='goals'] { display: none; }
+  .vm__sub { font-family: var(--font-sans); font-size: 11.5px; fill: var(--shi-art-ivory-ink); }
+  .vm--indicators .vm__ring { stroke-width: 3; }
+  .vm--indicators:hover .vm__ring, .vm--indicators:focus-visible .vm__ring { r: 10; stroke-width: 3.6; }
   .vm__dot { fill: var(--goal); }
   .vm__label { opacity: 0; pointer-events: none; transition: opacity 160ms ease; }
   .vm__plaque { fill: var(--shi-art-ivory); stroke: var(--goal); stroke-width: 2; }
@@ -317,12 +309,6 @@ const DESC =
   .vss__btn-count { font-size: 0.875rem; }
   .vss__btn:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(5, 31, 51, 0.22); }
   .vss__btn:focus-visible { outline: 3px solid var(--focus-ring-color); outline-offset: 3px; }
-  .vss__btn--status { background: #ffffff; color: var(--color-text-primary); border: 1px solid var(--ps-info-gray-300); }
-  .vss__btn--status .vss__btn-count { color: var(--color-text-secondary); }
-  .vss__btn--status .vss__btn-name { display: inline-flex; align-items: center; gap: var(--spacing-150); }
-  .vss__swatch { width: 0.75rem; height: 0.75rem; border-radius: 50%; flex: none; }
-  .vss__btn--status[aria-pressed='true'] { border: 3px solid var(--ps-info-gray-950); box-shadow: none; }
-  .vss__btn--status .vss__check { background: var(--ps-info-gray-950); color: #ffffff; }
   .vss__btn[aria-pressed='true'] { border-color: var(--ps-info-gray-950); box-shadow: inset 0 0 0 2px #ffffff; }
   .vss__check {
     position: absolute; top: var(--spacing-150); right: var(--spacing-150);

@@ -1,14 +1,15 @@
 ---
 // Vital Signs home, direction B (DELTA-912, round 3): the illustrated hero.
 // All of Puget Sound as a tilted tabletop with the 23 Vital Signs placed where
-// they live, then the All Indicators tree. The scene's Indicators view carries the roll-up, so
-// the rail holds only the intro. Same data and
+// they live, then the All Indicators tree with the roll-up in its margin (as in direction A);
+// pressing a roll-up status filters the tree. Same data and
 // wiring as direction A (/prototypes/vital-signs/home); the wheel gives way to
 // the scene.
 import PsInfoVsProdChrome from '../../../layouts/PsInfoVsProdChrome.astro';
 import PsInfoVsSoundExplorer from '../../../components/psinfo/PsInfoVsSoundExplorer.astro';
 import PsInfoVsHomeOverview from '../../../components/psinfo/PsInfoVsHomeOverview.astro';
 import PsInfoVitalSignsIntro from '../../../components/psinfo/PsInfoVitalSignsIntro.astro';
+import PsInfoVsRollup from '../../../components/psinfo/PsInfoVsRollup.astro';
 import PsInfoSectionTitle from '../../../components/psinfo/PsInfoSectionTitle.astro';
 import PsInfoVsFancyTree from '../../../components/psinfo/PsInfoVsFancyTree.astro';
 import PsInfoVsPartners from '../../../components/psinfo/PsInfoVsPartners.astro';
@@ -22,7 +23,7 @@ const TREE_ID = 'tree-home-sound';
   layout: PsInfoVsProdChrome > stack(2xl) spine
   sections:
     - illustrated hero          -> psinfo-vs-sound-explorer (scene, 23 VS markers)
-    - intro + roll-up + tree    -> psinfo-vs-home-overview (rail: psinfo-vital-signs-intro; main: psinfo-section-title, psinfo-vs-fancy-tree)
+    - intro + roll-up + tree    -> psinfo-vs-home-overview (rail: psinfo-vital-signs-intro, psinfo-vs-rollup; main: psinfo-section-title, psinfo-vs-fancy-tree)
     - contributing partners     -> psinfo-vs-partners
 -->
 <PsInfoVsProdChrome
@@ -38,6 +39,7 @@ const TREE_ID = 'tree-home-sound';
 
     <PsInfoVsHomeOverview label="Vital Sign Indicators">
       <PsInfoVitalSignsIntro slot="rail" espanolLink={ESPANOL_LINK} paragraphs={[INTRO_PARAGRAPHS[0]]} variant="margin" />
+      <PsInfoVsRollup slot="rail" goals={GOALS} treeId={TREE_ID} />
       <div class="stack" data-gap="md">
         <PsInfoSectionTitle title="All Indicators" size="lg" />
         <PsInfoVsFancyTree
