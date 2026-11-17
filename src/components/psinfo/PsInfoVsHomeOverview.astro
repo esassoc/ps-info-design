@@ -1,0 +1,38 @@
+---
+// PsInfoVsHomeOverview — the top of the combined Vital Signs home page: the
+// Vital Signs wheel as the primary graphic, and a narrower rail beside it
+// (intro sentence, the indicator roll-up). Kenna's ask (2026-11-03): roll the
+// all-indicator status onto the home page and balance the wheel against the
+// other content without a long scroll. Wide screens put both in the first
+// view; narrow screens stack the rail above the wheel, so the summary leads.
+//
+// Same shape as psinfo-shi-hero's aside: a main column and a margin column,
+// never two equal halves.
+interface Props {
+  /** Accessible name for the overview region. */
+  label?: string;
+}
+const { label = 'Vital Signs overview' } = Astro.props;
+---
+<section class="vshome" aria-label={label}>
+  <div class="vshome__rail"><slot name="rail" /></div>
+  <div class="vshome__main"><slot /></div>
+</section>
+
+<style>
+  .vshome {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(20rem, 24rem);
+    grid-template-areas: "main rail";
+    gap: var(--spacing-800);
+    align-items: start;
+  }
+  .vshome__main { grid-area: main; min-width: 0; }
+  .vshome__rail { grid-area: rail; display: flex; flex-direction: column; gap: var(--spacing-600); min-width: 0; }
+
+  @media (max-width: 960px) {
+    /* Stacked, the summary leads (it is first in the DOM too, so reading and
+       focus order match): the unrolled wheel is a long list of tiles. */
+    .vshome { grid-template-columns: minmax(0, 1fr); grid-template-areas: "rail" "main"; gap: var(--spacing-600); }
+  }
+</style>

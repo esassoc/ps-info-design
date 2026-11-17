@@ -16,6 +16,7 @@
 // with aria-expanded/aria-controls; the status icons carry the source's full
 // alt text; search input is labeled.
 import EsaIcon from '@esa/ecology/esa-icon.astro';
+import EsaFilterPills from '@esa/ecology/esa-filter-pills.astro';
 import PsInfoShiMark from './PsInfoShiMark.astro';
 import { SHI_SEARCH_TERMS } from '../../data/shi-domain';
 import { withBase } from '../../lib/base';
@@ -40,8 +41,17 @@ interface Props {
   salmonMarked?: string[];
   /** Jira key of the story that adds those SHI marks (epic preview). */
   shiMarkStory?: string;
+  /** Listen for psinfo-vs-rollup presses: filter indicator rows to one
+   *  progress or target status, shown as a removable pill in the toolbar. */
+  statusFilterable?: boolean;
+  /** "Download Indicators" link, right-aligned in the toolbar as on prod. */
+  downloadHref?: string;
 }
-const { goals = [], vitalSigns, frameHueVar, colorCoded = false, expandedLevels = 1, treeId = 'vstree', salmonMarked = [], shiMarkStory } = Astro.props;
+const { goals = [], vitalSigns, frameHueVar, colorCoded = false, expandedLevels = 1, treeId = 'vstree', salmonMarked = [], shiMarkStory, statusFilterable = false, downloadHref } = Astro.props;
+const STATUS_PILLS: { key: 'progress' | 'target'; label: string; value: string }[] = [
+  ...(['Getting Better', 'Mixed Results', 'No Trend', 'Getting Worse', 'Limited Data'] as const).map((value) => ({ key: 'progress' as const, label: 'Indicator Progress', value })),
+  ...(['Near Or At Target', 'Below Target'] as const).map((value) => ({ key: 'target' as const, label: 'Target Status', value })),
+];
 const indHref = (h: string) => (isExternalHref(h) ? h : withBase(h));
 
 const PROGRESS_ICON: Record<ProgressLabel, string> = {
@@ -86,7 +96,19 @@ const searchText = (ind: { name: string; href: string }) =>
       <input class="vstree__search" type="search" placeholder="Search..." data-tree-search />
     </label>
     <button type="button" class="vstree__clear" data-tree-clear aria-label="Clear search">×</button>
+    {statusFilterable && STATUS_PILLS.map((p) => (
+      <span class="vstree__pill" data-tree-pill={`${p.key}|${p.value}`} hidden>
+        <EsaFilterPills filters={[{ name: p.key, label: p.label, value: p.value, displayValue: p.value }]} />
+      </span>
+    ))}
+    {downloadHref && (
+      <a class="vstree__download" href={downloadHref}>
+        <EsaIcon name="download" size="sm" paths='<path d="M12 15V3"/><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/>' />
+        Download Indicators
+      </a>
+    )}
   </div>
+  {statusFilterable && <p class="sr-only" aria-live="polite" data-tree-status-live></p>}
 
   <div class="vstree__head" aria-hidden="true">
     <span class="vstree__head-path">
@@ -191,7 +213,7 @@ const searchText = (ind: { name: string; href: string }) =>
               </div>
               <ul class="vstree__l2" role="list" id={uid(goal.slug, vsign.name)} hidden={expandedLevels < 2}>
                 {vsign.indicators.map((ind) => (
-                  <li data-tree-row data-level="2" data-text={searchText(ind)}>
+                  <li data-tree-row data-level="2" data-text={searchText(ind)} data-progress={ind.progress} data-target={ind.targetStatus}>
                     <div class="vstree__row vstree__row--ind">
                       <span class="vstree__name">
                         <a class="vstree__link vstree__link--ind" href={indHref(ind.href)} {...(isExternalHref(ind.href) ? { target: '_blank', rel: 'noopener' } : {})}>{ind.name}</a>
@@ -287,7 +309,55 @@ const searchText = (ind: { name: string; href: string }) =>
         }
       });
     };
-    search?.addEventListener('input', () => applyFilter(search.value));
+    // Status filter from psinfo-vs-rollup (statusFilterable trees only).
+    const pills = [...tree.querySelectorAll<HTMLElement>('[data-tree-pill]')];
+    const live = tree.querySelector<HTMLElement>('[data-tree-status-live]');
+    const applyStatus = (key: string | null, value: string | null) => {
+      pills.forEach((p) => { p.hidden = p.dataset.treePill !== `${key}|${value}`; });
+      if (!key || !value) { applyFilter(search?.value ?? ''); if (live) live.textContent = ''; return; }
+      if (search) search.value = '';
+      rows.forEach((r) => { r.style.display = 'none'; });
+      const hits = rows.filter((r) => r.dataset.level === '2' && r.dataset[key] === value);
+      hits.forEach((r) => {
+        let node: HTMLElement | null = r;
+        while (node && node !== tree) {
+          if (node.matches('[data-tree-row]')) node.style.display = '';
+          const list = node.parentElement?.closest<HTMLElement>('ul[hidden]');
+          if (list) list.hidden = false;
+          node = node.parentElement?.closest<HTMLElement>('[data-tree-row]') ?? null;
+        }
+      });
+      tree.querySelectorAll<HTMLButtonElement>('[data-tree-toggle]').forEach((b) => {
+        const target = document.getElementById(b.getAttribute('aria-controls') || '');
+        if (target && !target.hidden) {
+          b.setAttribute('aria-expanded', 'true');
+          const svg = b.querySelector('svg');
+          if (svg) svg.innerHTML = `<path d="${MINUS_D}"/>`;
+        }
+      });
+      if (live) live.textContent = `${hits.length} indicators: ${value}`;
+    };
+    if (pills.length) {
+      document.addEventListener('psinfo:vs-status', (e) => {
+        const d = (e as CustomEvent<{ treeId: string; key: string; value: string | null }>).detail;
+        if (d.treeId !== tree.id) return;
+        applyStatus(d.value ? d.key : null, d.value);
+      });
+      tree.addEventListener('click', (e) => {
+        const btn = (e.target as HTMLElement).closest<HTMLButtonElement>('[data-esa-filter-remove]');
+        if (!btn || !tree.contains(btn)) return;
+        document.dispatchEvent(new CustomEvent('psinfo:vs-status', { detail: { treeId: tree.id, key: btn.dataset.name, value: null } }));
+        search?.focus();
+      });
+    }
+
+    search?.addEventListener('input', () => {
+      if (pills.some((p) => !p.hidden)) {
+        pills.forEach((p) => { p.hidden = true; });
+        document.dispatchEvent(new CustomEvent('psinfo:vs-status', { detail: { treeId: tree.id, key: null, value: null } }));
+      }
+      applyFilter(search.value);
+    });
     tree.querySelector('[data-tree-clear]')?.addEventListener('click', () => {
       if (search) { search.value = ''; applyFilter(''); search.focus(); }
     });
@@ -295,7 +365,7 @@ const searchText = (ind: { name: string; href: string }) =>
 </script>
 
 <style>
-  .vstree { display: flex; flex-direction: column; gap: var(--spacing-200); }
+  .vstree { display: flex; flex-direction: column; gap: var(--spacing-200); scroll-margin-top: var(--spacing-900); }
   .sr-only {
     position: absolute; width: 1px; height: 1px; margin: -1px;
     overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap;
@@ -311,6 +381,20 @@ const searchText = (ind: { name: string; href: string }) =>
   .vstree__lvlbtn:hover { background: var(--ps-info-blue-900); }
   .vstree__lvlbtn:focus-visible { outline: 2px solid var(--focus-ring-color); outline-offset: 2px; }
   .vstree__searchwrap { display: inline-flex; }
+  .vstree__pill[hidden] { display: none; }
+  /* The pill is a filter state, not a success state: PS Info blue, not the lego's default green. */
+  .vstree__pill {
+    --color-background-brand-muted: var(--ps-info-blue-50);
+    --color-background-brand-muted-hover: var(--ps-info-blue-100);
+    --color-content-brand: var(--ps-info-blue-800);
+  }
+  .vstree__download {
+    margin-inline-start: auto;
+    display: inline-flex; align-items: center; gap: var(--spacing-150);
+    color: var(--color-text-link); text-decoration: underline; text-underline-offset: 3px;
+  }
+  .vstree__download:hover { color: var(--color-text-link-hover); }
+  .vstree__download:focus-visible { outline: 2px solid var(--focus-ring-color); outline-offset: 2px; }
   .vstree__search {
     height: 36px; width: 220px; padding: 0 var(--spacing-300);
     border: 1px solid var(--color-border-strong); border-radius: var(--radius-100);

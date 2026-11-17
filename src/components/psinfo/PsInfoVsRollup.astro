@@ -1,0 +1,190 @@
+---
+// PsInfoVsRollup — the roll-up of Vital Sign Indicator progress and target
+// status for the Vital Signs home page (DELTA-912). Two groups, named for the
+// All Indicators tree's own columns: Indicator Progress and Target Status.
+// Each is one proportional bar in the source icons' colours, then one row per
+// status with its count. Counts are derived from the goals passed in, never
+// typed. Each row is a toggle: pressing it filters the All Indicators tree
+// (psinfo-vs-fancy-tree with the same treeId) to those indicators.
+//
+// Wiring: a document event `psinfo:vs-status` with detail
+// { treeId, key: 'progress' | 'target', value: string | null }. The roll-up
+// sends it on press; the tree sends it with value null when its filter pill
+// is removed, and this component un-presses to match.
+//
+// bcn-lego-checked: no esa- toggle fits because esa-button-toggle and esa-chip-group are single-row segmented pills with no swatch or count, and selection here spans two groups and drives a tree elsewhere on the page; checked Beacon (no legend-filter pattern); psinfo-vs-rollup is the reusable home.
+import type { GoalDetail, ProgressLabel, TargetStatusLabel } from '../../data/pages/goals';
+
+interface Props {
+  /** VSI data only: the roll-up counts Vital Sign Indicators, not SHI rows. */
+  goals: GoalDetail[];
+  /** id of the psinfo-vs-fancy-tree this roll-up filters. */
+  treeId: string;
+}
+const { goals, treeId } = Astro.props;
+
+const PROGRESS: { label: ProgressLabel; color: string }[] = [
+  { label: 'Getting Better', color: 'var(--ps-info-progress-better)' },
+  { label: 'Mixed Results', color: 'var(--ps-info-progress-mixed)' },
+  { label: 'No Trend', color: 'var(--ps-info-progress-notrend)' },
+  { label: 'Getting Worse', color: 'var(--ps-info-progress-worse)' },
+  { label: 'Limited Data', color: 'var(--ps-info-progress-limited)' },
+];
+const TARGET: { label: TargetStatusLabel; color: string }[] = [
+  { label: 'Near Or At Target', color: 'var(--ps-info-target-near)' },
+  { label: 'Below Target', color: 'var(--ps-info-target-below)' },
+];
+
+const indicators = goals.flatMap((g) => g.vitalSigns.flatMap((vs) => vs.indicators));
+const tally = (pick: (i: (typeof indicators)[number]) => string | undefined) => {
+  const out: Record<string, number> = {};
+  for (const i of indicators) {
+    const k = pick(i);
+    if (k) out[k] = (out[k] ?? 0) + 1;
+  }
+  return out;
+};
+const progressCounts = tally((i) => i.progress);
+const targetCounts = tally((i) => i.targetStatus);
+
+const groups = [
+  {
+    key: 'progress',
+    title: 'Indicator Progress',
+    rows: PROGRESS.map((r) => ({ ...r, count: progressCounts[r.label] ?? 0 })),
+  },
+  {
+    key: 'target',
+    title: 'Target Status',
+    rows: TARGET.map((r) => ({ ...r, count: targetCounts[r.label] ?? 0 })),
+  },
+];
+const headingId = (key: string) => `${treeId}-rollup-${key}`;
+---
+<div class="rollup" data-rollup-for={treeId}>
+  {groups.map((g) => {
+    const total = g.rows.reduce((n, r) => n + r.count, 0);
+    return (
+      <section class="rollup__group" aria-labelledby={headingId(g.key)}>
+        <h2 class="rollup__title" id={headingId(g.key)}>
+          {g.title}
+          <span class="rollup__total">{total} indicators</span>
+        </h2>
+        <div class="rollup__bar" aria-hidden="true">
+          {g.rows.filter((r) => r.count > 0).map((r) => (
+            <span class="rollup__seg" style={`flex-grow:${r.count};background:${r.color}`}></span>
+          ))}
+        </div>
+        <ul class="rollup__rows" role="list">
+          {g.rows.map((r) => (
+            <li>
+              <button
+                type="button"
+                class="rollup__row"
+                aria-pressed="false"
+                data-rollup-key={g.key}
+                data-rollup-value={r.label}
+                disabled={r.count === 0}
+              >
+                <span class="rollup__swatch" style={`background:${r.color}`} aria-hidden="true"></span>
+                <span class="rollup__label">{r.label}</span>
+                <span class="rollup__count">{r.count}</span>
+              </button>
+            </li>
+          ))}
+        </ul>
+      </section>
+    );
+  })}
+</div>
+
+<script>
+  type StatusDetail = { treeId: string; key: 'progress' | 'target'; value: string | null };
+
+  document.querySelectorAll<HTMLElement>('[data-rollup-for]').forEach((root) => {
+    const treeId = root.dataset.rollupFor!;
+    const buttons = [...root.querySelectorAll<HTMLButtonElement>('[data-rollup-key]')];
+
+    const sync = (key: string | null, value: string | null) => {
+      buttons.forEach((b) => {
+        b.setAttribute('aria-pressed', String(b.dataset.rollupKey === key && b.dataset.rollupValue === value));
+      });
+    };
+
+    buttons.forEach((b) => {
+      b.addEventListener('click', () => {
+        const on = b.getAttribute('aria-pressed') !== 'true';
+        const key = b.dataset.rollupKey as StatusDetail['key'];
+        const value = on ? b.dataset.rollupValue! : null;
+        sync(key, value);
+        document.dispatchEvent(new CustomEvent<StatusDetail>('psinfo:vs-status', { detail: { treeId, key, value } }));
+        if (on) {
+          const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+          document.getElementById(treeId)?.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' });
+        }
+      });
+    });
+
+    document.addEventListener('psinfo:vs-status', (e) => {
+      const d = (e as CustomEvent<StatusDetail>).detail;
+      if (d.treeId === treeId && d.value === null) sync(null, null);
+    });
+  });
+</script>
+
+<style>
+  .rollup { display: flex; flex-direction: column; gap: var(--spacing-600); }
+  .rollup__group { display: flex; flex-direction: column; gap: var(--spacing-250); }
+
+  .rollup__title {
+    display: flex; align-items: baseline; justify-content: space-between; gap: var(--spacing-300);
+    margin: 0;
+    font-family: var(--font-display); font-size: 1.25rem; font-weight: var(--font-weight-semibold);
+    color: var(--ps-info-blue-800);
+  }
+  .rollup__total {
+    font-family: var(--font-sans);
+    font-size: var(--ps-info-text-meta-lg); font-weight: var(--font-weight-medium);
+    color: var(--color-text-secondary); font-variant-numeric: tabular-nums;
+  }
+
+  .rollup__bar {
+    display: flex; gap: 2px; height: 0.75rem;
+    border-radius: var(--radius-100); overflow: hidden;
+  }
+  .rollup__seg { flex-basis: 0; min-width: 4px; }
+
+  .rollup__rows {
+    list-style: none; padding: 0; display: flex; flex-direction: column;
+    /* Rows carry hover padding; pull them out so swatch, bar and title share one left edge. */
+    margin: 0 calc(-1 * var(--spacing-250));
+  }
+  .rollup__row {
+    display: grid; grid-template-columns: 0.75rem 1fr auto; align-items: center; gap: var(--spacing-250);
+    width: 100%; min-height: 2.25rem;
+    padding: 0 var(--spacing-250);
+    border: 1px solid transparent; border-radius: var(--radius-100);
+    background: none; cursor: pointer;
+    font: inherit; font-size: var(--ps-info-text-body); color: var(--color-text-primary); text-align: start;
+  }
+  .rollup__row:hover:not(:disabled) { background: var(--ps-info-blue-50); }
+  .rollup__row:hover:not(:disabled) .rollup__label { text-decoration: underline; text-underline-offset: 3px; }
+  .rollup__row[aria-pressed='true'] {
+    background: var(--ps-info-blue-50);
+    border-color: var(--ps-info-blue-800);
+  }
+  .rollup__row[aria-pressed='true'] .rollup__label { font-weight: var(--font-weight-semibold); }
+  .rollup__row:focus-visible { outline: 2px solid var(--focus-ring-color); outline-offset: 1px; }
+  .rollup__row:disabled { cursor: default; color: var(--color-text-secondary); }
+
+  .rollup__swatch { width: 0.75rem; height: 0.75rem; border-radius: 50%; }
+  .rollup__count {
+    font-weight: var(--font-weight-semibold); font-variant-numeric: tabular-nums;
+    color: var(--ps-info-blue-800);
+  }
+
+  @media (forced-colors: active) {
+    .rollup__swatch, .rollup__seg { forced-color-adjust: none; }
+    .rollup__row[aria-pressed='true'] { border-color: Highlight; }
+  }
+</style>

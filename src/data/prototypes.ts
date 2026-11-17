@@ -42,6 +42,16 @@ export const prototypes: Prototype[] = [
     status: 'in-progress',
   },
   {
+    slug: 'vital-signs-home',
+    title: 'Vital Signs home + All Indicators, combined',
+    description:
+      'The wheel with a roll-up of indicator progress and target status beside it, then the All Indicators tree; pressing a status filters the tree.',
+    route: '/prototypes/vital-signs/home',
+    createdAt: '2026-11-17',
+    ticket: 'DELTA-912',
+    status: 'in-progress',
+  },
+  {
     slug: 'action-agenda',
     title: 'Action Agenda — the regional recovery plan',
     description:

@@ -27,6 +27,13 @@ import { WHEEL_CENTER_LOGO } from '../../data/pages/vital-signs';
 import { withBase } from '../../lib/base';
 import { isExternalHref } from '../../lib/psinfoExternalLink';
 
+interface Props {
+  /** 'compact' sizes the ring for a main column beside a rail (the combined
+   *  home page): narrower bands and smaller tile type, filling its column. */
+  size?: 'full' | 'compact';
+}
+const { size = 'full' } = Astro.props;
+
 const TILE_FILL: Record<string, string> = {
   population: 'var(--ps-info-goal-population)',
   quality: 'color-mix(in srgb, var(--ps-info-goal-quality) 88%, #000000)',
@@ -45,7 +52,7 @@ const GROUPS = [
   { goal: 'water', label: 'Healthy Water Quality', edge: 'left-top', band: WHEEL_COLORS.band.water },
 ];
 ---
-<div class="wheel" role="group" aria-label="Puget Sound Vital Signs by recovery goal">
+<div class:list={['wheel', size === 'compact' && 'wheel--compact']} role="group" aria-label="Puget Sound Vital Signs by recovery goal">
   <span class="wheel__cornerband" style={`background:${WHEEL_COLORS.corner}`} aria-hidden="true"></span>
   <span class="wheel__corner" aria-hidden="true">
     <img src={withBase('/psp-mark.png')} alt="" width="44" height="44" />
@@ -90,6 +97,16 @@ const GROUPS = [
     margin-inline: auto;
     width: 100%;
   }
+
+  .wheel--compact {
+    grid-template-columns: 40px repeat(7, minmax(0, 1fr)) 40px;
+    grid-template-rows: 40px repeat(7, minmax(0, 1fr)) 40px;
+    gap: 3px;
+    max-width: none;
+    margin-inline: 0;
+  }
+  .wheel--compact .wheel__band { font-size: 0.8125rem; letter-spacing: 0.12em; }
+  .wheel--compact .wheel__tile { font-size: 0.8125rem; padding: var(--spacing-100); hyphens: auto; }
 
   /* Desktop: the wrapper dissolves — band + tiles are direct ring-grid items. */
   .wheel__group { display: contents; }

@@ -83,6 +83,17 @@
   --ps-info-goal-habitat:    #8228bf;  /* Functioning Habitat */
   --ps-info-goal-water:      #018470;  /* Healthy Water Quality */
 
+  /* Indicator Progress / Target Status fills, sampled from the Vital Signs
+     site's own status icons (/photos/vital-signs/icons/*.png) so the roll-up
+     bar and the tree's icons read as one key. */
+  --ps-info-progress-better:  #61bb46;
+  --ps-info-progress-mixed:   #959335;
+  --ps-info-progress-notrend: #eeb826;
+  --ps-info-progress-worse:   #c94c31;
+  --ps-info-progress-limited: #888888;
+  --ps-info-target-near:      #61bb46;
+  --ps-info-target-below:     #c84c32;
+
   /* Neutral value-layered app chrome (design-principles house-chrome rule):
      main < rail < bar by LIGHTNESS — a blue whisper (~2–4%), never a saturated fill. */
   --ps-info-app-surface: #f8fafc;  /* main canvas — lightest */
