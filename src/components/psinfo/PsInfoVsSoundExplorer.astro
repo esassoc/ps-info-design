@@ -4,8 +4,12 @@
 // on the left, Cascades and Mt Baker on the right, the South Sound inlets at the
 // front edge), with the 23 Vital Signs placed where each lives. A marker links
 // to its Vital Sign; hover or focus opens a plaque with its name and a bar of
-// its indicators' progress. Marker colours are the goal bands' colours in the
-// header above, so the scene needs no legend.
+// its indicators' progress. A Goals / Indicators toggle (esa-button-toggle)
+// switches how the markers read: Goals colours each by its goal, with goal
+// buttons beneath that filter the map; Indicators turns each marker into a
+// ring split by its indicators' progress (the DELTA-912 roll-up, placed), with
+// progress buttons beneath that pick out the Vital Signs carrying that status.
+// Filtered-out markers fade back but stay links.
 //
 // The scene is generated art (vs-sound-art.svg, written by
 // docs/private/briefs/vs-home-rollup/scene/vs-sound-gen.py from the Census
@@ -13,8 +17,9 @@
 // art's palette and tree, cloud and ferry symbols. Ferries run their real
 // routes, orcas surface, the water glints; prefers-reduced-motion stills all of it.
 //
-// bcn-lego-checked: no esa- lego renders an illustrated image map with linked markers; checked Beacon (no map illustration); psinfo-vs-sound-explorer is the reusable home.
+// bcn-lego-checked: no esa- lego renders an illustrated image map with linked markers, and esa-button-toggle / esa-chip-group have no per-option goal fill for the filter buttons (same native aria-pressed pattern as psinfo-shi-habitat-explorer); checked Beacon (no map illustration); psinfo-vs-sound-explorer is the reusable home.
 import EsaButton from '@esa/ecology/esa-button.astro';
+import EsaIcon from '@esa/ecology/esa-icon.astro';
 import art from './vs-sound-art.svg?raw';
 import { VS_SOUND_MARKS, VS_SOUND_WIDTH, VS_SOUND_HEIGHT, type SoundGoal } from '../../data/vs-sound';
 import type { GoalDetail, ProgressLabel } from '../../data/pages/goals';
@@ -59,6 +64,8 @@ const SKY_CROP = 40;
 const GROUND_CROP = 40;
 const goalBySlug = Object.fromEntries(goals.map((g) => [g.slug, g]));
 const BAR_W = 96;
+const RING_R = 11;
+const RING_C = 2 * Math.PI * RING_R;
 const marks = VS_SOUND_MARKS.map((m) => {
   const goal = goalBySlug[GOAL_SLUG[m.goal]];
   const vs = goal?.vitalSigns.find((v) => v.name === m.name);
@@ -73,19 +80,40 @@ const marks = VS_SOUND_MARKS.map((m) => {
     x += w;
     return seg;
   });
-  const summary = counts.map((c) => `${c.n} ${c.p}`).join(', ');
-  return { ...m, goalName: goal?.name ?? '', href, segs, summary, ext: isExternalHref(href) };
+  const summary = counts.map((c) => `${c.n} ${c.p}`).join(', ') || 'no indicators reported yet';
+  // Indicators view: the ring split into arcs by progress, clockwise from 12 o'clock.
+  const gap = counts.length > 1 ? 1.6 : 0;
+  let at = 0;
+  const arcs = counts.map((c) => {
+    const len = (c.n / total) * RING_C;
+    const arc = { dash: `${Math.max(0.5, len - gap)} ${RING_C}`, offset: -at, stroke: PROGRESS_FILL[c.p]! };
+    at += len;
+    return arc;
+  });
+  return { ...m, goalName: goal?.name ?? '', href, segs, arcs, summary, statuses: counts.map((c) => c.p).join('|'), ext: isExternalHref(href) };
 });
+const buttons = (Object.keys(GOAL_SLUG) as SoundGoal[]).map((g) => ({
+  goal: g,
+  name: goalBySlug[GOAL_SLUG[g]]?.name ?? g,
+  count: marks.filter((m) => m.goal === g).length,
+}));
+// Indicators view buttons: indicator counts across all Vital Signs (the roll-up's numbers).
+const allInds = goals.flatMap((g) => g.vitalSigns.flatMap((v) => v.indicators));
+const statusButtons = ORDER.map((p) => ({ status: p, fill: PROGRESS_FILL[p]!, count: allInds.filter((i) => i.progress === p).length }));
+const CHECK = '<path d="M20 6 9 17l-5-5"/>';
 const DESC =
   'Puget Sound seen from the south as a tabletop map: the Olympic Mountains behind on the left, the Cascades and Mount Baker on the right. ' +
   'Hood Canal runs down the left, the Main Basin past Seattle and Bainbridge Island in the middle, the Whidbey Basin at the back, and the South Sound inlets around Olympia at the front edge. ' +
   'Rivers run from the mountains into the Sound, farms line the valleys, ferries cross to Bainbridge, Kingston, Clinton and Vashon, and a pod of orcas surfaces in the Main Basin. ' +
   'Each of the 23 Vital Signs is marked where it lives.';
 ---
-<div class="vss" data-vss-explorer style={`--vss-scene-w: ${VS_SOUND_WIDTH}px`}>
-  {/* WCAG 2.2.2: the scene moves for longer than five seconds, so it can be paused. */}
-  <div class="vss__controls">
-    <EsaButton variant="chrome" size="sm" data-vss-pause>Pause animation</EsaButton>
+<div class="vss" data-vss-explorer data-view="goals" style={`--vss-scene-w: ${VS_SOUND_WIDTH}px`}>
+  <div class="vss__bar">
+    <esa-button-toggle class="vss__view" size="sm" label="View by" value="goals" data-vss-view></esa-button-toggle>
+    {/* WCAG 2.2.2: the scene moves for longer than five seconds, so it can be paused. */}
+    <div class="vss__controls">
+      <EsaButton variant="secondary" size="sm" data-vss-pause>Pause animation</EsaButton>
+    </div>
   </div>
   <div class="vss__strip" role="region" aria-label="Puget Sound Vital Signs map" tabindex="-1">
     <div class="vss__pan">
@@ -102,14 +130,19 @@ const DESC =
                 class="vm"
                 href={m.href}
                 data-vss-goal={m.goal}
+                data-vss-statuses={m.statuses}
                 style={`--goal: ${GOAL_FILL[m.goal]}`}
                 aria-label={`${m.name}, ${m.goalName}: ${m.summary}`}
                 {...(m.ext ? { target: '_blank', rel: 'noopener' } : {})}
               >
                 <g transform={`translate(${m.x} ${m.y})`}>
-                  <circle class="vm__hit" r="14" />
-                  <circle class="vm__ring" r="6.5" />
-                  <circle class="vm__dot" r="2.4" />
+                  <circle class="vm__hit" r="20" />
+                  <ellipse class="vm__shadow" cx="1.5" cy="3" rx="11" ry="5" />
+                  <circle class="vm__ring" r="11" />
+                  <g class="vm__arcs" transform="rotate(-90)">
+                    {m.arcs.map((a) => <circle r={RING_R} stroke={a.stroke} stroke-dasharray={a.dash} stroke-dashoffset={a.offset} />)}
+                  </g>
+                  <circle class="vm__dot" r="4.6" />
                 </g>
               </a>
             ))}
@@ -118,7 +151,7 @@ const DESC =
           <g class="vss__labels" aria-hidden="true">
             {marks.map((m) => (
               <g transform={`translate(${m.x} ${m.y})`} style={`--goal: ${GOAL_FILL[m.goal]}`}>
-                <g class="vm__label" transform="translate(0 -24)">
+                <g class="vm__label" transform="translate(0 -32)">
                   <rect class="vm__plaque" rx="3" />
                   <text class="vm__text" text-anchor="middle" y="-3">{m.name}</text>
                   <g transform="translate(0 6)">
@@ -132,9 +165,34 @@ const DESC =
       </div>
     </div>
   </div>
+
+  <ul class="vss__buttons" role="list" aria-label="Show Vital Signs for one goal" data-vss-for="goals">
+    {buttons.map((b) => (
+      <li>
+        <button type="button" class="vss__btn" style={`--goal: ${GOAL_FILL[b.goal]}`} aria-pressed="false" data-vss-goal-btn={b.goal}>
+          <span class="vss__check" aria-hidden="true"><EsaIcon name="check" size="sm" paths={CHECK} /></span>
+          <span class="vss__btn-name">{b.name}</span>
+          <span class="vss__btn-count">{b.count} Vital Signs</span>
+        </button>
+      </li>
+    ))}
+  </ul>
+  <ul class="vss__buttons" role="list" aria-label="Show Vital Signs with one indicator progress" data-vss-for="indicators" hidden>
+    {statusButtons.map((b) => (
+      <li>
+        <button type="button" class="vss__btn vss__btn--status" aria-pressed="false" data-vss-status-btn={b.status}>
+          <span class="vss__check" aria-hidden="true"><EsaIcon name="check" size="sm" paths={CHECK} /></span>
+          <span class="vss__btn-name"><span class="vss__swatch" style={`background:${b.fill}`} aria-hidden="true"></span>{b.status}</span>
+          <span class="vss__btn-count">{b.count} indicators</span>
+        </button>
+      </li>
+    ))}
+  </ul>
+  <p class="vss__live" aria-live="polite" data-vss-live></p>
 </div>
 
 <script>
+  import '@esa/ecology/esa-button-toggle';
   document.querySelectorAll<HTMLElement>('[data-vss-explorer]').forEach((root) => {
     const marks = [...root.querySelectorAll<SVGAElement>('.vm')];
     const labels = [...root.querySelectorAll<SVGGElement>('.vm__label')];
@@ -146,6 +204,36 @@ const DESC =
       m.addEventListener('focus', () => { if (m.matches(':focus-visible')) on(); });
       m.addEventListener('blur', off);
     });
+    // One filter at a time: a goal (Goals view) or a progress status (Indicators view).
+    const live = root.querySelector<HTMLElement>('[data-vss-live]');
+    const filterBtns = [...root.querySelectorAll<HTMLButtonElement>('[data-vss-goal-btn], [data-vss-status-btn]')];
+    let current: HTMLButtonElement | null = null;
+    const apply = (btn: HTMLButtonElement | null) => {
+      current = btn;
+      filterBtns.forEach((o) => o.setAttribute('aria-pressed', String(o === btn)));
+      marks.forEach((m) => {
+        let keep = true;
+        if (btn?.dataset.vssGoalBtn) keep = m.dataset.vssGoal === btn.dataset.vssGoalBtn;
+        if (btn?.dataset.vssStatusBtn) keep = (m.dataset.vssStatuses ?? '').split('|').includes(btn.dataset.vssStatusBtn);
+        m.classList.toggle('is-muted', !keep);
+      });
+      if (!live) return;
+      const kept = marks.filter((m) => !m.classList.contains('is-muted')).length;
+      live.textContent = btn ? `${kept} Vital Signs: ${btn.querySelector('.vss__btn-name')!.textContent}` : 'Showing all Vital Signs';
+    };
+    filterBtns.forEach((b) => b.addEventListener('click', () => apply(current === b ? null : b)));
+
+    // Goals / Indicators view.
+    const view = root.querySelector<HTMLElement & { options: unknown; value: string }>('[data-vss-view]');
+    if (view) {
+      view.options = [{ label: 'Goals', value: 'goals' }, { label: 'Indicators', value: 'indicators' }];
+      view.addEventListener('change', () => {
+        root.dataset.view = view.value;
+        root.querySelectorAll<HTMLElement>('[data-vss-for]').forEach((l) => { l.hidden = l.dataset.vssFor !== view.value; });
+        apply(null);
+      });
+    }
+
     const pause = root.querySelector<HTMLElement>('[data-vss-pause]');
     const pauseBtn = pause?.matches('button') ? pause : pause?.querySelector('button');
     pauseBtn?.addEventListener('click', () => {
@@ -170,7 +258,7 @@ const DESC =
         rect.setAttribute('height', '34');
         const cx = Number((m.querySelector('g')!.getAttribute('transform') ?? '').match(/translate\(([-\d.]+)/)?.[1] ?? 0);
         const shift = cx - w / 2 < 6 ? 6 - (cx - w / 2) : cx + w / 2 > sceneW - 6 ? sceneW - 6 - (cx + w / 2) : 0;
-        label.setAttribute('transform', `translate(${shift} -24)`);
+        label.setAttribute('transform', `translate(${shift} -32)`);
       });
     };
     (document.fonts?.ready ?? Promise.resolve()).then(fit);
@@ -179,28 +267,70 @@ const DESC =
 
 <style>
   .vss { position: relative; width: 100%; }
-  .vss__controls {
-    position: absolute; z-index: 1; top: var(--spacing-200); right: var(--spacing-200);
-    background: var(--shi-art-ivory); color: var(--shi-art-ivory-ink); border-radius: var(--radius-100);
-  }
+  .vss__bar { display: flex; align-items: flex-end; justify-content: space-between; gap: var(--spacing-300); margin-bottom: var(--spacing-250); }
+  .vss__buttons[hidden] { display: none; }
+  .vss__live { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
   .vss.is-paused :global(:is(.vss-ferry, .vss-orca use, .vss-glint, .vss-clouds, .vss-gulls)) { animation-play-state: paused; }
   .vss__strip { position: relative; }
   .vss__pan { position: relative; width: 100%; }
   .vss__frame { position: relative; border-radius: var(--radius-100); overflow: hidden; }
   .vss__art { display: block; width: 100%; height: auto; }
+  @media (forced-colors: active) { .vss__btn { forced-color-adjust: none; } }
 
   /* Markers: an ivory ring in the goal's colour; the plaque opens on hover or focus. */
   .vm { cursor: pointer; }
   .vm:focus { outline: none; }
   .vm__hit { fill: transparent; }
-  .vm__ring { fill: var(--shi-art-ivory); stroke: var(--goal); stroke-width: 2.6; transition: r 160ms ease, stroke-width 160ms ease; }
+  .vm__shadow { fill: #1d2a22; opacity: 0.28; }
+  .vm__ring { fill: var(--shi-art-ivory); stroke: var(--goal); stroke-width: 4; transition: r 160ms ease, stroke-width 160ms ease, opacity 160ms ease; }
+  .vm__dot { transition: opacity 160ms ease; }
+  .vm__arcs { display: none; }
+  .vm__arcs circle { fill: none; stroke-width: 5; }
+  .vss[data-view='indicators'] .vm__arcs { display: inline; }
+  .vss[data-view='indicators'] .vm__ring { stroke: var(--ps-info-gray-300); }
+  .vss[data-view='indicators'] .vm__dot { fill: var(--shi-art-ivory-ink); }
+  .vss[data-view='indicators'] .vm.is-muted .vm__arcs { display: none; }
   .vm__dot { fill: var(--goal); }
   .vm__label { opacity: 0; pointer-events: none; transition: opacity 160ms ease; }
   .vm__plaque { fill: var(--shi-art-ivory); stroke: var(--goal); stroke-width: 2; }
   .vm__text { font-family: var(--font-display); font-size: 13px; font-weight: var(--font-weight-semibold); fill: var(--shi-art-ivory-ink); }
   .vm__label.is-on { opacity: 1; }
-  .vm:hover .vm__ring, .vm:focus-visible .vm__ring { r: 8.5; stroke-width: 3.2; }
-  .vm:focus-visible .vm__ring { stroke: var(--focus-ring-color); stroke-width: 3.6; }
+  .vm:hover .vm__ring, .vm:focus-visible .vm__ring { r: 13.5; stroke-width: 4.5; }
+  .vm:focus-visible .vm__ring { stroke: var(--focus-ring-color); stroke-width: 5; }
+  .vm.is-muted .vm__ring { r: 6; stroke: var(--shi-art-ivory-ink); stroke-width: 2; opacity: 0.55; }
+  .vm.is-muted .vm__dot, .vm.is-muted .vm__shadow { opacity: 0; }
+  .vm.is-muted:hover .vm__ring, .vm.is-muted:focus-visible .vm__ring { r: 11; opacity: 1; }
+
+  /* Goal filter: the five goal colours, one pressed at a time. */
+  .vss__buttons { list-style: none; margin: var(--spacing-300) 0 0; padding: 0; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: var(--spacing-200); }
+  .vss__buttons li { display: flex; }
+  .vss__btn {
+    position: relative; flex: 1; min-height: 4rem;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
+    padding: var(--spacing-200) 2.25rem;
+    background: var(--goal); color: #ffffff; text-align: center;
+    border: 3px solid transparent; border-radius: var(--radius-100);
+    font: inherit; cursor: pointer;
+    transition: transform 120ms ease, box-shadow 120ms ease, opacity 120ms ease;
+  }
+  .vss__btn-name { font-size: 1rem; font-weight: var(--font-weight-semibold); line-height: 1.25; }
+  .vss__btn-count { font-size: 0.875rem; }
+  .vss__btn:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(5, 31, 51, 0.22); }
+  .vss__btn:focus-visible { outline: 3px solid var(--focus-ring-color); outline-offset: 3px; }
+  .vss__btn--status { background: #ffffff; color: var(--color-text-primary); border: 1px solid var(--ps-info-gray-300); }
+  .vss__btn--status .vss__btn-count { color: var(--color-text-secondary); }
+  .vss__btn--status .vss__btn-name { display: inline-flex; align-items: center; gap: var(--spacing-150); }
+  .vss__swatch { width: 0.75rem; height: 0.75rem; border-radius: 50%; flex: none; }
+  .vss__btn--status[aria-pressed='true'] { border: 3px solid var(--ps-info-gray-950); box-shadow: none; }
+  .vss__btn--status .vss__check { background: var(--ps-info-gray-950); color: #ffffff; }
+  .vss__btn[aria-pressed='true'] { border-color: var(--ps-info-gray-950); box-shadow: inset 0 0 0 2px #ffffff; }
+  .vss__check {
+    position: absolute; top: var(--spacing-150); right: var(--spacing-150);
+    display: none; width: 1.5rem; height: 1.5rem; border-radius: 999px;
+    align-items: center; justify-content: center;
+    background: #ffffff; color: var(--ps-info-gray-950);
+  }
+  .vss__btn[aria-pressed='true'] .vss__check { display: inline-flex; }
 
 
   /* Life on the water. */
@@ -228,12 +358,14 @@ const DESC =
       margin: 0 calc(-1 * var(--spacing-400)); padding: 0 var(--spacing-400) var(--spacing-200);
     }
     .vss__pan { width: 900px; }
+    .vss__buttons { grid-template-columns: 1fr 1fr; }
   }
   @media (prefers-reduced-motion: reduce) {
     .vss__controls { display: none; }
     .vss :global(.vss-ferry), .vss :global(.vss-orca use), .vss :global(.vss-glint), .vss :global(.vss-clouds), .vss :global(.vss-gulls) { animation: none; }
     .vss :global(.vss-ferry) { offset-distance: 50%; }
     .vss :global(.vss-orca use) { opacity: 1; transform: none; }
-    .vm__ring, .vm__label { transition: none; }
+    .vm__ring, .vm__dot, .vm__label, .vss__btn { transition: none; }
+    .vss__btn:hover { transform: none; }
   }
 </style>
