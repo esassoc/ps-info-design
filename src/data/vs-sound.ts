@@ -14,7 +14,7 @@ export const VS_SOUND_MARKS: SoundMark[] = [
     name: "Air Quality",
     goal: "population",
     x: 893.3,
-    y: 426.7
+    y: 425.1
   },
   {
     name: "Drinking Water",
@@ -32,13 +32,13 @@ export const VS_SOUND_MARKS: SoundMark[] = [
     name: "Outdoor Activity",
     goal: "population",
     x: 267.9,
-    y: 383.3
+    y: 355.3
   },
   {
     name: "Shellfish Beds",
     goal: "population",
     x: 296.0,
-    y: 593.3
+    y: 591.7
   },
   {
     name: "Cultural Wellbeing",
@@ -56,13 +56,13 @@ export const VS_SOUND_MARKS: SoundMark[] = [
     name: "Good Governance",
     goal: "quality",
     x: 364.6,
-    y: 621.7
+    y: 620.1
   },
   {
     name: "Sense of Place",
     goal: "quality",
     x: 698.4,
-    y: 436.7
+    y: 435.1
   },
   {
     name: "Sound Stewardship",
@@ -104,13 +104,13 @@ export const VS_SOUND_MARKS: SoundMark[] = [
     name: "Zooplankton",
     goal: "species",
     x: 426.9,
-    y: 443.3
+    y: 441.7
   },
   {
     name: "Beaches and Marine Vegetation",
     goal: "habitat",
     x: 766.2,
-    y: 320.0
+    y: 318.4
   },
   {
     name: "Estuaries",
@@ -122,7 +122,7 @@ export const VS_SOUND_MARKS: SoundMark[] = [
     name: "Forests and Wetlands",
     goal: "habitat",
     x: 206.6,
-    y: 466.7
+    y: 465.1
   },
   {
     name: "Streams and Floodplains",
@@ -140,7 +140,7 @@ export const VS_SOUND_MARKS: SoundMark[] = [
     name: "Marine Water",
     goal: "water",
     x: 644.2,
-    y: 550.0
+    y: 548.4
   },
   {
     name: "Toxics in Aquatic Life",

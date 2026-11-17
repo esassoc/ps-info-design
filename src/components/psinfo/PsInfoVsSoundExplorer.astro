@@ -59,8 +59,8 @@ const INTERNAL_VS: Record<string, string> = {
   Orcas: '/prototypes/vital-signs/orcas',
 };
 
-// The art's top 40px is empty sky and its last 40px empty ground; the frame skips both.
-const SKY_CROP = 40;
+// The art's top 90px is empty sky and its last 40px empty ground; the frame skips both.
+const SKY_CROP = 90;
 const GROUND_CROP = 40;
 const goalBySlug = Object.fromEntries(goals.map((g) => [g.slug, g]));
 const BAR_W = 96;
@@ -102,7 +102,7 @@ const allInds = goals.flatMap((g) => g.vitalSigns.flatMap((v) => v.indicators));
 const statusButtons = ORDER.map((p) => ({ status: p, fill: PROGRESS_FILL[p]!, count: allInds.filter((i) => i.progress === p).length }));
 const CHECK = '<path d="M20 6 9 17l-5-5"/>';
 const DESC =
-  'Puget Sound seen from the south as a tabletop map: the Olympic Mountains behind on the left, the Cascades and Mount Baker on the right. ' +
+  'Puget Sound seen from the south as a tabletop relief map: the Olympic Mountains rise along the west side on the left, the forested Cascade foothills along the east side on the right. ' +
   'Hood Canal runs down the left, the Main Basin past Seattle and Bainbridge Island in the middle, the Whidbey Basin at the back, and the South Sound inlets around Olympia at the front edge. ' +
   'Rivers run from the mountains into the Sound, farms line the valleys, ferries cross to Bainbridge, Kingston, Clinton and Vashon, and a pod of orcas surfaces in the Main Basin. ' +
   'Each of the 23 Vital Signs is marked where it lives.';
@@ -359,6 +359,7 @@ const DESC =
     }
     .vss__pan { width: 900px; }
     .vss__buttons { grid-template-columns: 1fr 1fr; }
+    .vss__btn { padding: var(--spacing-200) 2rem var(--spacing-200) var(--spacing-300); }
   }
   @media (prefers-reduced-motion: reduce) {
     .vss__controls { display: none; }
