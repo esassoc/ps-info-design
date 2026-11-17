@@ -1,0 +1,47 @@
+{
+  "DELTA-912": {
+    "/prototypes/vital-signs/home": [
+      {
+        "src": "/epic-shots/delta-1338/delta-912/vital-signs-home-1.jpg",
+        "width": 1214,
+        "height": 724,
+        "marks": [
+          {
+            "n": 1,
+            "label": "Indicator roll-up",
+            "badge": "start",
+            "x": 64.17,
+            "y": 36.68,
+            "w": 33.28,
+            "h": 54.7
+          },
+          {
+            "n": 2,
+            "label": "Wheel beside the roll-up",
+            "badge": "start",
+            "x": 5.19,
+            "y": 4.28,
+            "w": 54.53,
+            "h": 91.44
+          }
+        ]
+      },
+      {
+        "src": "/epic-shots/delta-1338/delta-912/vital-signs-home-2.jpg",
+        "width": 1204,
+        "height": 1573,
+        "marks": [
+          {
+            "n": 3,
+            "label": "All Indicators with status filter",
+            "badge": "start",
+            "x": 5.23,
+            "y": 3.62,
+            "w": 92.19,
+            "h": 94.41
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -3,8 +3,9 @@
 // scripts/epic-shots.mjs can import this module too.
 import type { Epic, EpicBadgeSide, EpicMarkBox, EpicPage, EpicStep, EpicStory } from './types.ts';
 import { SHI_EPIC } from './shi.ts';
+import { VITAL_SIGNS_EPIC } from './vital-signs.ts';
 
-export const EPICS: Epic[] = [SHI_EPIC];
+export const EPICS: Epic[] = [SHI_EPIC, VITAL_SIGNS_EPIC];
 
 export const JIRA_BROWSE = 'https://sitkatech.atlassian.net/browse/';
 export const jiraHref = (key: string): string => `${JIRA_BROWSE}${key}`;
