@@ -59,8 +59,8 @@ export const VS_SOUND_SITES: SoundSite[] = [
     "vitalSign": "Outdoor Activity",
     "place": "Alki Beach",
     "kind": "swim-beach",
-    "x": 797.1,
-    "y": 459.5
+    "x": 793.1,
+    "y": 458.0
   },
   {
     "indicator": "Nature-based recreation",
@@ -123,8 +123,8 @@ export const VS_SOUND_SITES: SoundSite[] = [
     "vitalSign": "Good Governance",
     "place": "Capitol campus, Olympia",
     "kind": "capitol",
-    "x": 363.4,
-    "y": 628.4
+    "x": 354.8,
+    "y": 629.6
   },
   {
     "indicator": "Overall life satisfaction",
@@ -475,8 +475,8 @@ export const VS_SOUND_SITES: SoundSite[] = [
     "vitalSign": "Marine Water",
     "place": "Elliott Bay floor",
     "kind": "sediment-grab",
-    "x": 804.1,
-    "y": 439.2
+    "x": 809.7,
+    "y": 439.8
   },
   {
     "indicator": "Marine water temperature",
@@ -499,8 +499,8 @@ export const VS_SOUND_SITES: SoundSite[] = [
     "vitalSign": "Marine Water",
     "place": "Budd Inlet",
     "kind": "water-sample",
-    "x": 424.0,
-    "y": 603.7
+    "x": 360.3,
+    "y": 607.5
   },
   {
     "indicator": "Ocean acidification",
@@ -531,8 +531,8 @@ export const VS_SOUND_SITES: SoundSite[] = [
     "vitalSign": "Toxics in Aquatic Life",
     "place": "Duwamish River mouth",
     "kind": "salmon",
-    "x": 830.4,
-    "y": 455.0
+    "x": 832.8,
+    "y": 455.1
   },
   {
     "indicator": "Contaminants in caged mussels",
@@ -563,7 +563,7 @@ export const VS_SOUND_SITES: SoundSite[] = [
     "vitalSign": "Toxics in Aquatic Life",
     "place": "Squaxin Passage",
     "kind": "herring",
-    "x": 415.1,
-    "y": 590.7
+    "x": 375.7,
+    "y": 588.3
   }
 ];

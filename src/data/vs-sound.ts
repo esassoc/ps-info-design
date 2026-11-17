@@ -55,8 +55,8 @@ export const VS_SOUND_MARKS: SoundMark[] = [
   {
     name: "Good Governance",
     goal: "quality",
-    x: 364.6,
-    y: 620.1
+    x: 372.0,
+    y: 621.7
   },
   {
     name: "Sense of Place",

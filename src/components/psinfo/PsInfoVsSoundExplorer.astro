@@ -150,7 +150,7 @@ const DESC =
           <g class="vss__labels" aria-hidden="true">
             {pins.map((m) => (
               <g transform={`translate(${m.x} ${m.y})`} style={`--goal: ${GOAL_FILL[m.goal]}`}>
-                <g class="vm__label" data-dy="-22" transform="translate(0 -22)">
+                <g class="vm__label" data-dy={m.view === 'goals' ? -52 : -38} transform={`translate(0 ${m.view === 'goals' ? -52 : -38})`}>
                   <rect class="vm__plaque" rx="3" />
                   <text class="vm__text" text-anchor="middle" y="-3">{m.title}</text>
                   {m.sub && <text class="vm__sub" text-anchor="middle" y="11">{m.sub}</text>}
