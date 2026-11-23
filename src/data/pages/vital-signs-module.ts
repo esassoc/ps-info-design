@@ -176,11 +176,14 @@ export const WHEEL_TILES: WheelTile[] = [
 export interface PartnerLogo {
   name: string;
   href: string;
+  /** The organization's own website, when PS Info lists one. */
+  website?: string;
   image: string;
 }
 
 export const PARTNER_LOGOS: PartnerLogo[] = CONTRIBUTING_PARTNERS.map((p, i) => ({
   name: p.name,
   href: p.href,
+  website: p.website,
   image: `/photos/vital-signs/partners/p${String(i + 1).padStart(2, '0')}.png`,
 }));

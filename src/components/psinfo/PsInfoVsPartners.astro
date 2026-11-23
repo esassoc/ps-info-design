@@ -2,7 +2,8 @@
 // PsInfoVsPartners — the Contributing Partners logo wall: real logo files in
 // DOM order, rendered at a standardized bordered cell size instead of the
 // sources' mixed-dimension originals. Each logo links to its organization
-// page. Defaults to the Vital Signs module's PARTNER_LOGOS with its centered
+// page, or with linkTo="website" to the organization's own site in a new tab
+// (the Vital Signs home concepts). Defaults to the Vital Signs module's PARTNER_LOGOS with its centered
 // heading; other units pass their own `partners` (and `heading={null}` when
 // the page's own section title carries the heading) — the PI Topic Detail
 // page reuses this wall so Contributing Partners reads identically site-wide
@@ -12,29 +13,30 @@
 // bcn-lego-checked: checked esa-card / esa-avatar (content card / person
 // avatar — not a logo wall); a normalized logo grid is this component's own
 // single job. Logos carry their organization name as alt text.
-import { PARTNER_LOGOS } from '../../data/pages/vital-signs-module';
+import { PARTNER_LOGOS, type PartnerLogo } from '../../data/pages/vital-signs-module';
 import { withBase } from '../../lib/base';
 import { isExternalHref } from '../../lib/psinfoExternalLink';
 
-export interface PartnerLogo {
-  name: string;
-  image: string;
-  href: string;
-}
 interface Props {
   /** null renders no heading (the page's own section title carries it). */
   heading?: string | null;
   partners?: PartnerLogo[];
+  /** 'website' sends each logo to the organization's own site (new tab), falling back to its PS Info page; 'organization' (default) is the live site's behavior. */
+  linkTo?: 'organization' | 'website';
 }
-const { heading = 'Contributing Partners', partners = PARTNER_LOGOS } = Astro.props;
+const { heading = 'Contributing Partners', partners = PARTNER_LOGOS, linkTo = 'organization' } = Astro.props;
+const cells = partners.map((p) => {
+  const href = linkTo === 'website' && p.website ? p.website : p.href;
+  return { ...p, href, ext: isExternalHref(href) };
+});
 ---
 <section class="partners" aria-label={heading ?? 'Contributing Partners'}>
   {heading && <h2 class="partners__heading">{heading}</h2>}
   <ul class="partners__grid" role="list">
-    {partners.map((p) => (
+    {cells.map((p) => (
       <li>
-        <a class="partners__cell" href={p.href} {...(isExternalHref(p.href) ? { target: '_blank', rel: 'noopener' } : {})}>
-          <img src={withBase(p.image)} alt={p.name} loading="lazy" />
+        <a class="partners__cell" href={p.href} {...(p.ext ? { target: '_blank', rel: 'noopener' } : {})}>
+          <img src={withBase(p.image)} alt={p.ext ? `${p.name} (opens in a new tab)` : p.name} loading="lazy" />
         </a>
       </li>
     ))}

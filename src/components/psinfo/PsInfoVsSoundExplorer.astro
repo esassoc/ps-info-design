@@ -126,6 +126,15 @@ const DESC =
             <desc id="vss-desc">{DESC}</desc>
             <Fragment set:html={art} />
           </g>
+          {/* Hit areas: 26px+ in screen pixels at every scene width (WCAG 2.5.8). They sit in a layer under every pin, so where two overlap,
+              the dot a person sees is always the one they get. Pointer-only duplicates of the links below: out of the tab order and hidden from AT. */}
+          <g class="vss__hits" aria-hidden="true">
+            {pins.map((m) => (
+              <a class={`vh vh--${m.view}`} href={m.href} tabindex="-1" data-vss-goal={m.goal} {...(m.ext ? { target: '_blank', rel: 'noopener' } : {})}>
+                <circle class="vh__area" cx={m.x} cy={m.y} />
+              </a>
+            ))}
+          </g>
           <g class="vss__marks">
             {pins.map((m) => (
               <a
@@ -138,10 +147,13 @@ const DESC =
                 {...(m.ext ? { target: '_blank', rel: 'noopener' } : {})}
               >
                 <g transform={`translate(${m.x} ${m.y})`}>
-                  {/* The illustrated object is the landmark; the pin is a small anchor at its base. Hit area stays 24px+ (WCAG 2.5.8). */}
-                  <circle class="vm__hit" r="14" />
-                  <ellipse class="vm__shadow" cx="1" cy="2" rx={m.view === 'goals' ? 6 : 4.5} ry={m.view === 'goals' ? 2.6 : 2} />
-                  <circle class="vm__ring" r={m.view === 'goals' ? 5.5 : 4} />
+                  {/* The illustrated object is the landmark; the pin sits at its base: goal fill, ivory ring, solid ink keyline (3:1 on land and water alike). */}
+                  <ellipse class="vm__shadow" cx="1.5" cy="3" rx={m.view === 'goals' ? 9 : 7} ry={m.view === 'goals' ? 3.6 : 2.8} />
+                  <circle class="vm__focus-halo" />
+                  <circle class="vm__focus-edge" />
+                  <circle class="vm__focus" />
+                  <circle class="vm__edge" />
+                  <circle class="vm__ring" />
                 </g>
               </a>
             ))}
@@ -190,11 +202,14 @@ const DESC =
   document.querySelectorAll<HTMLElement>('[data-vss-explorer]').forEach((root) => {
     const marks = [...root.querySelectorAll<SVGAElement>('.vm')];
     const labels = [...root.querySelectorAll<SVGGElement>('.vm__label')];
+    const hits = [...root.querySelectorAll<SVGAElement>('.vh')];
     marks.forEach((m, i) => {
       const on = () => labels[i].classList.add('is-on');
       const off = () => labels[i].classList.remove('is-on');
       m.addEventListener('pointerenter', on);
       m.addEventListener('pointerleave', off);
+      hits[i]?.addEventListener('pointerenter', () => { m.classList.add('is-hover'); on(); });
+      hits[i]?.addEventListener('pointerleave', () => { m.classList.remove('is-hover'); off(); });
       m.addEventListener('focus', () => { if (m.matches(':focus-visible')) on(); });
       m.addEventListener('blur', off);
     });
@@ -239,6 +254,14 @@ const DESC =
     const fitBleed = () => root.style.setProperty('--vss-sbw', `${window.innerWidth - document.documentElement.clientWidth}px`);
     fitBleed();
     window.addEventListener('resize', fitBleed);
+    // Scene units per screen pixel, so each pin's hit area holds 26px whatever width the scene renders at.
+    const art = root.querySelector<SVGSVGElement>('.vss__art')!;
+    const fitHits = () => {
+      const w = art.getBoundingClientRect().width;
+      if (w > 0) root.style.setProperty('--vss-k', String(art.viewBox.baseVal.width / w));
+    };
+    fitHits();
+    new ResizeObserver(fitHits).observe(art);
     // WCAG 1.4.13: Escape dismisses an open plaque.
     document.addEventListener('keydown', (e) => { if (e.key === 'Escape') labels.forEach((l) => l.classList.remove('is-on')); });
 
@@ -291,30 +314,50 @@ const DESC =
   .vss__art { display: block; width: 100%; height: auto; }
   @media (forced-colors: active) { .vss__btn { forced-color-adjust: none; } }
 
-  /* Markers: an ivory ring in the goal's colour; the plaque opens on hover or focus. */
-  .vm { cursor: pointer; }
+  /* Markers: goal fill, ivory ring, solid ink keyline; the plaque opens on hover or focus.
+     Sizes are in scene units; --vss-k (scene units per screen pixel) sets the screen-pixel floors and line weights.
+     --r is the dot: it scales with the art, with a floor (12px goals, 8px indicators, which sit closer together) on narrow windows. */
+  .vm { cursor: pointer; --px: calc(1px * var(--vss-k, 1)); }
   .vm:focus { outline: none; }
-  .vm__hit { fill: transparent; }
-  .vm__shadow { fill: #1d2a22; opacity: 0.28; }
-  .vm__ring { fill: var(--goal); stroke: var(--shi-art-ivory); stroke-width: 1.8; transition: r 160ms ease, stroke-width 160ms ease, opacity 160ms ease; }
+  .vm--goals { --r: max(8px, calc(6 * var(--px))); }
+  .vm--indicators { --r: max(6.25px, calc(4 * var(--px))); }
+  .vm--goals:is(:hover, :focus-visible, .is-hover) { --r: max(10px, calc(7.5 * var(--px))); }
+  .vm--indicators:is(:hover, :focus-visible, .is-hover) { --r: max(8px, calc(5 * var(--px))); }
+  .vm__shadow { fill: #1d2a22; opacity: 0.32; pointer-events: none; }
+  .vm__ring {
+    r: var(--r); fill: var(--goal); stroke: var(--shi-art-ivory); stroke-width: 2.4;
+    transition: r 160ms ease, opacity 160ms ease;
+  }
+  .vm--indicators .vm__ring { stroke-width: 2; }
+  /* The keyline: 1.5 screen px of ink outside the ivory ring; it carries the 3:1 against light land and against the water. */
+  .vm__edge { r: calc(var(--r) + 1.2px + 1.5 * var(--px)); fill: var(--shi-art-ivory-ink); transition: r 160ms ease; }
+  /* Keyboard focus: orange inside an ink band inside an ivory band (fixed screen widths), well clear of the dot:
+     the ink reads on light land and water, the ivory on dark forest. */
+  .vm__focus, .vm__focus-edge, .vm__focus-halo { r: calc(var(--r) + 1.2px + 6 * var(--px)); fill: none; vector-effect: non-scaling-stroke; opacity: 0; pointer-events: none; }
+  .vm__focus { stroke: var(--focus-ring-color); stroke-width: 3; }
+  .vm__focus-edge { stroke: var(--shi-art-ivory-ink); stroke-width: 7; }
+  .vm__focus-halo { stroke: var(--shi-art-ivory); stroke-width: 10; }
+  .vm:focus-visible :is(.vm__focus, .vm__focus-edge, .vm__focus-halo) { opacity: 1; }
+  .vh { cursor: pointer; }
+  .vh__area { r: max(14px, calc(13 * var(--vss-k, 1) * 1px)); fill: transparent; }
   .vm__dot { transition: opacity 160ms ease; }
   /* The view decides which pins, plaques and art layer are on the map. */
-  .vss[data-view='goals'] .vm--indicators, .vss[data-view='indicators'] .vm--goals { display: none; }
+  .vss[data-view='goals'] :is(.vm--indicators, .vh--indicators), .vss[data-view='indicators'] :is(.vm--goals, .vh--goals) { display: none; }
   .vss[data-view='goals'] :global(.vss-layer--indicators), .vss[data-view='indicators'] :global(.vss-layer--goals) { display: none; }
   .vss[data-view='goals'] [data-vss-for-view='indicators'], .vss[data-view='indicators'] [data-vss-for-view='goals'] { display: none; }
-  .vm__sub { font-family: var(--font-sans); font-size: 11.5px; fill: var(--shi-art-ivory-ink); }
-  .vm--indicators .vm__ring { stroke-width: 1.5; }
-  .vm--indicators:hover .vm__ring, .vm--indicators:focus-visible .vm__ring { r: 6.5; }
+  .vm__sub { font-family: var(--font-sans); font-size: 13px; fill: var(--shi-art-ivory-ink); }
   .vm__dot { fill: var(--goal); }
   .vm__label { opacity: 0; pointer-events: none; transition: opacity 160ms ease; }
   .vm__plaque { fill: var(--shi-art-ivory); stroke: var(--goal); stroke-width: 2; }
   .vm__text { font-family: var(--font-display); font-size: 13px; font-weight: var(--font-weight-semibold); fill: var(--shi-art-ivory-ink); }
   .vm__label.is-on { opacity: 1; }
-  .vm:hover .vm__ring, .vm:focus-visible .vm__ring { r: 8; stroke-width: 2.2; }
-  .vm:focus-visible .vm__ring { stroke: var(--focus-ring-color); stroke-width: 3; }
-  .vm.is-muted .vm__ring { r: 3; fill: var(--shi-art-ivory-ink); stroke-width: 1; opacity: 0.45; }
-  .vm.is-muted .vm__dot, .vm.is-muted .vm__shadow { opacity: 0; }
-  .vm.is-muted:hover .vm__ring, .vm.is-muted:focus-visible .vm__ring { r: 6.5; fill: var(--goal); opacity: 1; }
+  /* Filtered out: a small grey dot that stays a link and comes back on hover or focus. */
+  .vm.is-muted { --r: max(4px, calc(3 * var(--px))); }
+  .vm.is-muted .vm__ring { fill: var(--shi-art-ivory-ink); stroke-width: 1.2; opacity: 0.5; }
+  .vm.is-muted .vm__dot, .vm.is-muted .vm__shadow, .vm.is-muted .vm__edge { opacity: 0; }
+  .vm.is-muted:is(:hover, :focus-visible, .is-hover) { --r: max(8px, calc(6 * var(--px))); }
+  .vm.is-muted:is(:hover, :focus-visible, .is-hover) .vm__ring { fill: var(--goal); opacity: 1; }
+  .vm.is-muted:is(:hover, :focus-visible, .is-hover) .vm__edge { opacity: 1; }
 
   /* Goal filter: the five goal colours, one pressed at a time. */
   .vss__buttons { list-style: none; margin: var(--spacing-300) 0 0; padding: 0; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: var(--spacing-200); }
@@ -375,7 +418,7 @@ const DESC =
     .vss :global(.vss-ferry), .vss :global(.vss-orca use), .vss :global(.vss-glint), .vss :global(.vss-clouds), .vss :global(.vss-gulls) { animation: none; }
     .vss :global(.vss-ferry) { offset-distance: 50%; }
     .vss :global(.vss-orca use) { opacity: 1; transform: none; }
-    .vm__ring, .vm__dot, .vm__label, .vss__btn { transition: none; }
+    .vm__ring, .vm__edge, .vm__dot, .vm__label, .vss__btn { transition: none; }
     .vss__btn:hover { transform: none; }
   }
 </style>
